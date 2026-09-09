@@ -1,0 +1,72 @@
+--- run_qwen_hc_norm_flat_check_0908.py
++++ run_qwen_quantize_blocks_check_0909.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Check flattened HC normalization rows through CPU and NUMA graphs."""
++"""Check exact Q8 activation blocks across workers and padded row/plane strides."""
+ import fcntl
+ import json
+ import os
+@@ -14,7 +14,7 @@
+ BASE = Path(__file__).resolve().parent
+ ENGINE = BASE.parent.parent / 'engines/llama.cpp-q4e-goal-0904'
+ PINNED = ENGINE / 'validated-iq-batch3-bin'
+-OUT = BASE / 'results/qwen-hc-norm-flat-proof-0908'
++OUT = BASE / 'results/qwen-quantize-blocks-proof-0909'
+ 
+ 
+ def main():
+@@ -22,8 +22,8 @@
+     assert process_info(1219506)['start'] == '103969952'
+     cpu = BASE / 'results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0'
+     assert sha256(cpu) == 'c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf'
+-    source = BASE / 'check-qwen-hc-norm-flat-0908.cpp'
+-    header = BASE / 'qwen-hc-norm-flat-0908.h'
++    source = BASE / 'check-qwen-quantize-blocks-0909.cpp'
++    header = BASE / 'qwen-quantize-blocks-0909.h'
+     preset = BASE / 'qwen-flash-20tps.json'
+     inputs = [Path(__file__).resolve(), source, header, cpu, preset,
+               BASE / 'model_measurement_guard.py', BASE / 'qwen_split_trial.py', PINNED / 'libggml-base.so.0']
+@@ -32,7 +32,7 @@
+     command += [str(source), str(cpu), '-L' + str(PINNED), '-lggml', '-lggml-base', '-ldl', '-pthread', '-o', str(OUT / 'check')]
+     result = dict(started=time.time(), controller_pid=os.getpid(), passed=False, steps=[], checks=[],
+                   compile_command=command, input_sha256={str(p):sha256(p) for p in inputs},
+-                  scope='Graph correctness only. No runtime integration or performance claim.')
++                  scope='Quantization scheduling helper correctness only, with concurrent calls and byte/coverage checks. No graph integration or performance claim.')
+     guard = ModelMeasurementGuard(1219506, {1219506:18095}, inference_snapshot)
+     owned = None
+ 
+@@ -59,11 +59,11 @@
+             environment = {k:v for k,v in os.environ.items() if not k.startswith(('GGML_', 'LLAMA_', 'OMP_', 'GOMP_'))}
+             environment.update(json.loads(preset.read_text())['runtime_env'])
+             environment['LD_LIBRARY_PATH'] = str(cpu.parent) + ':' + str(PINNED)
+-            for mode in ('cpu', 'numa'):
++            for mode in ('cpu',):
+                 trial = dict(environment)
+                 if mode == 'cpu':
+                     trial = {k:v for k,v in trial.items() if not k.startswith('GGML_CPU_NUMA_')}
+-                cmd = ['taskset', '-c', '0-127', str(OUT / 'check'), mode]
++                cmd = ['taskset', '-c', '48-62', str(OUT / 'check')]
+                 with (OUT / (mode + '.log')).open('w') as log:
+                     owned = subprocess.Popen(cmd, env=trial, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+                     result['owned'] = dict(pid=owned.pid, mode=mode)
+@@ -79,15 +79,13 @@
+                 rows = [json.loads(line) for line in (OUT / (mode + '.log')).read_text().splitlines() if line.startswith('{')]
+                 assert len(rows) == 1
+                 row = rows[0]
+-                assert row['passed'] and row['bit_exact'] and row['scalar_exact'] and row['inputs_preserved']
+-                assert row['mode'] == mode and row['cases'] == (576 if mode == 'cpu' else 192)
+-                assert row['fusion_eligible_cases'] == row['cases'] // 2
+-                assert row['padded_fallback_cases'] == row['cases'] // 2
++                assert row['passed'] and row['exact_bytes'] and row['single_writer_per_block']
++                assert row['inputs_and_padding_preserved'] and row['cases'] == 720
++                assert row['parallel_cases'] > 0 and row['blocks_checked'] > 0
+                 assert Path(row['cpu_library']).resolve() == cpu.resolve()
+-                assert Path(row['base_library']).resolve() == (PINNED / 'libggml-base.so.0').resolve()
+                 result['checks'].append(row)
+                 save()
+-                print(json.dumps(dict(completed=mode, cases=row['cases'], outputs=row['outputs'])), flush=True)
++                print(json.dumps(dict(completed=mode, cases=row['cases'], bytes_compared=row['bytes_compared'])), flush=True)
+             assert all(sha256(path) == digest for path,digest in result['input_sha256'].items())
+             result.update(passed=True, binary_sha256=sha256(OUT / 'check'))
+         except BaseException as error:

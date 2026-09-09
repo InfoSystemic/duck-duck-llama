@@ -1,0 +1,92 @@
+{
+  "time": 1788923296.8172953,
+  "control": "qwen-private-hc-norm-flat-off-0908",
+  "control_rows": {
+    "prose": {
+      "tok_s": 21.95142403312354,
+      "attribution_valid": true,
+      "idle_before_gb_s": 5.41800460833095,
+      "idle_after_gb_s": 5.711570450471479,
+      "adjusted_gb_s": 127.44447619932079,
+      "utilization": 0.3353802005245284,
+      "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+      "generated_tokens": 512,
+      "draft_tokens": 589,
+      "accepted_draft_tokens": 360,
+      "observed_other_host_cores": 3.474864814504913
+    },
+    "code": {
+      "tok_s": 28.66430401668281,
+      "attribution_valid": true,
+      "idle_before_gb_s": 5.438334328519243,
+      "idle_after_gb_s": 4.891288310388669,
+      "adjusted_gb_s": 135.66178584048583,
+      "utilization": 0.3570046995802259,
+      "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+      "generated_tokens": 318,
+      "draft_tokens": 292,
+      "accepted_draft_tokens": 244,
+      "observed_other_host_cores": 3.280723830934773
+    }
+  },
+  "comparisons": [
+    {
+      "label": "qwen-private-hc-norm-flat-on-0908",
+      "workloads": [
+        {
+          "workload": "prose",
+          "tok_s": 22.33506212250576,
+          "attribution_valid": true,
+          "idle_before_gb_s": 5.340337032529499,
+          "idle_after_gb_s": 6.427785689696838,
+          "adjusted_gb_s": 129.00876185448445,
+          "utilization": 0.33949674172232747,
+          "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+          "generated_tokens": 512,
+          "draft_tokens": 589,
+          "accepted_draft_tokens": 360,
+          "observed_other_host_cores": 3.5717256660363335,
+          "output_matches_control": true,
+          "speed_change_percent": 1.74766834626916,
+          "bandwidth_change_percent": 1.2274252300406907,
+          "both_thresholds_met": false
+        },
+        {
+          "workload": "code",
+          "tok_s": 29.185352120352658,
+          "attribution_valid": true,
+          "idle_before_gb_s": 5.285756247497609,
+          "idle_after_gb_s": 5.487506201822908,
+          "adjusted_gb_s": 138.90849391498637,
+          "utilization": 0.36554866819733256,
+          "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+          "generated_tokens": 318,
+          "draft_tokens": 292,
+          "accepted_draft_tokens": 244,
+          "observed_other_host_cores": 3.4543103258476027,
+          "output_matches_control": true,
+          "speed_change_percent": 1.8177594801066732,
+          "bandwidth_change_percent": 2.3932370154098326,
+          "both_thresholds_met": false
+        }
+      ]
+    }
+  ],
+  "all_outputs_match": true,
+  "all_candidate_thresholds_met": false,
+  "candidate_repeat_available": false,
+  "evidence": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-off-0908/result.json": "9c781279661ef64896cf64f12503d2f0c909959fb6cac7e163ee8ad572facdbf",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-off-0908/plan.json": "a75e04acbab1607dab463bc903a36213442c026b8b3921e5a7c0cb5d08f48d67",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-off-0908-decode/result.json": "697a005b36c0f1bd46b07a7aff1061df58041dd7b9626499d69a3d9298a59770",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-off-0908-decode/prose-draft4/chunks.json": "21d3f85b7deca3511a83f23b33df6ccb13ca4a47055d2c6a977fed48ba7b0f00",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-off-0908-decode/code-draft4/chunks.json": "2d89e634b16b143500df21642d1998919a82ead75c6b843682c86b02fbf6bbea",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-0908/result.json": "9906b6fde23ca92fa4700aa50a03e30912db14798540c81c981b5468ad604b4f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-0908/plan.json": "68243f8e2bcd82c1492e4b7083976d2ed82249afe3f1da2418b29b6c280b5aef",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-0908-decode/result.json": "1cca4c3ee26cb67153ba9693097d7a65cd93af746274750bc6adfdd4731d6938",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-0908-decode/prose-draft4/chunks.json": "5272341a0f5b89ff5ec2a5290e68245a757cb366ace704dee9a2bf3e5c63fbaf",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-0908-decode/code-draft4/chunks.json": "746d0ef5f6fde1d3f4b0abbcbf502f28bdaf468488be9666d7fa467c3c863809"
+  },
+  "analyzer_sha256": "61746080533120a72c079fa0e8b2f4b2a2b7570e954b31ae75d2acb6445fbf13",
+  "scope": "Fresh single-conversation decode. IMC attribution uses adjacent idle subtraction. This comparison does not itself certify broad quality or mark a goal complete."
+}
