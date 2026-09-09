@@ -1,0 +1,75 @@
+{
+  "parent": {
+    "library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-0908/private-cpu/libggml-cpu.so.0.22.0",
+    "sha256": "a4a77255f5b65541f1268b3463977b04ab25bdd6bdcbf2febe58bd6fc8aaa5a9",
+    "symbol": "ggml::cpu::repack::tensor_traits<block_q8_0, 8l, 8l, (ggml_type)8>::compute_forward(ggml_compute_params*, ggml_tensor*)",
+    "start": 636704,
+    "end": 642898,
+    "vector_operations": [],
+    "disassembly": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/projection-parent-disassembly.txt",
+    "disassembly_sha256": "9983873be3e7d00bea343830f7d07de90661df8169ed164b3523612341bb3270"
+  },
+  "candidate": {
+    "library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/libggml-cpu.so.0.22.0",
+    "sha256": "5ba125771f3e8bac0b634a845f6666700d53e25b90573581c62f8bbbb8718f2b",
+    "symbol": "ggml::cpu::repack::tensor_traits<block_q8_0, 8l, 8l, (ggml_type)8>::compute_forward(ggml_compute_params*, ggml_tensor*)",
+    "start": 881584,
+    "end": 890901,
+    "vector_operations": [
+      {
+        "offset": 887783,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 887789,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 887795,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 887865,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888009,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888019,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888028,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888098,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888239,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888299,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888343,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888392,
+        "instruction": "vpdpbusd"
+      },
+      {
+        "offset": 888654,
+        "instruction": "vfmadd231ps"
+      }
+    ],
+    "disassembly": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/projection-candidate-disassembly.txt",
+    "disassembly_sha256": "e236bd71692e6b1560d55e22aba5f7fb8ee1aea927a4ed0de8f8acff8f327815"
+  }
+}

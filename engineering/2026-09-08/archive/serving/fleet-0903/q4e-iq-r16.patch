@@ -1,0 +1,274 @@
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -4166,6 +4166,145 @@
+     return 0;
+ }
+ 
++// Four codes per output channel let each VNNI lane produce one row sum.
++struct block_iq_r16 {
++    ggml_half d[16];
++    uint8_t scales[(QK_K / 32) * 16];
++    uint8_t qs[(QK_K / 16) * 4 * 32];
++};
++static_assert(sizeof(block_iq_r16) == 2208, "wrong block_iq_r16 size/padding");
++
++template <typename BLOC_TYPE>
++static int repack_iq_to_r16(ggml_tensor * t, const void * data, size_t data_size) {
++    const int64_t nrows = ggml_nrows(t);
++    const int64_t nb = t->ne[0] / QK_K;
++    GGML_ASSERT(data_size == nrows * nb * sizeof(BLOC_TYPE));
++    if (t->ne[0] % QK_K != 0 || t->ne[1] % 16 != 0) {
++        return -1;
++    }
++    const BLOC_TYPE * src = (const BLOC_TYPE *) data;
++    block_iq_r16 * dst = (block_iq_r16 *) t->data;
++    parallel_repack_groups(nrows / 16, [&](int64_t group) {
++        for (int64_t b = 0; b < nb; ++b) {
++            block_iq_r16 & out = dst[group * nb + b];
++            memset(&out, 0, sizeof(out));
++            for (int half = 0; half < 2; ++half) {
++                BLOC_TYPE rows[8];
++                for (int r = 0; r < 8; ++r) {
++                    rows[r] = src[(group * 16 + half * 8 + r) * nb + b];
++                }
++                const auto r8 = [&]() {
++                    if constexpr (std::is_same_v<BLOC_TYPE, block_iq3_xxs>) {
++                        return make_block_iq3_xxs_r8(rows);
++                    } else {
++                        return make_block_iq2_xs_r8(rows);
++                    }
++                }();
++                for (int r = 0; r < 8; ++r) {
++                    const int row = half * 8 + r;
++                    out.d[row] = r8.d[r];
++                    for (int sb = 0; sb < QK_K / 32; ++sb) {
++                        if constexpr (std::is_same_v<BLOC_TYPE, block_iq3_xxs>) {
++                            const uint8_t scale = (r8.scales[sb] >> (4 * r)) & 15;
++                            out.scales[sb * 16 + row] = scale | (scale << 4);
++                        } else {
++                            out.scales[sb * 16 + row] = r8.scales[sb * 8 + r];
++                        }
++                    }
++                    for (int sb = 0; sb < QK_K / 16; ++sb) {
++                        for (int k = 0; k < 16; k += 2) {
++                            const int from = (sb * 2 + r / 4) * 32 + (r % 4) * 8 + k / 2;
++                            const int to = (sb * 4 + k / 4) * 32 + row * 2 + (k % 4) / 2;
++                            out.qs[to] = r8.qs[from];
++                        }
++                    }
++                }
++            }
++        }
++    });
++    return 0;
++}
++
++template <bool IQ3>
++static void ggml_gemv_iq_r16_q8_K(
++        int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    GGML_ASSERT(n % QK_K == 0 && nc % 16 == 0);
++    const int nb = n / QK_K;
++    const auto * weights = (const block_iq_r16 *) vx;
++    const auto * activations = (const block_q8_K *) vy;
++    constexpr float factor = IQ3 ? 0.25f : 0.125f;
++    static const uint8_t values2[16] = {21, 39, 56, 72, 89, 107, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64};
++    static const uint8_t values3[16] = {2, 12, 20, 28, 36, 44, 52, 60, 68, 76, 84, 92, 100, 108, 116, 126};
++    const uint8_t * values = IQ3 ? values3 : values2;
++#if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++    const __m512i lut = _mm512_broadcast_i32x4(_mm_loadu_si128((const __m128i *) values));
++    const __m512i lo_mask = _mm512_set1_epi16(15);
++    const __m512i hi_mask = _mm512_set1_epi16(0x0f00);
++    const __m512i scale_mask = _mm512_set1_epi32(15);
++    const __m512i one = _mm512_set1_epi32(1);
++    for (int y = 0; y < nr; ++y) {
++        const block_q8_K * a = activations + y * nb;
++        for (int x = 0; x < nc / 16; ++x) {
++            const block_iq_r16 * w = weights + x * nb;
++            __m512 sum = _mm512_setzero_ps();
++            for (int b = 0; b < nb; ++b) {
++                __m512i isum = _mm512_setzero_si512();
++                for (int sb = 0; sb < QK_K / 16; ++sb) {
++                    __m512i dots = _mm512_setzero_si512();
++                    for (int chunk = 0; chunk < 4; ++chunk) {
++                        const __m512i packed = _mm512_cvtepu8_epi16(_mm256_loadu_si256(
++                            (const __m256i *) (w[b].qs + (sb * 4 + chunk) * 32)));
++                        const __m512i codes = _mm512_or_si512(
++                            _mm512_and_si512(packed, lo_mask),
++                            _mm512_and_si512(_mm512_slli_epi16(packed, 4), hi_mask));
++                        int32_t aq;
++                        memcpy(&aq, a[b].qs + sb * 16 + chunk * 4, sizeof(aq));
++                        dots = _mm512_dpbusd_epi32(dots, _mm512_shuffle_epi8(lut, codes), _mm512_set1_epi32(aq));
++                    }
++                    dots = _mm512_sub_epi32(dots, _mm512_set1_epi32(64 * a[b].bsums[sb]));
++                    __m512i scales = _mm512_cvtepu8_epi32(_mm_loadu_si128(
++                        (const __m128i *) (w[b].scales + (sb / 2) * 16)));
++                    if (sb & 1) {
++                        scales = _mm512_srli_epi32(scales, 4);
++                    }
++                    scales = _mm512_add_epi32(_mm512_slli_epi32(_mm512_and_si512(scales, scale_mask), 1), one);
++                    isum = _mm512_add_epi32(isum, _mm512_mullo_epi32(dots, scales));
++                }
++                const __m512 d = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i *) w[b].d));
++                const __m512 scale = _mm512_mul_ps(d, _mm512_set1_ps(a[b].d * factor));
++                sum = _mm512_fmadd_ps(_mm512_cvtepi32_ps(isum), scale, sum);
++            }
++            _mm512_storeu_ps(s + y * bs + x * 16, sum);
++        }
++    }
++#else
++    for (int y = 0; y < nr; ++y) {
++        const block_q8_K * a = activations + y * nb;
++        for (int x = 0; x < nc / 16; ++x) {
++            const block_iq_r16 * w = weights + x * nb;
++            for (int row = 0; row < 16; ++row) {
++                float sum = 0.0f;
++                for (int b = 0; b < nb; ++b) {
++                    int32_t isum = 0;
++                    for (int sb = 0; sb < QK_K / 16; ++sb) {
++                        int32_t dots = 0;
++                        for (int k = 0; k < 16; ++k) {
++                            const uint8_t packed = w[b].qs[(sb * 4 + k / 4) * 32 + row * 2 + (k % 4) / 2];
++                            const uint8_t code = (packed >> (4 * (k % 2))) & 15;
++                            dots += (int(values[code]) - 64) * int(a[b].qs[sb * 16 + k]);
++                        }
++                        const int scale = (w[b].scales[(sb / 2) * 16 + row] >> (4 * (sb % 2))) & 15;
++                        isum += dots * (2 * scale + 1);
++                    }
++                    sum = std::fma(float(isum), GGML_FP16_TO_FP32(w[b].d[row]) * (a[b].d * factor), sum);
++                }
++                s[y * bs + x * 16 + row] = sum;
++            }
++        }
++    }
++#endif
++}
++
+ static void qK_r8_get_scale_min(
+         int j, const uint8_t * GGML_RESTRICT packed,
+         uint8_t * GGML_RESTRICT scale, uint8_t * GGML_RESTRICT min) {
+@@ -4875,8 +5014,16 @@
+     return repack_q2_K_to_q2_K_8_bl(t, 8, data, data_size);
+ }
+ 
++template <> int repack<block_iq2_xs, 8, 16>(ggml_tensor * t, const void * data, size_t data_size) {
++    return repack_iq_to_r16<block_iq2_xs>(t, data, data_size);
++}
++
+ template <> int repack<block_iq2_xs, 8, 8>(struct ggml_tensor * t, const void * data, size_t data_size) {
+     return repack_iq2_xs_to_iq2_xs_r8(t, data, data_size);
++}
++
++template <> int repack<block_iq3_xxs, 8, 16>(ggml_tensor * t, const void * data, size_t data_size) {
++    return repack_iq_to_r16<block_iq3_xxs>(t, data, data_size);
+ }
+ 
+ template <> int repack<block_iq3_xxs, 8, 8>(struct ggml_tensor * t, const void * data, size_t data_size) {
+@@ -4985,10 +5132,20 @@
+     ggml_gemv_q2_K_8x8_q8_K(n, s, bs, vx, vy, nr, nc);
+ }
+ 
++template <> void gemv<block_iq2_xs, 8, 16, GGML_TYPE_Q8_K>(
++        int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemv_iq_r16_q8_K<false>(n, s, bs, vx, vy, nr, nc);
++}
++
+ template <>
+ void gemv<block_iq2_xs, 8, 8, GGML_TYPE_Q8_K>(
+         int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemv_iq2_xs_r8_q8_K(n, s, bs, vx, vy, nr, nc);
++}
++
++template <> void gemv<block_iq3_xxs, 8, 16, GGML_TYPE_Q8_K>(
++        int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemv_iq_r16_q8_K<true>(n, s, bs, vx, vy, nr, nc);
+ }
+ 
+ template <>
+@@ -5110,9 +5267,19 @@
+     ggml_gemm_q2_K_8x8_q8_K(n, s, bs, vx, vy, nr, nc);
+ }
+ 
++template <> void gemm<block_iq2_xs, 8, 16, GGML_TYPE_Q8_K>(
++        int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemv_iq_r16_q8_K<false>(n, s, bs, vx, vy, nr, nc);
++}
++
+ template <> void gemm<block_iq2_xs, 8, 8, GGML_TYPE_Q8_K>(
+         int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemm_iq2_xs_r8_q8_K(n, s, bs, vx, vy, nr, nc);
++}
++
++template <> void gemm<block_iq3_xxs, 8, 16, GGML_TYPE_Q8_K>(
++        int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemv_iq_r16_q8_K<true>(n, s, bs, vx, vy, nr, nc);
+ }
+ 
+ template <> void gemm<block_iq3_xxs, 8, 8, GGML_TYPE_Q8_K>(
+@@ -5215,9 +5382,9 @@
+ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PARAM_TYPE> class tensor_traits : public tensor_traits_base {
+ 
+     static constexpr bool expanded_iq2_xs =
+-        std::is_same_v<BLOC_TYPE, block_iq2_xs> && INTER_SIZE == 8 && NB_COLS == 8;
++        std::is_same_v<BLOC_TYPE, block_iq2_xs> && INTER_SIZE == 8 && (NB_COLS == 8 || NB_COLS == 16);
+     static constexpr bool expanded_iq3_xxs =
+-        std::is_same_v<BLOC_TYPE, block_iq3_xxs> && INTER_SIZE == 8 && NB_COLS == 8;
++        std::is_same_v<BLOC_TYPE, block_iq3_xxs> && INTER_SIZE == 8 && (NB_COLS == 8 || NB_COLS == 16);
+     static constexpr bool expanded_q5_K =
+         std::is_same_v<BLOC_TYPE, block_q5_K_r8_source> && INTER_SIZE == 8 && NB_COLS == 8;
+     static constexpr bool expanded_q4_K =
+@@ -5258,7 +5425,9 @@
+     }
+ 
+     static size_t physical_row_group_size(const struct ggml_tensor * t) {
+-        if constexpr (expanded_iq2_xs) {
++        if constexpr (expanded_iq && NB_COLS == 16) {
++            return (t->ne[0] / QK_K) * sizeof(block_iq_r16);
++        } else if constexpr (expanded_iq2_xs) {
+             GGML_ASSERT(t->ne[0] % QK_K == 0);
+             return (t->ne[0] / QK_K) * sizeof(block_iq2_xs_r8);
+         } else if constexpr (expanded_iq3_xxs) {
+@@ -6887,6 +7056,11 @@
+ }
+ 
+ static const ggml::cpu::tensor_traits * ggml_repack_get_optimal_repack_type(const struct ggml_tensor * cur) {
++    static const bool iq_r16_enabled = []() {
++        const char * value = getenv("GGML_CPU_IQ_R16_REPACK");
++        return value != nullptr && strcmp(value, "1") == 0;
++    }();
++
+     // instance for Q4
+     static const ggml::cpu::repack::tensor_traits<block_q4_0, 4, 4, GGML_TYPE_Q8_0> q4_0_4x4_q8_0;
+     static const ggml::cpu::repack::tensor_traits<block_q4_0, 8, 4, GGML_TYPE_Q8_0> q4_0_4x8_q8_0;
+@@ -6913,10 +7087,12 @@
+     // tensor footprint from 2.3125 to 4.3125 bits per weight.  The extra bit
+     // replaces three AVX-512 mask expansions with a packed-nibble decode.
+     static const ggml::cpu::repack::tensor_traits<block_iq2_xs, 8, 8, GGML_TYPE_Q8_K> iq2_xs_r8_q8_K;
++    static const ggml::cpu::repack::tensor_traits<block_iq2_xs, 8, 16, GGML_TYPE_Q8_K> iq2_xs_r16_q8_K;
+ 
+     // Exact compact in-memory IQ3_XXS.  This is independently opt-in because
+     // it increases the tensor footprint from 3.0625 to 4.1875 bits per weight.
+     static const ggml::cpu::repack::tensor_traits<block_iq3_xxs, 8, 8, GGML_TYPE_Q8_K> iq3_xxs_r8_q8_K;
++    static const ggml::cpu::repack::tensor_traits<block_iq3_xxs, 8, 16, GGML_TYPE_Q8_K> iq3_xxs_r16_q8_K;
+ 
+     // instance for IQ4
+     static const ggml::cpu::repack::tensor_traits<block_iq4_nl, 4, 4, GGML_TYPE_Q8_0> iq4_nl_4x4_q8_0;
+@@ -7032,6 +7208,9 @@
+         }();
+         if (enabled && ggml_cpu_has_avx512() && ggml_cpu_has_avx512_vnni() &&
+                 cur->ne[0] % QK_K == 0 && cur->ne[1] % 8 == 0) {
++            if (iq_r16_enabled && cur->ne[1] % 16 == 0) {
++                return &iq2_xs_r16_q8_K;
++            }
+             return &iq2_xs_r8_q8_K;
+         }
+     } else if (cur->type == GGML_TYPE_IQ3_XXS) {
+@@ -7041,6 +7220,9 @@
+         }();
+         if (enabled && ggml_cpu_has_avx512() && ggml_cpu_has_avx512_vnni() &&
+                 cur->ne[0] % QK_K == 0 && cur->ne[1] % 8 == 0) {
++            if (iq_r16_enabled && cur->ne[1] % 16 == 0) {
++                return &iq3_xxs_r16_q8_K;
++            }
+             return &iq3_xxs_r8_q8_K;
+         }
+     } else if (cur->type == GGML_TYPE_Q5_K) {

@@ -1,0 +1,60 @@
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -422,6 +422,10 @@
+         const char * v = std::getenv("GGML_GLM5N_ATTN_TP");
+         return v != nullptr && std::atoi(v) != 0;
+     }();
++    static const bool glm5n_mla_tp = []() {
++        const char * v = std::getenv("GGML_GLM5N_MLA_TP");
++        return v != nullptr && std::atoi(v) != 0;
++    }();
+     static const bool glm5n_output_tp = []() {
+         const char * v = std::getenv("GGML_GLM5N_OUTPUT_TP");
+         return v == nullptr || std::atoi(v) != 0;   // on unless explicitly disabled
+@@ -456,6 +460,7 @@
+     static const std::regex pattern_glm5n_beta("blk\\.\\d*\\.ssm_beta\\.weight");
+     static const std::regex pattern_glm5n_a("blk\\.\\d*\\.ssm_a");
+     static const std::regex pattern_glm5n_ssm_gate("blk\\.\\d*\\.ssm_(f|g)_b\\.weight");
++    static const std::regex pattern_glm5n_mla_kv_b("blk\\.\\d*\\.attn_(k|v)_b\\.weight");
+     static const std::regex pattern_output_weight("output\\.weight");
+     static const std::regex pattern_output_bias  ("output\\.bias");
+ 
+@@ -529,6 +534,17 @@
+             // split states: src0=attn_output src1=kda_normed axis=10" abort).
+             const bool il_recr = tensor_layer >= 0 && tensor_layer < (int) hparams.n_layer() &&
+                 hparams.is_recr((uint32_t) tensor_layer);
++            if (glm5n_mla_tp && !il_recr) {
++                if (std::regex_match(tensor_name, pattern_attn_q_b_weight)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_1, "attn_output.weight");
++                }
++                if (std::regex_match(tensor_name, pattern_glm5n_mla_kv_b)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_2, "attn_output.weight");
++                }
++                if (std::regex_match(tensor_name, pattern_attn_out_weight)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_0);
++                }
++            }
+             if (glm5n_attn_tp && il_recr) {
+                 if (std::regex_match(tensor_name, pattern_q_weight) ||
+                         std::regex_match(tensor_name, pattern_kv_weight) ||
+@@ -789,6 +805,20 @@
+ 
+     auto get_split_granularity = [&](int64_t blck_size, uint32_t il, const std::vector<std::pair<int64_t, uint32_t>> & segments) -> std::vector<int64_t> {
+         // for better performance it may make sense to round up blck_size to a higher power of 2 so that more efficient kernels can be used
++        if (ud->model->arch == LLM_ARCH_GLM5NEXT && glm5n_mla_tp && !hparams.is_recr(il)) {
++            // Absorbed MLA shares one latent KV head; its query heads remain independent.
++            const int64_t v_dim = hparams.n_embd_head_v_mla();
++            const int64_t heads_per_group = std::lcm(blck_size, v_dim) / v_dim;
++            if (std::regex_match(tensor_name, pattern_attn_q_b_weight)) {
++                return {heads_per_group * hparams.n_embd_head_k_mla()};
++            }
++            if (std::regex_match(tensor_name, pattern_glm5n_mla_kv_b)) {
++                return {heads_per_group};
++            }
++            if (std::regex_match(tensor_name, pattern_attn_out_weight)) {
++                return {heads_per_group * v_dim};
++            }
++        }
+         if (ud->model->arch == LLM_ARCH_GLM5NEXT && hparams.is_recr(il)) {
+             // KDA: n_head heads of n_embd_head_kda along the q/k/v and gate
+             // axes; the conv state holds 3*(d_conv-1)*head_dim per head and the

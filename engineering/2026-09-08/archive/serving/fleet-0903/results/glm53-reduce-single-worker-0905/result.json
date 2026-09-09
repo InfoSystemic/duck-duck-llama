@@ -1,0 +1,69 @@
+{
+  "started": 1788669480.2970781,
+  "pid": 3117576,
+  "config": {
+    "label": "glm53-reduce-single-worker-0905",
+    "timing": false,
+    "engine": "full",
+    "flag": "single-worker"
+  },
+  "runs": [
+    {
+      "label": "build-check",
+      "started": 1788669546.2000678,
+      "exit": 0,
+      "contention": null,
+      "churn": [],
+      "finished": 1788669547.3815634
+    },
+    {
+      "label": "check-0-hint-0",
+      "started": 1788669547.4946558,
+      "exit": 0,
+      "contention": null,
+      "churn": [],
+      "finished": 1788669549.1263883
+    },
+    {
+      "label": "check-1-hint-1",
+      "started": 1788669549.2412934,
+      "exit": 0,
+      "contention": null,
+      "churn": [],
+      "finished": 1788669550.8736062
+    }
+  ],
+  "timings": [],
+  "numa_environment": {
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_NUMA_DISPATCH_SPIN_US": "20000",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_DISPATCH_HARD_SPIN_US": "300",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_CPU_NUMA_POLL": "100"
+  },
+  "idle": {
+    "time": 1788669546.0909996,
+    "foreign_pids": [],
+    "process_churn": [],
+    "quiet_seconds": 60.6803296339931,
+    "required_quiet_seconds": 60
+  },
+  "source_sha256": "305ade87258bcf632401620bd014e6a85cdfe00e88f102a976e53e50801ab865",
+  "fixture_sha256": "99fa1b9edb40c37b115123bed186a31f36c9d34c134da44f8ce90ce10e9fc9d3",
+  "library_sha256": {
+    "libggml-cpu.so.0.20.2": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+    "libggml-base.so.0.20.2": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+    "libggml-base.so.0": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+    "libggml-cpu.so.0": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+    "libggml.so.0.20.2": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d",
+    "libggml.so.0": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d"
+  },
+  "exact_graph_cases": 32,
+  "checked_input_iterations_per_arm": 160,
+  "finished": 1788669550.9480553
+}

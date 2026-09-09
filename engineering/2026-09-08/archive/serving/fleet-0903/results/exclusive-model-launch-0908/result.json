@@ -1,0 +1,21 @@
+{
+  "time": 1788898112.3034084,
+  "passed": true,
+  "checks": [
+    "concurrent startup transaction rejected",
+    "residency lock remains held by exec child after parent closes its handles",
+    "process exit releases residency lock despite remaining lock file",
+    "loading resident model blocks launch before it has an HTTP service",
+    "dead zombie does not reserve the server",
+    "launcher generator preserves the same exclusion check",
+    "actual Qwen launcher rejects a duplicate start while the existing process remains alive"
+  ],
+  "existing_pid": 1219506,
+  "refusal": "Qwen launch refused: An inference process is already running: PID 1219506, port 18095, Qwen3.8-Flash-Next-UD-Q6_K_XL-00001-of-00006.gguf. Use the existing service or coordinate its shutdown before starting another whole-server model.",
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_exclusive_model_launch_0908.py": "0d14455f3b16b413d17df8d17d88c5c446477418720c492655a31042c0b28ca2",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/exclusive_model_launch.py": "a4bc4e72a60783208bcbb41b4d4efac203f24d633b38dd5680b314d5cfc968c7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/launch-qwen-flash-20tps.py": "9a33cca304897f503ec42ce3193ef93d293bc5c1b453e0d9eb9cfe6df91249fc",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/pin-qwen-flash-20tps.py": "7ba55747b8fd18d76f22d501d6a2fac0aa92a9226fc54772d875118ea387a273"
+  }
+}

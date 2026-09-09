@@ -1,0 +1,220 @@
+{
+  "passed": true,
+  "sample_count": 94186,
+  "total_period": 1180434933328,
+  "groups": {
+    "lead": {
+      "total_period": 73626743054,
+      "top_symbols": [
+        {
+          "symbol": "ggml_gemv_q8_0_x16_q8_0",
+          "percent": 28.691509851938697
+        },
+        {
+          "symbol": "void flash_q8_sum_candidate<2>(int, float*, unsigned long, void const*, void const*, int, int) [clone .constprop.0]",
+          "percent": 27.376472849297034
+        },
+        {
+          "symbol": "gomp verified wait",
+          "percent": 9.727744161855725
+        },
+        {
+          "symbol": "ggml_backend_meta_fused_reduce_op(ggml_tensor*, int, int, void*)",
+          "percent": 4.369320497635712
+        },
+        {
+          "symbol": "ggml_vec_dot_f32",
+          "percent": 3.8408822157540277
+        },
+        {
+          "symbol": "unknown libc.so.6",
+          "percent": 3.1939282324022926
+        },
+        {
+          "symbol": "ggml_compute_forward_concat",
+          "percent": 2.052890929714817
+        },
+        {
+          "symbol": "ggml_compute_forward_add_non_quantized",
+          "percent": 1.5637247449008964
+        },
+        {
+          "symbol": "ggml_compute_forward_mul",
+          "percent": 1.4117969312286835
+        },
+        {
+          "symbol": "quantize_row_q8_0",
+          "percent": 1.3631610137418315
+        },
+        {
+          "symbol": "gomp other",
+          "percent": 1.1983011204949232
+        },
+        {
+          "symbol": "flash_rms_try_guarded(ggml_compute_params const*, float const*, long, float*)",
+          "percent": 1.1526074871702419
+        },
+        {
+          "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+          "percent": 1.11259202298165
+        },
+        {
+          "symbol": "ggml_vec_dot_q8_0_q8_0",
+          "percent": 1.0890342119464955
+        },
+        {
+          "symbol": "ggml::cpu::repack::tensor_traits<block_q8_0, 8l, 8l, (ggml_type)8>::compute_forward(ggml_compute_params*, ggml_tensor*)",
+          "percent": 1.0214254560308749
+        },
+        {
+          "symbol": "unknown libm.so.6",
+          "percent": 0.819943255614649
+        }
+      ]
+    },
+    "workers": {
+      "total_period": 1105265201653,
+      "top_symbols": [
+        {
+          "symbol": "gomp verified wait",
+          "percent": 29.460079961716417
+        },
+        {
+          "symbol": "ggml_gemv_q8_0_x16_q8_0",
+          "percent": 27.08338809883018
+        },
+        {
+          "symbol": "void flash_q8_sum_candidate<2>(int, float*, unsigned long, void const*, void const*, int, int) [clone .constprop.0]",
+          "percent": 25.62000591238205
+        },
+        {
+          "symbol": "ggml_vec_dot_f32",
+          "percent": 3.635300104980098
+        },
+        {
+          "symbol": "unknown libc.so.6",
+          "percent": 1.8329774510860273
+        },
+        {
+          "symbol": "ggml_compute_forward_concat",
+          "percent": 1.7026717813837653
+        },
+        {
+          "symbol": "gomp other",
+          "percent": 1.4672535019420045
+        },
+        {
+          "symbol": "ggml_vec_dot_q8_0_q8_0",
+          "percent": 1.1100943575940092
+        },
+        {
+          "symbol": "ggml_threadpool_chunk_add",
+          "percent": 0.7419387149559901
+        },
+        {
+          "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+          "percent": 0.738308134626492
+        },
+        {
+          "symbol": "ggml::cpu::repack::tensor_traits<block_q8_0, 8l, 8l, (ggml_type)8>::compute_forward(ggml_compute_params*, ggml_tensor*)",
+          "percent": 0.6334038538017694
+        },
+        {
+          "symbol": "ggml_compute_forward_add_non_quantized",
+          "percent": 0.5586940365773561
+        },
+        {
+          "symbol": "quantize_row_q8_0",
+          "percent": 0.5002242816232061
+        },
+        {
+          "symbol": "ggml_compute_forward_dsv4_hc_pre",
+          "percent": 0.4705723388578089
+        },
+        {
+          "symbol": "ggml_graph_compute_thread.isra.0",
+          "percent": 0.43560192683163285
+        },
+        {
+          "symbol": "ggml_compute_forward_dsv4_hc_post",
+          "percent": 0.36258084050837197
+        }
+      ]
+    },
+    "controller": {
+      "total_period": 1542988621,
+      "top_symbols": [
+        {
+          "symbol": "unknown [unknown]",
+          "percent": 20.411848131185927
+        },
+        {
+          "symbol": "__sched_yield",
+          "percent": 16.311278033721806
+        },
+        {
+          "symbol": "std::thread::_State_impl<std::thread::_Invoker<std::tuple<ggml_backend_meta_context::start_cpu_numa_dispatch()::{lambda()#1}> > >::_M_run()",
+          "percent": 14.848506909371434
+        },
+        {
+          "symbol": "common_sampler_sample(common_sampler*, llama_context*, int, bool)",
+          "percent": 9.157902856627741
+        },
+        {
+          "symbol": "ggml_backend_meta_context::dispatch_cpu_numa(std::vector<ggml_cgraph*, std::allocator<ggml_cgraph*> > const&)",
+          "percent": 6.843037243629809
+        },
+        {
+          "symbol": "llama_token_data_array_partial_sort_inplace(llama_token_data_array*, int)",
+          "percent": 6.811295920762334
+        },
+        {
+          "symbol": "unknown ld-linux-x86-64.so.2",
+          "percent": 4.803372363949533
+        },
+        {
+          "symbol": "unknown libc.so.6",
+          "percent": 3.358707854009508
+        },
+        {
+          "symbol": "pthread_create",
+          "percent": 1.5362238371296453
+        },
+        {
+          "symbol": "sched_yield@plt",
+          "percent": 1.293788931966466
+        },
+        {
+          "symbol": "malloc",
+          "percent": 1.2186146899653643
+        },
+        {
+          "symbol": "ggml_backend_sched_get_tensor_backend",
+          "percent": 1.0791468435592566
+        },
+        {
+          "symbol": "unknown [vdso]",
+          "percent": 0.9786733871189061
+        },
+        {
+          "symbol": "_dl_allocate_tls_init",
+          "percent": 0.8095337729648753
+        },
+        {
+          "symbol": "ggml_backend_meta_get_split_state(ggml_backend_meta_simple_tensor_container&, ggml_tensor const*, bool)",
+          "percent": 0.762173086693165
+        },
+        {
+          "symbol": "clock_gettime",
+          "percent": 0.6708148627364375
+        }
+      ]
+    }
+  },
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-profile-0908/result.json": "01434d0135bd83e586bcb61666f50ad9ccc5b26cbff6bcb5d187051214e4c22c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-profile-0908/prose-draft0/samples-by-thread.txt": "5ca9d0a616b4e70564ecb6fd560b39055a9d03d9111bc58980334abffd1de201",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-profile-0908/analysis/result.json": "2a7c065ac0c324b703964d2c9015a5bdaf57ea7eda022df473f76b4930811544"
+  },
+  "scope": "Existing profile split by recorded worker affinity; user-cycle sample fractions are not removable wall time."
+}

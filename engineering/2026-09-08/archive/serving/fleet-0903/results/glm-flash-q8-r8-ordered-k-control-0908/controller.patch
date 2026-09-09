@@ -1,0 +1,103 @@
+--- before-ordered-k
++++ glm_flash_q8_trial.py
+@@ -64,7 +64,7 @@
+         atomic_json(STATE, self.state)
+         print(json.dumps(row), flush=True)
+ 
+-    def candidate(self, batching, drafts, workers, q8_experts=False, op_profile_count=0, q8_clamp=False, pooling=False, expert_tile_rows=0, dense_chunk=16, sum16=False, rms_guard=False):
++    def candidate(self, batching, drafts, workers, q8_experts=False, op_profile_count=0, q8_clamp=False, pooling=False, expert_tile_rows=0, dense_chunk=16, sum16=False, rms_guard=False, ordered_k=False):
+         assert not q8_experts or batching
+         assert not q8_clamp or q8_experts
+         assert not pooling or q8_clamp
+@@ -72,6 +72,7 @@
+         assert dense_chunk in (16, 128) and (dense_chunk == 16 or (pooling and not expert_tile_rows))
+         assert not sum16 or (pooling and not expert_tile_rows and dense_chunk == 16)
+         assert not rms_guard or sum16
++        assert not ordered_k or rms_guard
+         assert 0 <= op_profile_count <= 256
+         download = verified_sources()
+         mtp = json.loads((BASE / 'results/glm-flash-q8-mtp-0908/result.json').read_text())
+@@ -293,6 +294,41 @@
+             assert all(f'CPU-NUMA{i}' in loader['devices'] for i in range(4))
+             assert all(Path(path).is_symlink() and str(Path(path).resolve()) == target for path, target in bundle['symlinks'].items())
+             command[0] = bundle['server']
++        if ordered_k:
++            root = BASE / 'results/glm-flash-q8-r8-ordered-k-0908'
++            validation = json.loads((root / 'result.json').read_text())
++            manifest = json.loads((root / 'private-cpu/manifest.json').read_text())
++            probe = json.loads((BASE / 'results/glm-flash-q8-r8-ordered-k-probe-0908b/result.json').read_text())
++            assert validation['passed'] and validation['bit_exact'] and probe['passed']
++            assert validation['baseline_link_identical'] and validation['unpatched_text_identical']
++            assert validation['parent_sha256'] == manifest['parent_sha256'] == probe['cpu_sha256'] == cpu_sha
++            assert {x['label'] for x in validation['checks']} == {'parent', 'off', 'on', 'no-fusion'}
++            assert all(x['cases'] == 94 and x['samples_per_case'] == 3 and x['output_bytes'] == 4034496
++                       for x in validation['checks'])
++            assert len({x['output_sha256'] for x in validation['checks']}) == 1
++            for check in validation['checks']:
++                assert sha256(root / (check['label'] + '.bin')) == check['output_sha256']
++                assert check['selected_calls'] == (102 if check['label'] in ('on', 'no-fusion') else 0)
++            correctness, = [x for x in probe['events'] if x['event'] == 'correctness']
++            assert correctness == dict(event='correctness', cases=486, values=60264, passed=True)
++            assert sha256(BASE / 'results/glm-flash-q8-r8-ordered-k-probe-0908b/outputs.bin') == probe['output_sha256']
++            for result in (validation, manifest, probe):
++                assert all(sha256(path) == digest for path, digest in result['input_sha256'].items())
++            assert all(sha256(path) == digest for path, digest in manifest['private_source_sha256'].items())
++            assert validation['library_sha256'] == manifest['library_sha256'] == sha256(validation['library'])
++            cpu, cpu_sha = Path(validation['library']), validation['library_sha256']
++            env['LD_LIBRARY_PATH'] = str(cpu.parent) + ':' + str(pinned)
++            env['GGML_CPU_Q8_R8_ORDERED_K'] = '1'
++            bundle = json.loads((BASE / 'results/glm-flash-q8-r8-ordered-k-runtime-0908/result.json').read_text())
++            assert bundle['passed'] and bundle['cpu_sha256'] == cpu_sha
++            assert bundle['runtime_env'] == runtime_environment(env)
++            assert 'GGML_CPU_Q8_R8_ORDERED_K_AUDIT' not in bundle['runtime_env']
++            assert bundle['server_sha256'] == preset['binary_sha256']['llama-server'] == sha256(bundle['server'])
++            loader, = bundle['runs']
++            assert loader['mode'] == 'private' and loader['cpu_maps'] == [str(cpu.resolve())]
++            assert all(f'CPU-NUMA{i}' in loader['devices'] for i in range(4))
++            assert all(Path(path).is_symlink() and str(Path(path).resolve()) == target for path, target in bundle['symlinks'].items())
++            command[0] = bundle['server']
+         assert not any('REQUANT' in key or key == 'GGML_CPU_ROUTER_F16' for key in runtime_environment(env))
+         assert not any('PROFILE' in key for key in runtime_environment(env))
+         if op_profile_count:
+@@ -306,7 +342,7 @@
+         assert affinity == list(range(128))
+         configuration = dict(command=command, runtime_env=runtime_environment(env),
+             batching=batching, q8_experts=q8_experts, drafts=drafts, workers=workers, affinity=affinity,
+-            op_profile_count=op_profile_count, q8_clamp=q8_clamp, pooling=pooling, expert_tile_rows=expert_tile_rows, dense_chunk=dense_chunk, sum16=sum16, rms_guard=rms_guard,
++            op_profile_count=op_profile_count, q8_clamp=q8_clamp, pooling=pooling, expert_tile_rows=expert_tile_rows, dense_chunk=dense_chunk, sum16=sum16, rms_guard=rms_guard, ordered_k=ordered_k,
+             cpu_library=str(cpu), cpu_sha256=cpu_sha, pinned_directory=str(pinned),
+             runtime_directory=str(Path(command[0]).parent),
+             model_revision=download['revision'], model_manifest_sha256=download['manifest_sha256'],
+@@ -438,8 +474,8 @@
+         self.qwen.start_process(configuration, env, 'post-flash-q8')
+         self.record('selected_qwen_restored', pid=self.qwen.state['current']['pid'])
+ 
+-    def launch(self, batching, drafts, workers, q8_experts=False, op_profile_count=0, q8_clamp=False, pooling=False, expert_tile_rows=0, dense_chunk=16, sum16=False, rms_guard=False):
+-        configuration, environment = self.candidate(batching, drafts, workers, q8_experts, op_profile_count, q8_clamp, pooling, expert_tile_rows, dense_chunk, sum16, rms_guard)
++    def launch(self, batching, drafts, workers, q8_experts=False, op_profile_count=0, q8_clamp=False, pooling=False, expert_tile_rows=0, dense_chunk=16, sum16=False, rms_guard=False, ordered_k=False):
++        configuration, environment = self.candidate(batching, drafts, workers, q8_experts, op_profile_count, q8_clamp, pooling, expert_tile_rows, dense_chunk, sum16, rms_guard, ordered_k)
+         self.quiet()
+         if self.qwen.state.get('current'):
+             previous = copy.deepcopy(self.qwen.state['current'])
+@@ -479,6 +515,7 @@
+                         help='Use the checked dense chunk limit; 128 requires pooling without the expert tile experiment')
+     parser.add_argument('--sum16', action='store_true', help='Use the checked Q8 activation sum for single-token 16-row calls; requires pooling and chunk 16')
+     parser.add_argument('--rms-guard', action='store_true', help='Use the checked SIMD RMS mean with serial fallback; requires --sum16')
++    parser.add_argument('--ordered-k', action='store_true', help='Parallelize narrow Q8 input work with original accumulation order; requires --rms-guard')
+     parser.add_argument('--drafts', type=int, choices=range(0, 9), default=2)
+     parser.add_argument('--workers', type=int, choices=range(1, 17), default=15)
+     parser.add_argument('--op-profile-count', type=int, choices=range(257), default=0,
+@@ -492,11 +529,11 @@
+         for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+             signal.signal(signum, lambda *_: setattr(manager, 'cancelled', True))
+         if args.action == 'launch':
+-            manager.launch(args.batching, args.drafts, args.workers, args.q8_experts, args.op_profile_count, args.q8_clamp, args.pooling, args.expert_tile_rows, args.dense_chunk, args.sum16, args.rms_guard)
++            manager.launch(args.batching, args.drafts, args.workers, args.q8_experts, args.op_profile_count, args.q8_clamp, args.pooling, args.expert_tile_rows, args.dense_chunk, args.sum16, args.rms_guard, args.ordered_k)
+         elif args.action == 'restore-qwen':
+             manager.restore_qwen()
+         elif args.action == 'check':
+-            configuration, _ = manager.candidate(args.batching, args.drafts, args.workers, args.q8_experts, args.op_profile_count, args.q8_clamp, args.pooling, args.expert_tile_rows, args.dense_chunk, args.sum16, args.rms_guard)
++            configuration, _ = manager.candidate(args.batching, args.drafts, args.workers, args.q8_experts, args.op_profile_count, args.q8_clamp, args.pooling, args.expert_tile_rows, args.dense_chunk, args.sum16, args.rms_guard, args.ordered_k)
+             print(json.dumps(dict(configuration=configuration, memory=memory_status()), indent=2))
+         else:
+             print(json.dumps(dict(current=manager.state.get('current'), inference=inference_snapshot(), memory=memory_status()), indent=2))

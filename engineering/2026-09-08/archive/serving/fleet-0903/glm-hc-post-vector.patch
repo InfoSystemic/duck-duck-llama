@@ -1,0 +1,59 @@
+--- a/ggml/src/ggml-cpu/ops.cpp
++++ b/ggml/src/ggml-cpu/ops.cpp
+@@ -11274,6 +11274,56 @@
+     const int64_t ir0 = dr * ith;
+     const int64_t ir1 = MIN(ir0 + dr, nr);
+ 
++
++    static const bool vector_enabled = []() {
++        const char * value = std::getenv("GGML_CPU_HC_POST_VECTOR");
++        return value != nullptr && std::atoi(value) != 0;
++    }();
++    if (vector_enabled && hc == 4 && nbx0 == sizeof(float) &&
++            nbr0 == sizeof(float) && nbd0 == sizeof(float)) {
++        int64_t ir = ir0;
++        while (ir < ir1) {
++            const int64_t row = ir / n_embd;
++            const int64_t idst = row % hc;
++            const int64_t it = row / hc;
++            const int64_t end = std::min(ir1, (row + 1) * n_embd) - row * n_embd;
++            int64_t i = ir - row * n_embd;
++            const float * xp = (const float *) ((const char *) x->data + it * nbx1);
++            const float * rp[4];
++            float cv[4];
++            for (int j = 0; j < 4; ++j) {
++                rp[j] = (const float *) ((const char *) residual->data + j * nbr1 + it * nbr2);
++                cv[j] = *(const float *) ((const char *) comb->data + idst * nbc0 + j * nbc1 + it * nbc2);
++            }
++            const float pv = *(const float *) ((const char *) post->data + idst * nbp0 + it * nbp1);
++            float * out = (float *) ((char *) dst->data + idst * nbd1 + it * nbd2);
++#if defined(__AVX512F__)
++            const __m512 p = _mm512_set1_ps(pv);
++            const __m512 c0 = _mm512_set1_ps(cv[0]);
++            const __m512 c1 = _mm512_set1_ps(cv[1]);
++            const __m512 c2 = _mm512_set1_ps(cv[2]);
++            const __m512 c3 = _mm512_set1_ps(cv[3]);
++            for (; i + 16 <= end; i += 16) {
++                __m512 sum = _mm512_mul_ps(_mm512_loadu_ps(xp + i), p);
++                sum = _mm512_fmadd_ps(_mm512_loadu_ps(rp[0] + i), c0, sum);
++                sum = _mm512_fmadd_ps(_mm512_loadu_ps(rp[1] + i), c1, sum);
++                sum = _mm512_fmadd_ps(_mm512_loadu_ps(rp[2] + i), c2, sum);
++                sum = _mm512_fmadd_ps(_mm512_loadu_ps(rp[3] + i), c3, sum);
++                _mm512_storeu_ps(out + i, sum);
++            }
++#endif
++            for (; i < end; ++i) {
++                float sum = xp[i] * pv;
++                for (int j = 0; j < 4; ++j) {
++                    sum = std::fma(rp[j][i], cv[j], sum);
++                }
++                out[i] = sum;
++            }
++            ir = row * n_embd + end;
++        }
++        return;
++    }
++
+     for (int64_t ir = ir0; ir < ir1; ++ir) {
+         const int64_t i0     = ir % n_embd;
+         const int64_t idst   = (ir / n_embd) % hc;

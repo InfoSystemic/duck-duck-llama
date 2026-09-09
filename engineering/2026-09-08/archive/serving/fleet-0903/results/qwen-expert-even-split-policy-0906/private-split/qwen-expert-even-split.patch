@@ -1,0 +1,19 @@
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -929,7 +929,15 @@
+                 std::regex_match(tensor_name, pattern_ffn_up_shexp_weight) ||
+                 std::regex_match(tensor_name, pattern_ffn_gate_shexp_weight) ||
+                 std::regex_match(tensor_name, pattern_ffn_down_shexp_weight)) {
+-            const int64_t blck_size_perf = std::lcm(blck_size, 128);
++            static const bool q4e_expert_even_split = [] {
++                const char * value = getenv("GGML_Q4E_EXPERT_EVEN_SPLIT");
++                return value && atoi(value) == 1;
++            }();
++            static const std::regex q4e_expert_weight("blk\\.\\d+\\.ffn_(gate|up|down)_exps\\.weight");
++            const bool even_expert = q4e_expert_even_split && ud->model->arch == LLM_ARCH_QWEN4EXP &&
++                ud->n_devices == 4 && hparams.n_ff_exp == 640 && blck_size == 32 &&
++                std::regex_match(tensor_name, q4e_expert_weight);
++            const int64_t blck_size_perf = std::lcm(blck_size, even_expert ? 16 : 128);
+             GGML_ASSERT(segments.size() == 1);
+             return {blck_size_perf};
+         }

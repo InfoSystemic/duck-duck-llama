@@ -1,0 +1,130 @@
+--- /home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-qwen4exp-current/src/llama-model.cpp	2026-08-31 02:06:37.255533919 -0600
++++ src/llama-model.cpp	2026-09-04 09:53:51.987999513 -0600
+@@ -29,6 +29,7 @@
+ #include <cassert>
+ #include <cfloat>
+ #include <cstdint>
++#include <cstdlib>
+ #include <cstring>
+ #include <cmath>
+ #include <functional>
+@@ -470,6 +471,50 @@
+         // Qwen4exp's PLE convolution and history are mirrored. Keep the one
+         // containing layer mirrored too so its fused SSM graph has one state.
+         if (ud->model->arch == LLM_ARCH_QWEN4EXP) {
++            // Staged split policy, for bisecting which rule is numerically wrong.
++            //   GGML_Q4E_SPLIT=0  routed experts + dense FFN + lm_head only,
++            //                     EVERYTHING else mirrored (always correct, the
++            //                     baseline the generic rules must match)
++            //   GGML_Q4E_SPLIT=1  also let the generic rules split attention/SSM
++            // Mirroring is always numerically safe; it just wastes bandwidth.
++            static const int q4e_split = []() {
++                const char * v = getenv("GGML_Q4E_SPLIT");
++                return v != nullptr ? atoi(v) : 1;
++            }();
++            // GGML_Q4E_SPLIT=2: generic rules everywhere EXCEPT the recurrent
++            // state, which is mirrored. If this is correct while 1 is garbage, the
++            // bug is the state split, not the weight splits.
++            if (q4e_split == 2) {
++                static const std::regex pat_rs_cache("cache_(r|s)_l\\d*");
++                if (std::regex_match(tensor_name, pat_rs_cache)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_MIRRORED);
++                }
++            }
++            // GGML_Q4E_SPLIT=3: generic rules EXCEPT the whole SSM/KDA half
++            // (its in-projection, output projection, gates, conv and state).
++            if (q4e_split == 3) {
++                static const std::regex pat_ssm_all("blk\\.\\d*\\.(ssm_[a-z0-9_]*|attn_qkv|attn_gate)\\.weight");
++                static const std::regex pat_rs_cache3("cache_(r|s)_l\\d*");
++                if (std::regex_match(tensor_name, pat_ssm_all) ||
++                        std::regex_match(tensor_name, pat_rs_cache3)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_MIRRORED);
++                }
++            }
++            if (q4e_split == 0) {
++                static const std::regex pat_exps("blk\\.\\d*\\.ffn_(up|gate)(_exps)?\\.weight");
++                static const std::regex pat_down("blk\\.\\d*\\.ffn_down(_exps)?\\.weight");
++                static const std::regex pat_down_b("blk\\.\\d*\\.ffn_down_exps\\.bias");
++                if (std::regex_match(tensor_name, pat_exps)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_1, "ffn_down.weight", "ffn_down_exps.weight");
++                }
++                if (std::regex_match(tensor_name, pat_down)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_0, "ffn_down.weight", "ffn_down_exps.weight");
++                }
++                if (std::regex_match(tensor_name, pat_down_b)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_PARTIAL, "ffn_down_exps.weight");
++                }
++                return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_MIRRORED);
++            }
+             int64_t tensor_il = -1;
+             if (tensor_name.rfind("blk.", 0) == 0) {
+                 const size_t end = tensor_name.find('.', 4);
+@@ -622,7 +667,17 @@
+             // both Qwen 3 Next and Qwen 3.5 support n_v_heads > n_k_heads but the broadcasting pattern is different:
+             //   - Qwen 3 Next: [k0_v0, k0_v1, k1_v2, k1_v3] (this is the default split pattern)
+             //   - Qwen 3.5:    [k0_v0, k1_v1, k0_v2, k1_v3] (needs segmenting of V on the scale of K to get the correct pattern)
+-            if (ud->model->arch == LLM_ARCH_QWEN3NEXT) {
++            // qwen4exp is grouped with Qwen 3.5 here, but which broadcast pattern it
++            // actually uses is an assumption, not a verified fact -- and getting it
++            // wrong interleaves the V segments and produces fluent garbage rather
++            // than an assert. GGML_Q4E_BCAST=next tests the other grouping.
++            static const bool q4e_bcast_next = []() {
++                const char * v = getenv("GGML_Q4E_BCAST");
++                return v != nullptr && strcmp(v, "next") == 0;
++            }();
++            const bool use_next_pattern = ud->model->arch == LLM_ARCH_QWEN3NEXT ||
++                (ud->model->arch == LLM_ARCH_QWEN4EXP && q4e_bcast_next);
++            if (use_next_pattern) {
+                 if (std::regex_match(tensor_name, pattern_qkv_weight) || std::regex_match(tensor_name, pattern_ssm_conv1d)) {
+                     GGML_ASSERT(tensor->ne[axis] == 2*key_dim + value_dim);
+                     return {{key_dim, 2}, {value_dim, 1}};
+@@ -1131,12 +1186,32 @@
+         }
+     }
+ 
++    // A Meta (tensor-parallel) device composes its extra buffer types from the
++    // matching per-device ones. Offer those BEFORE the plain device buffer so
++    // eligible weights keep node locality and land on the repacked kernels;
++    // without this the x16 AVX-512-VNNI paths are compiled but never selected.
++    // Only offer the meta device its composed node-local REPACK buffers when
++    // repacking was actually asked for. The repack buffer's set_tensor asserts
++    // size == ggml_nbytes(tensor), which a tensor-parallel load violates because
++    // it writes per-device SLICES, so preferring it unconditionally turns every
++    // TP load into an abort.
++    static const bool meta_repack_bufts = []() {
++        const char * v = getenv("GGML_CPU_NUMA_REPACK");
++        return v != nullptr && atoi(v) != 0;
++    }();
++    if (meta_repack_bufts && ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_META) {
++        ggml_backend_buffer_type_t * meta_extra_bufts = ggml_backend_meta_device_get_extra_bufts(dev);
++        while (meta_extra_bufts != nullptr && *meta_extra_bufts != nullptr) {
++            buft_list.emplace_back(dev, *meta_extra_bufts++);
++        }
++    }
++
+     // add the device default buffer type
+     buft_list.emplace_back(dev, ggml_backend_dev_buffer_type(dev));
+ 
+     // add the device extra buffer type (if any)
+     ggml_backend_reg_t reg = ggml_backend_dev_backend_reg(dev);
+-    if (reg) {
++    if (reg && ggml_backend_dev_type(dev) != GGML_BACKEND_DEVICE_TYPE_META) {
+         auto ggml_backend_dev_get_extra_bufts_fn = (ggml_backend_dev_get_extra_bufts_t)
+             ggml_backend_reg_get_proc_address(reg, "ggml_backend_dev_get_extra_bufts");
+ 
+@@ -2450,10 +2525,14 @@
+         default:
+             {
+                 // Dense MTP heads use a plain attention KV cache instead of the hybrid wrapper.
++                // Qwen3.8-Flash-Next has an MTP sidecar (drluoto/...-MTP-GGUF) that
++                // has been on disk since 08-29 and could never be used: without
++                // this arch the model takes the hybrid-recurrent memory path and
++                // the draft context is never built.
+                 const bool mtp_on_hybrid_qwen =
+                     params.ctx_type == LLAMA_CONTEXT_TYPE_MTP &&
+                     (arch == LLM_ARCH_QWEN3NEXT || arch == LLM_ARCH_QWEN35 || arch == LLM_ARCH_QWEN35MOE ||
+-                     arch == LLM_ARCH_BAILINGMOE3);
++                     arch == LLM_ARCH_BAILINGMOE3 || arch == LLM_ARCH_QWEN4EXP);
+ 
+                 const bool mtp_on_hybrid_nemotron =
+                     params.ctx_type == LLAMA_CONTEXT_TYPE_MTP && arch == LLM_ARCH_NEMOTRON_H_MOE;

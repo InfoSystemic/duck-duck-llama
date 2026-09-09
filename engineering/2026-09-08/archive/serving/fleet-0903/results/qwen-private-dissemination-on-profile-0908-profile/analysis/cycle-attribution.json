@@ -1,0 +1,390 @@
+{
+  "time": 1788904966.5739396,
+  "passed": true,
+  "workloads": [
+    {
+      "workload": "prose",
+      "samples": 68742,
+      "total_periods": 874478093182,
+      "category_percent": {
+        "dissemination-wait": 36.70739129758766,
+        "other": 15.130632533691413,
+        "gomp-wait-verified": 14.20856654977867,
+        "q8-x16": 12.88952374185331,
+        "q8-8x8": 12.079299600935306,
+        "q6-x16": 7.241861579352316,
+        "cross-socket-reduction": 0.8104421627317993,
+        "gomp-other": 0.6268585711568097,
+        "barrier-other": 0.30542396291271395
+      },
+      "cohorts": [
+        {
+          "cohort": "higher-activity",
+          "sampled_threads": 60,
+          "fraction_of_all_periods": 0.7793144353190387,
+          "within_cohort_percent": {
+            "dissemination-wait": 43.3946025364467,
+            "other": 17.78919909763819,
+            "q8-8x8": 12.923931041701222,
+            "q8-x16": 10.109451653938528,
+            "q6-x16": 9.292605463400168,
+            "gomp-wait-verified": 4.666359406896325,
+            "cross-socket-reduction": 0.9257238610322873,
+            "gomp-other": 0.5302692841405603,
+            "barrier-other": 0.3678576548060208
+          },
+          "top_symbols": [
+            {
+              "symbol": "ggml_barrier",
+              "percent": 43.76246019125272
+            },
+            {
+              "symbol": "[unknown]",
+              "percent": 10.23942574058372
+            },
+            {
+              "symbol": "ggml_gemv_q8_0_x16_q8_0",
+              "percent": 10.109451653938528
+            },
+            {
+              "symbol": "ggml_gemv_q6_K_x16_q8_K",
+              "percent": 9.292605463400168
+            },
+            {
+              "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+              "percent": 7.754284400472268
+            },
+            {
+              "symbol": "ggml_gemm_q8_0_8x8_q8_0",
+              "percent": 5.167821457452459
+            },
+            {
+              "symbol": "void (anonymous namespace)::tinyBLAS<16, float __vector(16), float __vector(16), float, float, float>::gemm_bloc<4, 5>(long, long)",
+              "percent": 2.5002028162447627
+            },
+            {
+              "symbol": "ggml_compute_forward_mul",
+              "percent": 2.103269539195486
+            },
+            {
+              "symbol": "void (anonymous namespace)::tinyBLAS<16, float __vector(16), float __vector(16), ggml_bf16_t, ggml_bf16_t, float>::gemm_bloc<4, 5>(long, long)",
+              "percent": 0.9856534658045091
+            },
+            {
+              "symbol": "ggml_backend_meta_fused_reduce_op(ggml_tensor*, int, int, void*)",
+              "percent": 0.9257238610322873
+            }
+          ]
+        },
+        {
+          "cohort": "other-threads",
+          "sampled_threads": 11,
+          "fraction_of_all_periods": 0.006203880584657361,
+          "within_cohort_percent": {
+            "other": 100.0
+          },
+          "top_symbols": [
+            {
+              "symbol": "[unknown]",
+              "percent": 22.184568293497616
+            },
+            {
+              "symbol": "std::thread::_State_impl<std::thread::_Invoker<std::tuple<ggml_backend_meta_context::start_cpu_numa_dispatch()::{lambda()#1}> > >::_M_run()",
+              "percent": 17.072709041180044
+            },
+            {
+              "symbol": "__sched_yield",
+              "percent": 10.768663865323564
+            },
+            {
+              "symbol": "common_sampler_sample(common_sampler*, llama_context*, int, bool)",
+              "percent": 9.681908168042506
+            },
+            {
+              "symbol": "ggml_backend_meta_get_split_state(ggml_backend_meta_simple_tensor_container&, ggml_tensor const*, bool)",
+              "percent": 7.802998073384656
+            },
+            {
+              "symbol": "llama_token_data_array_partial_sort_inplace(llama_token_data_array*, int)",
+              "percent": 5.636764826748452
+            },
+            {
+              "symbol": "ggml_backend_meta_get_split_state(ggml_backend_meta_simple_tensor_container&, ggml_tensor const*, bool)::{lambda()#1}::operator()() const",
+              "percent": 4.549795071172332
+            },
+            {
+              "symbol": "ggml_backend_meta_context::dispatch_cpu_numa(std::vector<ggml_cgraph*, std::allocator<ggml_cgraph*> > const&)",
+              "percent": 3.7633117532194915
+            },
+            {
+              "symbol": "ggml_backend_meta_buffer_simple_tensor(ggml_tensor const*, unsigned long) [clone .part.0]",
+              "percent": 2.2147356158385003
+            },
+            {
+              "symbol": "malloc",
+              "percent": 1.4601732688003222
+            }
+          ]
+        },
+        {
+          "cohort": "lower-activity",
+          "sampled_threads": 60,
+          "fraction_of_all_periods": 0.21448168409630397,
+          "within_cohort_percent": {
+            "gomp-wait-verified": 49.29094690831811,
+            "q8-x16": 23.363683271570494,
+            "dissemination-wait": 13.471318719715187,
+            "q8-8x8": 9.359743642111383,
+            "other": 3.015944360924416,
+            "gomp-other": 0.9959454781409893,
+            "cross-socket-reduction": 0.4150107039913716,
+            "barrier-other": 0.08740691522804538
+          },
+          "top_symbols": [
+            {
+              "symbol": "[unknown]",
+              "percent": 50.58677850400893
+            },
+            {
+              "symbol": "ggml_gemv_q8_0_x16_q8_0",
+              "percent": 23.363683271570494
+            },
+            {
+              "symbol": "ggml_barrier",
+              "percent": 13.558725634943233
+            },
+            {
+              "symbol": "ggml_gemm_q8_0_8x8_q8_0",
+              "percent": 7.088071841079871
+            },
+            {
+              "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+              "percent": 2.2716718010315113
+            },
+            {
+              "symbol": "ggml_vec_dot_f32",
+              "percent": 0.8939739479353228
+            },
+            {
+              "symbol": "ggml_backend_meta_fused_reduce_op(ggml_tensor*, int, int, void*)",
+              "percent": 0.4150107039913716
+            },
+            {
+              "symbol": "ggml_compute_forward_sigmoid",
+              "percent": 0.183741821281822
+            },
+            {
+              "symbol": "ggml_compute_forward_mul",
+              "percent": 0.1592459356352356
+            },
+            {
+              "symbol": "ggml_graph_compute_thread.isra.0",
+              "percent": 0.13561463733554852
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workload": "code",
+      "samples": 72066,
+      "total_periods": 919410968500,
+      "category_percent": {
+        "dissemination-wait": 36.66314790935627,
+        "other": 15.122659403970337,
+        "gomp-wait-verified": 13.924377979182223,
+        "q8-x16": 13.103202531567362,
+        "q8-8x8": 12.286558723167985,
+        "q6-x16": 7.124807920213538,
+        "cross-socket-reduction": 0.7710974288860684,
+        "gomp-other": 0.6736501007927664,
+        "barrier-other": 0.33049800286344966
+      },
+      "cohorts": [
+        {
+          "cohort": "higher-activity",
+          "sampled_threads": 60,
+          "fraction_of_all_periods": 0.7818650049964028,
+          "within_cohort_percent": {
+            "dissemination-wait": 43.30546539981903,
+            "other": 17.923357213068776,
+            "q8-8x8": 13.257482932348475,
+            "q8-x16": 9.96723374166935,
+            "q6-x16": 9.112580656102288,
+            "gomp-wait-verified": 4.576797531990431,
+            "cross-socket-reduction": 0.8523630991286099,
+            "gomp-other": 0.6006805471674406,
+            "barrier-other": 0.40403887870559985
+          },
+          "top_symbols": [
+            {
+              "symbol": "ggml_barrier",
+              "percent": 43.709504278524626
+            },
+            {
+              "symbol": "[unknown]",
+              "percent": 10.377210346129663
+            },
+            {
+              "symbol": "ggml_gemv_q8_0_x16_q8_0",
+              "percent": 9.96723374166935
+            },
+            {
+              "symbol": "ggml_gemv_q6_K_x16_q8_K",
+              "percent": 9.112580656102288
+            },
+            {
+              "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+              "percent": 7.919933263308804
+            },
+            {
+              "symbol": "ggml_gemm_q8_0_8x8_q8_0",
+              "percent": 5.330549201393876
+            },
+            {
+              "symbol": "void (anonymous namespace)::tinyBLAS<16, float __vector(16), float __vector(16), float, float, float>::gemm_bloc<4, 5>(long, long)",
+              "percent": 2.60006062270715
+            },
+            {
+              "symbol": "ggml_compute_forward_mul",
+              "percent": 2.0483681192906835
+            },
+            {
+              "symbol": "void (anonymous namespace)::tinyBLAS<16, float __vector(16), float __vector(16), ggml_bf16_t, ggml_bf16_t, float>::gemm_bloc<4, 5>(long, long)",
+              "percent": 1.011082336524321
+            },
+            {
+              "symbol": "ggml_backend_meta_fused_reduce_op(ggml_tensor*, int, int, void*)",
+              "percent": 0.8523630991286099
+            }
+          ]
+        },
+        {
+          "cohort": "other-threads",
+          "sampled_threads": 11,
+          "fraction_of_all_periods": 0.004962552183213376,
+          "within_cohort_percent": {
+            "other": 100.0
+          },
+          "top_symbols": [
+            {
+              "symbol": "[unknown]",
+              "percent": 26.67723199422002
+            },
+            {
+              "symbol": "std::thread::_State_impl<std::thread::_Invoker<std::tuple<ggml_backend_meta_context::start_cpu_numa_dispatch()::{lambda()#1}> > >::_M_run()",
+              "percent": 21.41754909706517
+            },
+            {
+              "symbol": "__sched_yield",
+              "percent": 12.412516332054242
+            },
+            {
+              "symbol": "common_sampler_sample(common_sampler*, llama_context*, int, bool)",
+              "percent": 12.304886971807834
+            },
+            {
+              "symbol": "llama_token_data_array_partial_sort_inplace(llama_token_data_array*, int)",
+              "percent": 7.175180132695847
+            },
+            {
+              "symbol": "ggml_backend_meta_get_split_state(ggml_backend_meta_simple_tensor_container&, ggml_tensor const*, bool)",
+              "percent": 4.506587788849509
+            },
+            {
+              "symbol": "ggml_backend_meta_context::dispatch_cpu_numa(std::vector<ggml_cgraph*, std::allocator<ggml_cgraph*> > const&)",
+              "percent": 3.9489553183430446
+            },
+            {
+              "symbol": "ggml_backend_meta_get_split_state(ggml_backend_meta_simple_tensor_container&, ggml_tensor const*, bool)::{lambda()#1}::operator()() const",
+              "percent": 1.1108334349384055
+            },
+            {
+              "symbol": "ggml_backend_meta_buffer_simple_tensor(ggml_tensor const*, unsigned long) [clone .part.0]",
+              "percent": 0.9821466128326001
+            },
+            {
+              "symbol": "malloc",
+              "percent": 0.7110379583473229
+            }
+          ]
+        },
+        {
+          "cohort": "lower-activity",
+          "sampled_threads": 60,
+          "fraction_of_all_periods": 0.21317244282038386,
+          "within_cohort_percent": {
+            "gomp-wait-verified": 48.5331969605581,
+            "q8-x16": 24.9102144821365,
+            "dissemination-wait": 13.154233028693739,
+            "q8-8x8": 9.011468549179337,
+            "other": 2.8744728943082465,
+            "gomp-other": 0.9569670407743098,
+            "cross-socket-reduction": 0.4909853672564862,
+            "barrier-other": 0.06846167709328002
+          },
+          "top_symbols": [
+            {
+              "symbol": "[unknown]",
+              "percent": 49.76825433346532
+            },
+            {
+              "symbol": "ggml_gemv_q8_0_x16_q8_0",
+              "percent": 24.9102144821365
+            },
+            {
+              "symbol": "ggml_barrier",
+              "percent": 13.222694705787019
+            },
+            {
+              "symbol": "ggml_gemm_q8_0_8x8_q8_0",
+              "percent": 6.8336157484449815
+            },
+            {
+              "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+              "percent": 2.1778528007343563
+            },
+            {
+              "symbol": "ggml_vec_dot_f32",
+              "percent": 1.0092299665351223
+            },
+            {
+              "symbol": "ggml_backend_meta_fused_reduce_op(ggml_tensor*, int, int, void*)",
+              "percent": 0.4909853672564862
+            },
+            {
+              "symbol": "ggml_threadpool_chunk_add",
+              "percent": 0.20519450618784293
+            },
+            {
+              "symbol": "ggml_compute_forward_sigmoid",
+              "percent": 0.16197452817248328
+            },
+            {
+              "symbol": "ggml_compute_forward_mul",
+              "percent": 0.15539339027665952
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/result.json": "052cb3e36b5f52eec5fe56e39b7df90fe4c823e236a07b64ee26c251c9a2882a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-dissemination-0908/private-cpu/libggml-cpu.so.0.22.0": "21519acabf56bd088113a7495feba357497af35a346aebe408f78f174d80f4fd",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/analysis/libgomp.so.1.0.0": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/analysis/libgomp-notes.txt": "1de3871f7c7d3769efce7e31117ec2040b720ad083ecab3f0ba44ce1238a04d4",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/analysis/libgomp-wait-disassembly.txt": "444615ce1a7dd29211717bf9c1952b68e7d92e958a101b462a21e92806520d80",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/analysis/ggml-barrier-disassembly.txt": "84236ca037a9d0e8db1955f4bb3ab44a91d97735c52093d749126cbc5b78a467",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/analyze_qwen_private_profile_0908.py": "9d882c440fe2ff2278cab90330a3a5771f9a0fac8f6a2f755b39544af388760d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/prose-draft4/report.txt": "be07becfcb152d7ceb1d03bf6fca3b4689e71fef16a09cb74cceda8706d08b07",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/analysis/prose-buildids.txt": "18b36335a697af9c3106600aa74b64e0c5bab2e2627bb618b73fbeb48c39ab7a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/analysis/prose-mmaps.txt": "dec96236f8cb48f5a1d25ca60367743a626e041656852a634c8413cb7310c31b",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/prose-draft4/samples-by-thread.txt": "53168ed794e5db4242ce588135a9e6605cd2a9b4c506e30ff1d0699045c81c9e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/code-draft4/report.txt": "8f8f08d3e0b8a3dc5ed3fd5d4bd7ee9d5d2ebb196e4a68dd7cc758789917ebdc",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/analysis/code-buildids.txt": "18b36335a697af9c3106600aa74b64e0c5bab2e2627bb618b73fbeb48c39ab7a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/analysis/code-mmaps.txt": "d356677a574101f9413735bfc3a6b44d62214caeffeb41ec9aca459161fb72fb",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-dissemination-on-profile-0908-profile/code-draft4/samples-by-thread.txt": "6e643be2c4d655ffd2206fb2bb861b3c8082b85cd17707ce806918e887b35090"
+  },
+  "scope": "Period-weighted sampled CPU cycles. These include concurrent worker waits and are not removable wall-time fractions. Cohorts are classified by observed thread CPU ticks, not assumed target/draft roles."
+}

@@ -1,0 +1,202 @@
+{
+  "started": 1788681459.0561814,
+  "pid": 4179591,
+  "config": {
+    "label": "full-three-row-finite-cycles-0906",
+    "seconds": 10.0,
+    "workers_per_socket": 15,
+    "mib_per_worker": 32,
+    "kind": "graph",
+    "k": 4096,
+    "tokens": 3,
+    "modes": "64",
+    "graph_rows": 6144,
+    "graph_matrices": 8,
+    "graph_controllers": 4,
+    "profile_cycles": true
+  },
+  "runs": [
+    {
+      "index": 0,
+      "mode": "64",
+      "started": 1788681527.1928227,
+      "ready": {
+        "event": "ready",
+        "pid": 4183146,
+        "workers": 60,
+        "chunk": 64,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 16384,
+        "rows": 6144,
+        "tokens": 3,
+        "matrices": 8,
+        "bytes_per_pass": 566231040,
+        "weight_hash": "b6a01643dcf8ab25",
+        "output_hash": "65fbab5d6ca68e25",
+        "max_reference_error": 7.77222169e-07
+      },
+      "numa_placement": {
+        "page_size": 4096,
+        "nodes": {
+          "0": {
+            "pages": 34716,
+            "nonlocal_pages": 0
+          },
+          "1": {
+            "pages": 34716,
+            "nonlocal_pages": 0
+          },
+          "2": {
+            "pages": 34716,
+            "nonlocal_pages": 0
+          },
+          "3": {
+            "pages": 34716,
+            "nonlocal_pages": 0
+          }
+        },
+        "scope": "Node-bound mappings after complete reference checks, before timed graph execution."
+      },
+      "measurement": {
+        "event": "done",
+        "phase": 0,
+        "start": 823823.996834129,
+        "end": 823833.99855684,
+        "passes": 3593,
+        "bytes": 2034468126720,
+        "logical_gb_s": 203.411770702,
+        "graph_ms": 2.783668998,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 823823.996834129,
+            "end": 823833.99855684
+          }
+        ],
+        "profiled": true
+      },
+      "profile": {
+        "target_pid": 4183146,
+        "scope": "Only the private fixture; no IMC collection.",
+        "profiler_pid": 4183292,
+        "exit_code": 0,
+        "selected_window_monotonic": [
+          823824.996834129,
+          823832.99855684
+        ],
+        "selected_samples": 97163,
+        "sample_window_monotonic": [
+          823824.997928,
+          823832.998464
+        ],
+        "report_file": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-three-row-finite-cycles-0906/arm0-cycles/report.txt",
+        "trace_file": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-three-row-finite-cycles-0906/arm0-cycles/cycles.txt"
+      },
+      "contention": null,
+      "finished": 1788681541.5212622,
+      "inference_churn": [],
+      "reduction_boundaries": 8,
+      "reduction_tensors": 8,
+      "complete": true
+    }
+  ],
+  "source_sha256": "9fd291a4814ce442b48dfb4f0fdd027a4439727bae67575f408947537e444879",
+  "scope": "Private finite-graph cycle profile. Profiled timing is not a throughput or bandwidth result.",
+  "modes": [
+    "64"
+  ],
+  "idle_gate": {
+    "time": 1788681524.8839052,
+    "foreign_pids": [],
+    "process_churn": [],
+    "quiet_seconds": 60.716599560924806,
+    "required_quiet_seconds": 60
+  },
+  "memory_before": [
+    "MemFree:        23186056 kB",
+    "MemAvailable:   154441976 kB",
+    "SwapFree:          26340 kB"
+  ],
+  "node_memory_before": {
+    "0": 3929336,
+    "1": 3861096,
+    "2": 5601480,
+    "3": 9794144
+  },
+  "fixture_environment": {
+    "GGML_CPU_ROUTER_F16": "1",
+    "GGML_GLM_QA_TP": "2",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_CPU_ATTN_REQUANT": "q5_K",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_MOE_SINGLE_TOKEN_THREADS": "15",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "0",
+    "GGML_CPU_NUMA_DISPATCH_SPIN_US": "20000",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_GLM_SHEXP_TP": "1",
+    "GGML_CPU_NUMA_DISPATCH_HARD_SPIN_US": "300",
+    "GGML_GLM_ATTN_TP": "1",
+    "GGML_GLM_OUTPUT_TP": "1",
+    "GGML_CPU_SHEXP_REQUANT": "q5_K",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_IQ2_XS_REPACK": "0",
+    "GGML_CPU_MOE_DOWN_WEIGHTED_SUM_TILE": "192",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_IQ3_XXS_MOE_2ROW": "1",
+    "GGML_CPU_SINGLE_TASK_MAX_ELEMENTS": "32768",
+    "GGML_CPU_MOE_WEIGHTED_SUM_FUSION": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_OUTPUT_REQUANT": "q6_K",
+    "GGML_CPU_Q8_0_REPACK_FFN": "1",
+    "GGML_CPU_Q8_0_REPACK_X_TILE": "auto",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_CPU_Q5_K_REPACK_MOE_DOWN": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_MOE_DOWN_WEIGHTED_SUM_FUSION": "1",
+    "GGML_CPU_NUMA_POLL": "100",
+    "OMP_NUM_THREADS": "1"
+  },
+  "libraries": {
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-cpu.so.0.20.2": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-base.so.0.20.2": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-base.so.0": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-cpu.so.0": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml.so.0.20.2": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml.so.0": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d"
+  },
+  "fixture_dependencies": {
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-backend-meta.cpp": "305ade87258bcf632401620bd014e6a85cdfe00e88f102a976e53e50801ab865",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-cpu/repack.cpp": "6f1d6f0db75aab477ad3d52543a087549585321375a45a6d0ca7c3baded9ee45",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-cpu/arch/x86/repack.cpp": "0d112976b6f81449df82915b358944a331fa692bb4fa3b399c463632c435b2bb"
+  },
+  "build_command": [
+    "g++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-pthread",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/cold-graph-check.cpp",
+    "-o",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-three-row-finite-cycles-0906/read-bandwidth-check",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-cpu",
+    "-L/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin",
+    "-lggml",
+    "-lggml-cpu",
+    "-lggml-base"
+  ],
+  "build_contention": null,
+  "binary_sha256": "ad56076d3773f2fbb6bc0f9cca82d8b1b8219569aba496252068da0d08cac08c",
+  "finished": 1788681541.7086372
+}

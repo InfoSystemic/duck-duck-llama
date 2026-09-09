@@ -1,0 +1,91 @@
+{
+  "scope": "Dynamic-symbol audit only; absence of imported task APIs supports the synchronization substitution but does not prove all runtime behavior. No model speed claim.",
+  "libraries": [
+    {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-dissemination-0908/private-cpu/libggml-cpu.so.0.22.0",
+      "sha256": "21519acabf56bd088113a7495feba357497af35a346aebe408f78f174d80f4fd",
+      "openmp_symbols": [
+        "                 U GOMP_barrier@GOMP_1.0",
+        "                 U GOMP_parallel@GOMP_4.0",
+        "                 U GOMP_single_start@GOMP_1.0",
+        "0000000000141a70 W _ZSt13__adjust_heapIPiliN9__gnu_cxx5__ops15_Iter_comp_iterI11cmp_argsortIL15ggml_sort_order0EEEEEvT_T0_S9_T1_T2_",
+        "0000000000141520 W _ZSt13__adjust_heapIPiliN9__gnu_cxx5__ops15_Iter_comp_iterI11cmp_argsortIL15ggml_sort_order1EEEEEvT_T0_S9_T1_T2_",
+        "0000000000141920 W _ZSt13__adjust_heapIPiliN9__gnu_cxx5__ops15_Iter_comp_iterI9cmp_top_kEEEvT_T0_S7_T1_T2_",
+        "0000000000141670 W _ZSt13__heap_selectIPiN9__gnu_cxx5__ops15_Iter_comp_iterI11cmp_argsortIL15ggml_sort_order1EEEEEvT_S8_S8_T0_",
+        "0000000000141420 W _ZSt16__insertion_sortIPiN9__gnu_cxx5__ops15_Iter_comp_iterI11cmp_argsortIL15ggml_sort_order0EEEEEvT_S8_T0_",
+        "0000000000141340 W _ZSt16__insertion_sortIPiN9__gnu_cxx5__ops15_Iter_comp_iterI11cmp_argsortIL15ggml_sort_order1EEEEEvT_S8_T0_",
+        "0000000000141bc0 W _ZSt16__introsort_loopIPilN9__gnu_cxx5__ops15_Iter_comp_iterI11cmp_argsortIL15ggml_sort_order0EEEEEvT_S8_T0_T1_",
+        "0000000000141740 W _ZSt16__introsort_loopIPilN9__gnu_cxx5__ops15_Iter_comp_iterI11cmp_argsortIL15ggml_sort_order1EEEEEvT_S8_T0_T1_",
+        "                 U omp_get_num_threads@OMP_1.0",
+        "                 U omp_get_thread_num@OMP_1.0"
+      ],
+      "task_symbols": []
+    },
+    {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0.3.0",
+      "sha256": "d213ba477ef5d3f2a68568b30a31595ef9578b6dce4b3b81e95da6f83a3dac8b",
+      "openmp_symbols": [
+        "000000000018c1e0 T _ZN21llama_dsv4_comp_state10state_readER15llama_io_read_iij",
+        "000000000018b720 T _ZN21llama_dsv4_comp_state5clearEib",
+        "0000000000194530 T _ZN21llama_dsv4_comp_state6seq_cpEii",
+        "0000000000194780 T _ZN21llama_dsv4_comp_stateC1ERK11llama_modelbbjjjjjPKcRKSt8functionIFbiEE",
+        "0000000000194780 T _ZN21llama_dsv4_comp_stateC2ERK11llama_modelbbjjjjjPKcRKSt8functionIFbiEE",
+        "0000000000199cd0 W _ZN27llama_kv_cache_dsv4_context9comp_planC1Ev",
+        "0000000000199cd0 W _ZN27llama_kv_cache_dsv4_context9comp_planC2Ev",
+        "0000000000199bb0 W _ZN27llama_kv_cache_dsv4_context9comp_planD1Ev",
+        "0000000000199bb0 W _ZN27llama_kv_cache_dsv4_context9comp_planD2Ev",
+        "000000000018cc50 T _ZN32llama_kv_cache_dsv4_comp_context4nextEv",
+        "00000000001907d0 T _ZN32llama_kv_cache_dsv4_comp_contextC1EP14llama_kv_cache",
+        "000000000018eb70 T _ZN32llama_kv_cache_dsv4_comp_contextC1EP14llama_kv_cacheSt6vectorINS0_9slot_infoESaIS3_EES2_I12llama_ubatchSaIS6_EE",
+        "00000000001907d0 T _ZN32llama_kv_cache_dsv4_comp_contextC2EP14llama_kv_cache",
+        "000000000018eb70 T _ZN32llama_kv_cache_dsv4_comp_contextC2EP14llama_kv_cacheSt6vectorINS0_9slot_infoESaIS3_EES2_I12llama_ubatchSaIS6_EE",
+        "000000000018c3a0 T _ZNK21llama_dsv4_comp_state10get_kv_allEP12ggml_contexti",
+        "000000000018ba90 T _ZNK21llama_dsv4_comp_state10get_n_rowsEv",
+        "000000000018c6c0 T _ZNK21llama_dsv4_comp_state10total_sizeEv",
+        "000000000018d340 T _ZNK21llama_dsv4_comp_state11state_writeER16llama_io_write_iijRKSt6vectorIjSaIjEE",
+        "000000000018b8f0 T _ZNK21llama_dsv4_comp_state12apply_copiesERKN14llama_kv_cache16stream_copy_infoE",
+        "000000000018ba80 T _ZNK21llama_dsv4_comp_state12get_n_rs_seqEv",
+        "000000000018ba70 T _ZNK21llama_dsv4_comp_state12get_n_streamEv",
+        "000000000018c4a0 T _ZNK21llama_dsv4_comp_state13get_score_allEP12ggml_contexti",
+        "000000000018ba60 T _ZNK21llama_dsv4_comp_state14get_state_sizeEv",
+        "000000000018baa0 T _ZNK21llama_dsv4_comp_state16memory_breakdownEv",
+        "000000000018c660 T _ZNK21llama_dsv4_comp_state6cpy_kvEP12ggml_contextP11ggml_tensorS3_i",
+        "000000000018c5a0 T _ZNK21llama_dsv4_comp_state6get_kvEP12ggml_contexti",
+        "000000000018c690 T _ZNK21llama_dsv4_comp_state9cpy_scoreEP12ggml_contextP11ggml_tensorS3_i",
+        "000000000018ba50 T _ZNK21llama_dsv4_comp_state9get_ratioEv",
+        "000000000018c600 T _ZNK21llama_dsv4_comp_state9get_scoreEP12ggml_contexti",
+        "000000000018cdd0 T _ZNK32llama_kv_cache_dsv4_comp_context15set_input_k_rotEP11ggml_tensor",
+        "000000000018cdc0 T _ZNK32llama_kv_cache_dsv4_comp_context17build_input_k_rotEP12ggml_context",
+        "000000000018cd90 T _ZNK32llama_kv_cache_dsv4_comp_context5cpy_kEP12ggml_contextP11ggml_tensorS3_i",
+        "000000000018cd60 T _ZNK32llama_kv_cache_dsv4_comp_context5get_kEP12ggml_contexti",
+        "000000000018cd50 T _ZNK32llama_kv_cache_dsv4_comp_context8get_n_kvEv",
+        "000000000019a200 W _ZNSt10unique_ptrI21llama_dsv4_comp_stateSt14default_deleteIS0_EED1Ev",
+        "000000000019a200 W _ZNSt10unique_ptrI21llama_dsv4_comp_stateSt14default_deleteIS0_EED2Ev",
+        "000000000019c140 W _ZNSt6vectorIN21llama_dsv4_comp_state5layerESaIS1_EE17_M_realloc_insertIJS1_EEEvN9__gnu_cxx17__normal_iteratorIPS1_S3_EEDpOT_",
+        "000000000019a170 W _ZNSt6vectorIN21llama_dsv4_comp_state5layerESaIS1_EED1Ev",
+        "000000000019a170 W _ZNSt6vectorIN21llama_dsv4_comp_state5layerESaIS1_EED2Ev",
+        "000000000019b9e0 W _ZNSt6vectorIN27llama_kv_cache_dsv4_context9comp_planESaIS1_EE17_M_realloc_insertIJS1_EEEvN9__gnu_cxx17__normal_iteratorIPS1_S3_EEDpOT_",
+        "0000000000199e20 W _ZNSt6vectorIN27llama_kv_cache_dsv4_context9comp_planESaIS1_EED1Ev",
+        "0000000000199e20 W _ZNSt6vectorIN27llama_kv_cache_dsv4_context9comp_planESaIS1_EED2Ev",
+        "0000000000224b80 W _ZSt13__adjust_heapIN9__gnu_cxx17__normal_iteratorIPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt6vectorIS7_SaIS7_EEEElS7_NS0_5__ops15_Iter_comp_iterIZN20llm_tokenizer_plamo25buildERK11llama_vocabEUlRKS7_SK_E_EEEvT_T0_SO_T1_T2_",
+        "000000000021d700 W _ZSt16__insertion_sortIN9__gnu_cxx17__normal_iteratorIPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt6vectorIS7_SaIS7_EEEENS0_5__ops15_Iter_comp_iterIZN20llm_tokenizer_plamo25buildERK11llama_vocabEUlRKS7_SK_E_EEEvT_SN_T0_",
+        "00000000002257d0 W _ZSt16__introsort_loopIN9__gnu_cxx17__normal_iteratorIPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt6vectorIS7_SaIS7_EEEElNS0_5__ops15_Iter_comp_iterIZN20llm_tokenizer_plamo25buildERK11llama_vocabEUlRKS7_SK_E_EEEvT_SN_T0_T1_",
+        "0000000000221b60 W _ZSt25__unguarded_linear_insertIN9__gnu_cxx17__normal_iteratorIPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt6vectorIS7_SaIS7_EEEENS0_5__ops14_Val_comp_iterIZN20llm_tokenizer_plamo25buildERK11llama_vocabEUlRKS7_SK_E_EEEvT_T0_"
+      ],
+      "task_symbols": []
+    },
+    {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0.22.0",
+      "sha256": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
+      "openmp_symbols": [
+        "                 U GOMP_atomic_end@GOMP_1.0",
+        "                 U GOMP_atomic_start@GOMP_1.0",
+        "                 U GOMP_loop_end@GOMP_1.0",
+        "                 U GOMP_loop_nonmonotonic_dynamic_next@GOMP_4.5",
+        "                 U GOMP_loop_nonmonotonic_dynamic_start@GOMP_4.5",
+        "                 U GOMP_parallel@GOMP_4.0"
+      ],
+      "task_symbols": []
+    }
+  ]
+}

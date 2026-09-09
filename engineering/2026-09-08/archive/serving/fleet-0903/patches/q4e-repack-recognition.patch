@@ -1,0 +1,12 @@
+--- a/ggml/src/ggml-cpu/ggml-cpu.cpp
++++ b/ggml/src/ggml-cpu/ggml-cpu.cpp
+@@ -95,6 +95,9 @@
+ static ggml_backend_buffer_type_t * ggml_backend_cpu_device_get_extra_buffers_type(ggml_backend_dev_t device);
+ 
+ static bool ggml_backend_cpu_is_extra_buffer_type(ggml_backend_buffer_type_t buft) {
++    if (ggml_backend_cpu_is_repack_buffer_type(buft)) {
++        return true;
++    }
+     for (auto * extra : ggml_backend_cpu_get_extra_buffer_types()) {
+         if (extra == buft) {
+             return true;

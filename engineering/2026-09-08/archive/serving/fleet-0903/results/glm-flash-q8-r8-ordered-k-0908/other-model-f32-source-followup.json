@@ -1,0 +1,90 @@
+{
+  "passed": true,
+  "sources": [
+    {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu.c",
+      "sha256": "751d7d235c142bd51efa777e32127178e9d4b9e8d36c5adad5bcb1d284e5938c",
+      "markers": [
+        {
+          "lines": [
+            1418,
+            1595,
+            1902,
+            2135
+          ]
+        },
+        {
+          "lines": [
+            1419,
+            1596,
+            1903,
+            2136
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/llamafile/sgemm.cpp",
+      "sha256": "e226380b05393302ba91b38d22718d9521700ee2cb7943f83ad316a7a9dcd597",
+      "markers": [
+        {
+          "lines": [
+            3820
+          ]
+        },
+        {
+          "lines": [
+            3829
+          ]
+        },
+        {
+          "lines": [
+            3837,
+            3843,
+            3851,
+            3859,
+            3887,
+            3900,
+            3908,
+            3916,
+            3951,
+            3964,
+            3972,
+            3982,
+            3990,
+            4000,
+            4020
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-cpu/ggml-cpu.c",
+      "sha256": "bab9ad91d47d1a90d01f6aa493e8099ce329bc47ba975fb0a564e1e58af42919",
+      "markers": [
+        {
+          "lines": [
+            1418,
+            1595,
+            1902,
+            2135
+          ]
+        },
+        {
+          "lines": [
+            1419,
+            1596,
+            1903,
+            2136
+          ]
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "The generic raw F32 path already abandons coarse fixed chunks when there are too few chunks for its workers; do not assume a fixed 64-row task serializes every narrow matrix.",
+    "The Qwen source sends F32 calls with at least two activation rows to the AVX-512 tinyBLAS entry point before generic row scheduling. Changing generic scheduling alone would not necessarily affect the selected speculative workload.",
+    "Any new candidate must identify the actual executed kernel, preserve that kernel's arithmetic, and compare raw and multirow cases. The Q8 ordered-block implementation does not directly handle these F32 weights."
+  ],
+  "scope": "Source inspection with saved tensor inventories. These engines are not currently loaded; no fresh runtime mapping or performance claim."
+}

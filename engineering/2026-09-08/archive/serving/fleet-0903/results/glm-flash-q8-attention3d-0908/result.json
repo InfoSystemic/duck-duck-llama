@@ -1,0 +1,47 @@
+{
+  "started": 1788858568.8082917,
+  "passed": true,
+  "checks": [
+    {
+      "mode": "reference",
+      "numeric_cases": 144,
+      "mapped_cpu": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libggml-cpu.so.0.22.0"
+    },
+    {
+      "mode": "off",
+      "numeric_cases": 144,
+      "mapped_cpu": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-batch-0908/private-cpu/libggml-cpu.so.0.22.0"
+    },
+    {
+      "mode": "on",
+      "numeric_cases": 144,
+      "mapped_cpu": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-batch-0908/private-cpu/libggml-cpu.so.0.22.0"
+    }
+  ],
+  "library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-batch-0908/private-cpu/libggml-cpu.so.0.22.0",
+  "library_sha256": "3601757e1c77e92dea67e5cc28ab242a69de5f106c5fac34b210ab7e4f7cb3f8",
+  "reference_cpu_sha256": "4254ca6c9537ba258eb8d6ae1c025d43741bad71c82de3a69c4a06257c558fbe",
+  "source_sha256": "d4bd043694620aeda981cc25cfed7003aa5b5cd8c207842e03fdce44634faa06",
+  "binary_sha256": "9fa70b14105ff6cca278c60f0e8680761cea5a6fed3c4f35d21350c8e11be1f1",
+  "compile_command": [
+    "/usr/bin/c++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-fopenmp",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/ggml-cpu",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-attention3d-0908/glm-q8-attention3d-check.cpp",
+    "-L/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin",
+    "-Wl,-rpath,/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin",
+    "-lggml",
+    "-lggml-cpu",
+    "-lggml-base",
+    "-ldl",
+    "-o",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-attention3d-0908/attention3d-check"
+  ],
+  "bit_exact_cases": 144,
+  "finished": 1788858628.6310272
+}

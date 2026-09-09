@@ -1,0 +1,56 @@
+{
+  "input_comparison_passed": true,
+  "workers_per_socket": [
+    15,
+    16
+  ],
+  "runtime_env_changes": {
+    "GGML_CPU_NUMA_THREADS": [
+      "15",
+      "16"
+    ]
+  },
+  "rows": [
+    {
+      "kind": "prose",
+      "reference_tok_s": 10.774689188170816,
+      "candidate_tok_s": 9.034103688385866,
+      "speed_change_percent": -16.15439173592017,
+      "reference_adjusted_gb_s": 222.65463146321667,
+      "candidate_adjusted_gb_s": 186.30290589674146,
+      "candidate_utilization": 0.4902708049914249,
+      "completed_answer": false,
+      "stream_fields_equal": {},
+      "stream_sha256": {
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-raw-0908/prose-draft0/chunks.json": "9cd57fbec4d5a9d5d55fbfdae4b5703e33f26c8c6f4c3900902a6eafe127dea0",
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-t16-raw-0908/prose-draft0/chunks.json": "79453c818bab47e39871f3a691c837c9ad7336fa92e95828c50c06dbcddf06aa"
+      }
+    },
+    {
+      "kind": "code",
+      "reference_tok_s": 10.774085351840302,
+      "candidate_tok_s": 7.753410002065806,
+      "speed_change_percent": -28.036489884113834,
+      "reference_adjusted_gb_s": 222.08179661203903,
+      "candidate_adjusted_gb_s": 160.33524195380545,
+      "candidate_utilization": 0.4219348472468564,
+      "completed_answer": false,
+      "stream_fields_equal": {},
+      "stream_sha256": {
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-raw-0908/code-draft0/chunks.json": "f820b754c67f78ad8489f64aea7a38dd59f5f535400950a122e59a800fb72f7f",
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-t16-raw-0908/code-draft0/chunks.json": "5c457c044c805a87e5dede1f8b807adcfc5eaa1b7abaf9815a0f2f241fb2a1e1"
+      }
+    }
+  ],
+  "all_streams_equal": false,
+  "target_reached": false,
+  "cpu_sha256": "0f2feaaa6a173a23bf5adde440ec5541348f1cb7ac2edee7d77bebc15af9ec23",
+  "server_sha256": "20fa1560caa0bee73fc6b23672d7ef8e84640c72ec555a640fc2373fd82587ed",
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/compare_flash_q8_workers_0908.py": "84636e456a020e51952b71af3163a353b0ffcc8e059b09184495e46fd6b0ab5b",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-raw-0908/result.json": "2fab6944ea6c980675300e29df2f8090e27324a3737990600a40a9c9a092f36a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-t16-raw-0908/result.json": "2afd0b1708fb70ed8a99a620b6f21e669903bd2d437aee83f1ca0abea2adf798",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-t16-parity-0908/result.json": "c4e2eb7830da7e970c496ce1d5084f59a5a0c67459251ab0344d6767a1b980af"
+  },
+  "note": "Worker-count comparison on fixed raw Q8 prompts; repetition and broad quality are separate requirements."
+}

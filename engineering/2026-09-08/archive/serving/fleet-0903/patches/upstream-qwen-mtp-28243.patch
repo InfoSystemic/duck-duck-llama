@@ -1,0 +1,2265 @@
+From c8c3a5bfe3f353d9429a3dcdb6c863b7d35fb25a Mon Sep 17 00:00:00 2001
+From: Ryan Monsurate <ryanmonsurate@users.noreply.github.com>
+Date: Thu, 27 Aug 2026 13:28:27 -0700
+Subject: [PATCH 01/10] gguf-py : register the qwen4exp NextN tensors
+
+Adds the MTP head's own hyper-connection mixer tensor names and lists the
+NextN tensors under the qwen4exp architecture.
+---
+ gguf-py/gguf/constants.py | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/gguf-py/gguf/constants.py b/gguf-py/gguf/constants.py
+index b85f62a31145..1a730d732390 100644
+--- a/gguf-py/gguf/constants.py
++++ b/gguf-py/gguf/constants.py
+@@ -1179,6 +1179,11 @@ class MODEL_TENSOR(IntEnum):
+     NEXTN_HNORM            = auto()
+     NEXTN_SHARED_HEAD_HEAD = auto()
+     NEXTN_SHARED_HEAD_NORM = auto()
++    # qwen4exp: the MTP head's own hyper-connection mixer, which stands in for the
++    # output norm the trunk does not have
++    NEXTN_HC_HEAD_NORM     = auto()
++    NEXTN_HC_HEAD_DOWN     = auto()
++    NEXTN_HC_HEAD_UP       = auto()
+     # eagle3
+     FC                     = auto()  # feature fusion layer
+     D2T                    = auto()  # draft to target vocabulary mapping
+@@ -1960,6 +1965,9 @@ class MODEL_TENSOR(IntEnum):
+     MODEL_TENSOR.NEXTN_HNORM:               "blk.{bid}.nextn.hnorm",
+     MODEL_TENSOR.NEXTN_SHARED_HEAD_HEAD:    "blk.{bid}.nextn.shared_head_head",
+     MODEL_TENSOR.NEXTN_SHARED_HEAD_NORM:    "blk.{bid}.nextn.shared_head_norm",
++    MODEL_TENSOR.NEXTN_HC_HEAD_NORM:        "blk.{bid}.nextn.hc_head_norm",
++    MODEL_TENSOR.NEXTN_HC_HEAD_DOWN:        "blk.{bid}.nextn.hc_head_down",
++    MODEL_TENSOR.NEXTN_HC_HEAD_UP:          "blk.{bid}.nextn.hc_head_up",
+     MODEL_TENSOR.FC:                        "fc",
+     MODEL_TENSOR.DSPARK_MARKOV_W1:          "markov_w1",
+     MODEL_TENSOR.DSPARK_MARKOV_W2:          "markov_w2",
+@@ -2925,6 +2933,15 @@ class MODEL_TENSOR(IntEnum):
+         MODEL_TENSOR.PLE_NORM_QUERY,
+         MODEL_TENSOR.PLE_NORM_CONV,
+         MODEL_TENSOR.PLE_CONV1D,
++        # NextN/MTP draft head
++        MODEL_TENSOR.NEXTN_EH_PROJ,
++        MODEL_TENSOR.NEXTN_EMBED_TOKENS,
++        MODEL_TENSOR.NEXTN_ENORM,
++        MODEL_TENSOR.NEXTN_HNORM,
++        MODEL_TENSOR.NEXTN_SHARED_HEAD_HEAD,
++        MODEL_TENSOR.NEXTN_HC_HEAD_NORM,
++        MODEL_TENSOR.NEXTN_HC_HEAD_DOWN,
++        MODEL_TENSOR.NEXTN_HC_HEAD_UP,
+     ],
+     MODEL_ARCH.PLAMO: [
+         MODEL_TENSOR.TOKEN_EMBD,
+
+From 57672d973fcf2cc3cebb34a11f2097807f412bbb Mon Sep 17 00:00:00 2001
+From: Ryan Monsurate <ryanmonsurate@users.noreply.github.com>
+Date: Thu, 27 Aug 2026 13:27:49 -0700
+Subject: [PATCH 02/10] model : add the qwen4exp NextN/MTP draft head
+
+Adds --spec-type draft-mtp support for Qwen3.8-Flash-Next.
+
+The MTP head folds the next token's embedding into the trunk's wide
+hyper-connection residual, runs one trunk-style block (dense attention +
+MoE) over it, and collapses the result with its own mixer before reusing
+the trunk's LM head.
+
+- read nextn_predict_layers so n_layer() excludes the MTP block
+- load the trailing block through the existing trunk path: is_recr() and
+  is_ple() are already false past the trunk, so it needs no special casing
+- eh_proj fuses the checkpoint's fc_embedding and fc_hidden side by side,
+  so one matmul computes fc_embedding@e + fc_hidden@h
+- the head carries its own hyper-connection mixer, mirroring the trunk's
+  hc_head_*, which stands in for the output norm qwen4exp does not have
+- export the wide pre-collapse residual as t_h_nextn from both graphs, so
+  the driver can feed it back for the next draft step
+- route MTP contexts to a plain KV cache filtered to the trailing layer
+
+The draft block attends densely for now: the trunk's QSA only prunes
+context past a 2048-token budget, so dense is a numerical superset and
+drafts are verified either way. Indexer tensors are still loaded.
+---
+ src/llama-arch.cpp      |   6 +
+ src/llama-arch.h        |   5 +
+ src/llama-model.cpp     |   2 +-
+ src/llama-model.h       |   6 +
+ src/models/models.h     |  12 +-
+ src/models/qwen4exp.cpp | 329 +++++++++++++++++++++++++++++++++++-----
+ 6 files changed, 318 insertions(+), 42 deletions(-)
+
+diff --git a/src/llama-arch.cpp b/src/llama-arch.cpp
+index 446de4ae25b3..8eb4ec50d3d3 100644
+--- a/src/llama-arch.cpp
++++ b/src/llama-arch.cpp
+@@ -575,6 +575,9 @@ static const std::map<llm_tensor, const char *> LLM_TENSOR_NAMES = {
+     { LLM_TENSOR_NEXTN_HNORM,                            "blk.%d.nextn.hnorm" },
+     { LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD,                 "blk.%d.nextn.shared_head_head" },
+     { LLM_TENSOR_NEXTN_SHARED_HEAD_NORM,                 "blk.%d.nextn.shared_head_norm" },
++    { LLM_TENSOR_NEXTN_HC_HEAD_NORM,                     "blk.%d.nextn.hc_head_norm" },
++    { LLM_TENSOR_NEXTN_HC_HEAD_DOWN,                     "blk.%d.nextn.hc_head_down" },
++    { LLM_TENSOR_NEXTN_HC_HEAD_UP,                       "blk.%d.nextn.hc_head_up" },
+     { LLM_TENSOR_ATTN_SUB_NORM,                          "blk.%d.attn_sub_norm" },
+     { LLM_TENSOR_FFN_SUB_NORM,                           "blk.%d.ffn_sub_norm" },
+     { LLM_TENSOR_DEC_OUTPUT_NORM,                        "dec.output_norm" },
+@@ -964,6 +967,9 @@ static const std::map<llm_tensor, llm_tensor_info> LLM_TENSOR_INFOS = {
+     {LLM_TENSOR_NEXTN_HNORM,                {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL}},
+     {LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD,     {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL_MAT}},
+     {LLM_TENSOR_NEXTN_SHARED_HEAD_NORM,     {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL}},
++    {LLM_TENSOR_NEXTN_HC_HEAD_NORM,         {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL}},
++    {LLM_TENSOR_NEXTN_HC_HEAD_DOWN,         {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL_MAT}},
++    {LLM_TENSOR_NEXTN_HC_HEAD_UP,           {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL_MAT}},
+     // Nemotron 3 Super
+     // latent projections feed ggml_mul_mat, the buft probe must use MUL_MAT to keep them on GPU
+     {LLM_TENSOR_FFN_LATENT_DOWN,            {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL_MAT}},
+diff --git a/src/llama-arch.h b/src/llama-arch.h
+index 0c0b994836f4..30a1c2a66ffd 100644
+--- a/src/llama-arch.h
++++ b/src/llama-arch.h
+@@ -687,6 +687,11 @@ enum llm_tensor {
+     LLM_TENSOR_NEXTN_HNORM,
+     LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD,
+     LLM_TENSOR_NEXTN_SHARED_HEAD_NORM,
++    // qwen4exp: the MTP head ends in its own hyper-connection mixer rather than a
++    // plain RMSNorm, mirroring the trunk's hc_head_* (which is its output norm)
++    LLM_TENSOR_NEXTN_HC_HEAD_NORM,
++    LLM_TENSOR_NEXTN_HC_HEAD_DOWN,
++    LLM_TENSOR_NEXTN_HC_HEAD_UP,
+     LLM_TENSOR_MASKED_EMBD_CENTROIDS,
+     LLM_TENSOR_MASKED_EMBD_ORDERING,
+     LLM_TENSOR_FC,
+diff --git a/src/llama-model.cpp b/src/llama-model.cpp
+index 6344f2d8aee4..8592ce99f3b4 100644
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -2453,7 +2453,7 @@ llama_memory_i * llama_model::create_memory(const llama_memory_params & params,
+                 const bool mtp_on_hybrid_qwen =
+                     params.ctx_type == LLAMA_CONTEXT_TYPE_MTP &&
+                     (arch == LLM_ARCH_QWEN3NEXT || arch == LLM_ARCH_QWEN35 || arch == LLM_ARCH_QWEN35MOE ||
+-                     arch == LLM_ARCH_BAILINGMOE3);
++                     arch == LLM_ARCH_BAILINGMOE3 || arch == LLM_ARCH_QWEN4EXP);
+ 
+                 const bool mtp_on_hybrid_nemotron =
+                     params.ctx_type == LLAMA_CONTEXT_TYPE_MTP && arch == LLM_ARCH_NEMOTRON_H_MOE;
+diff --git a/src/llama-model.h b/src/llama-model.h
+index 4c4a30e018bc..0e13c3b435a4 100644
+--- a/src/llama-model.h
++++ b/src/llama-model.h
+@@ -228,6 +228,12 @@ struct llama_layer_nextn {
+     struct ggml_tensor * shared_head_head_s    = nullptr;
+     struct ggml_tensor * shared_head_head_in_s = nullptr;
+     struct ggml_tensor * shared_head_norm      = nullptr;
++
++    // qwen4exp: the MTP head's own final hyper-connection mixer, which stands in for both
++    // the stream collapse and the output norm (the trunk has no separate output_norm either)
++    struct ggml_tensor * hc_head_norm          = nullptr;
++    struct ggml_tensor * hc_head_down          = nullptr;
++    struct ggml_tensor * hc_head_up            = nullptr;
+ };
+ 
+ struct llama_layer_switch_lora {
+diff --git a/src/models/models.h b/src/models/models.h
+index 9b87a40d5af9..f93518943ca8 100644
+--- a/src/models/models.h
++++ b/src/models/models.h
+@@ -2285,7 +2285,12 @@ struct llama_model_qwen4exp : public llama_model_base {
+ 
+     struct graph : public llm_build_delta_net_base {
+         graph(const llama_model & model, const llm_graph_params & params);
+-    private:
++    protected:
++        // tag-dispatched ctor for graph_mtp: binds the members without building the trunk
++        struct no_build_t {};
++        graph(const llama_model & model, const llm_graph_params & params, no_build_t) :
++            llm_build_delta_net_base(params), model(model) {}
++
+         // HC replaces every layer norm: residual is [n_embd, hc, n_tokens]
+         ggml_tensor * build_hc_mix(
+                     ggml_tensor * x,
+@@ -2377,6 +2382,11 @@ struct llama_model_qwen4exp : public llama_model_base {
+         const llama_model & model;
+     };
+ 
++    // LLM_GRAPH_TYPE_DECODER_MTP draft head: one HC-wrapped dense-attention + MoE block
++    struct graph_mtp : public graph {
++        graph_mtp(const llama_model & model, const llm_graph_params & params);
++    };
++
+     std::unique_ptr<llm_graph_context> build_arch_graph(const llm_graph_params & params) const override;
+ };
+ 
+diff --git a/src/models/qwen4exp.cpp b/src/models/qwen4exp.cpp
+index 1484c9b07bda..2d60b7db8862 100644
+--- a/src/models/qwen4exp.cpp
++++ b/src/models/qwen4exp.cpp
+@@ -24,6 +24,11 @@ static void qwen4exp_require_arr_len(llama_model_loader & ml, llm_kv kid, uint32
+ }
+ 
+ void llama_model_qwen4exp::load_arch_hparams(llama_model_loader & ml) {
++    // NextN/MTP: an extra decoder block appended past the trunk. Read this first, since
++    // n_layer() == n_layer_all - n_layer_nextn feeds every per-layer array below.
++    ml.get_key(LLM_KV_NEXTN_PREDICT_LAYERS, hparams.n_layer_nextn, false);
++    GGML_ASSERT(hparams.n_layer_nextn < hparams.n_layer_all && "n_layer_nextn must be < block_count");
++
+     ml.get_key_or_arr(LLM_KV_EXPERT_FEED_FORWARD_LENGTH, hparams.n_ff_exp_arr, hparams.n_layer_all, false);
+     ml.get_key(LLM_KV_EXPERT_SHARED_FEED_FORWARD_LENGTH, hparams.n_ff_shexp, false);
+     ml.get_key(LLM_KV_ATTENTION_LAYERNORM_RMS_EPS,       hparams.f_norm_rms_eps);
+@@ -188,9 +193,16 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+                                            { hparams.ple_head_dim, ple_rows }, TENSOR_READ_LAZY);
+     }
+ 
+-    for (int il = 0; il < n_layer; ++il) {
++    // MTP tensors sit in the trailing blocks; skip them entirely unless a draft head was asked for
++    const int mtp_flags = !ml.load_mtp ? TENSOR_SKIP : 0;
++
++    for (int il = 0; il < (int) hparams.n_layer_all; ++il) {
+         auto & layer = layers[il];
+ 
++        // the MTP block is structurally a trunk block: is_recr()/is_ple() are both false past
++        // the trunk, so it takes the full-attention + MoE path below with no special casing
++        const int flags = il < n_layer ? 0 : mtp_flags;
++
+         const int64_t n_ff_exp   = hparams.n_ff_exp() ? hparams.n_ff_exp() : n_ff / n_expert_used;
+         const int64_t n_ff_shexp = hparams.n_ff_shexp ? hparams.n_ff_shexp : n_ff;
+ 
+@@ -203,61 +215,86 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+         const int64_t conv_dim   = key_dim * 2 + value_dim;
+ 
+         // two HC modules per layer: before the token mixer, before the MoE
+-        layer.hc_attn_norm   = create_tensor(tn(LLM_TENSOR_HC_ATTN_NORM,   "weight", il), { hc_dim }, 0);
+-        layer.hc_attn_down   = create_tensor(tn(LLM_TENSOR_HC_ATTN_DOWN,   "weight", il), { hc_dim, hc_lr }, 0);
+-        layer.hc_attn_up     = create_tensor(tn(LLM_TENSOR_HC_ATTN_UP,     "weight", il), { hc_lr, hc_dim }, 0);
+-        layer.hc_attn_inject = create_tensor(tn(LLM_TENSOR_HC_ATTN_INJECT, "weight", il), { hc_dim, hc }, 0);
+-        layer.hc_ffn_norm    = create_tensor(tn(LLM_TENSOR_HC_FFN_NORM,    "weight", il), { hc_dim }, 0);
+-        layer.hc_ffn_down    = create_tensor(tn(LLM_TENSOR_HC_FFN_DOWN,    "weight", il), { hc_dim, hc_lr }, 0);
+-        layer.hc_ffn_up      = create_tensor(tn(LLM_TENSOR_HC_FFN_UP,      "weight", il), { hc_lr, hc_dim }, 0);
+-        layer.hc_ffn_inject  = create_tensor(tn(LLM_TENSOR_HC_FFN_INJECT,  "weight", il), { hc_dim, hc }, 0);
++        layer.hc_attn_norm   = create_tensor(tn(LLM_TENSOR_HC_ATTN_NORM,   "weight", il), { hc_dim }, flags);
++        layer.hc_attn_down   = create_tensor(tn(LLM_TENSOR_HC_ATTN_DOWN,   "weight", il), { hc_dim, hc_lr }, flags);
++        layer.hc_attn_up     = create_tensor(tn(LLM_TENSOR_HC_ATTN_UP,     "weight", il), { hc_lr, hc_dim }, flags);
++        layer.hc_attn_inject = create_tensor(tn(LLM_TENSOR_HC_ATTN_INJECT, "weight", il), { hc_dim, hc }, flags);
++        layer.hc_ffn_norm    = create_tensor(tn(LLM_TENSOR_HC_FFN_NORM,    "weight", il), { hc_dim }, flags);
++        layer.hc_ffn_down    = create_tensor(tn(LLM_TENSOR_HC_FFN_DOWN,    "weight", il), { hc_dim, hc_lr }, flags);
++        layer.hc_ffn_up      = create_tensor(tn(LLM_TENSOR_HC_FFN_UP,      "weight", il), { hc_lr, hc_dim }, flags);
++        layer.hc_ffn_inject  = create_tensor(tn(LLM_TENSOR_HC_FFN_INJECT,  "weight", il), { hc_dim, hc }, flags);
+ 
+         if (!hparams.is_recr(il)) {
+             // full attention: wq holds [q|gate] interleaved per head
+-            create_tensor_qkv(layer, il, n_embd, n_embd_head_k * n_head * 2, n_embd_k_gqa, n_embd_v_gqa, 0);
+-            layer.wo = create_tensor(tn(LLM_TENSOR_ATTN_OUT, "weight", il), { n_embd_head_k * n_head, n_embd }, 0);
++            create_tensor_qkv(layer, il, n_embd, n_embd_head_k * n_head * 2, n_embd_k_gqa, n_embd_v_gqa, flags);
++            layer.wo = create_tensor(tn(LLM_TENSOR_ATTN_OUT, "weight", il), { n_embd_head_k * n_head, n_embd }, flags);
+ 
+-            layer.attn_q_norm = create_tensor(tn(LLM_TENSOR_ATTN_Q_NORM, "weight", il), { n_embd_head_k }, 0);
+-            layer.attn_k_norm = create_tensor(tn(LLM_TENSOR_ATTN_K_NORM, "weight", il), { n_embd_head_k }, 0);
++            layer.attn_q_norm = create_tensor(tn(LLM_TENSOR_ATTN_Q_NORM, "weight", il), { n_embd_head_k }, flags);
++            layer.attn_k_norm = create_tensor(tn(LLM_TENSOR_ATTN_K_NORM, "weight", il), { n_embd_head_k }, flags);
+ 
+             const int64_t idx_dim = hparams.indexer_head_size;
+-            layer.index_q_proj = create_tensor(tn(LLM_TENSOR_INDEXER_Q_PROJ, "weight", il), { n_embd, hparams.indexer_n_head * idx_dim }, 0);
+-            layer.index_k_proj = create_tensor(tn(LLM_TENSOR_INDEXER_K_PROJ, "weight", il), { n_embd, idx_dim }, 0);
+-            layer.index_q_norm = create_tensor(tn(LLM_TENSOR_INDEXER_Q_NORM, "weight", il), { idx_dim }, 0);
+-            layer.index_k_norm = create_tensor(tn(LLM_TENSOR_INDEXER_K_NORM, "weight", il), { idx_dim }, 0);
++            layer.index_q_proj = create_tensor(tn(LLM_TENSOR_INDEXER_Q_PROJ, "weight", il), { n_embd, hparams.indexer_n_head * idx_dim }, flags);
++            layer.index_k_proj = create_tensor(tn(LLM_TENSOR_INDEXER_K_PROJ, "weight", il), { n_embd, idx_dim }, flags);
++            layer.index_q_norm = create_tensor(tn(LLM_TENSOR_INDEXER_Q_NORM, "weight", il), { idx_dim }, flags);
++            layer.index_k_norm = create_tensor(tn(LLM_TENSOR_INDEXER_K_NORM, "weight", il), { idx_dim }, flags);
+         } else {
+-            layer.wqkv       = create_tensor(tn(LLM_TENSOR_ATTN_QKV,   "weight", il), { n_embd, key_dim * 2 + value_dim }, 0);
+-            layer.wqkv_gate  = create_tensor(tn(LLM_TENSOR_ATTN_GATE,  "weight", il), { n_embd, value_dim }, 0);
+-            layer.ssm_conv1d = create_tensor(tn(LLM_TENSOR_SSM_CONV1D, "weight", il), { hparams.ssm_d_conv, conv_dim }, 0);
+-            layer.ssm_dt     = create_tensor(tn(LLM_TENSOR_SSM_DT,     "bias",   il), { hparams.ssm_dt_rank }, 0);
+-            layer.ssm_a      = create_tensor(tn(LLM_TENSOR_SSM_A_NOSCAN,         il), { hparams.ssm_dt_rank }, 0);
+-            layer.ssm_beta   = create_tensor(tn(LLM_TENSOR_SSM_BETA,   "weight", il), { n_embd, n_v_heads }, 0);
+-            layer.ssm_alpha  = create_tensor(tn(LLM_TENSOR_SSM_ALPHA,  "weight", il), { n_embd, n_v_heads }, 0);
+-            layer.ssm_norm   = create_tensor(tn(LLM_TENSOR_SSM_NORM,   "weight", il), { head_v_dim }, 0);
+-            layer.ssm_out    = create_tensor(tn(LLM_TENSOR_SSM_OUT,    "weight", il), { value_dim, n_embd }, 0);
++            layer.wqkv       = create_tensor(tn(LLM_TENSOR_ATTN_QKV,   "weight", il), { n_embd, key_dim * 2 + value_dim }, flags);
++            layer.wqkv_gate  = create_tensor(tn(LLM_TENSOR_ATTN_GATE,  "weight", il), { n_embd, value_dim }, flags);
++            layer.ssm_conv1d = create_tensor(tn(LLM_TENSOR_SSM_CONV1D, "weight", il), { hparams.ssm_d_conv, conv_dim }, flags);
++            layer.ssm_dt     = create_tensor(tn(LLM_TENSOR_SSM_DT,     "bias",   il), { hparams.ssm_dt_rank }, flags);
++            layer.ssm_a      = create_tensor(tn(LLM_TENSOR_SSM_A_NOSCAN,         il), { hparams.ssm_dt_rank }, flags);
++            layer.ssm_beta   = create_tensor(tn(LLM_TENSOR_SSM_BETA,   "weight", il), { n_embd, n_v_heads }, flags);
++            layer.ssm_alpha  = create_tensor(tn(LLM_TENSOR_SSM_ALPHA,  "weight", il), { n_embd, n_v_heads }, flags);
++            layer.ssm_norm   = create_tensor(tn(LLM_TENSOR_SSM_NORM,   "weight", il), { head_v_dim }, flags);
++            layer.ssm_out    = create_tensor(tn(LLM_TENSOR_SSM_OUT,    "weight", il), { value_dim, n_embd }, flags);
+         }
+ 
+         if (hparams.is_ple(il)) {
+-            layer.ple_key        = create_tensor(tn(LLM_TENSOR_PLE_KEY,        "weight", il), { n_embd, hc_dim }, 0);
+-            layer.ple_value      = create_tensor(tn(LLM_TENSOR_PLE_VALUE,      "weight", il), { n_embd, n_embd }, 0);
+-            layer.ple_norm_key   = create_tensor(tn(LLM_TENSOR_PLE_NORM_KEY,   "weight", il), { hc_dim }, 0);
+-            layer.ple_norm_query = create_tensor(tn(LLM_TENSOR_PLE_NORM_QUERY, "weight", il), { hc_dim }, 0);
+-            layer.ple_norm_conv  = create_tensor(tn(LLM_TENSOR_PLE_NORM_CONV,  "weight", il), { hc_dim }, 0);
+-            layer.ple_conv1d     = create_tensor(tn(LLM_TENSOR_PLE_CONV1D,     "weight", il), { hparams.ple_conv_kernel, hc_dim }, 0);
++            layer.ple_key        = create_tensor(tn(LLM_TENSOR_PLE_KEY,        "weight", il), { n_embd, hc_dim }, flags);
++            layer.ple_value      = create_tensor(tn(LLM_TENSOR_PLE_VALUE,      "weight", il), { n_embd, n_embd }, flags);
++            layer.ple_norm_key   = create_tensor(tn(LLM_TENSOR_PLE_NORM_KEY,   "weight", il), { hc_dim }, flags);
++            layer.ple_norm_query = create_tensor(tn(LLM_TENSOR_PLE_NORM_QUERY, "weight", il), { hc_dim }, flags);
++            layer.ple_norm_conv  = create_tensor(tn(LLM_TENSOR_PLE_NORM_CONV,  "weight", il), { hc_dim }, flags);
++            layer.ple_conv1d     = create_tensor(tn(LLM_TENSOR_PLE_CONV1D,     "weight", il), { hparams.ple_conv_kernel, hc_dim }, flags);
+         }
+ 
+-        layer.ffn_gate_inp  = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP,  "weight", il), { n_embd, n_expert }, 0);
+-        layer.ffn_down_exps = create_tensor(tn(LLM_TENSOR_FFN_DOWN_EXPS, "weight", il), { n_ff_exp, n_embd, n_expert }, 0);
+-        create_tensor_gate_up_exps(layer, il, n_embd, n_ff_exp, n_expert, 0);
++        layer.ffn_gate_inp  = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP,  "weight", il), { n_embd, n_expert }, flags);
++        layer.ffn_down_exps = create_tensor(tn(LLM_TENSOR_FFN_DOWN_EXPS, "weight", il), { n_ff_exp, n_embd, n_expert }, flags);
++        create_tensor_gate_up_exps(layer, il, n_embd, n_ff_exp, n_expert, flags);
++
++        layer.ffn_gate_inp_shexp = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP_SHEXP, "weight", il), { n_embd }, flags);
++        layer.ffn_gate_shexp     = create_tensor(tn(LLM_TENSOR_FFN_GATE_SHEXP,     "weight", il), { n_embd, n_ff_shexp }, flags);
++        layer.ffn_up_shexp       = create_tensor(tn(LLM_TENSOR_FFN_UP_SHEXP,       "weight", il), { n_embd, n_ff_shexp }, flags);
++        layer.ffn_down_shexp     = create_tensor(tn(LLM_TENSOR_FFN_DOWN_SHEXP,     "weight", il), { n_ff_shexp, n_embd }, flags);
+ 
+-        layer.ffn_gate_inp_shexp = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP_SHEXP, "weight", il), { n_embd }, 0);
+-        layer.ffn_gate_shexp     = create_tensor(tn(LLM_TENSOR_FFN_GATE_SHEXP,     "weight", il), { n_embd, n_ff_shexp }, 0);
+-        layer.ffn_up_shexp       = create_tensor(tn(LLM_TENSOR_FFN_UP_SHEXP,       "weight", il), { n_embd, n_ff_shexp }, 0);
+-        layer.ffn_down_shexp     = create_tensor(tn(LLM_TENSOR_FFN_DOWN_SHEXP,     "weight", il), { n_ff_shexp, n_embd }, 0);
++        if (il < n_layer) {
++            continue;
++        }
++
++        // NextN/MTP head. enorm/hnorm gate the two inputs; eh_proj is the checkpoint's
++        // fc_embedding and fc_hidden fused side by side, so one matmul over
++        // concat(e, h) computes fc_embedding@e + fc_hidden@h.
++        layer.nextn.enorm   = create_tensor(tn(LLM_TENSOR_NEXTN_ENORM,   "weight", il), { n_embd }, flags);
++        layer.nextn.hnorm   = create_tensor(tn(LLM_TENSOR_NEXTN_HNORM,   "weight", il), { hc_dim }, flags);
++        layer.nextn.eh_proj = create_tensor(tn(LLM_TENSOR_NEXTN_EH_PROJ, "weight", il), { 2 * n_embd, n_embd }, flags);
++
++        // the head's own output mixer, mirroring the trunk's hc_head_*: it collapses the
++        // hc streams and stands in for the output norm, of which qwen4exp has none
++        layer.nextn.hc_head_norm = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_NORM, "weight", il), { hc_dim }, flags);
++        layer.nextn.hc_head_down = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_DOWN, "weight", il), { hc_dim, hc_lr }, flags);
++        layer.nextn.hc_head_up   = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_UP,   "weight", il), { hc_lr, hc_dim }, flags);
++
++        // qwen4exp sets mtp_use_dedicated_embeddings=false, so these are absent and the
++        // head falls back to the trunk's embedding table and LM head
++        layer.nextn.embed_tokens     = create_tensor(tn(LLM_TENSOR_NEXTN_EMBED_TOKENS,     "weight", il), { n_embd, n_vocab }, flags | TENSOR_NOT_REQUIRED);
++        layer.nextn.shared_head_head = create_tensor(tn(LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD, "weight", il), { n_embd, n_vocab }, flags | TENSOR_NOT_REQUIRED);
+     }
+ }
+ 
+ std::unique_ptr<llm_graph_context> llama_model_qwen4exp::build_arch_graph(const llm_graph_params & params) const {
++    if (params.gtype == LLM_GRAPH_TYPE_DECODER_MTP) {
++        return std::make_unique<graph_mtp>(*this, params);
++    }
+     return std::make_unique<graph>(*this, params);
+ }
+ 
+@@ -397,7 +434,11 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+             cur = build_layer_attn(inp->get_attn(), mctx_hyb, cur, inp_pos, sections, il);
+         }
+ 
+-        if (il == n_layer - 1 && inp_out_ids) {
++        // an unmasked MTP export needs a hidden row for every token, so in that case the
++        // gather is deferred until after t_h_nextn is taken below
++        const bool gather_now = !cparams.embeddings_nextn || cparams.embeddings_nextn_masked;
++
++        if (il == n_layer - 1 && inp_out_ids && gather_now) {
+             // everything below is per token, so drop the rows that produce no output
+             cur    = ggml_get_rows(ctx0, cur,    inp_out_ids);
+             inject = ggml_get_rows(ctx0, inject, inp_out_ids);
+@@ -425,6 +466,23 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+         cb(res_hc, "l_last", il);
+     }
+ 
++    // The MTP head consumes the wide residual, before the head mixer collapses it. Export the
++    // combine result itself rather than a reshape of it: a pure view gets no backend assignment
++    // from the scheduler, and the readback in llama_context looks one up. It is contiguous, so
++    // [n_embd, hc, rows] already has the [n_embd_out, rows] layout the reader expects, and it
++    // carries exactly the right rows either way -- gathered above when masked, ungathered when not.
++    if (cparams.embeddings_nextn) {
++        cb(res_hc, "h_nextn", -1);
++        res->t_h_nextn = res_hc;
++
++        // deferred from the last layer: collapse to the output rows now that the export is taken
++        if (!cparams.embeddings_nextn_masked && inp_out_ids) {
++            res_hc = ggml_reshape_2d(ctx0, res_hc, n_embd*hc, res_hc->ne[2]);
++            res_hc = ggml_get_rows(ctx0, res_hc, inp_out_ids);
++            res_hc = ggml_reshape_3d(ctx0, res_hc, n_embd, hc, res_hc->ne[1]);
++        }
++    }
++
+     // the final mixer is the output norm: there is no separate one
+     ggml_tensor * cur = build_hc_mix(res_hc,
+             model.hc_head_norm, model.hc_head_down, model.hc_head_up,
+@@ -440,6 +498,197 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+     ggml_build_forward_expand(gf, cur);
+ }
+ 
++// LLM_GRAPH_TYPE_DECODER_MTP draft head for qwen4exp.
++//
++// The head folds the next token's embedding into the trunk's wide hyper-connection residual,
++// runs one trunk-style block over it, and collapses the result with its own mixer before
++// reusing the trunk's LM head. The wide post-block residual is exported as t_h_nextn so the
++// speculative driver can feed it straight back in for the next draft step.
++//
++// v1 simplification: the block attends densely. The trunk's QSA only prunes context past a
++// 2048-token budget, so dense is a numerical superset; drafts are verified by the target
++// either way. The indexer tensors are still loaded so the GGUF stays complete.
++// TODO: wire up QSA here for long-context draft fidelity.
++llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_graph_params & params) :
++    graph(model, params, no_build_t{}) {
++    GGML_ASSERT(hparams.n_layer_nextn > 0 && "QWEN4EXP MTP requires n_layer_nextn > 0");
++    GGML_ASSERT(hparams.n_layer_nextn == 1 && "QWEN4EXP MTP currently only supports a single MTP block");
++    GGML_ASSERT(ubatch.token && "QWEN4EXP MTP requires token input");
++
++    const int64_t hc     = hparams.dsv4_hc_mult;
++    const int64_t hc_dim = hc * n_embd;
++    GGML_ASSERT(hparams.n_embd_out() == (uint32_t) hc_dim && "QWEN4EXP MTP hidden width mismatch");
++
++    const int il = hparams.n_layer();
++    const auto & layer = model.layers[il];
++
++    GGML_ASSERT(layer.nextn.eh_proj     && "MTP block missing nextn.eh_proj");
++    GGML_ASSERT(layer.nextn.enorm       && "MTP block missing nextn.enorm");
++    GGML_ASSERT(layer.nextn.hnorm       && "MTP block missing nextn.hnorm");
++    GGML_ASSERT(layer.nextn.hc_head_norm && "MTP block missing nextn.hc_head_norm");
++
++    int sections[4];
++    std::copy(std::begin(hparams.rope_sections), std::begin(hparams.rope_sections) + 4, sections);
++
++    auto inp = std::make_unique<llm_graph_input_embd_h>(hc_dim);
++
++    inp->tokens = ggml_new_tensor_1d(ctx0, GGML_TYPE_I32, n_tokens);
++    ggml_set_input(inp->tokens);
++
++    inp->embd = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, hc_dim, n_tokens);
++    ggml_set_input(inp->embd);
++
++    inp->h = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, hc_dim, n_tokens);
++    ggml_set_input(inp->h);
++    ggml_set_name(inp->h, "mtp_h_input");
++
++    ggml_tensor * tok_embd_w = layer.nextn.embed_tokens ? layer.nextn.embed_tokens : model.tok_embd;
++    ggml_tensor * tok_embd   = ggml_get_rows(ctx0, tok_embd_w, inp->tokens);
++    cb(tok_embd, "mtp_tok_embd", il);
++
++    ggml_tensor * h_state = ggml_reshape_3d(ctx0, inp->h, n_embd, hc, n_tokens);
++    cb(h_state, "mtp_h_state", il);
++
++    res->add_input(std::move(inp));
++
++    ggml_tensor * inp_pos     = build_inp_pos();
++    ggml_tensor * inp_out_ids = build_inp_out_ids();
++
++    auto * inp_attn = build_attn_inp_kv();
++
++    // grouped RMSNorm over the wide stream: normalise each hc stream, then scale the flattened
++    // [hc_dim] vector with the head's gamma, exactly as build_hc_mix does
++    ggml_tensor * h_norm = ggml_rms_norm(ctx0, h_state, hparams.f_norm_rms_eps);
++    h_norm = ggml_reshape_2d(ctx0, h_norm, hc_dim, n_tokens);
++    h_norm = ggml_mul(ctx0, h_norm, layer.nextn.hnorm);
++    h_norm = ggml_reshape_3d(ctx0, h_norm, n_embd, hc, n_tokens);
++    cb(h_norm, "mtp_hnorm", il);
++
++    // the token embedding is shared across the streams, so broadcast it to hc copies
++    ggml_tensor * e_norm = build_norm(tok_embd, layer.nextn.enorm, nullptr, LLM_NORM_RMS, il);
++    e_norm = ggml_repeat_4d(ctx0,
++            ggml_reshape_3d(ctx0, e_norm, n_embd, 1, n_tokens),
++            n_embd, hc, n_tokens, 1);
++    cb(e_norm, "mtp_enorm", il);
++
++    // eh_proj holds fc_embedding and fc_hidden side by side, so this one matmul is
++    // fc_embedding @ e_norm + fc_hidden @ h_norm, applied to each stream independently.
++    // Keeping the streams distinct here is the point of the hyper-connection residual:
++    // pooling them before the projection would throw that away.
++    ggml_tensor * concat = ggml_concat(ctx0, e_norm, h_norm, /*dim=*/ 0);
++    cb(concat, "mtp_concat", il);
++
++    ggml_tensor * res_hc = build_lora_mm(layer.nextn.eh_proj, concat, layer.nextn.eh_proj_s);
++    cb(res_hc, "mtp_eh_proj", il);
++
++    ggml_tensor * inject = nullptr;
++    ggml_tensor * cur = build_hc_mix(res_hc,
++            layer.hc_attn_norm, layer.hc_attn_down, layer.hc_attn_up, layer.hc_attn_inject,
++            &inject, il);
++    cb(cur, "mtp_hc_attn_pre", il);
++
++    // ---- dense attention, mirroring the trunk's full-attention branch ----
++    const int64_t n_embd_head = hparams.n_embd_head_v();
++    GGML_ASSERT(n_embd_head == hparams.n_embd_head_k());
++
++    ggml_tensor * Qcur_full = build_lora_mm(layer.wq, cur, layer.wq_s);
++    cb(Qcur_full, "mtp_Qcur_full", il);
++
++    ggml_tensor * Qcur = ggml_view_3d(ctx0, Qcur_full, n_embd_head, n_head, n_tokens,
++        ggml_element_size(Qcur_full) * n_embd_head * 2,
++        ggml_element_size(Qcur_full) * n_embd_head * 2 * n_head, 0);
++    Qcur = build_norm(Qcur, layer.attn_q_norm, nullptr, LLM_NORM_RMS, il);
++    cb(Qcur, "mtp_Qcur_normed", il);
++
++    ggml_tensor * gate = ggml_view_3d(ctx0, Qcur_full, n_embd_head, n_head, n_tokens,
++        ggml_element_size(Qcur_full) * n_embd_head * 2,
++        ggml_element_size(Qcur_full) * n_embd_head * 2 * n_head,
++        ggml_element_size(Qcur_full) * n_embd_head);
++    gate = ggml_cont_2d(ctx0, gate, n_embd_head * n_head, n_tokens);
++    cb(gate, "mtp_gate", il);
++
++    ggml_tensor * Kcur = build_lora_mm(layer.wk, cur, layer.wk_s);
++    Kcur = ggml_reshape_3d(ctx0, Kcur, n_embd_head, n_head_kv, n_tokens);
++    Kcur = build_norm(Kcur, layer.attn_k_norm, nullptr, LLM_NORM_RMS, il);
++    cb(Kcur, "mtp_Kcur_normed", il);
++
++    ggml_tensor * Vcur = build_lora_mm(layer.wv, cur, layer.wv_s);
++    Vcur = ggml_reshape_3d(ctx0, Vcur, n_embd_head, n_head_kv, n_tokens);
++    cb(Vcur, "mtp_Vcur", il);
++
++    // IMRoPE, same convention and freq_base as the trunk
++    Qcur = ggml_rope_multi(ctx0, Qcur, inp_pos, nullptr,
++            n_rot, sections, rope_type, n_ctx_orig, freq_base, freq_scale,
++            ext_factor, attn_factor, beta_fast, beta_slow);
++    Kcur = ggml_rope_multi(ctx0, Kcur, inp_pos, nullptr,
++            n_rot, sections, rope_type, n_ctx_orig, freq_base, freq_scale,
++            ext_factor, attn_factor, beta_fast, beta_slow);
++    cb(Qcur, "mtp_Qcur", il);
++    cb(Kcur, "mtp_Kcur", il);
++
++    const float kq_scale = hparams.f_attention_scale == 0.0f
++            ? 1.0f / sqrtf(float(n_embd_head)) : hparams.f_attention_scale;
++
++    cur = build_attn(inp_attn,
++            nullptr, nullptr, nullptr,
++            Qcur, Kcur, Vcur, nullptr, nullptr, nullptr, kq_scale, il);
++    cb(cur, "mtp_attn_pregate", il);
++
++    cur = ggml_mul(ctx0, cur, ggml_sigmoid(ctx0, gate));
++    cb(cur, "mtp_attn_gated", il);
++
++    cur = build_lora_mm(layer.wo, cur, layer.wo_s);
++    cb(cur, "mtp_attn_out", il);
++
++    if (inp_out_ids) {
++        cur    = ggml_get_rows(ctx0, cur,    inp_out_ids);
++        inject = ggml_get_rows(ctx0, inject, inp_out_ids);
++
++        res_hc = ggml_reshape_2d(ctx0, res_hc, hc_dim, res_hc->ne[2]);
++        res_hc = ggml_get_rows(ctx0, res_hc, inp_out_ids);
++        res_hc = ggml_reshape_3d(ctx0, res_hc, n_embd, hc, res_hc->ne[1]);
++    }
++
++    res_hc = build_hc_combine(res_hc, cur, inject, il);
++    cb(res_hc, "mtp_hc_attn_post", il);
++
++    // ---- MoE, identical to the trunk's build_layer_ffn ----
++    cur = build_hc_mix(res_hc,
++            layer.hc_ffn_norm, layer.hc_ffn_down, layer.hc_ffn_up, layer.hc_ffn_inject,
++            &inject, il);
++    cb(cur, "mtp_hc_ffn_pre", il);
++
++    cur = build_layer_ffn(cur, il);
++    cb(cur, "mtp_ffn_out", il);
++
++    res_hc = build_hc_combine(res_hc, cur, inject, il);
++    cb(res_hc, "mtp_hc_ffn_post", il);
++
++    // The next draft step re-enters here, so export the wide stream before it is collapsed.
++    // As in the trunk, export the combine result rather than a reshape view of it.
++    cb(res_hc, "h_nextn", -1);
++    res->t_h_nextn = res_hc;
++
++    // the head's own mixer collapses the streams and doubles as the output norm
++    cur = build_hc_mix(res_hc,
++            layer.nextn.hc_head_norm, layer.nextn.hc_head_down, layer.nextn.hc_head_up,
++            nullptr, nullptr, -1);
++    cb(cur, "mtp_hc_head", -1);
++
++    // deliberately no res->t_embd: it would be n_embd wide while the context sizes its
++    // embedding buffer by n_embd_out (the wide stream). The driver reads t_h_nextn instead.
++
++    ggml_tensor * head_w = layer.nextn.shared_head_head ? layer.nextn.shared_head_head : model.output;
++    ggml_tensor * head_s = layer.nextn.shared_head_head ? layer.nextn.shared_head_head_s : model.output_s;
++    GGML_ASSERT(head_w && "QWEN4EXP MTP: missing LM head (nextn.shared_head_head or model.output)");
++
++    cur = build_lora_mm(head_w, cur, head_s);
++    cb(cur, "result_output", -1);
++    res->t_logits = cur;
++
++    ggml_build_forward_expand(gf, cur);
++}
++
+ std::pair<ggml_tensor *, ggml_tensor *> llama_model_qwen4exp::graph::build_qkvz(
+                 ggml_tensor * input,
+                         int   il) {
+
+From 84f9558855e1fc8f0f928f83127c342916a1cdbb Mon Sep 17 00:00:00 2001
+From: Ryan Monsurate <ryanmonsurate@users.noreply.github.com>
+Date: Thu, 27 Aug 2026 16:20:54 -0700
+Subject: [PATCH 03/10] convert : export the qwen4exp NextN/MTP draft head
+
+The MTP block is one trunk-shaped block (dense attention + MoE wrapped in
+hyper-connections) plus a head-level combiner, so once _QwenMtpMixin renames
+mtp.layers.0.* to the trailing block index its tensors ride the existing
+qwen4exp mappings unchanged. Two head-level pieces need handling:
+
+- fc_embedding and fc_hidden fuse into the eh_proj the shared NextN code
+  expects, since W_e@e + W_h@h == [W_e|W_h] @ concat(e, h)
+- mtp.hyper_connection_mixer.* is the head's own copy of the trunk's
+  hc_head_* output mixer, unindexed in the checkpoint and per-block in the
+  GGUF
+
+compress_ratios is read with length block_count, so it gains a trailing 0
+for the MTP block, which attends densely.
+
+--no-nextn drops the head; --mtp exports it on its own.
+---
+ conversion/qwen4exp.py         | 68 +++++++++++++++++++++++++++++-----
+ gguf-py/gguf/tensor_mapping.py | 10 +++++
+ 2 files changed, 68 insertions(+), 10 deletions(-)
+
+diff --git a/conversion/qwen4exp.py b/conversion/qwen4exp.py
+index 168796d616b9..5de299346056 100644
+--- a/conversion/qwen4exp.py
++++ b/conversion/qwen4exp.py
+@@ -1,6 +1,6 @@
+ from __future__ import annotations
+ 
+-from typing import Iterable, cast
++from typing import Callable, Iterable, cast
+ 
+ import torch
+ from torch import Tensor
+@@ -21,20 +21,64 @@ class Qwen4ExpTextModel(_Qwen35MRopeMixin, _LinearAttentionVReorderBase):
+     Shares the Qwen3.5 gated delta net and interleaved mrope, and adds three things:
+     hyper-connections in place of every layer norm, QSA sparse attention on the full
+     attention layers, and PLE n-gram hash embeddings on a single layer.
++
++    The checkpoint also carries a NextN/MTP draft head under `mtp.*`, exported as a
++    trailing block; pass --no-nextn to leave it out.
+     """
+ 
+     model_arch = gguf.MODEL_ARCH.QWEN4EXP
+ 
+-    # the MTP block is a separate draft head; vLLM drops it too
+-    supports_mtp_export = False
+-    no_mtp = True
+-
+     def __init__(self, *args, **kwargs):
+         super().__init__(*args, **kwargs)
+         # only the shard names, so the table itself is never held
+         self._ple_shards: dict[int, str] = {}
+         self._ple_row_dim: int | None = None
+ 
++    # The MTP head is one trunk-shaped block (dense attention + MoE, wrapped in
++    # hyper-connections) plus a combiner, so once _QwenMtpMixin renames
++    # `mtp.layers.0.*` to the trailing block index its tensors ride the existing
++    # qwen4exp mappings unchanged. Only the two head-level pieces below differ.
++
++    _MTP_MIXER_PREFIX = "mtp.hyper_connection_mixer."
++
++    @classmethod
++    def filter_tensors(cls, item):
++        # the head carries its own copy of the trunk's hc_head_* output mixer,
++        # which qwen4exp has in place of a final norm; it is unindexed in the
++        # checkpoint and per-block in the GGUF
++        name, gen = item
++        if name.startswith("model." + cls._MTP_MIXER_PREFIX):
++            name = name.replace("model.", "", 1)
++        if name.startswith(cls._MTP_MIXER_PREFIX):
++            if cls.no_mtp:
++                return None
++            assert cls._original_block_count is not None
++            return f"model.layers.{cls._original_block_count}.{name[len('mtp.'):]}", gen
++        return super().filter_tensors((name, gen))
++
++    def index_tensors(self, remote_hf_model_id: str | None = None) -> dict[str, Callable[[], Tensor]]:
++        # qwen4exp splits the combiner the shared NextN code calls eh_proj into
++        # fc_embedding and fc_hidden; W_e@e + W_h@h == [W_e|W_h] @ concat(e, h),
++        # so the two fuse back into the single expected matmul
++        tensors = super().index_tensors(remote_hf_model_id=remote_hf_model_id)
++
++        emb = tensors.pop("mtp.fc_embedding.weight", None)
++        hid = tensors.pop("mtp.fc_hidden.weight", None)
++        if emb is None and hid is None:
++            return tensors
++        if emb is None or hid is None:
++            raise ValueError(
++                "the qwen4exp MTP combiner needs both mtp.fc_embedding.weight and "
++                "mtp.fc_hidden.weight; pass --no-nextn to convert without the draft head"
++            )
++
++        assert self._original_block_count is not None
++        # fc_embedding first: the graph concatenates the token embedding ahead of
++        # the hidden state, so the fused weight has to be ordered to match
++        name = f"model.layers.{self._original_block_count}.eh_proj.weight"
++        tensors[name] = lambda: torch.cat([emb(), hid()], dim=1)
++        return tensors
++
+     def _read_hash_constants(self, suffix: str) -> list[int]:
+         """Read an int64 PLE constant straight from the checkpoint.
+ 
+@@ -63,14 +107,18 @@ def set_gguf_parameters(self):
+         self.gguf_writer.add_indexer_top_k(hp["indexer_budget"])
+         ratio = hp["indexer_compress_ratio"]
+         layer_types = hp["layer_types"]
+-        self.gguf_writer.add_attention_compress_ratios(
+-            [ratio if layer_types[i] == "full_attention" else 0 for i in range(n_layer)]
+-        )
++        ratios = [ratio if layer_types[i] == "full_attention" else 0 for i in range(n_layer)]
++        # llama.cpp reads this array with length block_count, and the MTP blocks
++        # trailing the trunk attend densely, which is what a ratio of 0 selects
++        ratios += [0] * (self.block_count - n_layer)
++        self.gguf_writer.add_attention_compress_ratios(ratios)
+ 
+         # ple_layer_ids is 1-based in the HF config; empty means no n-gram table,
+-        # so emit no PLE keys rather than optional ones
++        # so emit no PLE keys rather than optional ones.
++        # a draft-only export carries no trunk tensors, so it carries no PLE table
++        # to describe either
+         ple_layers = [i - 1 for i in hp["ple_layer_ids"]]
+-        if not ple_layers:
++        if not ple_layers or self.mtp_only:
+             return
+         self.gguf_writer.add_ple_layers(ple_layers)
+         self.gguf_writer.add_ple_ngram_size(hp["ngram_size"])
+diff --git a/gguf-py/gguf/tensor_mapping.py b/gguf-py/gguf/tensor_mapping.py
+index d644d502eae0..a8b3f7554dc0 100644
+--- a/gguf-py/gguf/tensor_mapping.py
++++ b/gguf-py/gguf/tensor_mapping.py
+@@ -2765,6 +2765,16 @@ class TensorNameMap:
+             MODEL_TENSOR.HC_HEAD_UP: (
+                 "model.hyper_connection_mixer.input_mix_weight_up",
+             ),
++            # the MTP head carries its own copy of the head mixer above
++            MODEL_TENSOR.NEXTN_HC_HEAD_NORM: (
++                "model.layers.{bid}.hyper_connection_mixer.hc_norm",
++            ),
++            MODEL_TENSOR.NEXTN_HC_HEAD_DOWN: (
++                "model.layers.{bid}.hyper_connection_mixer.input_mix_weight_down",
++            ),
++            MODEL_TENSOR.NEXTN_HC_HEAD_UP: (
++                "model.layers.{bid}.hyper_connection_mixer.input_mix_weight_up",
++            ),
+             MODEL_TENSOR.INDEXER_Q_NORM: (
+                 "model.layers.{bid}.self_attn.indexer.q_layernorm",
+             ),
+
+From 86d321a292e6bf78995afa048bf06052da44f00c Mon Sep 17 00:00:00 2001
+From: Daniel Han <danielhanchen@gmail.com>
+Date: Fri, 28 Aug 2026 20:10:49 +0000
+Subject: [PATCH 04/10] llama: let an MTP draft borrow the target's embeddings
+ and lm head
+
+A NextN/MTP draft exported with --mtp carries the token embeddings, output
+norm and lm head so it can be loaded as a standalone model. For every current
+sidecar those three tensors are most of the file: ggml-org/Qwen3.8-27B-GGUF
+mtp-Qwen3.8-27B-Q4_0.gguf is 1.565 GiB, of which 1.332 GiB (85%) is the copy,
+against 0.223 GiB for the MTP block itself.
+
+Add an opt-in --mtp-shared-embd that leaves them out and marks the file with
+nextn_shared_target_tensors. The loader then resolves those names against the
+already loaded target model. The graph side needs no change: the nextn blocks
+of twelve archs already fall back to model.tok_embd and model.output.
+
+The borrow is gated on the new key, so a sidecar published before this change
+cannot reach it and keeps its current behaviour. Shapes are checked against
+the target and a mismatch is refused, as is loading such a file on its own.
+---
+ common/speculative.cpp      |  3 ++
+ conversion/bailingmoe3.py   |  4 +--
+ conversion/base.py          |  6 ++++
+ conversion/command_r.py     |  4 +--
+ conversion/dots3.py         |  4 +--
+ conversion/glm.py           | 12 +++----
+ conversion/qwen.py          |  2 +-
+ convert_hf_to_gguf.py       | 10 ++++++
+ gguf-py/gguf/constants.py   |  1 +
+ gguf-py/gguf/gguf_writer.py |  3 ++
+ include/llama.h             |  4 +++
+ src/llama-arch.cpp          |  1 +
+ src/llama-arch.h            |  1 +
+ src/llama-model-loader.cpp  | 71 +++++++++++++++++++++++++++++++++++++
+ src/llama-model-loader.h    | 11 ++++++
+ src/llama-model.cpp         |  1 +
+ src/llama.cpp               |  3 +-
+ 17 files changed, 127 insertions(+), 14 deletions(-)
+
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index 851a47b9a584..70dcb2e41feb 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -2542,6 +2542,9 @@ common_speculative_init_result::common_speculative_init_result(
+         model_path = params.speculative.draft.mparams.path;
+         LOG_INF("%s: loading draft model '%s'\n", __func__, model_path.c_str());
+ 
++        // a draft head can leave out the embeddings and lm head and use the target's
++        mparams.model_shared = model_tgt;
++
+         llama_model * model_dft = llama_model_load_from_file(params.model.path.c_str(), mparams);
+         if (model_dft == NULL) {
+             LOG_ERR("%s: failed to load draft model, '%s'\n", __func__, model_path.c_str());
+diff --git a/conversion/bailingmoe3.py b/conversion/bailingmoe3.py
+index 20bba23e51c6..9ba3112ebc5c 100644
+--- a/conversion/bailingmoe3.py
++++ b/conversion/bailingmoe3.py
+@@ -121,9 +121,9 @@ def filter_tensors(cls, item: tuple[str, Callable[[], Tensor]]) -> tuple[str, Ca
+ 
+         if is_mtp and cls.no_mtp:
+             return None
+-        if cls.mtp_only and not is_mtp and name not in (
++        if cls.mtp_only and not is_mtp and (cls.mtp_shared_embd or name not in (
+             "model.word_embeddings.weight", "model.norm.weight", "lm_head.weight",
+-        ):
++        )):
+             return None
+ 
+         return super().filter_tensors((name, gen))
+diff --git a/conversion/base.py b/conversion/base.py
+index daae28e92adc..b3205f11a7b5 100644
+--- a/conversion/base.py
++++ b/conversion/base.py
+@@ -120,6 +120,8 @@ class ModelBase:
+     supports_mtp_export: bool = False
+     mtp_only: bool = False
+     no_mtp: bool = False
++    # with mtp_only, leave the shared embeddings and lm head to the target model
++    mtp_shared_embd: bool = False
+ 
+     def __init__(self, dir_model: Path, ftype: gguf.LlamaFileType, fname_out: Path, *, is_big_endian: bool = False,
+                  use_temp_file: bool = False, eager: bool = False,
+@@ -1032,6 +1034,10 @@ def set_type(self):
+ 
+     def prepare_metadata(self, vocab_only: bool):
+ 
++        # tells the loader the shared embeddings and lm head are missing on purpose
++        if self.mtp_only and self.mtp_shared_embd:
++            self.gguf_writer.add_nextn_shared_target_tensors(True)
++
+         total_params, shared_params, expert_params, expert_count = self.gguf_writer.get_total_parameter_count()
+ 
+         self.metadata = gguf.Metadata.load(self.metadata_override, self.dir_model_card, self.model_name, total_params)
+diff --git a/conversion/command_r.py b/conversion/command_r.py
+index 971f93ebdf12..2b513509d55f 100644
+--- a/conversion/command_r.py
++++ b/conversion/command_r.py
+@@ -131,9 +131,9 @@ def filter_tensors(cls, item):
+             is_mtp = (m := re.match(r"model\.layers\.(\d+)\.", name)) is not None and int(m.group(1)) >= cls._n_main_layers
+             if is_mtp and cls.no_mtp:
+                 return None
+-            if cls.mtp_only and not is_mtp and name not in (
++            if cls.mtp_only and not is_mtp and (cls.mtp_shared_embd or name not in (
+                 "model.embed_tokens.weight", "model.norm.weight", "lm_head.weight",
+-            ):
++            )):
+                 return None
+ 
+         return name, gen
+diff --git a/conversion/dots3.py b/conversion/dots3.py
+index c7ac2319e243..e8d3f350c74f 100644
+--- a/conversion/dots3.py
++++ b/conversion/dots3.py
+@@ -99,9 +99,9 @@ def filter_tensors(cls, item: tuple[str, Callable[[], Tensor]]) -> tuple[str, Ca
+         # --no-mtp: drop the NextN/MTP block; --mtp: keep only that block plus the shared embeddings/norm/lm_head
+         if is_mtp and cls.no_mtp:
+             return None
+-        if cls.mtp_only and not is_mtp and name not in (
++        if cls.mtp_only and not is_mtp and (cls.mtp_shared_embd or name not in (
+             "model.embed_tokens.weight", "model.norm.weight", "lm_head.weight",
+-        ):
++        )):
+             return None
+ 
+         return name, gen
+diff --git a/conversion/glm.py b/conversion/glm.py
+index 7544f850cb22..245f01f84bf0 100644
+--- a/conversion/glm.py
++++ b/conversion/glm.py
+@@ -138,9 +138,9 @@ def filter_tensors(cls, item: tuple[str, Callable[[], Tensor]]) -> tuple[str, Ca
+ 
+         if is_mtp and cls.no_mtp:
+             return None
+-        if cls.mtp_only and not is_mtp and name not in (
++        if cls.mtp_only and not is_mtp and (cls.mtp_shared_embd or name not in (
+             "model.embed_tokens.weight", "model.norm.weight", "lm_head.weight",
+-        ):
++        )):
+             return None
+ 
+         return name, gen
+@@ -292,9 +292,9 @@ def filter_tensors(cls, item):
+             is_mtp = match is not None and int(match.group(1)) >= cls._n_main_layers
+             if is_mtp and cls.no_mtp:
+                 return None
+-            if cls.mtp_only and not is_mtp and name not in (
++            if cls.mtp_only and not is_mtp and (cls.mtp_shared_embd or name not in (
+                 "model.embed_tokens.weight", "model.norm.weight", "lm_head.weight",
+-            ):
++            )):
+                 return None
+ 
+         return name, gen
+@@ -352,9 +352,9 @@ def filter_tensors(cls, item: tuple[str, Callable[[], Tensor]]) -> tuple[str, Ca
+             return None
+         # --mtp: keep ONLY NextN-block tensors plus the shared embeddings/
+         # norm/lm_head (so the resulting GGUF carries just the draft head).
+-        if cls.mtp_only and not is_mtp and name not in (
++        if cls.mtp_only and not is_mtp and (cls.mtp_shared_embd or name not in (
+             "model.embed_tokens.weight", "model.norm.weight", "lm_head.weight",
+-        ):
++        )):
+             return None
+ 
+         return name, gen
+diff --git a/conversion/qwen.py b/conversion/qwen.py
+index 419611896fc3..ca89d27ba4a2 100644
+--- a/conversion/qwen.py
++++ b/conversion/qwen.py
+@@ -338,7 +338,7 @@ def filter_tensors(cls, item):
+             elif len(parts) == 3 and parts[1] in remapper:
+                 name = f"model.layers.{cls._original_block_count}.{remapper[parts[1]]}.{parts[2]}"
+         elif cls.mtp_only:
+-            keep = name in (
++            keep = not cls.mtp_shared_embd and name in (
+                 "model.embed_tokens.weight", "model.norm.weight", "lm_head.weight",
+                 "embed_tokens.weight", "norm.weight",
+             )
+diff --git a/convert_hf_to_gguf.py b/convert_hf_to_gguf.py
+index 78ad26c65630..6e7dddfa661e 100755
+--- a/convert_hf_to_gguf.py
++++ b/convert_hf_to_gguf.py
+@@ -125,6 +125,10 @@ def parse_args() -> argparse.Namespace:
+         "--no-nextn", "--no-mtp", dest="no_mtp", action="store_true",
+         help="Exclude NextN speculative draft tensors from the converted GGUF. Pair with --mtp or --dspark on a second run to publish target and draft as two files.",
+     )
++    parser.add_argument(
++        "--mtp-shared-embd", action="store_true",
++        help="With --mtp, leave the token embeddings, output norm and LM head out of the draft and take them from the target model at load time. Much smaller draft, but it needs a llama.cpp new enough to read it.",
++    )
+     parser.add_argument(
+         "--dspark", action="store_true",
+         help="Export only the DeepSeek-V4 DSpark draft tensors as a separate GGUF.",
+@@ -278,6 +282,12 @@ def main() -> None:
+             if args.mtp:
+                 model_class.mtp_only = True
+ 
++        if args.mtp_shared_embd:
++            if not args.mtp:
++                logger.error("--mtp-shared-embd only applies together with --mtp")
++                sys.exit(1)
++            model_class.mtp_shared_embd = True
++
+         model_instance = model_class(dir_model, output_type, fname_out,
+                                      is_big_endian=args.bigendian, use_temp_file=args.use_temp_file,
+                                      eager=args.no_lazy,
+diff --git a/gguf-py/gguf/constants.py b/gguf-py/gguf/constants.py
+index 1a730d732390..52267b01782c 100644
+--- a/gguf-py/gguf/constants.py
++++ b/gguf-py/gguf/constants.py
+@@ -129,6 +129,7 @@ class LLM:
+         MOE_EVERY_N_LAYERS                = "{arch}.moe_every_n_layers"
+         MOE_LATENT_SIZE                   = "{arch}.moe_latent_size"
+         NEXTN_PREDICT_LAYERS              = "{arch}.nextn_predict_layers"
++        NEXTN_SHARED_TARGET_TENSORS       = "{arch}.nextn_shared_target_tensors"
+         NUM_DEEPSTACK_LAYERS              = "{arch}.n_deepstack_layers"
+         DEEPSTACK_MAPPING                 = "{arch}.deepstack_mapping"
+         POOLING_TYPE                      = "{arch}.pooling_type"
+diff --git a/gguf-py/gguf/gguf_writer.py b/gguf-py/gguf/gguf_writer.py
+index 689c2fca1119..f784579a0bc8 100644
+--- a/gguf-py/gguf/gguf_writer.py
++++ b/gguf-py/gguf/gguf_writer.py
+@@ -911,6 +911,9 @@ def add_moe_latent_size(self, value: int) -> None:
+     def add_nextn_predict_layers(self, count: int) -> None:
+         self.add_uint32(Keys.LLM.NEXTN_PREDICT_LAYERS.format(arch=self.arch), count)
+ 
++    def add_nextn_shared_target_tensors(self, value: bool) -> None:
++        self.add_bool(Keys.LLM.NEXTN_SHARED_TARGET_TENSORS.format(arch=self.arch), value)
++
+     def add_swin_norm(self, value: bool) -> None:
+         self.add_bool(Keys.LLM.SWIN_NORM.format(arch=self.arch), value)
+ 
+diff --git a/include/llama.h b/include/llama.h
+index ef7a012c43a1..6e25109dbcef 100644
+--- a/include/llama.h
++++ b/include/llama.h
+@@ -340,6 +340,10 @@ extern "C" {
+         // override key-value pairs of the model meta data
+         const struct llama_model_kv_override * kv_overrides;
+ 
++        // already loaded model to take the shared embeddings and lm head from, for a draft
++        // head that declares nextn_shared_target_tensors. must outlive the model being loaded
++        const struct llama_model * model_shared;
++
+         // Keep the booleans together to avoid misalignment during copy-by-value.
+         bool vocab_only;      // only load the vocabulary, no weights
+         bool check_tensors;   // validate model tensor data
+diff --git a/src/llama-arch.cpp b/src/llama-arch.cpp
+index 8eb4ec50d3d3..58f839fc85a0 100644
+--- a/src/llama-arch.cpp
++++ b/src/llama-arch.cpp
+@@ -217,6 +217,7 @@ static const std::map<llm_kv, const char *> LLM_KV_NAMES = {
+     { LLM_KV_MOE_EVERY_N_LAYERS,                "%s.moe_every_n_layers"                },
+     { LLM_KV_MOE_LATENT_SIZE,                   "%s.moe_latent_size"                   },
+     { LLM_KV_NEXTN_PREDICT_LAYERS,              "%s.nextn_predict_layers"              },
++    { LLM_KV_NEXTN_SHARED_TARGET_TENSORS,       "%s.nextn_shared_target_tensors"       },
+     { LLM_KV_NUM_DEEPSTACK_LAYERS,              "%s.n_deepstack_layers"                },
+     { LLM_KV_DEEPSTACK_MAPPING,                 "%s.deepstack_mapping"                 },
+     { LLM_KV_HIDDEN_ACT,                        "%s.hidden_activation"                 },
+diff --git a/src/llama-arch.h b/src/llama-arch.h
+index 30a1c2a66ffd..3a498e4c4331 100644
+--- a/src/llama-arch.h
++++ b/src/llama-arch.h
+@@ -222,6 +222,7 @@ enum llm_kv {
+     LLM_KV_MOE_EVERY_N_LAYERS,
+     LLM_KV_MOE_LATENT_SIZE,
+     LLM_KV_NEXTN_PREDICT_LAYERS,
++    LLM_KV_NEXTN_SHARED_TARGET_TENSORS,
+     LLM_KV_NUM_DEEPSTACK_LAYERS,
+     LLM_KV_DEEPSTACK_MAPPING,
+     LLM_KV_HIDDEN_ACT,
+diff --git a/src/llama-model-loader.cpp b/src/llama-model-loader.cpp
+index 49f3c4f8ea0d..512e374145d1 100644
+--- a/src/llama-model-loader.cpp
++++ b/src/llama-model-loader.cpp
+@@ -1106,6 +1106,71 @@ bool llama_model_loader::lazy_read::add(const std::string & name, const ggml_ten
+     return true;
+ }
+ 
++// declared in llama-model.h, which this file does not include
++const std::vector<std::pair<std::string, ggml_tensor *>> & llama_internal_get_tensor_map(const llama_model * model);
++
++struct ggml_tensor * llama_model_loader::borrow_shared_tensor(const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne) {
++    // only the tensors a draft head is allowed to leave out, checked first so no other
++    // tensor in any model costs a metadata lookup
++    if (tn.tensor != LLM_TENSOR_TOKEN_EMBD && tn.tensor != LLM_TENSOR_OUTPUT && tn.tensor != LLM_TENSOR_OUTPUT_NORM) {
++        return nullptr;
++    }
++
++    if (shared_target_tensors < 0) {
++        bool shared = false;
++        get_key(LLM_KV_NEXTN_SHARED_TARGET_TENSORS, shared, false);
++        shared_target_tensors = shared ? 1 : 0;
++    }
++    if (shared_target_tensors == 0) {
++        return nullptr;
++    }
++
++    // a file that declares the flag and still ships the tensor keeps its own copy
++    const std::string name = tn.str();
++    if (get_weight(name.c_str()) != nullptr) {
++        return nullptr;
++    }
++
++    if (model_shared == nullptr) {
++        throw std::runtime_error(format("%s: this model is a draft head without its own '%s'; "
++                    "load it as a draft of its target model, not on its own", __func__, name.c_str()));
++    }
++
++    ggml_tensor * src = nullptr;
++    for (const auto & [n, t] : llama_internal_get_tensor_map(model_shared)) {
++        if (n == name) {
++            src = t;
++            break;
++        }
++    }
++    if (src == nullptr) {
++        throw std::runtime_error(format("%s: draft needs tensor '%s' from the target, which does not have it",
++                    __func__, name.c_str()));
++    }
++
++    // the draft uses the tensor directly, so the shapes must agree exactly
++    size_t dim = 0;
++    for (const int64_t n : ne) {
++        if (dim >= GGML_MAX_DIMS || src->ne[dim] != n) {
++            throw std::runtime_error(format("%s: draft and target disagree on '%s': target has %s, draft wants %s",
++                        __func__, name.c_str(), llama_format_tensor_shape(src).c_str(), llama_format_tensor_shape(ne).c_str()));
++        }
++        dim++;
++    }
++    for (; dim < GGML_MAX_DIMS; dim++) {
++        if (src->ne[dim] != 1) {
++            throw std::runtime_error(format("%s: draft and target disagree on '%s': target has %s, draft wants %s",
++                        __func__, name.c_str(), llama_format_tensor_shape(src).c_str(), llama_format_tensor_shape(ne).c_str()));
++        }
++    }
++
++    LLAMA_LOG_INFO("%s: tensor %s taken from the target model\n", __func__, name.c_str());
++
++    // not counted in n_created or size_data: the tensor is not in this file and is neither
++    // allocated nor freed here
++    return src;
++}
++
+ struct ggml_tensor * llama_model_loader::create_tensor(
+         const llama_hparams & hparams, const buft_list_t * buft_list_cpu, const buft_list_t * buft_list_input, const buft_list_t * buft_list_output,
+         const buft_list_t * buft_list_layer, const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne, int flags) {
+@@ -1326,6 +1391,12 @@ struct ggml_tensor * llama_model_loader::create_tensor(
+         return ret;
+     }
+ 
++    // must run before check_tensor_dims: the tensor is absent from this file by design, and for
++    // the lm head it must also win over the arch fallback that ties the head to token_embd
++    if (ggml_tensor * shared = borrow_shared_tensor(tn, ne)) {
++        return shared;
++    }
++
+     LLAMA_LOG_DEBUG("%s: loading tensor %s\n", __func__, tn.str().c_str());
+     const struct ggml_tensor * cur = check_tensor_dims(tn.str(), ne, !(flags & TENSOR_NOT_REQUIRED), flags & TENSOR_ALLOW_RESHAPE);
+     if (cur == NULL) {
+diff --git a/src/llama-model-loader.h b/src/llama-model-loader.h
+index 9e51d0ce7505..d9e6cda98416 100644
+--- a/src/llama-model-loader.h
++++ b/src/llama-model-loader.h
+@@ -117,6 +117,12 @@ struct llama_model_loader {
+         std::set<std::string>                  tensors;
+     } lazy;
+ 
++    // target model a draft head borrows the shared tensors from, see borrow_shared_tensor()
++    const struct llama_model * model_shared = nullptr;
++
++    // cached nextn_shared_target_tensors, -1 until first read
++    int shared_target_tensors = -1;
++
+     llama_files files;
+     llama_ftype ftype;
+     llama_fver  fver;
+@@ -238,6 +244,11 @@ struct llama_model_loader {
+         const llama_hparams & hparams, const buft_list_t * buft_list_cpu, const buft_list_t * buft_list_input, const buft_list_t * buft_list_output,
+         const buft_list_t * buft_list_layer, const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne, int flags);
+ 
++    // a draft head that sets nextn_shared_target_tensors does not carry its own token_embd,
++    // output or output_norm; take them from the target model instead. returns null unless the
++    // file declares the flag, so a draft that ships its own tensors is never affected
++    struct ggml_tensor * borrow_shared_tensor(const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne);
++
+     void done_getting_tensors(bool partial = false) const;
+ 
+     void init_mappings(bool prefetch = true, llama_mlocks * mlock_mmaps = nullptr);
+diff --git a/src/llama-model.cpp b/src/llama-model.cpp
+index 8592ce99f3b4..ad321c55c46b 100644
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -2711,6 +2711,7 @@ llama_model_params llama_model_default_params() {
+         /*.progress_callback           =*/ nullptr,
+         /*.progress_callback_user_data =*/ nullptr,
+         /*.kv_overrides                =*/ nullptr,
++        /*.model_shared                =*/ nullptr,
+         /*.vocab_only                  =*/ false,
+         /*.check_tensors               =*/ false,
+         /*.use_extra_bufts             =*/ true,
+diff --git a/src/llama.cpp b/src/llama.cpp
+index 633db658c955..7c49b3a24621 100644
+--- a/src/llama.cpp
++++ b/src/llama.cpp
+@@ -318,7 +318,8 @@ static std::pair<int, llama_model *> llama_model_load(struct gguf_context * meta
+         llama_model_loader ml(metadata, set_tensor_data, set_tensor_data_ud, fname, splits, file, params.load_mode,
+             params.check_tensors, params.no_alloc, params.load_mtp, params.kv_overrides, params.tensor_buft_overrides);
+ 
+-        ml.lazy.mode = params.lazy_mode;
++        ml.lazy.mode    = params.lazy_mode;
++        ml.model_shared = params.model_shared;
+ 
+         ml.print_info();
+         std::unique_ptr<llama_model> model_ptr(llama_model_create(ml, params));
+
+From 30b65375afa1d661e516ee5c0e435bd44d6196f8 Mon Sep 17 00:00:00 2001
+From: danielhanchen <danielhanchen@gmail.com>
+Date: Sun, 30 Aug 2026 00:33:57 +0000
+Subject: [PATCH 05/10] qwen4exp: allow loading a draft-only MTP export
+
+---
+ src/models/qwen4exp.cpp | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/src/models/qwen4exp.cpp b/src/models/qwen4exp.cpp
+index 2d60b7db8862..f9075cf7a12e 100644
+--- a/src/models/qwen4exp.cpp
++++ b/src/models/qwen4exp.cpp
+@@ -159,12 +159,18 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+     const int64_t hc_dim = hc * n_embd;
+     const int64_t hc_lr  = hparams.hc_low_rank;
+ 
++    // a draft-only export declares the full block count but ships the MTP block alone,
++    // so the trunk is described and absent. same probe as qwen35.
++    const bool mtp_only    = (hparams.n_layer_nextn > 0) && (ml.get_weight("blk.0.hc_attn_norm.weight") == nullptr);
++    const int  trunk_flags = mtp_only ? TENSOR_NOT_REQUIRED : 0;
++
+     tok_embd = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, 0);
+ 
+-    // there is no output_norm: the final hyper-connection mixer carries it
+-    hc_head_norm = create_tensor(tn(LLM_TENSOR_HC_HEAD_NORM, "weight"), { hc_dim }, 0);
+-    hc_head_down = create_tensor(tn(LLM_TENSOR_HC_HEAD_DOWN, "weight"), { hc_dim, hc_lr }, 0);
+-    hc_head_up   = create_tensor(tn(LLM_TENSOR_HC_HEAD_UP,   "weight"), { hc_lr, hc_dim }, 0);
++    // there is no output_norm: the final hyper-connection mixer carries it. the MTP head
++    // has its own in nextn.hc_head_*, so a draft-only file does not carry these
++    hc_head_norm = create_tensor(tn(LLM_TENSOR_HC_HEAD_NORM, "weight"), { hc_dim }, trunk_flags);
++    hc_head_down = create_tensor(tn(LLM_TENSOR_HC_HEAD_DOWN, "weight"), { hc_dim, hc_lr }, trunk_flags);
++    hc_head_up   = create_tensor(tn(LLM_TENSOR_HC_HEAD_UP,   "weight"), { hc_lr, hc_dim }, trunk_flags);
+ 
+     output = create_tensor(tn(LLM_TENSOR_OUTPUT, "weight"), { n_embd, n_vocab }, TENSOR_NOT_REQUIRED);
+     if (output == NULL) {
+@@ -201,7 +207,7 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+ 
+         // the MTP block is structurally a trunk block: is_recr()/is_ple() are both false past
+         // the trunk, so it takes the full-attention + MoE path below with no special casing
+-        const int flags = il < n_layer ? 0 : mtp_flags;
++        const int flags = il < n_layer ? trunk_flags : mtp_flags;
+ 
+         const int64_t n_ff_exp   = hparams.n_ff_exp() ? hparams.n_ff_exp() : n_ff / n_expert_used;
+         const int64_t n_ff_shexp = hparams.n_ff_shexp ? hparams.n_ff_shexp : n_ff;
+
+From 44c79602c840ce0782f46372f1b1b6a8af0fa478 Mon Sep 17 00:00:00 2001
+From: danielhanchen <danielhanchen@gmail.com>
+Date: Wed, 2 Sep 2026 12:15:57 +0000
+Subject: [PATCH 06/10] qwen4exp mtp: trim comments
+
+---
+ common/speculative.cpp         |  1 -
+ conversion/base.py             |  3 +-
+ conversion/qwen4exp.py         | 25 ++++----------
+ gguf-py/gguf/constants.py      |  4 +--
+ gguf-py/gguf/tensor_mapping.py |  1 -
+ include/llama.h                |  3 +-
+ src/llama-arch.h               |  2 --
+ src/llama-model-loader.cpp     | 12 +++----
+ src/llama-model-loader.h       |  5 +--
+ src/llama-model.h              |  3 +-
+ src/models/models.h            |  3 +-
+ src/models/qwen4exp.cpp        | 60 +++++++---------------------------
+ 12 files changed, 28 insertions(+), 94 deletions(-)
+
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index 70dcb2e41feb..c9709961df16 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -2542,7 +2542,6 @@ common_speculative_init_result::common_speculative_init_result(
+         model_path = params.speculative.draft.mparams.path;
+         LOG_INF("%s: loading draft model '%s'\n", __func__, model_path.c_str());
+ 
+-        // a draft head can leave out the embeddings and lm head and use the target's
+         mparams.model_shared = model_tgt;
+ 
+         llama_model * model_dft = llama_model_load_from_file(params.model.path.c_str(), mparams);
+diff --git a/conversion/base.py b/conversion/base.py
+index b3205f11a7b5..c0dd413b596b 100644
+--- a/conversion/base.py
++++ b/conversion/base.py
+@@ -120,7 +120,6 @@ class ModelBase:
+     supports_mtp_export: bool = False
+     mtp_only: bool = False
+     no_mtp: bool = False
+-    # with mtp_only, leave the shared embeddings and lm head to the target model
+     mtp_shared_embd: bool = False
+ 
+     def __init__(self, dir_model: Path, ftype: gguf.LlamaFileType, fname_out: Path, *, is_big_endian: bool = False,
+@@ -1034,7 +1033,7 @@ def set_type(self):
+ 
+     def prepare_metadata(self, vocab_only: bool):
+ 
+-        # tells the loader the shared embeddings and lm head are missing on purpose
++        # tells the loader they are missing on purpose
+         if self.mtp_only and self.mtp_shared_embd:
+             self.gguf_writer.add_nextn_shared_target_tensors(True)
+ 
+diff --git a/conversion/qwen4exp.py b/conversion/qwen4exp.py
+index 5de299346056..5b2b0495e92c 100644
+--- a/conversion/qwen4exp.py
++++ b/conversion/qwen4exp.py
+@@ -34,18 +34,13 @@ def __init__(self, *args, **kwargs):
+         self._ple_shards: dict[int, str] = {}
+         self._ple_row_dim: int | None = None
+ 
+-    # The MTP head is one trunk-shaped block (dense attention + MoE, wrapped in
+-    # hyper-connections) plus a combiner, so once _QwenMtpMixin renames
+-    # `mtp.layers.0.*` to the trailing block index its tensors ride the existing
+-    # qwen4exp mappings unchanged. Only the two head-level pieces below differ.
+-
++    # _QwenMtpMixin renames mtp.layers.0.* to the trailing block index, so the head reuses the
++    # existing qwen4exp mappings; only the two pieces below differ.
+     _MTP_MIXER_PREFIX = "mtp.hyper_connection_mixer."
+ 
+     @classmethod
+     def filter_tensors(cls, item):
+-        # the head carries its own copy of the trunk's hc_head_* output mixer,
+-        # which qwen4exp has in place of a final norm; it is unindexed in the
+-        # checkpoint and per-block in the GGUF
++        # unindexed in the checkpoint, per-block in the GGUF
+         name, gen = item
+         if name.startswith("model." + cls._MTP_MIXER_PREFIX):
+             name = name.replace("model.", "", 1)
+@@ -57,9 +52,7 @@ def filter_tensors(cls, item):
+         return super().filter_tensors((name, gen))
+ 
+     def index_tensors(self, remote_hf_model_id: str | None = None) -> dict[str, Callable[[], Tensor]]:
+-        # qwen4exp splits the combiner the shared NextN code calls eh_proj into
+-        # fc_embedding and fc_hidden; W_e@e + W_h@h == [W_e|W_h] @ concat(e, h),
+-        # so the two fuse back into the single expected matmul
++        # W_e@e + W_h@h == [W_e|W_h] @ concat(e, h), so fc_embedding and fc_hidden fuse into eh_proj
+         tensors = super().index_tensors(remote_hf_model_id=remote_hf_model_id)
+ 
+         emb = tensors.pop("mtp.fc_embedding.weight", None)
+@@ -73,8 +66,7 @@ def index_tensors(self, remote_hf_model_id: str | None = None) -> dict[str, Call
+             )
+ 
+         assert self._original_block_count is not None
+-        # fc_embedding first: the graph concatenates the token embedding ahead of
+-        # the hidden state, so the fused weight has to be ordered to match
++        # fc_embedding first: the graph concatenates the embedding ahead of the hidden state
+         name = f"model.layers.{self._original_block_count}.eh_proj.weight"
+         tensors[name] = lambda: torch.cat([emb(), hid()], dim=1)
+         return tensors
+@@ -108,15 +100,12 @@ def set_gguf_parameters(self):
+         ratio = hp["indexer_compress_ratio"]
+         layer_types = hp["layer_types"]
+         ratios = [ratio if layer_types[i] == "full_attention" else 0 for i in range(n_layer)]
+-        # llama.cpp reads this array with length block_count, and the MTP blocks
+-        # trailing the trunk attend densely, which is what a ratio of 0 selects
++        # read with length block_count; 0 selects dense, which is how the MTP blocks attend
+         ratios += [0] * (self.block_count - n_layer)
+         self.gguf_writer.add_attention_compress_ratios(ratios)
+ 
+         # ple_layer_ids is 1-based in the HF config; empty means no n-gram table,
+-        # so emit no PLE keys rather than optional ones.
+-        # a draft-only export carries no trunk tensors, so it carries no PLE table
+-        # to describe either
++        # so emit no PLE keys rather than optional ones. a draft-only export has no PLE table either.
+         ple_layers = [i - 1 for i in hp["ple_layer_ids"]]
+         if not ple_layers or self.mtp_only:
+             return
+diff --git a/gguf-py/gguf/constants.py b/gguf-py/gguf/constants.py
+index 52267b01782c..2bebd73244fd 100644
+--- a/gguf-py/gguf/constants.py
++++ b/gguf-py/gguf/constants.py
+@@ -1180,8 +1180,7 @@ class MODEL_TENSOR(IntEnum):
+     NEXTN_HNORM            = auto()
+     NEXTN_SHARED_HEAD_HEAD = auto()
+     NEXTN_SHARED_HEAD_NORM = auto()
+-    # qwen4exp: the MTP head's own hyper-connection mixer, which stands in for the
+-    # output norm the trunk does not have
++    # qwen4exp: the MTP head's own hyper-connection mixer, in place of an output norm
+     NEXTN_HC_HEAD_NORM     = auto()
+     NEXTN_HC_HEAD_DOWN     = auto()
+     NEXTN_HC_HEAD_UP       = auto()
+@@ -2934,7 +2933,6 @@ class MODEL_TENSOR(IntEnum):
+         MODEL_TENSOR.PLE_NORM_QUERY,
+         MODEL_TENSOR.PLE_NORM_CONV,
+         MODEL_TENSOR.PLE_CONV1D,
+-        # NextN/MTP draft head
+         MODEL_TENSOR.NEXTN_EH_PROJ,
+         MODEL_TENSOR.NEXTN_EMBED_TOKENS,
+         MODEL_TENSOR.NEXTN_ENORM,
+diff --git a/gguf-py/gguf/tensor_mapping.py b/gguf-py/gguf/tensor_mapping.py
+index a8b3f7554dc0..124d055aa12b 100644
+--- a/gguf-py/gguf/tensor_mapping.py
++++ b/gguf-py/gguf/tensor_mapping.py
+@@ -2765,7 +2765,6 @@ class TensorNameMap:
+             MODEL_TENSOR.HC_HEAD_UP: (
+                 "model.hyper_connection_mixer.input_mix_weight_up",
+             ),
+-            # the MTP head carries its own copy of the head mixer above
+             MODEL_TENSOR.NEXTN_HC_HEAD_NORM: (
+                 "model.layers.{bid}.hyper_connection_mixer.hc_norm",
+             ),
+diff --git a/include/llama.h b/include/llama.h
+index 6e25109dbcef..41b9123042b1 100644
+--- a/include/llama.h
++++ b/include/llama.h
+@@ -340,8 +340,7 @@ extern "C" {
+         // override key-value pairs of the model meta data
+         const struct llama_model_kv_override * kv_overrides;
+ 
+-        // already loaded model to take the shared embeddings and lm head from, for a draft
+-        // head that declares nextn_shared_target_tensors. must outlive the model being loaded
++        // target for a draft head that declares nextn_shared_target_tensors; must outlive this model
+         const struct llama_model * model_shared;
+ 
+         // Keep the booleans together to avoid misalignment during copy-by-value.
+diff --git a/src/llama-arch.h b/src/llama-arch.h
+index 3a498e4c4331..e13633ec859d 100644
+--- a/src/llama-arch.h
++++ b/src/llama-arch.h
+@@ -688,8 +688,6 @@ enum llm_tensor {
+     LLM_TENSOR_NEXTN_HNORM,
+     LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD,
+     LLM_TENSOR_NEXTN_SHARED_HEAD_NORM,
+-    // qwen4exp: the MTP head ends in its own hyper-connection mixer rather than a
+-    // plain RMSNorm, mirroring the trunk's hc_head_* (which is its output norm)
+     LLM_TENSOR_NEXTN_HC_HEAD_NORM,
+     LLM_TENSOR_NEXTN_HC_HEAD_DOWN,
+     LLM_TENSOR_NEXTN_HC_HEAD_UP,
+diff --git a/src/llama-model-loader.cpp b/src/llama-model-loader.cpp
+index 512e374145d1..0238e235a1ad 100644
+--- a/src/llama-model-loader.cpp
++++ b/src/llama-model-loader.cpp
+@@ -1110,8 +1110,7 @@ bool llama_model_loader::lazy_read::add(const std::string & name, const ggml_ten
+ const std::vector<std::pair<std::string, ggml_tensor *>> & llama_internal_get_tensor_map(const llama_model * model);
+ 
+ struct ggml_tensor * llama_model_loader::borrow_shared_tensor(const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne) {
+-    // only the tensors a draft head is allowed to leave out, checked first so no other
+-    // tensor in any model costs a metadata lookup
++    // checked first so no other tensor in any model pays a metadata lookup
+     if (tn.tensor != LLM_TENSOR_TOKEN_EMBD && tn.tensor != LLM_TENSOR_OUTPUT && tn.tensor != LLM_TENSOR_OUTPUT_NORM) {
+         return nullptr;
+     }
+@@ -1125,7 +1124,6 @@ struct ggml_tensor * llama_model_loader::borrow_shared_tensor(const LLM_TN_IMPL
+         return nullptr;
+     }
+ 
+-    // a file that declares the flag and still ships the tensor keeps its own copy
+     const std::string name = tn.str();
+     if (get_weight(name.c_str()) != nullptr) {
+         return nullptr;
+@@ -1148,7 +1146,7 @@ struct ggml_tensor * llama_model_loader::borrow_shared_tensor(const LLM_TN_IMPL
+                     __func__, name.c_str()));
+     }
+ 
+-    // the draft uses the tensor directly, so the shapes must agree exactly
++    // used directly, so the shapes must agree exactly
+     size_t dim = 0;
+     for (const int64_t n : ne) {
+         if (dim >= GGML_MAX_DIMS || src->ne[dim] != n) {
+@@ -1166,8 +1164,7 @@ struct ggml_tensor * llama_model_loader::borrow_shared_tensor(const LLM_TN_IMPL
+ 
+     LLAMA_LOG_INFO("%s: tensor %s taken from the target model\n", __func__, name.c_str());
+ 
+-    // not counted in n_created or size_data: the tensor is not in this file and is neither
+-    // allocated nor freed here
++    // not counted in n_created/size_data: not in this file, neither allocated nor freed here
+     return src;
+ }
+ 
+@@ -1391,8 +1388,7 @@ struct ggml_tensor * llama_model_loader::create_tensor(
+         return ret;
+     }
+ 
+-    // must run before check_tensor_dims: the tensor is absent from this file by design, and for
+-    // the lm head it must also win over the arch fallback that ties the head to token_embd
++    // must precede check_tensor_dims, and must win over the arch fallback that ties output to token_embd
+     if (ggml_tensor * shared = borrow_shared_tensor(tn, ne)) {
+         return shared;
+     }
+diff --git a/src/llama-model-loader.h b/src/llama-model-loader.h
+index d9e6cda98416..7cf1d823cde8 100644
+--- a/src/llama-model-loader.h
++++ b/src/llama-model-loader.h
+@@ -117,7 +117,6 @@ struct llama_model_loader {
+         std::set<std::string>                  tensors;
+     } lazy;
+ 
+-    // target model a draft head borrows the shared tensors from, see borrow_shared_tensor()
+     const struct llama_model * model_shared = nullptr;
+ 
+     // cached nextn_shared_target_tensors, -1 until first read
+@@ -244,9 +243,7 @@ struct llama_model_loader {
+         const llama_hparams & hparams, const buft_list_t * buft_list_cpu, const buft_list_t * buft_list_input, const buft_list_t * buft_list_output,
+         const buft_list_t * buft_list_layer, const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne, int flags);
+ 
+-    // a draft head that sets nextn_shared_target_tensors does not carry its own token_embd,
+-    // output or output_norm; take them from the target model instead. returns null unless the
+-    // file declares the flag, so a draft that ships its own tensors is never affected
++    // token_embd/output/output_norm from the target. null unless the file declares the flag.
+     struct ggml_tensor * borrow_shared_tensor(const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne);
+ 
+     void done_getting_tensors(bool partial = false) const;
+diff --git a/src/llama-model.h b/src/llama-model.h
+index 0e13c3b435a4..6ab52e37aea5 100644
+--- a/src/llama-model.h
++++ b/src/llama-model.h
+@@ -229,8 +229,7 @@ struct llama_layer_nextn {
+     struct ggml_tensor * shared_head_head_in_s = nullptr;
+     struct ggml_tensor * shared_head_norm      = nullptr;
+ 
+-    // qwen4exp: the MTP head's own final hyper-connection mixer, which stands in for both
+-    // the stream collapse and the output norm (the trunk has no separate output_norm either)
++    // qwen4exp: the MTP head's mixer; collapses the streams and stands in for the output norm
+     struct ggml_tensor * hc_head_norm          = nullptr;
+     struct ggml_tensor * hc_head_down          = nullptr;
+     struct ggml_tensor * hc_head_up            = nullptr;
+diff --git a/src/models/models.h b/src/models/models.h
+index f93518943ca8..51e09a699e45 100644
+--- a/src/models/models.h
++++ b/src/models/models.h
+@@ -2286,7 +2286,7 @@ struct llama_model_qwen4exp : public llama_model_base {
+     struct graph : public llm_build_delta_net_base {
+         graph(const llama_model & model, const llm_graph_params & params);
+     protected:
+-        // tag-dispatched ctor for graph_mtp: binds the members without building the trunk
++        // graph_mtp ctor: binds the members without building the trunk
+         struct no_build_t {};
+         graph(const llama_model & model, const llm_graph_params & params, no_build_t) :
+             llm_build_delta_net_base(params), model(model) {}
+@@ -2382,7 +2382,6 @@ struct llama_model_qwen4exp : public llama_model_base {
+         const llama_model & model;
+     };
+ 
+-    // LLM_GRAPH_TYPE_DECODER_MTP draft head: one HC-wrapped dense-attention + MoE block
+     struct graph_mtp : public graph {
+         graph_mtp(const llama_model & model, const llm_graph_params & params);
+     };
+diff --git a/src/models/qwen4exp.cpp b/src/models/qwen4exp.cpp
+index f9075cf7a12e..95a8b1d7b0d4 100644
+--- a/src/models/qwen4exp.cpp
++++ b/src/models/qwen4exp.cpp
+@@ -24,8 +24,7 @@ static void qwen4exp_require_arr_len(llama_model_loader & ml, llm_kv kid, uint32
+ }
+ 
+ void llama_model_qwen4exp::load_arch_hparams(llama_model_loader & ml) {
+-    // NextN/MTP: an extra decoder block appended past the trunk. Read this first, since
+-    // n_layer() == n_layer_all - n_layer_nextn feeds every per-layer array below.
++    // must precede the per-layer arrays: n_layer() == n_layer_all - n_layer_nextn.
+     ml.get_key(LLM_KV_NEXTN_PREDICT_LAYERS, hparams.n_layer_nextn, false);
+     GGML_ASSERT(hparams.n_layer_nextn < hparams.n_layer_all && "n_layer_nextn must be < block_count");
+ 
+@@ -159,15 +158,13 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+     const int64_t hc_dim = hc * n_embd;
+     const int64_t hc_lr  = hparams.hc_low_rank;
+ 
+-    // a draft-only export declares the full block count but ships the MTP block alone,
+-    // so the trunk is described and absent. same probe as qwen35.
++    // a draft-only export declares the full block count but ships the MTP block alone.
+     const bool mtp_only    = (hparams.n_layer_nextn > 0) && (ml.get_weight("blk.0.hc_attn_norm.weight") == nullptr);
+     const int  trunk_flags = mtp_only ? TENSOR_NOT_REQUIRED : 0;
+ 
+     tok_embd = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, 0);
+ 
+-    // there is no output_norm: the final hyper-connection mixer carries it. the MTP head
+-    // has its own in nextn.hc_head_*, so a draft-only file does not carry these
++    // no output_norm: this mixer carries it. the MTP head has its own in nextn.hc_head_*.
+     hc_head_norm = create_tensor(tn(LLM_TENSOR_HC_HEAD_NORM, "weight"), { hc_dim }, trunk_flags);
+     hc_head_down = create_tensor(tn(LLM_TENSOR_HC_HEAD_DOWN, "weight"), { hc_dim, hc_lr }, trunk_flags);
+     hc_head_up   = create_tensor(tn(LLM_TENSOR_HC_HEAD_UP,   "weight"), { hc_lr, hc_dim }, trunk_flags);
+@@ -199,14 +196,11 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+                                            { hparams.ple_head_dim, ple_rows }, TENSOR_READ_LAZY);
+     }
+ 
+-    // MTP tensors sit in the trailing blocks; skip them entirely unless a draft head was asked for
+     const int mtp_flags = !ml.load_mtp ? TENSOR_SKIP : 0;
+ 
+     for (int il = 0; il < (int) hparams.n_layer_all; ++il) {
+         auto & layer = layers[il];
+ 
+-        // the MTP block is structurally a trunk block: is_recr()/is_ple() are both false past
+-        // the trunk, so it takes the full-attention + MoE path below with no special casing
+         const int flags = il < n_layer ? trunk_flags : mtp_flags;
+ 
+         const int64_t n_ff_exp   = hparams.n_ff_exp() ? hparams.n_ff_exp() : n_ff / n_expert_used;
+@@ -277,21 +271,15 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+             continue;
+         }
+ 
+-        // NextN/MTP head. enorm/hnorm gate the two inputs; eh_proj is the checkpoint's
+-        // fc_embedding and fc_hidden fused side by side, so one matmul over
+-        // concat(e, h) computes fc_embedding@e + fc_hidden@h.
+         layer.nextn.enorm   = create_tensor(tn(LLM_TENSOR_NEXTN_ENORM,   "weight", il), { n_embd }, flags);
+         layer.nextn.hnorm   = create_tensor(tn(LLM_TENSOR_NEXTN_HNORM,   "weight", il), { hc_dim }, flags);
+         layer.nextn.eh_proj = create_tensor(tn(LLM_TENSOR_NEXTN_EH_PROJ, "weight", il), { 2 * n_embd, n_embd }, flags);
+ 
+-        // the head's own output mixer, mirroring the trunk's hc_head_*: it collapses the
+-        // hc streams and stands in for the output norm, of which qwen4exp has none
+         layer.nextn.hc_head_norm = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_NORM, "weight", il), { hc_dim }, flags);
+         layer.nextn.hc_head_down = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_DOWN, "weight", il), { hc_dim, hc_lr }, flags);
+         layer.nextn.hc_head_up   = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_UP,   "weight", il), { hc_lr, hc_dim }, flags);
+ 
+-        // qwen4exp sets mtp_use_dedicated_embeddings=false, so these are absent and the
+-        // head falls back to the trunk's embedding table and LM head
++        // absent when mtp_use_dedicated_embeddings=false (qwen4exp); the head falls back to the trunk's.
+         layer.nextn.embed_tokens     = create_tensor(tn(LLM_TENSOR_NEXTN_EMBED_TOKENS,     "weight", il), { n_embd, n_vocab }, flags | TENSOR_NOT_REQUIRED);
+         layer.nextn.shared_head_head = create_tensor(tn(LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD, "weight", il), { n_embd, n_vocab }, flags | TENSOR_NOT_REQUIRED);
+     }
+@@ -440,8 +428,7 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+             cur = build_layer_attn(inp->get_attn(), mctx_hyb, cur, inp_pos, sections, il);
+         }
+ 
+-        // an unmasked MTP export needs a hidden row for every token, so in that case the
+-        // gather is deferred until after t_h_nextn is taken below
++        // an unmasked MTP export needs every token's row, so it defers the gather until after t_h_nextn.
+         const bool gather_now = !cparams.embeddings_nextn || cparams.embeddings_nextn_masked;
+ 
+         if (il == n_layer - 1 && inp_out_ids && gather_now) {
+@@ -472,16 +459,11 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+         cb(res_hc, "l_last", il);
+     }
+ 
+-    // The MTP head consumes the wide residual, before the head mixer collapses it. Export the
+-    // combine result itself rather than a reshape of it: a pure view gets no backend assignment
+-    // from the scheduler, and the readback in llama_context looks one up. It is contiguous, so
+-    // [n_embd, hc, rows] already has the [n_embd_out, rows] layout the reader expects, and it
+-    // carries exactly the right rows either way -- gathered above when masked, ungathered when not.
++    // export res_hc itself, never a reshape view: a pure view gets no backend assignment to read back.
+     if (cparams.embeddings_nextn) {
+         cb(res_hc, "h_nextn", -1);
+         res->t_h_nextn = res_hc;
+ 
+-        // deferred from the last layer: collapse to the output rows now that the export is taken
+         if (!cparams.embeddings_nextn_masked && inp_out_ids) {
+             res_hc = ggml_reshape_2d(ctx0, res_hc, n_embd*hc, res_hc->ne[2]);
+             res_hc = ggml_get_rows(ctx0, res_hc, inp_out_ids);
+@@ -504,16 +486,8 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+     ggml_build_forward_expand(gf, cur);
+ }
+ 
+-// LLM_GRAPH_TYPE_DECODER_MTP draft head for qwen4exp.
+-//
+-// The head folds the next token's embedding into the trunk's wide hyper-connection residual,
+-// runs one trunk-style block over it, and collapses the result with its own mixer before
+-// reusing the trunk's LM head. The wide post-block residual is exported as t_h_nextn so the
+-// speculative driver can feed it straight back in for the next draft step.
+-//
+-// v1 simplification: the block attends densely. The trunk's QSA only prunes context past a
+-// 2048-token budget, so dense is a numerical superset; drafts are verified by the target
+-// either way. The indexer tensors are still loaded so the GGUF stays complete.
++// LLM_GRAPH_TYPE_DECODER_MTP draft head for qwen4exp. Attends densely: QSA only prunes context
++// past a 2048-token budget, so dense is a numerical superset and drafts are verified regardless.
+ // TODO: wire up QSA here for long-context draft fidelity.
+ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_graph_params & params) :
+     graph(model, params, no_build_t{}) {
+@@ -562,25 +536,19 @@ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_
+ 
+     auto * inp_attn = build_attn_inp_kv();
+ 
+-    // grouped RMSNorm over the wide stream: normalise each hc stream, then scale the flattened
+-    // [hc_dim] vector with the head's gamma, exactly as build_hc_mix does
+     ggml_tensor * h_norm = ggml_rms_norm(ctx0, h_state, hparams.f_norm_rms_eps);
+     h_norm = ggml_reshape_2d(ctx0, h_norm, hc_dim, n_tokens);
+     h_norm = ggml_mul(ctx0, h_norm, layer.nextn.hnorm);
+     h_norm = ggml_reshape_3d(ctx0, h_norm, n_embd, hc, n_tokens);
+     cb(h_norm, "mtp_hnorm", il);
+ 
+-    // the token embedding is shared across the streams, so broadcast it to hc copies
+     ggml_tensor * e_norm = build_norm(tok_embd, layer.nextn.enorm, nullptr, LLM_NORM_RMS, il);
+     e_norm = ggml_repeat_4d(ctx0,
+             ggml_reshape_3d(ctx0, e_norm, n_embd, 1, n_tokens),
+             n_embd, hc, n_tokens, 1);
+     cb(e_norm, "mtp_enorm", il);
+ 
+-    // eh_proj holds fc_embedding and fc_hidden side by side, so this one matmul is
+-    // fc_embedding @ e_norm + fc_hidden @ h_norm, applied to each stream independently.
+-    // Keeping the streams distinct here is the point of the hyper-connection residual:
+-    // pooling them before the projection would throw that away.
++    // per stream, not pooled: pooling before the projection discards the hyper-connection residual.
+     ggml_tensor * concat = ggml_concat(ctx0, e_norm, h_norm, /*dim=*/ 0);
+     cb(concat, "mtp_concat", il);
+ 
+@@ -593,7 +561,6 @@ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_
+             &inject, il);
+     cb(cur, "mtp_hc_attn_pre", il);
+ 
+-    // ---- dense attention, mirroring the trunk's full-attention branch ----
+     const int64_t n_embd_head = hparams.n_embd_head_v();
+     GGML_ASSERT(n_embd_head == hparams.n_embd_head_k());
+ 
+@@ -622,7 +589,6 @@ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_
+     Vcur = ggml_reshape_3d(ctx0, Vcur, n_embd_head, n_head_kv, n_tokens);
+     cb(Vcur, "mtp_Vcur", il);
+ 
+-    // IMRoPE, same convention and freq_base as the trunk
+     Qcur = ggml_rope_multi(ctx0, Qcur, inp_pos, nullptr,
+             n_rot, sections, rope_type, n_ctx_orig, freq_base, freq_scale,
+             ext_factor, attn_factor, beta_fast, beta_slow);
+@@ -658,7 +624,6 @@ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_
+     res_hc = build_hc_combine(res_hc, cur, inject, il);
+     cb(res_hc, "mtp_hc_attn_post", il);
+ 
+-    // ---- MoE, identical to the trunk's build_layer_ffn ----
+     cur = build_hc_mix(res_hc,
+             layer.hc_ffn_norm, layer.hc_ffn_down, layer.hc_ffn_up, layer.hc_ffn_inject,
+             &inject, il);
+@@ -670,19 +635,16 @@ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_
+     res_hc = build_hc_combine(res_hc, cur, inject, il);
+     cb(res_hc, "mtp_hc_ffn_post", il);
+ 
+-    // The next draft step re-enters here, so export the wide stream before it is collapsed.
+-    // As in the trunk, export the combine result rather than a reshape view of it.
++    // the next draft step re-enters here, so export the wide stream before it is collapsed.
+     cb(res_hc, "h_nextn", -1);
+     res->t_h_nextn = res_hc;
+ 
+-    // the head's own mixer collapses the streams and doubles as the output norm
+     cur = build_hc_mix(res_hc,
+             layer.nextn.hc_head_norm, layer.nextn.hc_head_down, layer.nextn.hc_head_up,
+             nullptr, nullptr, -1);
+     cb(cur, "mtp_hc_head", -1);
+ 
+-    // deliberately no res->t_embd: it would be n_embd wide while the context sizes its
+-    // embedding buffer by n_embd_out (the wide stream). The driver reads t_h_nextn instead.
++    // no res->t_embd: it is n_embd wide, but the context sizes that buffer by n_embd_out.
+ 
+     ggml_tensor * head_w = layer.nextn.shared_head_head ? layer.nextn.shared_head_head : model.output;
+     ggml_tensor * head_s = layer.nextn.shared_head_head ? layer.nextn.shared_head_head_s : model.output_s;
+
+From eb65412fc1c9e3a201d59ef0d5fc9b2aabc54f47 Mon Sep 17 00:00:00 2001
+From: danielhanchen <danielhanchen@gmail.com>
+Date: Wed, 2 Sep 2026 12:36:18 +0000
+Subject: [PATCH 07/10] convert : declare mtp_shared_embd on the Qwen MTP mixin
+
+_QwenMtpMixin is not a ModelBase subclass, so it re-declares the
+attributes it reads off cls for the type checker. filter_tensors reads
+cls.mtp_shared_embd without a matching declaration, which ty reports as
+unresolved-attribute.
+
+The declaration is a bare annotation, matching no_mtp and mtp_only
+above it. That creates no class attribute, so it cannot shadow
+ModelBase.mtp_shared_embd even though the mixin precedes the model
+class in the MRO; a default value here would have.
+
+Assisted-by: Claude
+---
+ conversion/qwen.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/conversion/qwen.py b/conversion/qwen.py
+index ca89d27ba4a2..27f4d7fe8e04 100644
+--- a/conversion/qwen.py
++++ b/conversion/qwen.py
+@@ -290,6 +290,7 @@ class _QwenMtpMixin:
+     tensor_map: gguf.TensorNameMap
+     no_mtp: bool
+     mtp_only: bool
++    mtp_shared_embd: bool
+     _original_block_count: int | None = None
+     opt_num_mtp_layers: int = 0
+ 
+
+From 44ff8032376a55f2666bf0fdcdd782d3a888ae6b Mon Sep 17 00:00:00 2001
+From: danielhanchen <danielhanchen@gmail.com>
+Date: Wed, 2 Sep 2026 12:40:56 +0000
+Subject: [PATCH 08/10] qwen4exp: reject a draft-only export loaded without its
+ target
+
+A draft-only export declares the full block count but ships the MTP
+block alone, so the trunk tensors load as null and only the MTP graph
+is buildable. Context reservation builds the trunk graph, which walked
+those nulls and segfaulted.
+
+A shared-embedding draft is caught earlier by the borrow check, since
+it has no token_embd of its own. A self-contained draft keeps one, so
+it passed that check and reached here.
+
+Assisted-by: Claude
+---
+ src/models/qwen4exp.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/models/qwen4exp.cpp b/src/models/qwen4exp.cpp
+index 95a8b1d7b0d4..5074f4911797 100644
+--- a/src/models/qwen4exp.cpp
++++ b/src/models/qwen4exp.cpp
+@@ -289,6 +289,13 @@ std::unique_ptr<llm_graph_context> llama_model_qwen4exp::build_arch_graph(const
+     if (params.gtype == LLM_GRAPH_TYPE_DECODER_MTP) {
+         return std::make_unique<graph_mtp>(*this, params);
+     }
++    // a draft-only export declares the trunk but ships the MTP block alone, so the trunk
++    // tensors are null and only the MTP graph above is buildable. a self-contained draft
++    // keeps token_embd, so it passes the borrow check and would reach here and walk nulls.
++    if (hc_head_norm == nullptr) {
++        throw std::runtime_error("this model is an MTP draft head without a trunk; "
++                                 "load it as a draft of its target model (-md), not on its own");
++    }
+     return std::make_unique<graph>(*this, params);
+ }
+ 
+
+From cc2c59a74c6f632f2236e3d3e3f1d64c1c1c9b9f Mon Sep 17 00:00:00 2001
+From: danielhanchen <danielhanchen@gmail.com>
+Date: Thu, 3 Sep 2026 08:38:19 +0000
+Subject: [PATCH 09/10] llama: borrow the MTP draft's shared tensors through
+ ctx_other
+
+Reuses the existing llama_context_params::ctx_other plumbing instead of adding a
+model_shared load parameter and a nextn_shared_target_tensors metadata key.
+
+A draft-only export now simply omits token_embd/output, and the qwen4exp MTP graph
+resolves them against the target context at graph build, following dflash and
+gemma4-assistant. Loading such a file on its own reports that it needs -md.
+
+Assisted-by: Claude
+---
+ common/speculative.cpp      |  2 --
+ conversion/base.py          |  4 ---
+ gguf-py/gguf/constants.py   |  1 -
+ gguf-py/gguf/gguf_writer.py |  3 --
+ include/llama.h             |  3 --
+ src/llama-arch.cpp          |  1 -
+ src/llama-arch.h            |  1 -
+ src/llama-context.cpp       |  2 +-
+ src/llama-model-loader.cpp  | 67 -------------------------------------
+ src/llama-model-loader.h    |  7 ----
+ src/llama-model.cpp         |  1 -
+ src/llama.cpp               |  3 +-
+ src/models/qwen4exp.cpp     | 31 +++++++++++++++--
+ 13 files changed, 30 insertions(+), 96 deletions(-)
+
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index c9709961df16..851a47b9a584 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -2542,8 +2542,6 @@ common_speculative_init_result::common_speculative_init_result(
+         model_path = params.speculative.draft.mparams.path;
+         LOG_INF("%s: loading draft model '%s'\n", __func__, model_path.c_str());
+ 
+-        mparams.model_shared = model_tgt;
+-
+         llama_model * model_dft = llama_model_load_from_file(params.model.path.c_str(), mparams);
+         if (model_dft == NULL) {
+             LOG_ERR("%s: failed to load draft model, '%s'\n", __func__, model_path.c_str());
+diff --git a/conversion/base.py b/conversion/base.py
+index c0dd413b596b..0602dd297717 100644
+--- a/conversion/base.py
++++ b/conversion/base.py
+@@ -1033,10 +1033,6 @@ def set_type(self):
+ 
+     def prepare_metadata(self, vocab_only: bool):
+ 
+-        # tells the loader they are missing on purpose
+-        if self.mtp_only and self.mtp_shared_embd:
+-            self.gguf_writer.add_nextn_shared_target_tensors(True)
+-
+         total_params, shared_params, expert_params, expert_count = self.gguf_writer.get_total_parameter_count()
+ 
+         self.metadata = gguf.Metadata.load(self.metadata_override, self.dir_model_card, self.model_name, total_params)
+diff --git a/gguf-py/gguf/constants.py b/gguf-py/gguf/constants.py
+index 2bebd73244fd..59c22593d81f 100644
+--- a/gguf-py/gguf/constants.py
++++ b/gguf-py/gguf/constants.py
+@@ -129,7 +129,6 @@ class LLM:
+         MOE_EVERY_N_LAYERS                = "{arch}.moe_every_n_layers"
+         MOE_LATENT_SIZE                   = "{arch}.moe_latent_size"
+         NEXTN_PREDICT_LAYERS              = "{arch}.nextn_predict_layers"
+-        NEXTN_SHARED_TARGET_TENSORS       = "{arch}.nextn_shared_target_tensors"
+         NUM_DEEPSTACK_LAYERS              = "{arch}.n_deepstack_layers"
+         DEEPSTACK_MAPPING                 = "{arch}.deepstack_mapping"
+         POOLING_TYPE                      = "{arch}.pooling_type"
+diff --git a/gguf-py/gguf/gguf_writer.py b/gguf-py/gguf/gguf_writer.py
+index f784579a0bc8..689c2fca1119 100644
+--- a/gguf-py/gguf/gguf_writer.py
++++ b/gguf-py/gguf/gguf_writer.py
+@@ -911,9 +911,6 @@ def add_moe_latent_size(self, value: int) -> None:
+     def add_nextn_predict_layers(self, count: int) -> None:
+         self.add_uint32(Keys.LLM.NEXTN_PREDICT_LAYERS.format(arch=self.arch), count)
+ 
+-    def add_nextn_shared_target_tensors(self, value: bool) -> None:
+-        self.add_bool(Keys.LLM.NEXTN_SHARED_TARGET_TENSORS.format(arch=self.arch), value)
+-
+     def add_swin_norm(self, value: bool) -> None:
+         self.add_bool(Keys.LLM.SWIN_NORM.format(arch=self.arch), value)
+ 
+diff --git a/include/llama.h b/include/llama.h
+index 41b9123042b1..ef7a012c43a1 100644
+--- a/include/llama.h
++++ b/include/llama.h
+@@ -340,9 +340,6 @@ extern "C" {
+         // override key-value pairs of the model meta data
+         const struct llama_model_kv_override * kv_overrides;
+ 
+-        // target for a draft head that declares nextn_shared_target_tensors; must outlive this model
+-        const struct llama_model * model_shared;
+-
+         // Keep the booleans together to avoid misalignment during copy-by-value.
+         bool vocab_only;      // only load the vocabulary, no weights
+         bool check_tensors;   // validate model tensor data
+diff --git a/src/llama-arch.cpp b/src/llama-arch.cpp
+index 58f839fc85a0..8eb4ec50d3d3 100644
+--- a/src/llama-arch.cpp
++++ b/src/llama-arch.cpp
+@@ -217,7 +217,6 @@ static const std::map<llm_kv, const char *> LLM_KV_NAMES = {
+     { LLM_KV_MOE_EVERY_N_LAYERS,                "%s.moe_every_n_layers"                },
+     { LLM_KV_MOE_LATENT_SIZE,                   "%s.moe_latent_size"                   },
+     { LLM_KV_NEXTN_PREDICT_LAYERS,              "%s.nextn_predict_layers"              },
+-    { LLM_KV_NEXTN_SHARED_TARGET_TENSORS,       "%s.nextn_shared_target_tensors"       },
+     { LLM_KV_NUM_DEEPSTACK_LAYERS,              "%s.n_deepstack_layers"                },
+     { LLM_KV_DEEPSTACK_MAPPING,                 "%s.deepstack_mapping"                 },
+     { LLM_KV_HIDDEN_ACT,                        "%s.hidden_activation"                 },
+diff --git a/src/llama-arch.h b/src/llama-arch.h
+index e13633ec859d..90aa7cfb1119 100644
+--- a/src/llama-arch.h
++++ b/src/llama-arch.h
+@@ -222,7 +222,6 @@ enum llm_kv {
+     LLM_KV_MOE_EVERY_N_LAYERS,
+     LLM_KV_MOE_LATENT_SIZE,
+     LLM_KV_NEXTN_PREDICT_LAYERS,
+-    LLM_KV_NEXTN_SHARED_TARGET_TENSORS,
+     LLM_KV_NUM_DEEPSTACK_LAYERS,
+     LLM_KV_DEEPSTACK_MAPPING,
+     LLM_KV_HIDDEN_ACT,
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index 3cc27717ece8..01014b1378ee 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -152,7 +152,7 @@ llama_context::llama_context(
+         cparams.ctx_other = params.ctx_other;
+     }
+ 
+-    if (model.arch == LLM_ARCH_EAGLE3 || model.arch == LLM_ARCH_DFLASH) {
++    if (model.arch == LLM_ARCH_EAGLE3 || model.arch == LLM_ARCH_DFLASH || model.arch == LLM_ARCH_QWEN4EXP) {
+         if (model.tok_embd == nullptr || model.output == nullptr) {
+             if (params.ctx_other == nullptr) {
+                 throw std::runtime_error(model.arch_name() + " requires ctx_other to be set (this warning is normal during memory fitting)");
+diff --git a/src/llama-model-loader.cpp b/src/llama-model-loader.cpp
+index 0238e235a1ad..49f3c4f8ea0d 100644
+--- a/src/llama-model-loader.cpp
++++ b/src/llama-model-loader.cpp
+@@ -1106,68 +1106,6 @@ bool llama_model_loader::lazy_read::add(const std::string & name, const ggml_ten
+     return true;
+ }
+ 
+-// declared in llama-model.h, which this file does not include
+-const std::vector<std::pair<std::string, ggml_tensor *>> & llama_internal_get_tensor_map(const llama_model * model);
+-
+-struct ggml_tensor * llama_model_loader::borrow_shared_tensor(const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne) {
+-    // checked first so no other tensor in any model pays a metadata lookup
+-    if (tn.tensor != LLM_TENSOR_TOKEN_EMBD && tn.tensor != LLM_TENSOR_OUTPUT && tn.tensor != LLM_TENSOR_OUTPUT_NORM) {
+-        return nullptr;
+-    }
+-
+-    if (shared_target_tensors < 0) {
+-        bool shared = false;
+-        get_key(LLM_KV_NEXTN_SHARED_TARGET_TENSORS, shared, false);
+-        shared_target_tensors = shared ? 1 : 0;
+-    }
+-    if (shared_target_tensors == 0) {
+-        return nullptr;
+-    }
+-
+-    const std::string name = tn.str();
+-    if (get_weight(name.c_str()) != nullptr) {
+-        return nullptr;
+-    }
+-
+-    if (model_shared == nullptr) {
+-        throw std::runtime_error(format("%s: this model is a draft head without its own '%s'; "
+-                    "load it as a draft of its target model, not on its own", __func__, name.c_str()));
+-    }
+-
+-    ggml_tensor * src = nullptr;
+-    for (const auto & [n, t] : llama_internal_get_tensor_map(model_shared)) {
+-        if (n == name) {
+-            src = t;
+-            break;
+-        }
+-    }
+-    if (src == nullptr) {
+-        throw std::runtime_error(format("%s: draft needs tensor '%s' from the target, which does not have it",
+-                    __func__, name.c_str()));
+-    }
+-
+-    // used directly, so the shapes must agree exactly
+-    size_t dim = 0;
+-    for (const int64_t n : ne) {
+-        if (dim >= GGML_MAX_DIMS || src->ne[dim] != n) {
+-            throw std::runtime_error(format("%s: draft and target disagree on '%s': target has %s, draft wants %s",
+-                        __func__, name.c_str(), llama_format_tensor_shape(src).c_str(), llama_format_tensor_shape(ne).c_str()));
+-        }
+-        dim++;
+-    }
+-    for (; dim < GGML_MAX_DIMS; dim++) {
+-        if (src->ne[dim] != 1) {
+-            throw std::runtime_error(format("%s: draft and target disagree on '%s': target has %s, draft wants %s",
+-                        __func__, name.c_str(), llama_format_tensor_shape(src).c_str(), llama_format_tensor_shape(ne).c_str()));
+-        }
+-    }
+-
+-    LLAMA_LOG_INFO("%s: tensor %s taken from the target model\n", __func__, name.c_str());
+-
+-    // not counted in n_created/size_data: not in this file, neither allocated nor freed here
+-    return src;
+-}
+-
+ struct ggml_tensor * llama_model_loader::create_tensor(
+         const llama_hparams & hparams, const buft_list_t * buft_list_cpu, const buft_list_t * buft_list_input, const buft_list_t * buft_list_output,
+         const buft_list_t * buft_list_layer, const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne, int flags) {
+@@ -1388,11 +1326,6 @@ struct ggml_tensor * llama_model_loader::create_tensor(
+         return ret;
+     }
+ 
+-    // must precede check_tensor_dims, and must win over the arch fallback that ties output to token_embd
+-    if (ggml_tensor * shared = borrow_shared_tensor(tn, ne)) {
+-        return shared;
+-    }
+-
+     LLAMA_LOG_DEBUG("%s: loading tensor %s\n", __func__, tn.str().c_str());
+     const struct ggml_tensor * cur = check_tensor_dims(tn.str(), ne, !(flags & TENSOR_NOT_REQUIRED), flags & TENSOR_ALLOW_RESHAPE);
+     if (cur == NULL) {
+diff --git a/src/llama-model-loader.h b/src/llama-model-loader.h
+index 7cf1d823cde8..e8ef8a16fe90 100644
+--- a/src/llama-model-loader.h
++++ b/src/llama-model-loader.h
+@@ -117,10 +117,6 @@ struct llama_model_loader {
+         std::set<std::string>                  tensors;
+     } lazy;
+ 
+-    const struct llama_model * model_shared = nullptr;
+-
+-    // cached nextn_shared_target_tensors, -1 until first read
+-    int shared_target_tensors = -1;
+ 
+     llama_files files;
+     llama_ftype ftype;
+@@ -243,9 +239,6 @@ struct llama_model_loader {
+         const llama_hparams & hparams, const buft_list_t * buft_list_cpu, const buft_list_t * buft_list_input, const buft_list_t * buft_list_output,
+         const buft_list_t * buft_list_layer, const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne, int flags);
+ 
+-    // token_embd/output/output_norm from the target. null unless the file declares the flag.
+-    struct ggml_tensor * borrow_shared_tensor(const LLM_TN_IMPL & tn, const std::initializer_list<int64_t> & ne);
+-
+     void done_getting_tensors(bool partial = false) const;
+ 
+     void init_mappings(bool prefetch = true, llama_mlocks * mlock_mmaps = nullptr);
+diff --git a/src/llama-model.cpp b/src/llama-model.cpp
+index ad321c55c46b..8592ce99f3b4 100644
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -2711,7 +2711,6 @@ llama_model_params llama_model_default_params() {
+         /*.progress_callback           =*/ nullptr,
+         /*.progress_callback_user_data =*/ nullptr,
+         /*.kv_overrides                =*/ nullptr,
+-        /*.model_shared                =*/ nullptr,
+         /*.vocab_only                  =*/ false,
+         /*.check_tensors               =*/ false,
+         /*.use_extra_bufts             =*/ true,
+diff --git a/src/llama.cpp b/src/llama.cpp
+index 7c49b3a24621..633db658c955 100644
+--- a/src/llama.cpp
++++ b/src/llama.cpp
+@@ -318,8 +318,7 @@ static std::pair<int, llama_model *> llama_model_load(struct gguf_context * meta
+         llama_model_loader ml(metadata, set_tensor_data, set_tensor_data_ud, fname, splits, file, params.load_mode,
+             params.check_tensors, params.no_alloc, params.load_mtp, params.kv_overrides, params.tensor_buft_overrides);
+ 
+-        ml.lazy.mode    = params.lazy_mode;
+-        ml.model_shared = params.model_shared;
++        ml.lazy.mode = params.lazy_mode;
+ 
+         ml.print_info();
+         std::unique_ptr<llama_model> model_ptr(llama_model_create(ml, params));
+diff --git a/src/models/qwen4exp.cpp b/src/models/qwen4exp.cpp
+index 5074f4911797..c1e5a8d3b683 100644
+--- a/src/models/qwen4exp.cpp
++++ b/src/models/qwen4exp.cpp
+@@ -23,6 +23,20 @@ static void qwen4exp_require_arr_len(llama_model_loader & ml, llm_kv kid, uint32
+     }
+ }
+ 
++// a draft head may ship without the embeddings and the LM head and borrow the target's instead.
++// the target is only reachable at graph build, through the context the draft is speculating for.
++static const llama_model & qwen4exp_shared_model(const llama_cparams & cparams, const llama_model & model, const char * name) {
++    if (cparams.ctx_other == nullptr) {
++        throw std::runtime_error(format("QWEN4EXP MTP: this draft head has no '%s' of its own; "
++                                        "load it as a draft of its target model (-md), not on its own", name));
++    }
++    const llama_model & other = *llama_get_model(cparams.ctx_other);
++    if (other.hparams.n_embd != model.hparams.n_embd || other.vocab.n_tokens() != model.vocab.n_tokens()) {
++        throw std::runtime_error(format("QWEN4EXP MTP: draft and target disagree on the shape of '%s'", name));
++    }
++    return other;
++}
++
+ void llama_model_qwen4exp::load_arch_hparams(llama_model_loader & ml) {
+     // must precede the per-layer arrays: n_layer() == n_layer_all - n_layer_nextn.
+     ml.get_key(LLM_KV_NEXTN_PREDICT_LAYERS, hparams.n_layer_nextn, false);
+@@ -162,7 +176,8 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+     const bool mtp_only    = (hparams.n_layer_nextn > 0) && (ml.get_weight("blk.0.hc_attn_norm.weight") == nullptr);
+     const int  trunk_flags = mtp_only ? TENSOR_NOT_REQUIRED : 0;
+ 
+-    tok_embd = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, 0);
++    // a draft may also drop the embeddings and the head and borrow the target's at graph build
++    tok_embd = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, trunk_flags);
+ 
+     // no output_norm: this mixer carries it. the MTP head has its own in nextn.hc_head_*.
+     hc_head_norm = create_tensor(tn(LLM_TENSOR_HC_HEAD_NORM, "weight"), { hc_dim }, trunk_flags);
+@@ -170,7 +185,9 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+     hc_head_up   = create_tensor(tn(LLM_TENSOR_HC_HEAD_UP,   "weight"), { hc_lr, hc_dim }, trunk_flags);
+ 
+     output = create_tensor(tn(LLM_TENSOR_OUTPUT, "weight"), { n_embd, n_vocab }, TENSOR_NOT_REQUIRED);
+-    if (output == NULL) {
++    // tie_word_embeddings is false here, so this only fires for a file that ships neither; do not
++    // tie a borrowing draft's head to a token_embd it does not have either
++    if (output == NULL && tok_embd != NULL) {
+         output = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, TENSOR_DUPLICATED);
+     }
+ 
+@@ -530,6 +547,9 @@ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_
+     ggml_set_name(inp->h, "mtp_h_input");
+ 
+     ggml_tensor * tok_embd_w = layer.nextn.embed_tokens ? layer.nextn.embed_tokens : model.tok_embd;
++    if (tok_embd_w == nullptr) {
++        tok_embd_w = qwen4exp_shared_model(cparams, model, "token_embd.weight").tok_embd;
++    }
+     ggml_tensor * tok_embd   = ggml_get_rows(ctx0, tok_embd_w, inp->tokens);
+     cb(tok_embd, "mtp_tok_embd", il);
+ 
+@@ -655,7 +675,12 @@ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_
+ 
+     ggml_tensor * head_w = layer.nextn.shared_head_head ? layer.nextn.shared_head_head : model.output;
+     ggml_tensor * head_s = layer.nextn.shared_head_head ? layer.nextn.shared_head_head_s : model.output_s;
+-    GGML_ASSERT(head_w && "QWEN4EXP MTP: missing LM head (nextn.shared_head_head or model.output)");
++    if (head_w == nullptr) {
++        const llama_model & other = qwen4exp_shared_model(cparams, model, "output.weight");
++        head_w = other.output;
++        head_s = other.output_s;
++        GGML_ASSERT(head_w && "QWEN4EXP MTP: the target model has no LM head to borrow");
++    }
+ 
+     cur = build_lora_mm(head_w, cur, head_s);
+     cb(cur, "result_output", -1);
+
+From 2c967293c2632bd0d09096406628a7e4baf97b88 Mon Sep 17 00:00:00 2001
+From: danielhanchen <danielhanchen@gmail.com>
+Date: Thu, 3 Sep 2026 21:58:24 +0000
+Subject: [PATCH 10/10] qwen4exp mtp: cut comments that restate the code
+
+Assisted-by: Claude
+---
+ conversion/qwen4exp.py    |  9 ++-------
+ gguf-py/gguf/constants.py |  1 -
+ src/llama-model.h         |  1 -
+ src/models/models.h       |  1 -
+ src/models/qwen4exp.cpp   | 18 +++---------------
+ 5 files changed, 5 insertions(+), 25 deletions(-)
+
+diff --git a/conversion/qwen4exp.py b/conversion/qwen4exp.py
+index 5b2b0495e92c..f9ce6b1df42e 100644
+--- a/conversion/qwen4exp.py
++++ b/conversion/qwen4exp.py
+@@ -34,13 +34,10 @@ def __init__(self, *args, **kwargs):
+         self._ple_shards: dict[int, str] = {}
+         self._ple_row_dim: int | None = None
+ 
+-    # _QwenMtpMixin renames mtp.layers.0.* to the trailing block index, so the head reuses the
+-    # existing qwen4exp mappings; only the two pieces below differ.
+     _MTP_MIXER_PREFIX = "mtp.hyper_connection_mixer."
+ 
+     @classmethod
+     def filter_tensors(cls, item):
+-        # unindexed in the checkpoint, per-block in the GGUF
+         name, gen = item
+         if name.startswith("model." + cls._MTP_MIXER_PREFIX):
+             name = name.replace("model.", "", 1)
+@@ -52,7 +49,6 @@ def filter_tensors(cls, item):
+         return super().filter_tensors((name, gen))
+ 
+     def index_tensors(self, remote_hf_model_id: str | None = None) -> dict[str, Callable[[], Tensor]]:
+-        # W_e@e + W_h@h == [W_e|W_h] @ concat(e, h), so fc_embedding and fc_hidden fuse into eh_proj
+         tensors = super().index_tensors(remote_hf_model_id=remote_hf_model_id)
+ 
+         emb = tensors.pop("mtp.fc_embedding.weight", None)
+@@ -66,7 +62,7 @@ def index_tensors(self, remote_hf_model_id: str | None = None) -> dict[str, Call
+             )
+ 
+         assert self._original_block_count is not None
+-        # fc_embedding first: the graph concatenates the embedding ahead of the hidden state
++        # W_e@e + W_h@h == [W_e|W_h] @ concat(e, h); embedding first, matching the graph's concat.
+         name = f"model.layers.{self._original_block_count}.eh_proj.weight"
+         tensors[name] = lambda: torch.cat([emb(), hid()], dim=1)
+         return tensors
+@@ -100,12 +96,11 @@ def set_gguf_parameters(self):
+         ratio = hp["indexer_compress_ratio"]
+         layer_types = hp["layer_types"]
+         ratios = [ratio if layer_types[i] == "full_attention" else 0 for i in range(n_layer)]
+-        # read with length block_count; 0 selects dense, which is how the MTP blocks attend
++        # 0 selects dense, which is how the MTP block attends.
+         ratios += [0] * (self.block_count - n_layer)
+         self.gguf_writer.add_attention_compress_ratios(ratios)
+ 
+         # ple_layer_ids is 1-based in the HF config; empty means no n-gram table,
+-        # so emit no PLE keys rather than optional ones. a draft-only export has no PLE table either.
+         ple_layers = [i - 1 for i in hp["ple_layer_ids"]]
+         if not ple_layers or self.mtp_only:
+             return
+diff --git a/gguf-py/gguf/constants.py b/gguf-py/gguf/constants.py
+index 59c22593d81f..01c955121637 100644
+--- a/gguf-py/gguf/constants.py
++++ b/gguf-py/gguf/constants.py
+@@ -1179,7 +1179,6 @@ class MODEL_TENSOR(IntEnum):
+     NEXTN_HNORM            = auto()
+     NEXTN_SHARED_HEAD_HEAD = auto()
+     NEXTN_SHARED_HEAD_NORM = auto()
+-    # qwen4exp: the MTP head's own hyper-connection mixer, in place of an output norm
+     NEXTN_HC_HEAD_NORM     = auto()
+     NEXTN_HC_HEAD_DOWN     = auto()
+     NEXTN_HC_HEAD_UP       = auto()
+diff --git a/src/llama-model.h b/src/llama-model.h
+index 6ab52e37aea5..1a07bd267027 100644
+--- a/src/llama-model.h
++++ b/src/llama-model.h
+@@ -229,7 +229,6 @@ struct llama_layer_nextn {
+     struct ggml_tensor * shared_head_head_in_s = nullptr;
+     struct ggml_tensor * shared_head_norm      = nullptr;
+ 
+-    // qwen4exp: the MTP head's mixer; collapses the streams and stands in for the output norm
+     struct ggml_tensor * hc_head_norm          = nullptr;
+     struct ggml_tensor * hc_head_down          = nullptr;
+     struct ggml_tensor * hc_head_up            = nullptr;
+diff --git a/src/models/models.h b/src/models/models.h
+index 51e09a699e45..815a4957ff64 100644
+--- a/src/models/models.h
++++ b/src/models/models.h
+@@ -2286,7 +2286,6 @@ struct llama_model_qwen4exp : public llama_model_base {
+     struct graph : public llm_build_delta_net_base {
+         graph(const llama_model & model, const llm_graph_params & params);
+     protected:
+-        // graph_mtp ctor: binds the members without building the trunk
+         struct no_build_t {};
+         graph(const llama_model & model, const llm_graph_params & params, no_build_t) :
+             llm_build_delta_net_base(params), model(model) {}
+diff --git a/src/models/qwen4exp.cpp b/src/models/qwen4exp.cpp
+index c1e5a8d3b683..e00d32ddc2d0 100644
+--- a/src/models/qwen4exp.cpp
++++ b/src/models/qwen4exp.cpp
+@@ -23,8 +23,6 @@ static void qwen4exp_require_arr_len(llama_model_loader & ml, llm_kv kid, uint32
+     }
+ }
+ 
+-// a draft head may ship without the embeddings and the LM head and borrow the target's instead.
+-// the target is only reachable at graph build, through the context the draft is speculating for.
+ static const llama_model & qwen4exp_shared_model(const llama_cparams & cparams, const llama_model & model, const char * name) {
+     if (cparams.ctx_other == nullptr) {
+         throw std::runtime_error(format("QWEN4EXP MTP: this draft head has no '%s' of its own; "
+@@ -172,21 +170,17 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+     const int64_t hc_dim = hc * n_embd;
+     const int64_t hc_lr  = hparams.hc_low_rank;
+ 
+-    // a draft-only export declares the full block count but ships the MTP block alone.
+     const bool mtp_only    = (hparams.n_layer_nextn > 0) && (ml.get_weight("blk.0.hc_attn_norm.weight") == nullptr);
+     const int  trunk_flags = mtp_only ? TENSOR_NOT_REQUIRED : 0;
+ 
+-    // a draft may also drop the embeddings and the head and borrow the target's at graph build
+     tok_embd = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, trunk_flags);
+ 
+-    // no output_norm: this mixer carries it. the MTP head has its own in nextn.hc_head_*.
+     hc_head_norm = create_tensor(tn(LLM_TENSOR_HC_HEAD_NORM, "weight"), { hc_dim }, trunk_flags);
+     hc_head_down = create_tensor(tn(LLM_TENSOR_HC_HEAD_DOWN, "weight"), { hc_dim, hc_lr }, trunk_flags);
+     hc_head_up   = create_tensor(tn(LLM_TENSOR_HC_HEAD_UP,   "weight"), { hc_lr, hc_dim }, trunk_flags);
+ 
+     output = create_tensor(tn(LLM_TENSOR_OUTPUT, "weight"), { n_embd, n_vocab }, TENSOR_NOT_REQUIRED);
+-    // tie_word_embeddings is false here, so this only fires for a file that ships neither; do not
+-    // tie a borrowing draft's head to a token_embd it does not have either
++    // tie_word_embeddings is false here: never tie to a token_embd a borrowing draft lacks.
+     if (output == NULL && tok_embd != NULL) {
+         output = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, TENSOR_DUPLICATED);
+     }
+@@ -296,7 +290,6 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+         layer.nextn.hc_head_down = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_DOWN, "weight", il), { hc_dim, hc_lr }, flags);
+         layer.nextn.hc_head_up   = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_UP,   "weight", il), { hc_lr, hc_dim }, flags);
+ 
+-        // absent when mtp_use_dedicated_embeddings=false (qwen4exp); the head falls back to the trunk's.
+         layer.nextn.embed_tokens     = create_tensor(tn(LLM_TENSOR_NEXTN_EMBED_TOKENS,     "weight", il), { n_embd, n_vocab }, flags | TENSOR_NOT_REQUIRED);
+         layer.nextn.shared_head_head = create_tensor(tn(LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD, "weight", il), { n_embd, n_vocab }, flags | TENSOR_NOT_REQUIRED);
+     }
+@@ -306,9 +299,7 @@ std::unique_ptr<llm_graph_context> llama_model_qwen4exp::build_arch_graph(const
+     if (params.gtype == LLM_GRAPH_TYPE_DECODER_MTP) {
+         return std::make_unique<graph_mtp>(*this, params);
+     }
+-    // a draft-only export declares the trunk but ships the MTP block alone, so the trunk
+-    // tensors are null and only the MTP graph above is buildable. a self-contained draft
+-    // keeps token_embd, so it passes the borrow check and would reach here and walk nulls.
++    // without this a self-contained draft loads, then walks the null trunk and segfaults.
+     if (hc_head_norm == nullptr) {
+         throw std::runtime_error("this model is an MTP draft head without a trunk; "
+                                  "load it as a draft of its target model (-md), not on its own");
+@@ -452,7 +443,6 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+             cur = build_layer_attn(inp->get_attn(), mctx_hyb, cur, inp_pos, sections, il);
+         }
+ 
+-        // an unmasked MTP export needs every token's row, so it defers the gather until after t_h_nextn.
+         const bool gather_now = !cparams.embeddings_nextn || cparams.embeddings_nextn_masked;
+ 
+         if (il == n_layer - 1 && inp_out_ids && gather_now) {
+@@ -510,9 +500,7 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+     ggml_build_forward_expand(gf, cur);
+ }
+ 
+-// LLM_GRAPH_TYPE_DECODER_MTP draft head for qwen4exp. Attends densely: QSA only prunes context
+-// past a 2048-token budget, so dense is a numerical superset and drafts are verified regardless.
+-// TODO: wire up QSA here for long-context draft fidelity.
++// TODO: QSA for the draft head; dense is a numerical superset below the 2048-token budget.
+ llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_graph_params & params) :
+     graph(model, params, no_build_t{}) {
+     GGML_ASSERT(hparams.n_layer_nextn > 0 && "QWEN4EXP MTP requires n_layer_nextn > 0");

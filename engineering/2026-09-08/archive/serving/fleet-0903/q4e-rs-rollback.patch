@@ -1,0 +1,63 @@
+--- a/src/llama-arch.cpp
++++ b/src/llama-arch.cpp
+@@ -3,6 +3,7 @@
+ #include "llama-impl.h"
+ 
+ #include <map>
++#include <cstdlib>
+ #include <vector>
+ 
+ static const std::map<llm_arch, const char *> LLM_ARCH_NAMES = {
+@@ -1104,6 +1105,10 @@
+ 
+ bool llm_arch_supports_rs_rollback(const llm_arch & arch) {
+     switch (arch) {
++        case LLM_ARCH_QWEN4EXP: {
++            const char * value = std::getenv("GGML_Q4E_RS_ROLLBACK");
++            return value != nullptr && std::atoi(value) != 0;
++        }
+         case LLM_ARCH_QWEN35:
+         case LLM_ARCH_QWEN35MOE:
+         case LLM_ARCH_DEEPSEEK4:
+--- a/src/models/qwen4exp.cpp
++++ b/src/models/qwen4exp.cpp
+@@ -1296,20 +1296,26 @@
+ 
+     ggml_tensor * conv_input = ggml_concat(ctx0, state, ggml_transpose(ctx0, x), 0);
+ 
+-    // keep the last state_cols columns for the next ubatch
+     const size_t row_size = ggml_row_size(conv_states_all->type, row_total);
+-
+-    ggml_tensor * tail = ggml_view_3d(ctx0, conv_input,
+-            state_cols, channels, n_seqs,
+-            conv_input->nb[1], conv_input->nb[2],
+-            ggml_row_size(conv_input->type, conv_input->ne[0] - state_cols));
+-
+-    ggml_tensor * dst = ggml_view_2d(ctx0, conv_states_all,
+-            state_cols * channels, n_seqs,
+-            conv_states_all->nb[1],
+-            kv_head * row_size);
+-
+-    ggml_build_forward_expand(gf, ggml_cpy(ctx0, ggml_cont(ctx0, tail), dst));
++    const int64_t mem_size = mctx_cur->get_size();
++    const int64_t slots = cparams.n_rs_seq + 1;
++    const int64_t n_seq_tokens = conv_input->ne[0] - state_cols;
++
++    // Each rollback plane stores the convolution history after that prefix.
++    for (int64_t slot = 0; slot < slots; ++slot) {
++        const int64_t first = std::max<int64_t>(0, n_seq_tokens - slot);
++        ggml_tensor * tail = ggml_view_3d(ctx0, conv_input,
++                state_cols, channels, n_seqs,
++                conv_input->nb[1], conv_input->nb[2],
++                ggml_row_size(conv_input->type, first));
++
++        ggml_tensor * dst = ggml_view_2d(ctx0, conv_states_all,
++                state_cols * channels, n_seqs,
++                conv_states_all->nb[1],
++                (slot * mem_size + kv_head) * row_size);
++
++        ggml_build_forward_expand(gf, ggml_cpy(ctx0, ggml_cont(ctx0, tail), dst));
++    }
+ 
+     return conv_input;
+ }

@@ -1,0 +1,194 @@
+--- a/ggml/src/ggml-cpu/traits.h
++++ b/ggml/src/ggml-cpu/traits.h
+@@ -20,6 +20,11 @@
+         const struct ggml_compute_params * params,
+         struct ggml_tensor * gate,
+         struct ggml_tensor * up,
++        struct ggml_tensor * dst);
++bool ggml_cpu_extra_compute_forward_mul_mat_id_swiglu_clamped(
++        const struct ggml_compute_params * params,
++        struct ggml_tensor * gate_clamp,
++        struct ggml_tensor * up_clamp,
+         struct ggml_tensor * dst);
+ bool ggml_cpu_extra_compute_forward_mul_mat_id_weighted_sum(
+         const struct ggml_compute_params * params,
+@@ -51,6 +56,13 @@
+             struct ggml_tensor *) {
+         return false;
+     }
++    virtual bool compute_forward_mul_mat_id_swiglu_clamped(
++            struct ggml_compute_params *,
++            struct ggml_tensor *,
++            struct ggml_tensor *,
++            struct ggml_tensor *) {
++        return false;
++    }
+     virtual bool compute_forward_mul_mat_id_weighted_sum(
+             struct ggml_compute_params *,
+             struct ggml_tensor *,
+--- a/ggml/src/ggml-cpu/traits.cpp
++++ b/ggml/src/ggml-cpu/traits.cpp
+@@ -79,6 +79,27 @@
+     return false;
+ }
+ 
++bool ggml_cpu_extra_compute_forward_mul_mat_id_swiglu_clamped(
++        const struct ggml_compute_params * params,
++        struct ggml_tensor * gate_clamp,
++        struct ggml_tensor * up_clamp,
++        struct ggml_tensor * dst) {
++    for (auto extra : ggml_backend_cpu_get_extra_buffer_types()) {
++        if (!extra || !extra->context) {
++            continue;
++        }
++        auto buf_extra = (ggml::cpu::extra_buffer_type *) extra->context;
++        auto gate_traits = buf_extra->get_tensor_traits(gate_clamp->src[0]);
++        auto up_traits = buf_extra->get_tensor_traits(up_clamp->src[0]);
++        if (gate_traits && gate_traits == up_traits &&
++                gate_traits->compute_forward_mul_mat_id_swiglu_clamped(
++                    const_cast<ggml_compute_params *>(params), gate_clamp, up_clamp, dst)) {
++            return true;
++        }
++    }
++    return false;
++}
++
+ bool ggml_cpu_extra_compute_forward_mul_mat_id_weighted_sum(
+         const struct ggml_compute_params * params,
+         struct ggml_tensor * down,
+--- a/ggml/src/ggml-cpu/ggml-cpu.c
++++ b/ggml/src/ggml-cpu/ggml-cpu.c
+@@ -3497,6 +3497,7 @@
+ // Returns the number of nodes skipped by fusion (>=1), or 0 if no fusion was applied.
+ static bool ggml_cpu_disable_fusion = false;  // initialized once in ggml_cpu_init(), read-only afterwards
+ static bool ggml_cpu_moe_gate_up_fusion = false;
++static bool ggml_cpu_moe_clamp_fusion = false;
+ static bool ggml_cpu_ffn_gate_up_fusion = false;
+ static bool ggml_cpu_moe_weighted_sum_fusion = false;
+ static bool ggml_cpu_moe_down_weighted_sum_fusion = false;
+@@ -3720,6 +3721,35 @@
+                         params, glu->src[0], glu->src[1], glu)) {
+                     return 2;
+                 }
++            }
++        }
++    }
++
++    if (ggml_cpu_moe_gate_up_fusion && ggml_cpu_moe_clamp_fusion &&
++            node->op == GGML_OP_MUL_MAT_ID && node_n + 4 < cgraph->n_nodes) {
++        const enum ggml_op fuse_ops[] = {
++            GGML_OP_MUL_MAT_ID, GGML_OP_CLAMP, GGML_OP_MUL_MAT_ID, GGML_OP_CLAMP, GGML_OP_GLU
++        };
++        const int outputs[] = { node_n + 4 };
++        if (ggml_can_fuse_subgraph(cgraph, node_n, 5, fuse_ops, outputs, 1)) {
++            struct ggml_tensor * mm0 = cgraph->nodes[node_n];
++            struct ggml_tensor * clamp0 = cgraph->nodes[node_n + 1];
++            struct ggml_tensor * mm1 = cgraph->nodes[node_n + 2];
++            struct ggml_tensor * clamp1 = cgraph->nodes[node_n + 3];
++            struct ggml_tensor * glu = cgraph->nodes[node_n + 4];
++            const bool operands_match = clamp0->src[0] == mm0 && clamp1->src[0] == mm1 &&
++                ((glu->src[0] == clamp0 && glu->src[1] == clamp1) ||
++                 (glu->src[0] == clamp1 && glu->src[1] == clamp0));
++            if (operands_match && ggml_get_glu_op(glu) == GGML_GLU_OP_SWIGLU &&
++                    mm0->src[1] == mm1->src[1] && mm0->src[2] == mm1->src[2] &&
++                    mm0->type == GGML_TYPE_F32 && mm1->type == GGML_TYPE_F32 &&
++                    clamp0->type == GGML_TYPE_F32 && clamp1->type == GGML_TYPE_F32 && glu->type == GGML_TYPE_F32 &&
++                    mm0->src[0]->type == mm1->src[0]->type &&
++                    ggml_are_same_shape(mm0->src[0], mm1->src[0]) &&
++                    ggml_are_same_shape(mm0, clamp0) && ggml_are_same_shape(mm1, clamp1) &&
++                    ggml_are_same_shape(mm0, mm1) && ggml_are_same_shape(mm0, glu) &&
++                    ggml_cpu_extra_compute_forward_mul_mat_id_swiglu_clamped(params, glu->src[0], glu->src[1], glu)) {
++                return 4;
+             }
+         }
+     }
+@@ -4769,6 +4799,10 @@
+             ggml_cpu_moe_gate_up_fusion = (env != NULL && atoi(env) == 1);
+         }
+         {
++            const char * env = getenv("GGML_CPU_MOE_CLAMP_FUSION");
++            ggml_cpu_moe_clamp_fusion = (env != NULL && atoi(env) == 1);
++        }
++        {
+             const char * env = getenv("GGML_CPU_FFN_GATE_UP_FUSION");
+             ggml_cpu_ffn_gate_up_fusion = (env != NULL && atoi(env) == 1);
+         }
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -5847,11 +5847,38 @@
+         return true;
+     }
+ 
++    bool compute_forward_mul_mat_id_swiglu_clamped(
++            ggml_compute_params * params,
++            ggml_tensor * gate_clamp,
++            ggml_tensor * up_clamp,
++            ggml_tensor * dst) override {
++        if constexpr (!expanded_iq || NB_COLS != 16) {
++            return false;
++        } else {
++            ggml_tensor * gate = gate_clamp->src[0];
++            ggml_tensor * up = up_clamp->src[0];
++            if (gate_clamp->op != GGML_OP_CLAMP || up_clamp->op != GGML_OP_CLAMP ||
++                    gate->op != GGML_OP_MUL_MAT_ID || up->op != GGML_OP_MUL_MAT_ID ||
++                    gate->src[0]->extra != this || up->src[0]->extra != this) {
++                return false;
++            }
++            static std::atomic<bool> logged{false};
++            if (params->ith == 0 && !logged.load(std::memory_order_relaxed) &&
++                    !logged.exchange(true, std::memory_order_relaxed)) {
++                GGML_LOG_INFO("MOE_CLAMP_FUSION_ACTIVE type=%s\n", ggml_type_name(gate->src[0]->type));
++            }
++            forward_mul_mat_id_swiglu(params, gate, up, dst, gate_clamp, up_clamp);
++            return true;
++        }
++    }
++
+     void forward_mul_mat_id_swiglu(
+             ggml_compute_params * params,
+             ggml_tensor * gate,
+             ggml_tensor * up,
+-            ggml_tensor * dst) {
++            ggml_tensor * dst,
++            const ggml_tensor * gate_clamp = nullptr,
++            const ggml_tensor * up_clamp = nullptr) {
+         const ggml_tensor * gate_w = gate->src[0];
+         const ggml_tensor * up_w = up->src[0];
+         const ggml_tensor * src1 = gate->src[1];
+@@ -5877,6 +5904,20 @@
+         GGML_ASSERT(gate_w->nb[0] == ggml_type_size(gate_w->type));
+         GGML_ASSERT(up_w->nb[0] == ggml_type_size(up_w->type));
+         GGML_ASSERT(src1->nb[0] == sizeof(float) && dst->nb[0] == sizeof(float));
++
++        float gate_bounds[2] = {}, up_bounds[2] = {};
++        if (gate_clamp && up_clamp) {
++            memcpy(gate_bounds, gate_clamp->op_params, sizeof(gate_bounds));
++            memcpy(up_bounds, up_clamp->op_params, sizeof(up_bounds));
++        }
++        const auto apply_clamps = [&](int64_t count, float * gate_values, float * up_values) {
++            if (gate_clamp && up_clamp) {
++                for (int64_t i = 0; i < count; ++i) {
++                    gate_values[i] = MAX(MIN(gate_values[i], gate_bounds[1]), gate_bounds[0]);
++                    up_values[i] = MAX(MIN(up_values[i], up_bounds[1]), up_bounds[0]);
++                }
++            }
++        };
+ 
+         const size_t src1_row_size = ggml_row_size(PARAM_TYPE, k);
+         const size_t src1_plane_size = src1_row_size * n_src_rows;
+@@ -5980,6 +6021,7 @@
+                             ggml_gemv_iq_r16_batch<expanded_iq3_xxs>(k, up_tmp[0], tile_size,
+                                 up_cur + physical_row_offset(up_w, tile_start), activations, nr, tile_rows);
+                             for (int y = 0; y < nr; ++y) {
++                                apply_clamps(tile_rows, gate_tmp[y], up_tmp[y]);
+                                 ggml_vec_swiglu_f32(tile_rows, outputs[y] + tile_start, gate_tmp[y], up_tmp[y]);
+                             }
+                         }
+@@ -6008,6 +6050,7 @@
+                     gemv<BLOC_TYPE, INTER_SIZE, NB_COLS, PARAM_TYPE>(
+                         k, up_tmp, tile_rows, up_cur + physical_row_offset(up_w, tile_start),
+                         src1_col, 1, tile_rows);
++                    apply_clamps(tile_rows, gate_tmp, up_tmp);
+                     ggml_vec_swiglu_f32(
+                         tile_rows, out_dst + tile_start - row_start, gate_tmp, up_tmp);
+                 }

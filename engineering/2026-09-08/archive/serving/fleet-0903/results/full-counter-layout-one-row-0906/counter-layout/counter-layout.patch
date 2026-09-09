@@ -1,0 +1,36 @@
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -1926,17 +1926,21 @@
+     int64_t       single_task_max_elements = 0;
+     alignas(64) std::atomic<int> arrive1{0};
+     alignas(64) std::atomic<int> arrive2{0};
+-    alignas(64) std::atomic<int> done_threads[GGML_META_FUSED_MAX_DEVS];
++    struct alignas(GGML_PRIVATE_PAD_COUNTERS ? 64 : alignof(std::atomic<int>)) completion_counter {
++        std::atomic<int> value;
++    };
++    static_assert(sizeof(completion_counter) == (GGML_PRIVATE_PAD_COUNTERS ? 64 : sizeof(std::atomic<int>)));
++    alignas(64) completion_counter done_threads[GGML_META_FUSED_MAX_DEVS];
+     ggml_backend_meta_fused_reduce_desc() {
+         for (int j = 0; j < GGML_META_FUSED_MAX_DEVS; j++) {
+-            done_threads[j].store(0, std::memory_order_relaxed);
++            done_threads[j].value.store(0, std::memory_order_relaxed);
+         }
+     }
+     void reset() {
+         arrive1.store(0, std::memory_order_relaxed);
+         arrive2.store(0, std::memory_order_relaxed);
+         for (int j = 0; j < GGML_META_FUSED_MAX_DEVS; j++) {
+-            done_threads[j].store(0, std::memory_order_relaxed);
++            done_threads[j].value.store(0, std::memory_order_relaxed);
+         }
+     }
+ };
+@@ -2038,7 +2042,7 @@
+     }
+ 
+     // phase 2: all threads of this device done -> device done; wait for all devices
+-    if (d->done_threads[j].fetch_add(1, std::memory_order_acq_rel) + 1 == nth_reduce) {
++    if (d->done_threads[j].value.fetch_add(1, std::memory_order_acq_rel) + 1 == nth_reduce) {
+         d->arrive2.fetch_add(1, std::memory_order_acq_rel);
+     }
+     ggml_backend_meta_fused_spin_until(d->arrive2, n, "arrive2");

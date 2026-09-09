@@ -1,0 +1,63 @@
+{
+  "time": 1788898312.6685228,
+  "flash_pid": 462943,
+  "flash_process_absent": true,
+  "kernel_events": [
+    "2026-09-08T13:45:22,574125-06:00 oom-kill:constraint=CONSTRAINT_MEMORY_POLICY,nodemask=0,cpuset=user.slice,mems_allowed=0-3,global_oom,task_memcg=/user.slice/user-1000.slice/session-4040.scope,task=llama-server,pid=462943,uid=1000",
+    "2026-09-08T13:45:22,574572-06:00 Out of memory: Killed process 462943 (llama-server) total-vm:345999176kB, anon-rss:329341368kB, file-rss:67832kB, shmem-rss:108kB, UID:1000 pgtables:648136kB oom_score_adj:0"
+  ],
+  "external_qwen_first_observation": {
+    "pid": 1004526,
+    "start_ticks": 103876120,
+    "start_epoch": 1788896467.2,
+    "observed_at": 1788896994.6173644,
+    "provenance": "Earlier host process inspection in this turn; this PID has since been replaced externally."
+  },
+  "current_inference": [
+    {
+      "pid": 1219506,
+      "name": "llama-server",
+      "port": "18095",
+      "model": "Qwen3.8-Flash-Next-UD-Q6_K_XL-00001-of-00006.gguf",
+      "start_ticks": "103969952",
+      "exe": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/llama-server"
+    }
+  ],
+  "qwen_service": {
+    "processing": 0,
+    "queued": 0.0
+  },
+  "memory": {
+    "MemTotal": 811215671296,
+    "MemAvailable": 345428750336,
+    "SwapTotal": 8589930496,
+    "SwapFree": 4702208,
+    "Shmem": 279289663488
+  },
+  "component_probe_intervals": [
+    {
+      "label": "glm-flash-local-barrier-probe-0908",
+      "started": 1788896120.7300844,
+      "finished": 1788896127.5839577,
+      "completed_before_external_launch": true
+    },
+    {
+      "label": "glm-flash-local-barrier-probe-0908b",
+      "started": 1788896305.4459386,
+      "finished": 1788896309.9854422,
+      "completed_before_external_launch": true
+    }
+  ],
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-local-barrier-probe-0908/result.json": "f040d43f2fc2bc3a49e6e4e2d7b99c0871bd6ca8a96dc53b4a3c75c305a29ba6",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-local-barrier-probe-0908b/result.json": "5ae7cb031d853abe2d47c61fd4234ca12c4693fbe79d2e975598dfe2ed3170d6",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-post-model-0908.json": "f291cc2452a7f024c80a2bf3419f3b94fa83d6252730e280f4fc3b46a6c9d3ec",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-dissemination-0908b/result.json": "fd82ff5590acdffdfb69627cf45b2250dbbae715a4e81952175731c7536af5a5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/exclusive-model-launch-0908/result.json": "66e92de1e1c5cf41d363c28002021859ce242a8a69d17326c6b2e759844a372b"
+  },
+  "assessment": "The kernel killed the retained unmodified Flash runtime under a node-0 memory policy after another session started Qwen Q6. The experimental dissemination library was never loaded into Flash. The corrected isolated probe predates the external launch.",
+  "current_flash_state_note": "The trial manager still records the dead PID. Do not treat it as a live model or restore over the external Qwen service without coordinating ownership.",
+  "pending_coordination": "User was asked whether to pause externally served Qwen after its request completes; no reply has been received.",
+  "goal_target_gb_s": 285,
+  "target_reached": false
+}

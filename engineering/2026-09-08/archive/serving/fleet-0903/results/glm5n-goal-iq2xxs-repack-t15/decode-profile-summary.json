@@ -1,0 +1,4181 @@
+{
+  "graph_index": 14,
+  "cpu": 32,
+  "graph": "0x630a3abcafa0",
+  "nodes": 7035,
+  "total_ms": 107.633,
+  "hc_pre_source_shapes": [
+    "4096,4,1"
+  ],
+  "operation_ms": [
+    {
+      "op": "MUL_MAT",
+      "source_type": "q5_K",
+      "ms": 18.623
+    },
+    {
+      "op": "MUL_MAT_ID",
+      "source_type": "iq2_xxs",
+      "ms": 13.61
+    },
+    {
+      "op": "MUL_MAT",
+      "source_type": "q8_0",
+      "ms": 11.148
+    },
+    {
+      "op": "CONCAT",
+      "source_type": "f32",
+      "ms": 8.618
+    },
+    {
+      "op": "CUSTOM",
+      "source_type": "none",
+      "ms": 7.695
+    },
+    {
+      "op": "MUL_MAT_ID",
+      "source_type": "iq3_xxs",
+      "ms": 6.44
+    },
+    {
+      "op": "GET_ROWS",
+      "source_type": "f32",
+      "ms": 6.324
+    },
+    {
+      "op": "DSV4_HC_POST",
+      "source_type": "f32",
+      "ms": 4.752
+    },
+    {
+      "op": "MUL",
+      "source_type": "f32",
+      "ms": 4.432
+    },
+    {
+      "op": "RMS_NORM",
+      "source_type": "f32",
+      "ms": 4.331
+    },
+    {
+      "op": "MUL_MAT",
+      "source_type": "f32",
+      "ms": 4.212
+    },
+    {
+      "op": "MUL_MAT",
+      "source_type": "q6_K",
+      "ms": 1.931
+    },
+    {
+      "op": "SOFT_MAX",
+      "source_type": "f32",
+      "ms": 1.654
+    },
+    {
+      "op": "GATED_DELTA_NET",
+      "source_type": "f32",
+      "ms": 1.629
+    },
+    {
+      "op": "CPY",
+      "source_type": "f32",
+      "ms": 1.593
+    },
+    {
+      "op": "UNARY",
+      "source_type": "f32",
+      "ms": 1.064
+    },
+    {
+      "op": "MUL_MAT",
+      "source_type": "q4_K",
+      "ms": 0.975
+    },
+    {
+      "op": "MUL_MAT_ID",
+      "source_type": "iq2_s",
+      "ms": 0.755
+    },
+    {
+      "op": "ARGSORT",
+      "source_type": "f32",
+      "ms": 0.722
+    },
+    {
+      "op": "DSV4_HC_PRE",
+      "source_type": "f32",
+      "ms": 0.652
+    },
+    {
+      "op": "ADD",
+      "source_type": "f32",
+      "ms": 0.643
+    },
+    {
+      "op": "CONT",
+      "source_type": "f32",
+      "ms": 0.599
+    },
+    {
+      "op": "SUM_ROWS",
+      "source_type": "f32",
+      "ms": 0.48
+    },
+    {
+      "op": "MUL_MAT_ID",
+      "source_type": "iq4_xs",
+      "ms": 0.446
+    },
+    {
+      "op": "GET_ROWS",
+      "source_type": "f16",
+      "ms": 0.308
+    },
+    {
+      "op": "SSM_CONV",
+      "source_type": "f32",
+      "ms": 0.285
+    },
+    {
+      "op": "FLASH_ATTN_EXT",
+      "source_type": "f32",
+      "ms": 0.245
+    },
+    {
+      "op": "L2_NORM",
+      "source_type": "f32",
+      "ms": 0.192
+    },
+    {
+      "op": "LIGHTNING_INDEXER",
+      "source_type": "f32",
+      "ms": 0.08
+    },
+    {
+      "op": "GLU",
+      "source_type": "f32",
+      "ms": 0.074
+    },
+    {
+      "op": "CLAMP",
+      "source_type": "f32",
+      "ms": 0.029
+    },
+    {
+      "op": "GET_ROWS",
+      "source_type": "i32",
+      "ms": 0.024
+    },
+    {
+      "op": "TOP_K",
+      "source_type": "f32",
+      "ms": 0.013
+    },
+    {
+      "op": "SET_ROWS",
+      "source_type": "f32",
+      "ms": 0.013
+    },
+    {
+      "op": "REPEAT",
+      "source_type": "f32",
+      "ms": 0.012
+    }
+  ],
+  "source_ms": [
+    {
+      "source_name": "",
+      "ms": 7.695
+    },
+    {
+      "source_name": "blk.N.ffn_gate_exps.weight",
+      "ms": 7.21
+    },
+    {
+      "source_name": "blk.N.ffn_up_exps.weight",
+      "ms": 7.155
+    },
+    {
+      "source_name": "blk.N.ffn_down_exps.weight",
+      "ms": 6.886
+    },
+    {
+      "source_name": "blk.N.attn_output.weight",
+      "ms": 4.372
+    },
+    {
+      "source_name": "blk.N.ffn_gate_inp.weight",
+      "ms": 4.099
+    },
+    {
+      "source_name": "blk.N.attn_q.weight",
+      "ms": 3.156
+    },
+    {
+      "source_name": "blk.N.attn_k.weight",
+      "ms": 3.129
+    },
+    {
+      "source_name": "blk.N.attn_v.weight",
+      "ms": 3.063
+    },
+    {
+      "source_name": "blk.N.ssm_conv1d_q.weight (reshaped)",
+      "ms": 1.859
+    },
+    {
+      "source_name": "blk.N.ffn_up_shexp.weight",
+      "ms": 1.835
+    },
+    {
+      "source_name": "blk.N.ssm_g_a.weight",
+      "ms": 1.804
+    },
+    {
+      "source_name": "blk.N.ssm_f_a.weight",
+      "ms": 1.795
+    },
+    {
+      "source_name": "blk.N.ffn_gate_shexp.weight",
+      "ms": 1.728
+    },
+    {
+      "source_name": "blk.N.hc_ffn_fn.weight",
+      "ms": 1.271
+    },
+    {
+      "source_name": "blk.N.hc_attn_fn.weight",
+      "ms": 1.238
+    },
+    {
+      "source_name": "blk.N.ffn_down_shexp.weight",
+      "ms": 1.193
+    },
+    {
+      "source_name": "output.weight",
+      "ms": 0.975
+    },
+    {
+      "source_name": "blk.N.attn_q_b.weight",
+      "ms": 0.869
+    },
+    {
+      "source_name": "blk.N.indexer.attn_q_b.weight",
+      "ms": 0.869
+    },
+    {
+      "source_name": "blk.N.attn_q_a.weight",
+      "ms": 0.771
+    },
+    {
+      "source_name": "blk.N.attn_v_b.weight",
+      "ms": 0.764
+    },
+    {
+      "source_name": " (reshaped)",
+      "ms": 0.711
+    },
+    {
+      "source_name": "blk.N.indexer_compressor_gate.weight",
+      "ms": 0.515
+    },
+    {
+      "source_name": "blk.N.attn_k_b.weight",
+      "ms": 0.494
+    },
+    {
+      "source_name": "blk.N.ffn_gate.weight",
+      "ms": 0.45
+    },
+    {
+      "source_name": "blk.N.ffn_up.weight",
+      "ms": 0.448
+    },
+    {
+      "source_name": "blk.N.ffn_down.weight",
+      "ms": 0.447
+    },
+    {
+      "source_name": "blk.N.attn_kv_a_mqa.weight",
+      "ms": 0.422
+    },
+    {
+      "source_name": "blk.N.ssm_beta.weight",
+      "ms": 0.346
+    },
+    {
+      "source_name": "blk.N.ssm_f_b.weight",
+      "ms": 0.293
+    },
+    {
+      "source_name": "blk.N.ssm_g_b.weight",
+      "ms": 0.279
+    },
+    {
+      "source_name": "node_416",
+      "ms": 0.261
+    },
+    {
+      "source_name": "cache_s_l2 (reshaped)",
+      "ms": 0.232
+    },
+    {
+      "source_name": "cache_s_l0 (reshaped)",
+      "ms": 0.221
+    },
+    {
+      "source_name": "indexer_pool_members-3 (view) (permuted) (cont)",
+      "ms": 0.219
+    },
+    {
+      "source_name": "cache_s_l1 (reshaped)",
+      "ms": 0.212
+    },
+    {
+      "source_name": "cache_s_l12 (reshaped)",
+      "ms": 0.185
+    },
+    {
+      "source_name": "cache_s_l8 (reshaped)",
+      "ms": 0.184
+    },
+    {
+      "source_name": "cache_s_l16 (reshaped)",
+      "ms": 0.184
+    },
+    {
+      "source_name": "cache_s_l40 (reshaped)",
+      "ms": 0.183
+    },
+    {
+      "source_name": "cache_s_l6 (reshaped)",
+      "ms": 0.182
+    },
+    {
+      "source_name": "cache_s_l32 (reshaped)",
+      "ms": 0.181
+    },
+    {
+      "source_name": "cache_s_l36 (reshaped)",
+      "ms": 0.18
+    },
+    {
+      "source_name": "cache_s_l44 (reshaped)",
+      "ms": 0.18
+    },
+    {
+      "source_name": "cache_s_l34 (reshaped)",
+      "ms": 0.178
+    },
+    {
+      "source_name": "conv_states_reshaped-1",
+      "ms": 0.177
+    },
+    {
+      "source_name": "cache_s_l20 (reshaped)",
+      "ms": 0.176
+    },
+    {
+      "source_name": "cache_s_l37 (reshaped)",
+      "ms": 0.176
+    },
+    {
+      "source_name": "cache_s_l10 (reshaped)",
+      "ms": 0.175
+    },
+    {
+      "source_name": "cache_s_l4 (reshaped)",
+      "ms": 0.174
+    },
+    {
+      "source_name": "cache_s_l5 (reshaped)",
+      "ms": 0.174
+    },
+    {
+      "source_name": "cache_s_l17 (reshaped)",
+      "ms": 0.174
+    },
+    {
+      "source_name": "node_163",
+      "ms": 0.173
+    },
+    {
+      "source_name": "conv_states_reshaped-2",
+      "ms": 0.173
+    },
+    {
+      "source_name": "cache_s_l9 (reshaped)",
+      "ms": 0.171
+    },
+    {
+      "source_name": "node_280",
+      "ms": 0.17
+    },
+    {
+      "source_name": "cache_s_l33 (reshaped)",
+      "ms": 0.17
+    },
+    {
+      "source_name": "node_46",
+      "ms": 0.169
+    },
+    {
+      "source_name": "cache_s_l18 (reshaped)",
+      "ms": 0.169
+    },
+    {
+      "source_name": "cache_s_l38 (reshaped)",
+      "ms": 0.168
+    },
+    {
+      "source_name": "cache_s_l24 (reshaped)",
+      "ms": 0.166
+    },
+    {
+      "source_name": "cache_s_l13 (reshaped)",
+      "ms": 0.165
+    },
+    {
+      "source_name": "cache_s_l21 (reshaped)",
+      "ms": 0.163
+    },
+    {
+      "source_name": "cache_s_l41 (reshaped)",
+      "ms": 0.162
+    },
+    {
+      "source_name": "cache_s_l28 (reshaped)",
+      "ms": 0.16
+    },
+    {
+      "source_name": "cache_s_l42 (reshaped)",
+      "ms": 0.16
+    },
+    {
+      "source_name": "cache_s_l14 (reshaped)",
+      "ms": 0.158
+    },
+    {
+      "source_name": "cache_s_l22 (reshaped)",
+      "ms": 0.157
+    },
+    {
+      "source_name": "cache_s_l25 (reshaped)",
+      "ms": 0.156
+    },
+    {
+      "source_name": "cache_s_l30 (reshaped)",
+      "ms": 0.154
+    },
+    {
+      "source_name": "cache_s_l29 (reshaped)",
+      "ms": 0.152
+    },
+    {
+      "source_name": "conv_states_reshaped-0",
+      "ms": 0.151
+    },
+    {
+      "source_name": "cache_s_l26 (reshaped)",
+      "ms": 0.151
+    },
+    {
+      "source_name": "blk.N.indexer.attn_k.weight",
+      "ms": 0.151
+    },
+    {
+      "source_name": "node_1044",
+      "ms": 0.143
+    },
+    {
+      "source_name": "node_2296",
+      "ms": 0.141
+    },
+    {
+      "source_name": "node_2922",
+      "ms": 0.141
+    },
+    {
+      "source_name": "node_3548",
+      "ms": 0.14
+    },
+    {
+      "source_name": "node_4174",
+      "ms": 0.14
+    },
+    {
+      "source_name": "node_5426",
+      "ms": 0.139
+    },
+    {
+      "source_name": "node_1670",
+      "ms": 0.138
+    },
+    {
+      "source_name": "node_4800",
+      "ms": 0.138
+    },
+    {
+      "source_name": "node_6052",
+      "ms": 0.137
+    },
+    {
+      "source_name": "node_6678",
+      "ms": 0.136
+    },
+    {
+      "source_name": "indexer_pool_members-19 (view) (permuted) (cont)",
+      "ms": 0.123
+    },
+    {
+      "source_name": "indexer_pool_members-7 (view) (permuted) (cont)",
+      "ms": 0.116
+    },
+    {
+      "source_name": "indexer_pool_members-11 (view) (permuted) (cont)",
+      "ms": 0.116
+    },
+    {
+      "source_name": "ffn_out-1",
+      "ms": 0.115
+    },
+    {
+      "source_name": "kda_out-1",
+      "ms": 0.114
+    },
+    {
+      "source_name": "blk.N.indexer.proj.weight",
+      "ms": 0.113
+    },
+    {
+      "source_name": "indexer_pool_members-43 (view) (permuted) (cont)",
+      "ms": 0.11
+    },
+    {
+      "source_name": "indexer_pool_members-27 (view) (permuted) (cont)",
+      "ms": 0.109
+    },
+    {
+      "source_name": "ffn_out-2",
+      "ms": 0.107
+    },
+    {
+      "source_name": "ffn_moe_down-6",
+      "ms": 0.103
+    },
+    {
+      "source_name": "indexer_pool_members-15 (view) (permuted) (cont)",
+      "ms": 0.099
+    },
+    {
+      "source_name": "indexer_pool_members-35 (view) (permuted) (cont)",
+      "ms": 0.099
+    },
+    {
+      "source_name": "indexer_pool_members-39 (view) (permuted) (cont)",
+      "ms": 0.099
+    },
+    {
+      "source_name": "kda_out-2",
+      "ms": 0.098
+    },
+    {
+      "source_name": "indexer_pool_members-23 (view) (permuted) (cont)",
+      "ms": 0.098
+    },
+    {
+      "source_name": "indexer_pool_members-31 (view) (permuted) (cont)",
+      "ms": 0.098
+    },
+    {
+      "source_name": "node_1497",
+      "ms": 0.095
+    },
+    {
+      "source_name": "ffn_moe_down-8",
+      "ms": 0.093
+    },
+    {
+      "source_name": "dsa_out-3",
+      "ms": 0.092
+    },
+    {
+      "source_name": "ffn_moe_down-3",
+      "ms": 0.092
+    },
+    {
+      "source_name": "ffn_moe_down-14",
+      "ms": 0.092
+    },
+    {
+      "source_name": "ffn_moe_down-18",
+      "ms": 0.092
+    },
+    {
+      "source_name": "kda_out-0",
+      "ms": 0.091
+    },
+    {
+      "source_name": "ffn_out-0",
+      "ms": 0.091
+    },
+    {
+      "source_name": "ffn_moe_down-9",
+      "ms": 0.091
+    },
+    {
+      "source_name": "conv_states_reshaped-13",
+      "ms": 0.09
+    },
+    {
+      "source_name": "conv_states_reshaped-16",
+      "ms": 0.09
+    },
+    {
+      "source_name": "ffn_moe_down-43",
+      "ms": 0.089
+    },
+    {
+      "source_name": "ffn_moe_down-4",
+      "ms": 0.088
+    },
+    {
+      "source_name": "ffn_moe_down-27",
+      "ms": 0.088
+    },
+    {
+      "source_name": "node_4945",
+      "ms": 0.087
+    },
+    {
+      "source_name": "ffn_moe_down-17",
+      "ms": 0.086
+    },
+    {
+      "source_name": "conv_states_reshaped-10",
+      "ms": 0.085
+    },
+    {
+      "source_name": "ffn_moe_down-10",
+      "ms": 0.085
+    },
+    {
+      "source_name": "conv_states_reshaped-9",
+      "ms": 0.084
+    },
+    {
+      "source_name": "ffn_moe_down-26",
+      "ms": 0.084
+    },
+    {
+      "source_name": "node_4319",
+      "ms": 0.084
+    },
+    {
+      "source_name": "kda_q_norm-2",
+      "ms": 0.083
+    },
+    {
+      "source_name": "ffn_moe_down-39",
+      "ms": 0.083
+    },
+    {
+      "source_name": "ffn_moe_down-24",
+      "ms": 0.082
+    },
+    {
+      "source_name": "ffn_moe_down-28",
+      "ms": 0.082
+    },
+    {
+      "source_name": "ffn_moe_down-7",
+      "ms": 0.081
+    },
+    {
+      "source_name": "ffn_moe_down-15",
+      "ms": 0.081
+    },
+    {
+      "source_name": "ffn_moe_down-16",
+      "ms": 0.081
+    },
+    {
+      "source_name": "ffn_moe_down-20",
+      "ms": 0.081
+    },
+    {
+      "source_name": "ffn_moe_down-21",
+      "ms": 0.081
+    },
+    {
+      "source_name": "ffn_moe_down-23",
+      "ms": 0.081
+    },
+    {
+      "source_name": "ffn_moe_down-29",
+      "ms": 0.081
+    },
+    {
+      "source_name": "ffn_moe_down-35",
+      "ms": 0.081
+    },
+    {
+      "source_name": "ffn_moe_down-5",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-12",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-13",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-19",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-22",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-25",
+      "ms": 0.08
+    },
+    {
+      "source_name": "conv_states_reshaped-26",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-30",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-31",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-32",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-33",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-34",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-36",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-37",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-38",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-41",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-42",
+      "ms": 0.08
+    },
+    {
+      "source_name": "ffn_moe_down-40",
+      "ms": 0.079
+    },
+    {
+      "source_name": "ffn_moe_down-44",
+      "ms": 0.079
+    },
+    {
+      "source_name": "node_418",
+      "ms": 0.078
+    },
+    {
+      "source_name": "ffn_moe_down-11",
+      "ms": 0.078
+    },
+    {
+      "source_name": "conv_states_reshaped-5",
+      "ms": 0.077
+    },
+    {
+      "source_name": "conv_states_reshaped-17",
+      "ms": 0.077
+    },
+    {
+      "source_name": "conv_states_reshaped-18",
+      "ms": 0.077
+    },
+    {
+      "source_name": "conv_states_reshaped-20",
+      "ms": 0.077
+    },
+    {
+      "source_name": "conv_states_reshaped-22",
+      "ms": 0.077
+    },
+    {
+      "source_name": "conv_states_reshaped-37",
+      "ms": 0.077
+    },
+    {
+      "source_name": "conv_states_reshaped-42",
+      "ms": 0.077
+    },
+    {
+      "source_name": "kda_q_norm-1",
+      "ms": 0.076
+    },
+    {
+      "source_name": "conv_states_reshaped-12",
+      "ms": 0.076
+    },
+    {
+      "source_name": "conv_states_reshaped-21",
+      "ms": 0.076
+    },
+    {
+      "source_name": "conv_states_reshaped-34",
+      "ms": 0.076
+    },
+    {
+      "source_name": "hc_init (reshaped)",
+      "ms": 0.075
+    },
+    {
+      "source_name": "conv_states_reshaped-6",
+      "ms": 0.075
+    },
+    {
+      "source_name": "node_871",
+      "ms": 0.075
+    },
+    {
+      "source_name": "node_1343",
+      "ms": 0.075
+    },
+    {
+      "source_name": "node_1815",
+      "ms": 0.075
+    },
+    {
+      "source_name": "conv_states_reshaped-14",
+      "ms": 0.075
+    },
+    {
+      "source_name": "node_2123",
+      "ms": 0.075
+    },
+    {
+      "source_name": "node_3221",
+      "ms": 0.075
+    },
+    {
+      "source_name": "node_3847",
+      "ms": 0.075
+    },
+    {
+      "source_name": "node_5725",
+      "ms": 0.075
+    },
+    {
+      "source_name": "conv_states_reshaped-41",
+      "ms": 0.075
+    },
+    {
+      "source_name": "node_6823",
+      "ms": 0.075
+    },
+    {
+      "source_name": "l_last-0 (reshaped)",
+      "ms": 0.074
+    },
+    {
+      "source_name": "conv_states_reshaped-4",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_563",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_717",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_1189",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_1969",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_2441",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_2595",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_2749",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_3067",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_3375",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_3693",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_4001",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_4473",
+      "ms": 0.074
+    },
+    {
+      "source_name": "conv_states_reshaped-30",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_4627",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_5099",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_5253",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_5571",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_5879",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_6197",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_6351",
+      "ms": 0.074
+    },
+    {
+      "source_name": "node_6505",
+      "ms": 0.074
+    },
+    {
+      "source_name": "conv_states_reshaped-44",
+      "ms": 0.074
+    },
+    {
+      "source_name": "l_last-1 (reshaped)",
+      "ms": 0.073
+    },
+    {
+      "source_name": "conv_states_reshaped-8",
+      "ms": 0.073
+    },
+    {
+      "source_name": "conv_states_reshaped-24",
+      "ms": 0.073
+    },
+    {
+      "source_name": "conv_states_reshaped-32",
+      "ms": 0.073
+    },
+    {
+      "source_name": "conv_states_reshaped-33",
+      "ms": 0.073
+    },
+    {
+      "source_name": "conv_states_reshaped-25",
+      "ms": 0.072
+    },
+    {
+      "source_name": "conv_states_reshaped-28",
+      "ms": 0.072
+    },
+    {
+      "source_name": "conv_states_reshaped-29",
+      "ms": 0.072
+    },
+    {
+      "source_name": "conv_states_reshaped-36",
+      "ms": 0.072
+    },
+    {
+      "source_name": "conv_states_reshaped-38",
+      "ms": 0.072
+    },
+    {
+      "source_name": "conv_states_reshaped-40",
+      "ms": 0.072
+    },
+    {
+      "source_name": "kda_q_norm-0",
+      "ms": 0.07
+    },
+    {
+      "source_name": " (permuted)",
+      "ms": 0.07
+    },
+    {
+      "source_name": "hc_attn_post-1 (reshaped)",
+      "ms": 0.069
+    },
+    {
+      "source_name": "hc_attn_post-2 (reshaped)",
+      "ms": 0.069
+    },
+    {
+      "source_name": "hc_attn_post-3 (reshaped)",
+      "ms": 0.069
+    },
+    {
+      "source_name": "kda_q_norm-40",
+      "ms": 0.069
+    },
+    {
+      "source_name": "l_last-2 (reshaped)",
+      "ms": 0.068
+    },
+    {
+      "source_name": "hc_attn_post-0 (reshaped)",
+      "ms": 0.067
+    },
+    {
+      "source_name": "kda_out-10",
+      "ms": 0.067
+    },
+    {
+      "source_name": "indexer_pool_members-3 (view) (permuted)",
+      "ms": 0.066
+    },
+    {
+      "source_name": "kda_out-33",
+      "ms": 0.065
+    },
+    {
+      "source_name": "ffn_out-5",
+      "ms": 0.064
+    },
+    {
+      "source_name": "kda_q_norm-4",
+      "ms": 0.063
+    },
+    {
+      "source_name": "ffn_out-27",
+      "ms": 0.063
+    },
+    {
+      "source_name": "kda_out-36",
+      "ms": 0.063
+    },
+    {
+      "source_name": "node_296",
+      "ms": 0.061
+    },
+    {
+      "source_name": "ffn_out-36",
+      "ms": 0.06
+    },
+    {
+      "source_name": "ffn_out-44",
+      "ms": 0.06
+    },
+    {
+      "source_name": "ffn_out-14",
+      "ms": 0.059
+    },
+    {
+      "source_name": "ffn_out-18",
+      "ms": 0.058
+    },
+    {
+      "source_name": "kda_out-37",
+      "ms": 0.058
+    },
+    {
+      "source_name": "kda_out-44",
+      "ms": 0.057
+    },
+    {
+      "source_name": "kda_out-5",
+      "ms": 0.056
+    },
+    {
+      "source_name": "dsa_out-19",
+      "ms": 0.056
+    },
+    {
+      "source_name": "dsa_out-31",
+      "ms": 0.056
+    },
+    {
+      "source_name": "kda_out-42",
+      "ms": 0.056
+    },
+    {
+      "source_name": "ffn_out-10",
+      "ms": 0.055
+    },
+    {
+      "source_name": "kda_out-30",
+      "ms": 0.055
+    },
+    {
+      "source_name": "ffn_out-33",
+      "ms": 0.055
+    },
+    {
+      "source_name": "ffn_out-11",
+      "ms": 0.054
+    },
+    {
+      "source_name": "kda_q_norm-32",
+      "ms": 0.054
+    },
+    {
+      "source_name": "kda_out-4",
+      "ms": 0.053
+    },
+    {
+      "source_name": "kda_q_norm-16",
+      "ms": 0.053
+    },
+    {
+      "source_name": "kda_q_norm-18",
+      "ms": 0.053
+    },
+    {
+      "source_name": "kda_out-18",
+      "ms": 0.053
+    },
+    {
+      "source_name": "kda_out-29",
+      "ms": 0.053
+    },
+    {
+      "source_name": "indexer_pool_members-43 (view) (permuted)",
+      "ms": 0.053
+    },
+    {
+      "source_name": "kda_q_norm-8",
+      "ms": 0.051
+    },
+    {
+      "source_name": "dsa_out-27",
+      "ms": 0.051
+    },
+    {
+      "source_name": "dsa_out-43",
+      "ms": 0.051
+    },
+    {
+      "source_name": "ffn_out-15",
+      "ms": 0.05
+    },
+    {
+      "source_name": "dsa_out-23",
+      "ms": 0.05
+    },
+    {
+      "source_name": "kda_out-28",
+      "ms": 0.05
+    },
+    {
+      "source_name": "kda_q_norm-33",
+      "ms": 0.05
+    },
+    {
+      "source_name": "ffn_out-42",
+      "ms": 0.05
+    },
+    {
+      "source_name": "conv_state_last-0",
+      "ms": 0.049
+    },
+    {
+      "source_name": "node_6054",
+      "ms": 0.049
+    },
+    {
+      "source_name": "kda_q_norm-44",
+      "ms": 0.049
+    },
+    {
+      "source_name": "conv_state_last-1",
+      "ms": 0.048
+    },
+    {
+      "source_name": "conv_state_last-2",
+      "ms": 0.048
+    },
+    {
+      "source_name": "l_last-13 (reshaped)",
+      "ms": 0.048
+    },
+    {
+      "source_name": "kda_q_norm-38",
+      "ms": 0.048
+    },
+    {
+      "source_name": "kda_q_norm-5",
+      "ms": 0.047
+    },
+    {
+      "source_name": "dsa_out-11",
+      "ms": 0.046
+    },
+    {
+      "source_name": "kda_q_norm-12",
+      "ms": 0.046
+    },
+    {
+      "source_name": "hc_attn_post-22 (reshaped)",
+      "ms": 0.046
+    },
+    {
+      "source_name": "indexer_pool_members-27 (view) (permuted)",
+      "ms": 0.046
+    },
+    {
+      "source_name": "ffn_out-30",
+      "ms": 0.046
+    },
+    {
+      "source_name": "ffn_out-31",
+      "ms": 0.046
+    },
+    {
+      "source_name": "ffn_out-32",
+      "ms": 0.046
+    },
+    {
+      "source_name": "hc_attn_post-37 (reshaped)",
+      "ms": 0.046
+    },
+    {
+      "source_name": "ffn_out-3",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-4",
+      "ms": 0.045
+    },
+    {
+      "source_name": "dsa_out-7",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-7",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-8",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-9",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-9",
+      "ms": 0.045
+    },
+    {
+      "source_name": "node_1672",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-12",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-12",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-13",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-13",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-14",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-16",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-16",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-17",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-17",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-21",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-21",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-22",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-22",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-24",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-25",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-25",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-26",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-29",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-32",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_q_norm-34",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-34",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-34",
+      "ms": 0.045
+    },
+    {
+      "source_name": "dsa_out-35",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-35",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_q_norm-37",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-37",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-38",
+      "ms": 0.045
+    },
+    {
+      "source_name": "dsa_out-39",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-39",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-40",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-41",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-41",
+      "ms": 0.045
+    },
+    {
+      "source_name": "ffn_out-43",
+      "ms": 0.045
+    },
+    {
+      "source_name": "kda_out-6",
+      "ms": 0.044
+    },
+    {
+      "source_name": "ffn_out-6",
+      "ms": 0.044
+    },
+    {
+      "source_name": "ffn_out-8",
+      "ms": 0.044
+    },
+    {
+      "source_name": "dsa_out-15",
+      "ms": 0.044
+    },
+    {
+      "source_name": "indexer_pool_members-19 (view) (permuted)",
+      "ms": 0.044
+    },
+    {
+      "source_name": "ffn_out-19",
+      "ms": 0.044
+    },
+    {
+      "source_name": "kda_out-20",
+      "ms": 0.044
+    },
+    {
+      "source_name": "ffn_out-20",
+      "ms": 0.044
+    },
+    {
+      "source_name": "ffn_out-23",
+      "ms": 0.044
+    },
+    {
+      "source_name": "kda_out-24",
+      "ms": 0.044
+    },
+    {
+      "source_name": "ffn_out-26",
+      "ms": 0.044
+    },
+    {
+      "source_name": "ffn_out-28",
+      "ms": 0.044
+    },
+    {
+      "source_name": "kda_out-38",
+      "ms": 0.044
+    },
+    {
+      "source_name": "ffn_out-40",
+      "ms": 0.044
+    },
+    {
+      "source_name": "indexer_pool_members-11 (view) (permuted)",
+      "ms": 0.043
+    },
+    {
+      "source_name": "kda_q_norm-36",
+      "ms": 0.043
+    },
+    {
+      "source_name": "l_last-37 (reshaped)",
+      "ms": 0.043
+    },
+    {
+      "source_name": "kda_q_norm-6",
+      "ms": 0.042
+    },
+    {
+      "source_name": "kda_q_norm-20",
+      "ms": 0.042
+    },
+    {
+      "source_name": "kda_q_norm-24",
+      "ms": 0.042
+    },
+    {
+      "source_name": "kda_q_norm-42",
+      "ms": 0.042
+    },
+    {
+      "source_name": "node_1046",
+      "ms": 0.041
+    },
+    {
+      "source_name": "l_last-15 (reshaped)",
+      "ms": 0.041
+    },
+    {
+      "source_name": "kda_q_norm-17",
+      "ms": 0.041
+    },
+    {
+      "source_name": "node_2924",
+      "ms": 0.041
+    },
+    {
+      "source_name": "kda_q_norm-22",
+      "ms": 0.041
+    },
+    {
+      "source_name": "kda_q_norm-28",
+      "ms": 0.041
+    },
+    {
+      "source_name": "node_5428",
+      "ms": 0.041
+    },
+    {
+      "source_name": "kda_q_norm-41",
+      "ms": 0.041
+    },
+    {
+      "source_name": "indexer_pool_members-15 (view) (permuted)",
+      "ms": 0.041
+    },
+    {
+      "source_name": "l_last-7 (reshaped)",
+      "ms": 0.04
+    },
+    {
+      "source_name": "kda_q_norm-13",
+      "ms": 0.04
+    },
+    {
+      "source_name": "kda_q_norm-14",
+      "ms": 0.04
+    },
+    {
+      "source_name": "kda_q_norm-26",
+      "ms": 0.04
+    },
+    {
+      "source_name": "indexer_pool_members-35 (view) (permuted)",
+      "ms": 0.04
+    },
+    {
+      "source_name": "indexer_pool_members-7 (view) (permuted)",
+      "ms": 0.039
+    },
+    {
+      "source_name": "kda_q_norm-9",
+      "ms": 0.039
+    },
+    {
+      "source_name": "hc_attn_post-11 (reshaped)",
+      "ms": 0.039
+    },
+    {
+      "source_name": "kda_q_norm-21",
+      "ms": 0.039
+    },
+    {
+      "source_name": "kda_q_norm-25",
+      "ms": 0.039
+    },
+    {
+      "source_name": "kda_q_norm-29",
+      "ms": 0.039
+    },
+    {
+      "source_name": "indexer_pool_members-31 (view) (permuted)",
+      "ms": 0.039
+    },
+    {
+      "source_name": "indexer_pool_members-39 (view) (permuted)",
+      "ms": 0.039
+    },
+    {
+      "source_name": "indexer_pool_members-23 (view) (permuted)",
+      "ms": 0.038
+    },
+    {
+      "source_name": "node_179",
+      "ms": 0.038
+    },
+    {
+      "source_name": "cache_k_l3 (view) (view)",
+      "ms": 0.038
+    },
+    {
+      "source_name": "l_last-5 (reshaped)",
+      "ms": 0.038
+    },
+    {
+      "source_name": "conv_state_last-8",
+      "ms": 0.038
+    },
+    {
+      "source_name": "kda_q_norm-10",
+      "ms": 0.038
+    },
+    {
+      "source_name": "hc_attn_post-10 (reshaped)",
+      "ms": 0.038
+    },
+    {
+      "source_name": "node_2298",
+      "ms": 0.038
+    },
+    {
+      "source_name": "kda_q_norm-30",
+      "ms": 0.038
+    },
+    {
+      "source_name": "cache_k_l31 (view) (view)",
+      "ms": 0.038
+    },
+    {
+      "source_name": "hc_attn_post-7 (reshaped)",
+      "ms": 0.037
+    },
+    {
+      "source_name": "hc_attn_post-8 (reshaped)",
+      "ms": 0.037
+    },
+    {
+      "source_name": "l_last-9 (reshaped)",
+      "ms": 0.037
+    },
+    {
+      "source_name": "hc_attn_post-14 (reshaped)",
+      "ms": 0.037
+    },
+    {
+      "source_name": "node_3550",
+      "ms": 0.037
+    },
+    {
+      "source_name": "l_last-26 (reshaped)",
+      "ms": 0.037
+    },
+    {
+      "source_name": "node_4176",
+      "ms": 0.037
+    },
+    {
+      "source_name": "l_last-36 (reshaped)",
+      "ms": 0.037
+    },
+    {
+      "source_name": "l_last-42 (reshaped)",
+      "ms": 0.037
+    },
+    {
+      "source_name": "node_6680",
+      "ms": 0.037
+    },
+    {
+      "source_name": "l_last-3 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-4 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-5 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-6 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-8 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-9 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-10 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-11 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-12 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-12 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-13 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-14 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-15 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-16 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-17 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-18 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-19 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-19 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "conv_state_last-20",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-23 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-24 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-25 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-25 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-26 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-27 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-27 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-28 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-28 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-29 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-29 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-30 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-30 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "node_4802",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-32 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-32 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-33 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-33 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-34 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-35 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-36 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-38 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-38 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-39 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-40 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-40 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-41 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-41 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-42 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-43 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "l_last-43 (reshaped)",
+      "ms": 0.036
+    },
+    {
+      "source_name": "hc_attn_post-4 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "l_last-6 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "l_last-17 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "l_last-18 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "hc_attn_post-20 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "l_last-20 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "hc_attn_post-21 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "l_last-22 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "hc_attn_post-23 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "hc_attn_post-24 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "hc_attn_post-31 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "l_last-31 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "l_last-34 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "l_last-35 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "hc_attn_post-39 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "hc_attn_post-44 (reshaped)",
+      "ms": 0.035
+    },
+    {
+      "source_name": "node_28",
+      "ms": 0.034
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-3",
+      "ms": 0.034
+    },
+    {
+      "source_name": "l_last-16 (reshaped)",
+      "ms": 0.034
+    },
+    {
+      "source_name": "l_last-21 (reshaped)",
+      "ms": 0.034
+    },
+    {
+      "source_name": "node_145",
+      "ms": 0.033
+    },
+    {
+      "source_name": "node_262",
+      "ms": 0.033
+    },
+    {
+      "source_name": "cache_k_l11 (view) (view)",
+      "ms": 0.033
+    },
+    {
+      "source_name": "conv_state_last-12",
+      "ms": 0.033
+    },
+    {
+      "source_name": "new_state-1",
+      "ms": 0.032
+    },
+    {
+      "source_name": "new_state-6",
+      "ms": 0.031
+    },
+    {
+      "source_name": "node_49",
+      "ms": 0.03
+    },
+    {
+      "source_name": "cache_k_l19 (view) (view)",
+      "ms": 0.03
+    },
+    {
+      "source_name": "conv_state_last-16",
+      "ms": 0.028
+    },
+    {
+      "source_name": "cache_k_l43 (view) (view)",
+      "ms": 0.028
+    },
+    {
+      "source_name": "new_state-0",
+      "ms": 0.027
+    },
+    {
+      "source_name": "cache_k_l7 (view) (view)",
+      "ms": 0.027
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-16",
+      "ms": 0.027
+    },
+    {
+      "source_name": "dsa_q_absorbed-19 (view) (permuted)",
+      "ms": 0.027
+    },
+    {
+      "source_name": "node_4927",
+      "ms": 0.027
+    },
+    {
+      "source_name": "node_62",
+      "ms": 0.026
+    },
+    {
+      "source_name": "cache_r_l10 (reshaped)",
+      "ms": 0.026
+    },
+    {
+      "source_name": "dsa_q_absorbed-11 (view) (permuted)",
+      "ms": 0.026
+    },
+    {
+      "source_name": "cache_k_l27 (view) (view)",
+      "ms": 0.026
+    },
+    {
+      "source_name": "conv_state_last-10",
+      "ms": 0.025
+    },
+    {
+      "source_name": "conv_state_last-13",
+      "ms": 0.025
+    },
+    {
+      "source_name": "cache_k_l23 (view) (view)",
+      "ms": 0.025
+    },
+    {
+      "source_name": "conv_state_last-25",
+      "ms": 0.025
+    },
+    {
+      "source_name": "conv_state_last-30",
+      "ms": 0.025
+    },
+    {
+      "source_name": "conv_state_last-38",
+      "ms": 0.025
+    },
+    {
+      "source_name": "conv_state_last-40",
+      "ms": 0.025
+    },
+    {
+      "source_name": "node_26",
+      "ms": 0.024
+    },
+    {
+      "source_name": "kda_conv-1 (view)",
+      "ms": 0.024
+    },
+    {
+      "source_name": "Meta(CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3)#kpool_pool_cells ",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-4",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-5",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-6",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-9",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-14",
+      "ms": 0.024
+    },
+    {
+      "source_name": "cache_k_l15 (view) (view)",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-17",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-18",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-22",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-24",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-26",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-28",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-29",
+      "ms": 0.024
+    },
+    {
+      "source_name": "new_state-30",
+      "ms": 0.024
+    },
+    {
+      "source_name": "dsa_q_absorbed-31 (view) (permuted)",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-32",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-33",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-34",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-36",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-37",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-41",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-42",
+      "ms": 0.024
+    },
+    {
+      "source_name": "conv_state_last-44",
+      "ms": 0.024
+    },
+    {
+      "source_name": "hc_init",
+      "ms": 0.023
+    },
+    {
+      "source_name": "node_260",
+      "ms": 0.023
+    },
+    {
+      "source_name": "new_state-2",
+      "ms": 0.023
+    },
+    {
+      "source_name": "conv_state_last-21",
+      "ms": 0.023
+    },
+    {
+      "source_name": "dsa_q_absorbed-27 (view) (permuted)",
+      "ms": 0.023
+    },
+    {
+      "source_name": "dsa_q_absorbed-35 (view) (permuted)",
+      "ms": 0.023
+    },
+    {
+      "source_name": "node_143",
+      "ms": 0.022
+    },
+    {
+      "source_name": "kda_conv-2 (view)",
+      "ms": 0.022
+    },
+    {
+      "source_name": "dsa_q_absorbed-3 (view) (permuted)",
+      "ms": 0.022
+    },
+    {
+      "source_name": "cache_k_l35 (view) (view)",
+      "ms": 0.021
+    },
+    {
+      "source_name": "dsa_q_absorbed-7 (view) (permuted)",
+      "ms": 0.02
+    },
+    {
+      "source_name": "dsa_q_absorbed-15 (view) (permuted)",
+      "ms": 0.02
+    },
+    {
+      "source_name": "dsa_q_absorbed-23 (view) (permuted)",
+      "ms": 0.02
+    },
+    {
+      "source_name": "node_5707",
+      "ms": 0.02
+    },
+    {
+      "source_name": "dsa_q_absorbed-39 (view) (permuted)",
+      "ms": 0.02
+    },
+    {
+      "source_name": "dsa_q_absorbed-43 (view) (permuted)",
+      "ms": 0.02
+    },
+    {
+      "source_name": "kda_conv-0 (view)",
+      "ms": 0.019
+    },
+    {
+      "source_name": "new_state-32",
+      "ms": 0.019
+    },
+    {
+      "source_name": "ffn_gate-38",
+      "ms": 0.019
+    },
+    {
+      "source_name": "cache_r_l0 (reshaped)",
+      "ms": 0.018
+    },
+    {
+      "source_name": "conv_input-0",
+      "ms": 0.018
+    },
+    {
+      "source_name": "Meta(CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3)#kpool_pool_bias (",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-4",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-5",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-10",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-12",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-16",
+      "ms": 0.018
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-31",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-34",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-37",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-38",
+      "ms": 0.018
+    },
+    {
+      "source_name": "cache_k_l39 (view) (view)",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-40",
+      "ms": 0.018
+    },
+    {
+      "source_name": "new_state-41",
+      "ms": 0.018
+    },
+    {
+      "source_name": "l_last-1",
+      "ms": 0.017
+    },
+    {
+      "source_name": "conv_input-2",
+      "ms": 0.017
+    },
+    {
+      "source_name": "indexer_q-3",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-4",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-5",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_853",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-9",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-9",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_1479",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-10",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-11",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-12",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-13",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-13",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_2423",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-17",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-19",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-20",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-21",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-22",
+      "ms": 0.017
+    },
+    {
+      "source_name": "l_last-22",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-23",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_3829",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-26",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-27",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_4299",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-28",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-29",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-29",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-33",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-33",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_5235",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-35",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_5553",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-36",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-36",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_5861",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_6333",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-41",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-42",
+      "ms": 0.017
+    },
+    {
+      "source_name": "new_state-44",
+      "ms": 0.017
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-44",
+      "ms": 0.017
+    },
+    {
+      "source_name": "node_166",
+      "ms": 0.016
+    },
+    {
+      "source_name": "hc_ffn_pre-1",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_283",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_545",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_699",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-6",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-7",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_1171",
+      "ms": 0.016
+    },
+    {
+      "source_name": "new_state-8",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-8",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_1325",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_1797",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_1951",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_2105",
+      "ms": 0.016
+    },
+    {
+      "source_name": "new_state-14",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-14",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_2577",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-17",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_2731",
+      "ms": 0.016
+    },
+    {
+      "source_name": "new_state-18",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-18",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_3049",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_3203",
+      "ms": 0.016
+    },
+    {
+      "source_name": "new_state-21",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_3357",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-22",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_3675",
+      "ms": 0.016
+    },
+    {
+      "source_name": "new_state-24",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-24",
+      "ms": 0.016
+    },
+    {
+      "source_name": "new_state-25",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-25",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_3983",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-26",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_4301",
+      "ms": 0.016
+    },
+    {
+      "source_name": "new_state-28",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_4455",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_4609",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-30",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-32",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_5081",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-34",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-37",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-38",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-39",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_6179",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-40",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_6487",
+      "ms": 0.016
+    },
+    {
+      "source_name": "new_state-42",
+      "ms": 0.016
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-43",
+      "ms": 0.016
+    },
+    {
+      "source_name": "node_6805",
+      "ms": 0.016
+    },
+    {
+      "source_name": "hc_attn_pre-0",
+      "ms": 0.015
+    },
+    {
+      "source_name": "hc_ffn_pre-0",
+      "ms": 0.015
+    },
+    {
+      "source_name": "hc_attn_pre-1",
+      "ms": 0.015
+    },
+    {
+      "source_name": "cache_r_l2 (reshaped)",
+      "ms": 0.015
+    },
+    {
+      "source_name": "hc_attn_pre-2",
+      "ms": 0.015
+    },
+    {
+      "source_name": "hc_ffn_pre-2",
+      "ms": 0.015
+    },
+    {
+      "source_name": "hc_attn_pre-3",
+      "ms": 0.015
+    },
+    {
+      "source_name": "hc_ffn_pre-3",
+      "ms": 0.015
+    },
+    {
+      "source_name": "ffn_moe_probs_biased-15",
+      "ms": 0.015
+    },
+    {
+      "source_name": "new_state-20",
+      "ms": 0.015
+    },
+    {
+      "source_name": "conv_input-1",
+      "ms": 0.014
+    },
+    {
+      "source_name": "node_194",
+      "ms": 0.014
+    },
+    {
+      "source_name": "hc_attn_post-1",
+      "ms": 0.014
+    },
+    {
+      "source_name": "node_4489",
+      "ms": 0.014
+    },
+    {
+      "source_name": "cache_r_l32 (reshaped)",
+      "ms": 0.014
+    },
+    {
+      "source_name": "node_5587",
+      "ms": 0.014
+    },
+    {
+      "source_name": "cache_r_l1 (reshaped)",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_400",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_579",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_733",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_1205",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_1359",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_1513",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_3083",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_3237",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_3391",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_3863",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_4017",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_4335",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_4643",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_5741",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_5895",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_6213",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_6367",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_6521",
+      "ms": 0.013
+    },
+    {
+      "source_name": "cache_r_l44 (reshaped)",
+      "ms": 0.013
+    },
+    {
+      "source_name": "node_6839",
+      "ms": 0.013
+    },
+    {
+      "source_name": "Meta(CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3)#embd (reshaped)#0",
+      "ms": 0.012
+    },
+    {
+      "source_name": "hc_attn_post-2",
+      "ms": 0.012
+    },
+    {
+      "source_name": "cache_r_l4 (reshaped)",
+      "ms": 0.012
+    },
+    {
+      "source_name": "cache_r_l5 (reshaped)",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_887",
+      "ms": 0.012
+    },
+    {
+      "source_name": "cache_r_l9 (reshaped)",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_1831",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_1985",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_2103",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_2139",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_2457",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_2611",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_2765",
+      "ms": 0.012
+    },
+    {
+      "source_name": "cache_r_l24 (reshaped)",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_3709",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_4961",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_5115",
+      "ms": 0.012
+    },
+    {
+      "source_name": "node_5269",
+      "ms": 0.012
+    },
+    {
+      "source_name": "cache_r_l40 (reshaped)",
+      "ms": 0.012
+    },
+    {
+      "source_name": "hc_attn_post-0",
+      "ms": 0.011
+    },
+    {
+      "source_name": "l_last-0",
+      "ms": 0.011
+    },
+    {
+      "source_name": "l_last-2",
+      "ms": 0.011
+    },
+    {
+      "source_name": "hc_attn_post-3",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_543",
+      "ms": 0.011
+    },
+    {
+      "source_name": "ffn_gate_clamped-4",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_697",
+      "ms": 0.011
+    },
+    {
+      "source_name": "cache_r_l6 (reshaped)",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_851",
+      "ms": 0.011
+    },
+    {
+      "source_name": "cache_r_l8 (reshaped)",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_1169",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_1323",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_1477",
+      "ms": 0.011
+    },
+    {
+      "source_name": "kda_conv-10 (view)",
+      "ms": 0.011
+    },
+    {
+      "source_name": "ffn_gate_clamped-10",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_1795",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_1949",
+      "ms": 0.011
+    },
+    {
+      "source_name": "cache_r_l16 (reshaped)",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_2575",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_2729",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_3047",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_3201",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_3673",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_3827",
+      "ms": 0.011
+    },
+    {
+      "source_name": "cache_r_l26 (reshaped)",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_3981",
+      "ms": 0.011
+    },
+    {
+      "source_name": "cache_r_l29 (reshaped)",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_4453",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_4607",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_4925",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_5079",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_5233",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_5551",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_5705",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_5859",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_6177",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_6331",
+      "ms": 0.011
+    },
+    {
+      "source_name": "norm-41",
+      "ms": 0.011
+    },
+    {
+      "source_name": "cache_r_l42 (reshaped)",
+      "ms": 0.011
+    },
+    {
+      "source_name": "node_6485",
+      "ms": 0.011
+    },
+    {
+      "source_name": "fattn_mla-7 (permuted)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l12 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l13 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l14 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "node_2421",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l18 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "ffn_gate-18",
+      "ms": 0.01
+    },
+    {
+      "source_name": "fattn_mla-19 (permuted)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l20 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l21 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "node_3355",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l28 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "ffn_moe_out-30",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l33 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l34 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "fattn_mla-35 (permuted)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l36 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l37 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l38 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "cache_r_l41 (reshaped)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "kda_conv-41 (view)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "kda_conv-42 (view)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "node_6803",
+      "ms": 0.01
+    },
+    {
+      "source_name": "kda_conv-44 (view)",
+      "ms": 0.01
+    },
+    {
+      "source_name": "conv_input-10",
+      "ms": 0.009
+    },
+    {
+      "source_name": "hc_attn_post-10",
+      "ms": 0.009
+    },
+    {
+      "source_name": "cache_r_l17 (reshaped)",
+      "ms": 0.009
+    },
+    {
+      "source_name": "cache_r_l22 (reshaped)",
+      "ms": 0.009
+    },
+    {
+      "source_name": "cache_r_l25 (reshaped)",
+      "ms": 0.009
+    },
+    {
+      "source_name": "cache_r_l30 (reshaped)",
+      "ms": 0.009
+    },
+    {
+      "source_name": "ffn_gate_clamped-29",
+      "ms": 0.009
+    },
+    {
+      "source_name": "conv_input-44",
+      "ms": 0.009
+    },
+    {
+      "source_name": "kda_scan_out-0",
+      "ms": 0.008
+    },
+    {
+      "source_name": "kda_scan_out-1",
+      "ms": 0.008
+    },
+    {
+      "source_name": "kda_scan_out-2",
+      "ms": 0.008
+    },
+    {
+      "source_name": "indexer_pool_score-3 (reshaped)",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-4",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-5",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-5",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_post-6",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-6",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-9",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-9",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-11",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-14",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-14",
+      "ms": 0.008
+    },
+    {
+      "source_name": "l_last-14",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-15",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-16",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-16",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-18",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-18",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-18",
+      "ms": 0.008
+    },
+    {
+      "source_name": "indexer_q-19",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_post-19",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-20",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-21",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-22",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-22",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-23",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-23",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-24",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-25",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-26",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-26",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-27",
+      "ms": 0.008
+    },
+    {
+      "source_name": "l_last-27",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-28",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-28",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-28",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-29",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-30",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_post-30",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_post-31",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-31",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-32",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-33",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-33",
+      "ms": 0.008
+    },
+    {
+      "source_name": "l_last-33",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-34",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-36",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-36",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-36",
+      "ms": 0.008
+    },
+    {
+      "source_name": "l_last-36",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-37",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-38",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-39",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-40",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-40",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-40",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-41",
+      "ms": 0.008
+    },
+    {
+      "source_name": "conv_input-42",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-42",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-43",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-44",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_ffn_pre-44",
+      "ms": 0.008
+    },
+    {
+      "source_name": "hc_attn_pre-4",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-4",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-4",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-5",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-6",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-6",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-6",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-7",
+      "ms": 0.007
+    },
+    {
+      "source_name": "indexer_q-7",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-7",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-8",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-8",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-8",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-8",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-9",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-9",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-10",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-10",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-10",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-11",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-12",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-12",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-12",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-13",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-13",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-13",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-13",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-14",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-15",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-16",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-17",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-17",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-17",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-17",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-18",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-19",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-19",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-20",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-20",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-21",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-21",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-21",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-22",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-24",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-24",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-24",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-25",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-25",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-26",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-26",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-27",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-28",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-29",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-29",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-29",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-30",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-30",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-30",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-31",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-32",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-32",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-32",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-33",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-33",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-34",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-34",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-34",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-34",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-35",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-35",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-36",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-37",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-37",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-37",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-38",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-38",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-38",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-39",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_ffn_pre-39",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-41",
+      "ms": 0.007
+    },
+    {
+      "source_name": "conv_input-41",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-42",
+      "ms": 0.007
+    },
+    {
+      "source_name": "l_last-42",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_pre-43",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_attn_post-44",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_mean",
+      "ms": 0.007
+    },
+    {
+      "source_name": "hc_mixes-0 (view)",
+      "ms": 0.006
+    },
+    {
+      "source_name": "ffn_gate_clamped-0",
+      "ms": 0.006
+    },
+    {
+      "source_name": "ffn_gate_clamped-2",
+      "ms": 0.006
+    },
+    {
+      "source_name": "node_379",
+      "ms": 0.006
+    },
+    {
+      "source_name": "blk.N.indexer_compressor_ape.weight (transposed)",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-3",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-4",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-5",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-5",
+      "ms": 0.006
+    },
+    {
+      "source_name": "ffn_gate_clamped-6",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-7",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-7",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-8",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-9",
+      "ms": 0.006
+    },
+    {
+      "source_name": "node_1500",
+      "ms": 0.006
+    },
+    {
+      "source_name": "indexer_q-11",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-11",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-11",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-12",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-12",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-13",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-14",
+      "ms": 0.006
+    },
+    {
+      "source_name": "indexer_q-15",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-15",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-15",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-16",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-16",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-17",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-18",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-19",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-20",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-21",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-22",
+      "ms": 0.006
+    },
+    {
+      "source_name": "indexer_q-23",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-23",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-23",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-25",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-25",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-26",
+      "ms": 0.006
+    },
+    {
+      "source_name": "indexer_q-27",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-27",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-28",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-29",
+      "ms": 0.006
+    },
+    {
+      "source_name": "indexer_q-31",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-31",
+      "ms": 0.006
+    },
+    {
+      "source_name": "indexer_q-35",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-35",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-35",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-37",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-38",
+      "ms": 0.006
+    },
+    {
+      "source_name": "indexer_q-39",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-39",
+      "ms": 0.006
+    },
+    {
+      "source_name": "kda_conv-40 (view)",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-40",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-40",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-41",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-41",
+      "ms": 0.006
+    },
+    {
+      "source_name": "indexer_q-43",
+      "ms": 0.006
+    },
+    {
+      "source_name": "hc_attn_post-43",
+      "ms": 0.006
+    },
+    {
+      "source_name": "l_last-43",
+      "ms": 0.006
+    },
+    {
+      "source_name": "norm-0",
+      "ms": 0.005
+    },
+    {
+      "source_name": "norm-1",
+      "ms": 0.005
+    },
+    {
+      "source_name": "ffn_gate_clamped-1",
+      "ms": 0.005
+    },
+    {
+      "source_name": "fattn_mla-3 (permuted)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-4 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-6 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-8 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "node_1452",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_scan_out-10",
+      "ms": 0.005
+    },
+    {
+      "source_name": "ffn_moe_gate_clamped-11",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-12 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "node_1972",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-14 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "node_2598",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-17 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-20 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "l_last-20",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-21 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-24 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "ffn_moe_gate_clamped-24",
+      "ms": 0.005
+    },
+    {
+      "source_name": "l_last-24",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-25 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-26 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-28 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-29 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-32 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "hc_attn_post-32",
+      "ms": 0.005
+    },
+    {
+      "source_name": "ffn_moe_gate_clamped-32",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-36 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "kda_conv-37 (view)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "ffn_gate_clamped-37",
+      "ms": 0.005
+    },
+    {
+      "source_name": "indexer_pool_score-39 (reshaped)",
+      "ms": 0.005
+    },
+    {
+      "source_name": "node_6152",
+      "ms": 0.005
+    },
+    {
+      "source_name": "hc_attn_post-42",
+      "ms": 0.005
+    }
+  ]
+}

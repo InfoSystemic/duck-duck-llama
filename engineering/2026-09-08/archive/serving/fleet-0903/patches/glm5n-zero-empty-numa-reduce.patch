@@ -1,0 +1,16 @@
+--- a/ggml/src/ggml-cpu/ggml-cpu.cpp
++++ b/ggml/src/ggml-cpu/ggml-cpu.cpp
+@@ -923,6 +923,13 @@
+         ggml_backend_synchronize(backend);
+     }
+ 
++    // Empty input slices disable computation but still allocate an output buffer.
++    for (size_t i = 0; i < n_backends; ++i) {
++        if ((tensors[i]->flags & GGML_TENSOR_FLAG_COMPUTE) == 0) {
++            memset(tensors[i]->data, 0, ggml_nbytes(tensors[i]));
++        }
++    }
++
+     float * dst = (float *) first->data;
+     if (n_backends == 2) {
+         const float * src1 = (const float *) tensors[1]->data;

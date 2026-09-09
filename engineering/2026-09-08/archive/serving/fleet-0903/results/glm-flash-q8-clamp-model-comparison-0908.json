@@ -1,0 +1,55 @@
+{
+  "input_comparison_passed": true,
+  "rows": [
+    {
+      "kind": "prose",
+      "baseline_tok_s": 10.522978003598734,
+      "candidate_tok_s": 10.774689188170816,
+      "speed_change_percent": 2.392014736569825,
+      "baseline_adjusted_gb_s": 217.67164047850324,
+      "candidate_adjusted_gb_s": 222.65463146321667,
+      "candidate_utilization": 0.5859332406926755,
+      "completed_answer": false,
+      "stream_fields_equal": {},
+      "stream_sha256": {
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-experts-raw-0908/prose-draft0/chunks.json": "aa57e446e7ecec42510c6cad7f00290e14843c885c473b696251424799dd3aef",
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-raw-0908/prose-draft0/chunks.json": "9cd57fbec4d5a9d5d55fbfdae4b5703e33f26c8c6f4c3900902a6eafe127dea0"
+      }
+    },
+    {
+      "kind": "code",
+      "baseline_tok_s": 10.491738330954144,
+      "candidate_tok_s": 10.774085351840302,
+      "speed_change_percent": 2.6911367018479737,
+      "baseline_adjusted_gb_s": 218.13015373132407,
+      "candidate_adjusted_gb_s": 222.08179661203903,
+      "candidate_utilization": 0.5844257805579974,
+      "completed_answer": false,
+      "stream_fields_equal": {},
+      "stream_sha256": {
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-experts-raw-0908/code-draft0/chunks.json": "167d473e74eea1d7c6b2ce7665c9edd97e60fce4836632e467ec616ee3036270",
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-raw-0908/code-draft0/chunks.json": "f820b754c67f78ad8489f64aea7a38dd59f5f535400950a122e59a800fb72f7f"
+      }
+    }
+  ],
+  "runtime_env_changes": {
+    "GGML_CPU_X16_Q8_CLAMP_FUSION": [
+      null,
+      "1"
+    ],
+    "LD_LIBRARY_PATH": [
+      "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-experts-0908/private-cpu:/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin",
+      "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-0908/private-cpu:/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin"
+    ]
+  },
+  "server_binary_sha256": "20fa1560caa0bee73fc6b23672d7ef8e84640c72ec555a640fc2373fd82587ed",
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/compare_flash_q8_clamp_0908.py": "c14bd0563eb2ff4048c98931cb1fa54d2316edece9a659b7bcc71708ad9e0694",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-experts-raw-0908/result.json": "cf8631435fd4f96bbecadd9cc735999065274ec25296bcd96670539ba0696384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-raw-0908/result.json": "2fab6944ea6c980675300e29df2f8090e27324a3737990600a40a9c9a092f36a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-raw-parity-0908/result.json": "5f5d6b7e5dabf2ea1229a1a7862f0d55e38066ae0814e20b546f919c941f8034"
+  },
+  "all_streams_equal": true,
+  "target_reached": false,
+  "note": "Matched raw Q8 decode probes. Small single-run changes do not establish repeatability or source-checkpoint quality."
+}

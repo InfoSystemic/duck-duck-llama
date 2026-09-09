@@ -1,0 +1,69 @@
+--- a/ggml/src/ggml-cpu/ggml-cpu.cpp
++++ b/ggml/src/ggml-cpu/ggml-cpu.cpp
+@@ -12,6 +12,7 @@
+ #include <cstdlib>
+ #include <fstream>
+ #include <iterator>
++#include <map>
+ #include <memory>
+ #include <mutex>
+ #include <set>
+@@ -91,17 +92,7 @@
+     return bufts;
+ }
+ 
+-static ggml_backend_buffer_type_t * ggml_backend_cpu_device_get_extra_buffers_type(ggml_backend_dev_t device) {
+-    static std::vector<ggml_backend_buffer_type_t> extra_bufts = [] {
+-        std::vector<ggml_backend_buffer_type_t> bufts = ggml_backend_cpu_get_extra_buffer_types();
+-        bufts.push_back(nullptr);
+-        return bufts;
+-    }();
+-
+-    return extra_bufts.data();
+-
+-    GGML_UNUSED(device);
+-}
++static ggml_backend_buffer_type_t * ggml_backend_cpu_device_get_extra_buffers_type(ggml_backend_dev_t device);
+ 
+ static bool ggml_backend_cpu_is_extra_buffer_type(ggml_backend_buffer_type_t buft) {
+     for (auto * extra : ggml_backend_cpu_get_extra_buffer_types()) {
+@@ -745,6 +736,29 @@
+     return ctx->buffer_type ? ctx->buffer_type : ggml_backend_cpu_buffer_type();
+ }
+ 
++static ggml_backend_buffer_type_t * ggml_backend_cpu_device_get_extra_buffers_type(ggml_backend_dev_t device) {
++    const auto * ctx = static_cast<const ggml_backend_cpu_device_context *>(device->context);
++    if (ctx->numa_node >= 0) {
++        static std::mutex mutex;
++        static std::map<ggml_backend_dev_t, std::vector<ggml_backend_buffer_type_t>> buffers;
++        std::lock_guard<std::mutex> lock(mutex);
++        auto found = buffers.find(device);
++        if (found == buffers.end()) {
++            const auto name = ctx->name + "_REPACK";
++            auto repack = ggml_backend_cpu_repack_buffer_type_from(
++                ggml_backend_cpu_device_get_buffer_type(device), device, name.c_str());
++            found = buffers.emplace(device, std::vector<ggml_backend_buffer_type_t>{repack, nullptr}).first;
++        }
++        return found->second.data();
++    }
++    static std::vector<ggml_backend_buffer_type_t> extra_bufts = [] {
++        auto bufts = ggml_backend_cpu_get_extra_buffer_types();
++        bufts.push_back(nullptr);
++        return bufts;
++    }();
++    return extra_bufts.data();
++}
++
+ static ggml_backend_buffer_t ggml_backend_cpu_device_buffer_from_host_ptr(ggml_backend_dev_t dev, void * ptr, size_t size, size_t max_tensor_size) {
+     return ggml_backend_cpu_buffer_from_ptr(ptr, size);
+ 
+@@ -811,6 +825,9 @@
+ }
+ 
+ static bool ggml_backend_cpu_device_supports_buft(ggml_backend_dev_t dev, ggml_backend_buffer_type_t buft) {
++    if (ggml_backend_cpu_is_repack_buffer_type(buft)) {
++        return ggml_backend_buft_get_device(buft) == dev;
++    }
+     return ggml_backend_buft_is_host(buft) || ggml_backend_cpu_is_extra_buffer_type(buft);
+     GGML_UNUSED(dev);
+ }

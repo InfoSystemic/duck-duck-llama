@@ -1,0 +1,373 @@
+{
+  "time": 1788895363.489847,
+  "passed": true,
+  "pid": 462943,
+  "cpu_sha256": "5ba125771f3e8bac0b634a845f6666700d53e25b90573581c62f8bbbb8718f2b",
+  "sample_count": 94186,
+  "sample_counts": {
+    "q8_x16": 25706,
+    "gomp_spin": 26051,
+    "other": 12186,
+    "q8_sum16": 23991,
+    "q8_x8": 715,
+    "f32_dot": 3442,
+    "gomp_other": 1364,
+    "q8_r8_projection_dispatch": 544,
+    "q8_r8_ordered_vector": 71,
+    "rms_norm": 47,
+    "rms_guard": 69
+  },
+  "period_percent": {
+    "q8_x16": 27.148289098705757,
+    "gomp_spin": 28.190815435867325,
+    "other": 12.32693192531669,
+    "q8_sum16": 25.69607241949666,
+    "q8_x8": 0.7606881082114624,
+    "f32_dot": 3.643370956055038,
+    "gomp_other": 1.4558972073579475,
+    "q8_r8_projection_dispatch": 0.5819055828544638,
+    "q8_r8_ordered_vector": 0.0748722249779793,
+    "rms_norm": 0.049265967024580394,
+    "rms_guard": 0.0718910741320968
+  },
+  "total_sampled_period": 1180434933328,
+  "fast_sum_offsets": {
+    "0x1b3a28": 497,
+    "0x1b3986": 6733,
+    "0x1b3974": 4188,
+    "0x1b39e4": 2181,
+    "0x1b39bc": 734,
+    "0x1b3a63": 130,
+    "0x1b3a0c": 2449,
+    "0x1b39f8": 2211,
+    "0x1b396a": 55,
+    "0x1b39a8": 870,
+    "0x1b3a12": 366,
+    "0x1b3a5c": 16,
+    "0x1b39d0": 775,
+    "0x1b3990": 62,
+    "0x1b3a4f": 131,
+    "0x1b39c9": 6,
+    "0x1b39fe": 346,
+    "0x1b3a7e": 4,
+    "0x1b3a3e": 107,
+    "0x1b3a6f": 327,
+    "0x1b39d6": 281,
+    "0x1b39ae": 177,
+    "0x1b397a": 79,
+    "0x1b399a": 136,
+    "0x1b39ea": 281,
+    "0x1b39c2": 238,
+    "0x1b3a55": 116,
+    "0x1b3a69": 270,
+    "0x1b39b5": 52,
+    "0x1b3a1e": 8,
+    "0x1b3a05": 17,
+    "0x1b3a46": 9,
+    "0x1b39f1": 8,
+    "0x1b39a1": 6,
+    "0x1b394a": 2,
+    "0x1b3989": 23,
+    "0x1b3a22": 17,
+    "0x1b39dd": 45,
+    "0x1b3a17": 15,
+    "0x1b3a33": 6,
+    "0x1b38e0": 2,
+    "0x1b3a2f": 1,
+    "0x1b3939": 1,
+    "0x1b3a91": 3,
+    "0x1b3921": 2,
+    "0x1b3a92": 1,
+    "0x1b38d6": 2,
+    "0x1b38dc": 1,
+    "0x1b3907": 3,
+    "0x1b38d1": 1
+  },
+  "rms_offsets": {
+    "0x113d2a": 9,
+    "0x113d31": 5,
+    "0x113cf6": 5,
+    "0x113d24": 36,
+    "0x113d07": 7,
+    "0x113d0d": 2,
+    "0x113d13": 4,
+    "0x113d35": 1
+  },
+  "helper_ranges": {
+    "rms_guard": [
+      1129488,
+      1130517
+    ],
+    "q8_sum16": [
+      1784016,
+      1784524
+    ]
+  },
+  "mapped_libraries": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/libggml-cpu.so.0.22.0": [
+      [
+        131574542630912,
+        131574542790656,
+        0
+      ],
+      [
+        131574542790656,
+        131574544424960,
+        159744
+      ],
+      [
+        131574544424960,
+        131574544605184,
+        1794048
+      ],
+      [
+        131574544605184,
+        131574544613376,
+        1974272
+      ],
+      [
+        131574544613376,
+        131574544621568,
+        1982464
+      ]
+    ],
+    "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0": [
+      [
+        131574570684416,
+        131574570729472,
+        0
+      ],
+      [
+        131574570729472,
+        131574570975232,
+        45056
+      ],
+      [
+        131574570975232,
+        131574571028480,
+        290816
+      ],
+      [
+        131574571028480,
+        131574571032576,
+        344064
+      ],
+      [
+        131574571032576,
+        131574571036672,
+        348160
+      ]
+    ]
+  },
+  "gomp_sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1",
+  "lost_records": 0,
+  "loss_check_command": [
+    "sudo",
+    "-n",
+    "perf",
+    "script",
+    "-G",
+    "--show-lost-events",
+    "-F",
+    "event",
+    "-i",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-profile-0908/prose-draft0/perf.data"
+  ],
+  "earlier_rms_period_percent": {
+    "other": 11.505274436730705,
+    "gomp_spin": 29.473410646058696,
+    "q8_x8": 1.0886369429254334,
+    "q8_sum16": 25.73419587380144,
+    "f32_dot": 3.5770490104269146,
+    "q8_x16": 27.108904711958882,
+    "gomp_other": 1.4264572216369555,
+    "rms_guard": 0.05804576179966624,
+    "rms_norm": 0.028025394661305304
+  },
+  "projection_offsets": {
+    "0xd8bb2": 201,
+    "0xd89e3": 14,
+    "0xd90f5": 22,
+    "0xd8bd2": 66,
+    "0xd8f4e": 62,
+    "0xd8ba8": 5,
+    "0xd86b7": 2,
+    "0xd816a": 1,
+    "0xd8bc2": 28,
+    "0xd8e83": 6,
+    "0xd7bbd": 7,
+    "0xd8c78": 4,
+    "0xd8c45": 4,
+    "0xd8c85": 2,
+    "0xd8f45": 1,
+    "0xd8b5b": 2,
+    "0xd8964": 1,
+    "0xd8bf3": 3,
+    "0xd7be1": 1,
+    "0xd8f54": 15,
+    "0xd8906": 1,
+    "0xd7e4b": 8,
+    "0xd87ac": 1,
+    "0xd8bdc": 6,
+    "0xd8b52": 1,
+    "0xd8c8f": 5,
+    "0xd87bb": 3,
+    "0xd8c9b": 10,
+    "0xd8c72": 2,
+    "0xd8bed": 5,
+    "0xd7d9d": 1,
+    "0xd8c33": 6,
+    "0xd7e80": 4,
+    "0xd8b28": 2,
+    "0xd7c16": 1,
+    "0xd8f06": 1,
+    "0xd8c52": 4,
+    "0xd7ce1": 6,
+    "0xd8c9f": 4,
+    "0xd7e8b": 5,
+    "0xd8c65": 4,
+    "0xd82ee": 1,
+    "0xd8c00": 2,
+    "0xd89e9": 1,
+    "0xd73bd": 1,
+    "0xd8c6b": 3,
+    "0xd8c06": 1,
+    "0xd8007": 1,
+    "0xd7dd1": 1,
+    "0xd8ca5": 1,
+    "0xd89d4": 1,
+    "0xd8c19": 5,
+    "0xd8c8b": 5,
+    "0xd877e": 1,
+    "0xd8ea6": 2,
+    "0xd8b2f": 1,
+    "0xd7ca8": 1,
+    "0xd8caa": 1,
+    "0xd8a17": 1,
+    "0xd7e66": 1,
+    "0xd8c58": 3,
+    "0xd7d10": 1,
+    "0xd7b1b": 1,
+    "0xd8c95": 1,
+    "0xd8c4b": 2,
+    "0xd7b6a": 2,
+    "0xd80a5": 1,
+    "0xd8b8c": 1,
+    "0xd8b3a": 4,
+    "0xd8e94": 2,
+    "0xd8684": 1,
+    "0xd86b0": 1,
+    "0xd7ba5": 1,
+    "0xd829b": 1,
+    "0xd8829": 1,
+    "0xd8b68": 1,
+    "0xd8c3f": 3,
+    "0xd8bf9": 1,
+    "0xd90fd": 2,
+    "0xd7e83": 1,
+    "0xd73b0": 2,
+    "0xd8c26": 3,
+    "0xd8c7f": 1,
+    "0xd7e5e": 1,
+    "0xd871d": 1,
+    "0xd8a04": 1,
+    "0xd814f": 1,
+    "0xd8367": 1,
+    "0xd8b9c": 1,
+    "0xd8c2d": 1,
+    "0xd8be7": 1,
+    "0xd8ead": 1,
+    "0xd803e": 1,
+    "0xd8be2": 1,
+    "0xd7d47": 1,
+    "0xd8c13": 1,
+    "0xd81a6": 1,
+    "0xd8f00": 1,
+    "0xd8646": 1,
+    "0xd7e74": 1,
+    "0xd8a09": 2,
+    "0xd8b95": 1
+  },
+  "ordered_vector_offsets": {
+    "0xd8f4e": 62,
+    "0xd8bf3": 3,
+    "0xd8bed": 5,
+    "0xd8be7": 1
+  },
+  "top_symbols": [
+    {
+      "symbol": "[unknown]",
+      "percent": 31.848247683003613
+    },
+    {
+      "symbol": "ggml_gemv_q8_0_x16_q8_0",
+      "percent": 27.148289098705757
+    },
+    {
+      "symbol": "void flash_q8_sum_candidate<2>(int, float*, unsigned long, void const*, void const*, int, int) [clone .constprop.0]",
+      "percent": 25.69607241949666
+    },
+    {
+      "symbol": "ggml_vec_dot_f32",
+      "percent": 3.643370956055038
+    },
+    {
+      "symbol": "ggml_compute_forward_concat",
+      "percent": 1.7222902215103193
+    },
+    {
+      "symbol": "ggml_vec_dot_q8_0_q8_0",
+      "percent": 1.1073297385522187
+    },
+    {
+      "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+      "percent": 0.7606881082114624
+    },
+    {
+      "symbol": "ggml_threadpool_chunk_add",
+      "percent": 0.7352949834794691
+    },
+    {
+      "symbol": "ggml::cpu::repack::tensor_traits<block_q8_0, 8l, 8l, (ggml_type)8>::compute_forward(ggml_compute_params*, ggml_tensor*)",
+      "percent": 0.6567778078324431
+    },
+    {
+      "symbol": "ggml_compute_forward_add_non_quantized",
+      "percent": 0.620650081012493
+    },
+    {
+      "symbol": "quantize_row_q8_0",
+      "percent": 0.5533939895850971
+    },
+    {
+      "symbol": "ggml_compute_forward_dsv4_hc_pre",
+      "percent": 0.45945778143901966
+    },
+    {
+      "symbol": "ggml_graph_compute_thread.isra.0",
+      "percent": 0.43303005686122487
+    },
+    {
+      "symbol": "ggml_compute_forward_mul",
+      "percent": 0.363821611487896
+    },
+    {
+      "symbol": "ggml_compute_forward_dsv4_hc_post",
+      "percent": 0.3604208836826942
+    }
+  ],
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/analyze_flash_q8_r8_ordered_k_profile_0908.py": "53eae9a989a9a98bf16a26b39490080e2e34db693be6dbd3643a9b3287060a2d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-profile-0908/result.json": "01434d0135bd83e586bcb61666f50ad9ccc5b26cbff6bcb5d187051214e4c22c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-profile-0908/prose-draft0/samples-by-thread.txt": "5ca9d0a616b4e70564ecb6fd560b39055a9d03d9111bc58980334abffd1de201",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-profile-0908/prose-draft0/record.log": "bf5f2d50b8ebea9a71eb4e853e585263ff6aeb2c51b5bc10ce5754b3ae5f59ac",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-profile-0908/analysis/host-library.json": "7963d3d7a79a23eb104c1a7e10012d0f8f42f50a24bedb034e8ff7668a453e65",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-profile-0908/analysis/result.json": "a468d20bedfba4e8a8a3d75841b60cadc047245c59ccb3a96585170857eda87b",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/libggml-cpu.so.0.22.0": "5ba125771f3e8bac0b634a845f6666700d53e25b90573581c62f8bbbb8718f2b",
+    "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/projection-disassembly.json": "d60895f659619a8b8b4ef208204239003a95d9b56c224ec4a7f78f3eda2f4f8a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/projection-candidate-disassembly.txt": "e236bd71692e6b1560d55e22aba5f7fb8ee1aea927a4ed0de8f8acff8f327815",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/projection-parent-disassembly.txt": "9983873be3e7d00bea343830f7d07de90661df8169ed164b3523612341bb3270"
+  },
+  "scope": "Verified helper execution and sampled user-cycle distribution. Sample fractions are not removable wall-time fractions; profiled speed is not the unprofiled benchmark."
+}
