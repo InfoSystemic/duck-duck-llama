@@ -7,9 +7,9 @@
     "all_reconstructed_trees_match": true
   },
   "archive": {
-    "archive_files": 3354,
+    "archive_files": 3410,
     "patches": 10,
-    "python_files": 874,
+    "python_files": 887,
     "shell_files": 29,
     "errors": [],
     "passed": true
@@ -176,7 +176,7 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 66,
+    "staged_files_scanned": 61,
     "credential_or_binary_findings": [],
     "manifest_files_not_tracked": [],
     "host_snapshot_filter_check_passed": true,
@@ -243,8 +243,8 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "updated_utc": "2026-09-09T05:43:02.974015+00:00",
-    "archive_files_added": 61,
+    "updated_utc": "2026-09-09T06:45:09.701293+00:00",
+    "archive_files_added": 56,
     "archive_files_updated": 1,
     "source_bundles_and_selected_overlays_unchanged": true,
     "source_audit": {
@@ -310,166 +310,144 @@
       "issues": [],
       "passed": true
     },
-    "huge_pages": {
-      "off_on_pairs_completed": 1,
-      "all_outputs_and_draft_counts_match": true,
-      "all_bandwidth_attribution_windows_valid": true,
-      "disabled_tok_s_prose_code": [
-        22.309508233823905,
-        28.88025335908322
-      ],
-      "enabled_tok_s_prose_code": [
-        22.146170183913323,
-        28.250095511166766
-      ],
-      "enabled_adjusted_gb_s_prose_code": [
-        128.1741726636533,
-        132.08384263169495
-      ],
-      "enabled_anonymous_hugepage_fraction_after_load_decode": [
-        0.8134763474898378,
-        0.8071117100662065
-      ],
-      "model_speed_gain_established": false,
-      "candidate_repeat_available": false,
-      "both_model_targets_met": false,
-      "runtime_promoted": false,
-      "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-huge-pages-0909.json"
+    "pinned_base_recovery": {
+      "passed": true,
+      "byte_identical": true,
+      "library_sha256": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
+      "evidence": "archive/serving/fleet-0903/results/qwen-pinned-base-recovery-0909b/result.json"
     },
-    "block_quantization_interval_analysis": {
-      "whole_run_scores_preserved": true,
-      "root_cause_established": false,
-      "evidence": "archive/serving/fleet-0903/results/qwen-quantize-blocks-interval-analysis-0909.json"
-    },
-    "shared_dispatch": {
-      "implementation_prepared": true,
-      "baseline_objects": {
-        "ggml-cpu.cpp": true,
-        "ggml-backend-meta.cpp": true
-      },
-      "baseline_libraries": {
+    "shared_dispatch_build": {
+      "passed": true,
+      "parent_libraries_byte_identical": {
         "cpu": true,
-        "base": false
+        "base": true
       },
-      "build_completed": false,
-      "build_error": "AssertionError('base')",
-      "candidate_compiled": false,
-      "graph_lifecycle_loader_validated": false,
-      "model_loaded": false,
-      "model_speed_gain_established": false,
-      "runtime_promoted": false,
-      "peer_preserved": true,
-      "suspected_base_source_difference_proven": false,
-      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/result.json",
-      "diagnosis": "archive/serving/fleet-0903/results/qwen-30tps-tools-0909/shared-dispatch-parent-base-diagnosis-0909.json"
+      "candidate_library_sha256": {
+        "base": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
+        "cpu": "e68c0c543aa3334a1f1ed732c11f8f4fe8ecf097ea816eb89f82fe9ae1ed6a0a"
+      },
+      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/result.json"
     },
-    "publication_review": {
-      "readme_relative_links_checked": 69,
-      "missing_readme_links": [],
-      "whitespace_exit_code": 2,
-      "whitespace_warnings": [
+    "shared_dispatch_numa": {
+      "passed": true,
+      "arms": 24,
+      "all_outputs_match_parent": true,
+      "total_output_bytes": 328089600,
+      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-numa-0909/result.json"
+    },
+    "shared_dispatch_lifecycle": {
+      "passed": true,
+      "arms": [
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
-          "line": 20,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
+          "arm": "parent",
+          "passed": true,
+          "runs": 24,
+          "exact_values": 209920,
+          "shared_workers": false,
+          "workers_per_context": 60,
+          "baseline_threads": 1,
+          "active_threads_two_contexts": 129,
+          "final_threads": 1,
+          "concurrent_rounds": 8,
+          "destroyed_context_while_peer_workers_held": true
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
-          "line": 21,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
+          "arm": "off",
+          "passed": true,
+          "runs": 24,
+          "exact_values": 209920,
+          "shared_workers": false,
+          "workers_per_context": 60,
+          "baseline_threads": 1,
+          "active_threads_two_contexts": 129,
+          "final_threads": 1,
+          "concurrent_rounds": 8,
+          "destroyed_context_while_peer_workers_held": true
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
-          "line": 47,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
-          "line": 48,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
-          "line": 6,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
-          "line": 41,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
-          "line": 42,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
-          "line": 9,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
-          "line": 15,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
-          "line": 23,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
-          "line": 50,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
-          "line": 53,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-cpu.cpp.patch",
-          "line": 16,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-cpu.cpp.patch",
-          "line": 40,
-          "diagnostic": "trailing whitespace.",
-          "required_blank_diff_context_prefix": true,
-          "original_hash_matches": true
+          "arm": "on",
+          "passed": true,
+          "runs": 24,
+          "exact_values": 209920,
+          "shared_workers": true,
+          "workers_per_context": 60,
+          "baseline_threads": 1,
+          "active_threads_two_contexts": 61,
+          "final_threads": 1,
+          "concurrent_rounds": 8,
+          "destroyed_context_while_peer_workers_held": true
         }
       ],
+      "all_outputs_match_parent": true,
+      "scope": "Independent context buffers; does not establish arbitrary shared-buffer concurrency.",
+      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-lifecycle-0909/result.json"
+    },
+    "shared_dispatch_loader": {
+      "passed": true,
+      "model_loaded": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-runtime-0909/result.json"
+    },
+    "shared_dispatch_model_control": {
+      "passed": true,
+      "rows": [
+        {
+          "workload": "prose",
+          "tok_s": 22.232090582673507,
+          "adjusted_gb_s": 129.29581243910113,
+          "idle_before_gb_s": 6.0658753019828815,
+          "idle_after_gb_s": 5.760977420804238,
+          "attribution_valid": true,
+          "both_targets_met": false
+        },
+        {
+          "workload": "code",
+          "tok_s": 28.99466973699182,
+          "adjusted_gb_s": 138.10023584214267,
+          "idle_before_gb_s": 5.149966040907076,
+          "idle_after_gb_s": 5.362250237621821,
+          "attribution_valid": true,
+          "both_targets_met": false
+        }
+      ],
+      "owned_model_exit": 0,
+      "peer_preserved": true,
+      "evidence": "archive/serving/fleet-0903/results/qwen-private-shared-dispatch-off-0909/result.json"
+    },
+    "shared_dispatch_enabled_model_trial": {
+      "passed": false,
+      "model_loaded": true,
+      "benchmark_requests_sent": false,
+      "error": "AssertionError('No shared four-socket context group observed')",
+      "dispatch_after_release": {
+        "created": [],
+        "attached": [],
+        "destroyed": []
+      },
+      "owned_model_exit": 0,
+      "peer_preserved": true,
+      "missing_log_messages_cause_resolved": false,
+      "off_on_comparison_completed": false,
+      "model_speed_gain_established": false,
+      "runtime_promoted": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-private-shared-dispatch-on-0909/result.json"
+    },
+    "readme_links": {
+      "readme_links_checked": 75,
+      "errors": [],
       "passed": true
     },
-    "scope": "Archive refresh only. Prepared shared-dispatch sources have not compiled or undergone runtime validation. Selected source overlays, profiles, and earlier reconstructed publication builds are unchanged. No new model benchmark or runtime promotion during publication."
+    "scope": "Archive refresh only. Shared-dispatch component checks pass, but the enabled model trial failed before requests. Selected source overlays, profiles, and earlier reconstructed publication builds are unchanged. No model benchmark or runtime promotion during publication.",
+    "whitespace_check": {
+      "git_diff_check_exit_code": 2,
+      "preserved_blank_patch_prefixes": 23,
+      "unexpected_findings": [],
+      "passed": true
+    },
+    "archive_source_freshness": {
+      "added_since_export": 0,
+      "updated_since_export": 0,
+      "all_eligible_current_sources_match": true
+    }
   },
   "previous_follow_ups": [
     {
@@ -1015,6 +993,235 @@
         ],
         "passed": true
       }
+    },
+    {
+      "updated_utc": "2026-09-09T05:43:02.974015+00:00",
+      "archive_files_added": 61,
+      "archive_files_updated": 1,
+      "source_bundles_and_selected_overlays_unchanged": true,
+      "source_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "huge_pages": {
+        "off_on_pairs_completed": 1,
+        "all_outputs_and_draft_counts_match": true,
+        "all_bandwidth_attribution_windows_valid": true,
+        "disabled_tok_s_prose_code": [
+          22.309508233823905,
+          28.88025335908322
+        ],
+        "enabled_tok_s_prose_code": [
+          22.146170183913323,
+          28.250095511166766
+        ],
+        "enabled_adjusted_gb_s_prose_code": [
+          128.1741726636533,
+          132.08384263169495
+        ],
+        "enabled_anonymous_hugepage_fraction_after_load_decode": [
+          0.8134763474898378,
+          0.8071117100662065
+        ],
+        "model_speed_gain_established": false,
+        "candidate_repeat_available": false,
+        "both_model_targets_met": false,
+        "runtime_promoted": false,
+        "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-huge-pages-0909.json"
+      },
+      "block_quantization_interval_analysis": {
+        "whole_run_scores_preserved": true,
+        "root_cause_established": false,
+        "evidence": "archive/serving/fleet-0903/results/qwen-quantize-blocks-interval-analysis-0909.json"
+      },
+      "shared_dispatch": {
+        "implementation_prepared": true,
+        "baseline_objects": {
+          "ggml-cpu.cpp": true,
+          "ggml-backend-meta.cpp": true
+        },
+        "baseline_libraries": {
+          "cpu": true,
+          "base": false
+        },
+        "build_completed": false,
+        "build_error": "AssertionError('base')",
+        "candidate_compiled": false,
+        "graph_lifecycle_loader_validated": false,
+        "model_loaded": false,
+        "model_speed_gain_established": false,
+        "runtime_promoted": false,
+        "peer_preserved": true,
+        "suspected_base_source_difference_proven": false,
+        "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/result.json",
+        "diagnosis": "archive/serving/fleet-0903/results/qwen-30tps-tools-0909/shared-dispatch-parent-base-diagnosis-0909.json"
+      },
+      "publication_review": {
+        "readme_relative_links_checked": 69,
+        "missing_readme_links": [],
+        "whitespace_exit_code": 2,
+        "whitespace_warnings": [
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+            "line": 20,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+            "line": 21,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+            "line": 47,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+            "line": 48,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
+            "line": 6,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
+            "line": 41,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
+            "line": 42,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+            "line": 9,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+            "line": 15,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+            "line": 23,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+            "line": 50,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+            "line": 53,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-cpu.cpp.patch",
+            "line": 16,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-cpu.cpp.patch",
+            "line": 40,
+            "diagnostic": "trailing whitespace.",
+            "required_blank_diff_context_prefix": true,
+            "original_hash_matches": true
+          }
+        ],
+        "passed": true
+      },
+      "scope": "Archive refresh only. Prepared shared-dispatch sources have not compiled or undergone runtime validation. Selected source overlays, profiles, and earlier reconstructed publication builds are unchanged. No new model benchmark or runtime promotion during publication."
     }
   ],
   "previous_content_scans": [
@@ -1034,6 +1241,13 @@
     },
     {
       "staged_files_scanned": 69,
+      "credential_or_binary_findings": [],
+      "manifest_files_not_tracked": [],
+      "host_snapshot_filter_check_passed": true,
+      "passed": true
+    },
+    {
+      "staged_files_scanned": 66,
       "credential_or_binary_findings": [],
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,

@@ -1,0 +1,145 @@
+{
+  "started": 1788934475.5039852,
+  "controller_pid": 4045390,
+  "passed": true,
+  "checks": [
+    {
+      "arm": "parent",
+      "proof": {
+        "passed": true,
+        "runs": 24,
+        "exact_values": 209920,
+        "shared_workers": false,
+        "workers_per_context": 60,
+        "baseline_threads": 1,
+        "active_threads_two_contexts": 129,
+        "final_threads": 1,
+        "concurrent_rounds": 8,
+        "destroyed_context_while_peer_workers_held": true
+      },
+      "full_output_matches_parent": true,
+      "output_sha256": "254c0efd26ec78e684343ba5bccb33630d846ec8b7902cabee2294373a95297a",
+      "bytes": 839680,
+      "runtime_cpu_sha256": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+      "runtime_base_sha256": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
+      "groups_created": [],
+      "groups_attached": [],
+      "groups_destroyed": []
+    },
+    {
+      "arm": "off",
+      "proof": {
+        "passed": true,
+        "runs": 24,
+        "exact_values": 209920,
+        "shared_workers": false,
+        "workers_per_context": 60,
+        "baseline_threads": 1,
+        "active_threads_two_contexts": 129,
+        "final_threads": 1,
+        "concurrent_rounds": 8,
+        "destroyed_context_while_peer_workers_held": true
+      },
+      "full_output_matches_parent": true,
+      "output_sha256": "254c0efd26ec78e684343ba5bccb33630d846ec8b7902cabee2294373a95297a",
+      "bytes": 839680,
+      "runtime_cpu_sha256": "e68c0c543aa3334a1f1ed732c11f8f4fe8ecf097ea816eb89f82fe9ae1ed6a0a",
+      "runtime_base_sha256": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
+      "groups_created": [],
+      "groups_attached": [],
+      "groups_destroyed": []
+    },
+    {
+      "arm": "on",
+      "proof": {
+        "passed": true,
+        "runs": 24,
+        "exact_values": 209920,
+        "shared_workers": true,
+        "workers_per_context": 60,
+        "baseline_threads": 1,
+        "active_threads_two_contexts": 61,
+        "final_threads": 1,
+        "concurrent_rounds": 8,
+        "destroyed_context_while_peer_workers_held": true
+      },
+      "full_output_matches_parent": true,
+      "output_sha256": "254c0efd26ec78e684343ba5bccb33630d846ec8b7902cabee2294373a95297a",
+      "bytes": 839680,
+      "runtime_cpu_sha256": "e68c0c543aa3334a1f1ed732c11f8f4fe8ecf097ea816eb89f82fe9ae1ed6a0a",
+      "runtime_base_sha256": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
+      "groups_created": [
+        "1",
+        "2"
+      ],
+      "groups_attached": [
+        "1",
+        "1",
+        "1",
+        "2"
+      ],
+      "groups_destroyed": [
+        "1",
+        "2"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "label": "compile",
+      "exit_code": 0
+    },
+    {
+      "label": "parent",
+      "exit_code": 0
+    },
+    {
+      "label": "off",
+      "exit_code": 0
+    },
+    {
+      "label": "on",
+      "exit_code": 0
+    }
+  ],
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/validate_qwen_shared_dispatch_lifecycle_0909.py": "f60acb8a8589acc31594423480729c58ac13e2bc3101ea22c6cded8e883a0e60",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/private-runtime/manifest.json": "577376b463d0a18f7992345724578efeedd9449eb38944a42aef9619124d1cb9",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0.22.0": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen-flash-20tps.json": "884e0de653e6eae6651ef6135aea2f76c40a355c31c32b093f385d46181cf4c3",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-shared-dispatch-lifecycle-0909.cpp": "04e46569244744030dcb4f6a5c050f4de52e18e4d907c3d4941ac357a65a29b5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/private-runtime/libggml-base.so.0.22.0": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/private-runtime/libggml-cpu.so.0.22.0": "e68c0c543aa3334a1f1ed732c11f8f4fe8ecf097ea816eb89f82fe9ae1ed6a0a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/glm_flash_q8_trial.py": "3a99a4512a3d9ceebce8de82b0c1048774bed028b48c6d8c0e3bca25c9fc802d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/validate_qwen_quantize_blocks_0909.py": "c5e9eaf1c5d01d1acc41f217eadda4d5d37614a992fe062e13836a3620d6c34e"
+  },
+  "model_loaded": false,
+  "scope": "Independent private-buffer Meta contexts: exact dyadic reference, alternating and concurrent submissions, 60-worker identity reuse, destruction during a peer graph, and final thread cleanup. No model-rate claim.",
+  "idle_gate": {
+    "time": 1788934496.0372195,
+    "quiet_seconds": 15.238246474880725,
+    "required_quiet_seconds": 15,
+    "state": {
+      "servers": {
+        "1219506": {
+          "processing": 0,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "owned": {
+    "pid": 4046607,
+    "label": "on"
+  },
+  "bit_exact": true,
+  "binary_sha256": "ba4c70915695c24ad7ef0a38fc6a65d11aedbfcaa7e99c997b1c7078d20db094",
+  "finished": 1788934505.7772608,
+  "peer_preserved": true
+}

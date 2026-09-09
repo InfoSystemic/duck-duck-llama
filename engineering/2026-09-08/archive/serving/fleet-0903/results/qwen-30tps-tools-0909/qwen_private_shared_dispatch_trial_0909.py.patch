@@ -1,0 +1,127 @@
+--- qwen_private_quantize_blocks_trial_0909.py
++++ qwen_private_shared_dispatch_trial_0909.py
+@@ -21,6 +21,14 @@
+ 
+ BASE = Path(__file__).resolve().parent
+ PORT = 18155
++
++
++def dispatch_log(out):
++    text = (out / 'model.log').read_text()
++    created = re.findall(r'SHARED_NUMA_DISPATCH create group=(\d+) ranks=(\d+)', text)
++    attached = re.findall(r'SHARED_NUMA_DISPATCH attach group=(\d+) ranks=(\d+)', text)
++    destroyed = re.findall(r'SHARED_NUMA_DISPATCH destroy group=(\d+)', text)
++    return dict(created=created, attached=attached, destroyed=destroyed)
+ 
+ 
+ def memory_gate(loading=False):
+@@ -71,21 +79,24 @@
+     peer = process_info(args.peer_pid)
+     assert peer['start'] == args.start_ticks
+     preset_path = BASE / 'qwen-flash-20tps.json'
+-    bundle_path = BASE / 'results/qwen-quantize-blocks-runtime-0909/result.json'
+-    check_path = BASE / 'results/qwen-quantize-blocks-validation-0909/result.json'
+-    build_path = BASE / 'results/qwen-quantize-blocks-build-0909/result.json'
+-    preset, bundle, checks, build = [json.loads(path.read_text()) for path in (preset_path, bundle_path, check_path, build_path)]
+-    assert bundle['passed'] and checks['passed'] and build['passed'] and build['build_completed']
+-    assert checks['bit_exact'] and checks['graph_case_executions'] == 1728 and len(checks['checks']) == 12
+-    assert len(checks['numa_checks']) == 14
+-    assert all(sha256(path) == digest for path,digest in checks['fixture_sha256'].items())
++    bundle_path = BASE / 'results/qwen-shared-dispatch-runtime-0909/result.json'
++    check_path = BASE / 'results/qwen-shared-dispatch-numa-0909/result.json'
++    lifecycle_path = BASE / 'results/qwen-shared-dispatch-lifecycle-0909/result.json'
++    build_path = BASE / 'results/qwen-shared-dispatch-build-0909b/result.json'
++    preset, bundle, checks, lifecycle, build = [json.loads(path.read_text()) for path in (preset_path, bundle_path, check_path, lifecycle_path, build_path)]
++    assert bundle['passed'] and checks['passed'] and lifecycle['passed'] and build['passed'] and build['build_completed']
++    assert checks['bit_exact'] and checks['arms'] == 24
++    assert lifecycle['bit_exact'] and len(lifecycle['checks']) == 3
++    assert sha256(check_path.parent / 'numa-check.cpp') == checks['fixture_sha256']
+     assert all(sha256(path) == digest for path,digest in build['private_source_sha256'].items())
+-    assert build['parent_sha256'] == 'c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf'
+-    assert bundle['cpu_sha256'] == sha256(bundle['cpu']) == build['library_sha256'] == checks['cpu_sha256']
++    assert build['parent_cpu_sha256'] == 'c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf'
++    assert build['parent_base_sha256'] == 'a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36'
++    assert bundle['cpu_sha256'] == sha256(bundle['cpu']) == build['libraries']['cpu']['sha256']
++    assert bundle['base_sha256'] == sha256(bundle['base']) == build['libraries']['base']['sha256']
+     assert bundle['llama_sha256'] == sha256(bundle['llama']) == 'd0b2321eae443255dd84a5ad98cda8d3d9bf5540a31891bdc5c03be91061d647'
+-    assert build['baseline_link_identical'] and build['baseline_object_identical']
+-    assert all(sha256(path) == digest for path, digest in build['input_sha256'].items())
+-    assert all(sha256(path) == digest for path, digest in checks['input_sha256'].items())
++    assert all(build['baseline_objects'].values()) and all(build['baseline_libraries'].values())
++    for record in (build, checks, lifecycle):
++        assert all(sha256(path) == digest for path, digest in record['input_sha256'].items())
+     assert all(sha256(path) == digest for path, digest in bundle['sources'].items())
+     peer_env = runtime_environment(process_environment(args.peer_pid))
+     assert peer_env == preset['runtime_env']
+@@ -98,18 +109,19 @@
+     if args.drafts == 0:
+         for flag in [value for value in command if value.startswith('--spec-')]:
+             command = set_option(command, flag, None)
+-    env = dict(bundle['runtime_env'], GGML_CPU_X16_QUANTIZE_BLOCKS=str(int(args.quantize_blocks == 'on')))
++    env = dict(bundle['runtime_env'], GGML_CPU_NUMA_SHARED_DISPATCH=str(int(args.shared_dispatch == 'on')))
++    assert env['GGML_CPU_X16_QUANTIZE_BLOCKS'] == env['GGML_CPU_NUMA_HUGEPAGES'] == '0'
+     assert not any('AUDIT' in key or 'PROFILE' in key or 'REQUANT' in key for key in env)
+     records, source_paths = model_records(preset)
+-    source_paths += [Path(__file__).resolve(), preset_path, bundle_path, check_path, build_path,
++    source_paths += [Path(__file__).resolve(), preset_path, bundle_path, check_path, lifecycle_path, build_path,
+                      BASE / 'measure-model-bandwidth.py', BASE / 'model_measurement_guard.py',
+                      BASE / 'guarded_inference_request.py', BASE / 'dram_bandwidth.py',
+                      BASE / 'benchmark_qwen_q6.py', BASE / 'glm_flash_q8_trial.py',
+                      BASE / 'benchmark_qwen_resident_0908.py',
+-                     Path(bundle['cpu']), Path(bundle['llama']), Path(bundle['server'])]
++                     Path(bundle['cpu']), Path(bundle['base']), Path(bundle['llama']), Path(bundle['server'])]
+     plan = dict(prepared=time.time(), label=args.label, peer_pid=args.peer_pid, peer=peer, peer_runtime_env=peer_env,
+-                port=PORT, command=command, runtime_env=env, drafts=args.drafts, quantize_blocks=args.quantize_blocks,
+-                cpu=bundle['cpu'], cpu_sha256=bundle['cpu_sha256'], llama=bundle['llama'],
++                port=PORT, command=command, runtime_env=env, drafts=args.drafts, quantize_blocks='off', shared_dispatch=args.shared_dispatch,
++                cpu=bundle['cpu'], cpu_sha256=bundle['cpu_sha256'], base=bundle['base'], base_sha256=bundle['base_sha256'], llama=bundle['llama'],
+                 server_sha256=bundle['server_sha256'], model_records=records,
+                 source_sha256={str(path):sha256(path) for path in source_paths},
+                 memory_preflight=memory_gate(), target_tok_s=30, target_gb_s=190, capacity_gb_s=380,
+@@ -118,7 +130,7 @@
+     verify_plan(plan)
+     out.mkdir(exist_ok=False)
+     (out / 'plan.json').write_text(json.dumps(plan, indent=2) + '\n')
+-    print(json.dumps(dict(prepared=True, path=str(out / 'plan.json'), quantize_blocks=args.quantize_blocks,
++    print(json.dumps(dict(prepared=True, path=str(out / 'plan.json'), shared_dispatch=args.shared_dispatch,
+                           drafts=args.drafts, private_port=PORT, peer_preserved=args.peer_pid)), flush=True)
+ 
+ 
+@@ -177,9 +189,16 @@
+         assert current['command'] == plan['command'] and current['affinity'] == list(range(128))
+         assert runtime_environment(process_environment(model.pid)) == plan['runtime_env']
+         mapped = Path(f'/proc/{model.pid}/maps').read_text().splitlines()
+-        for stem, path in [('libggml-cpu.so.', plan['cpu']), ('libllama.so.', plan['llama'])]:
++        for stem, path in [('libggml-cpu.so.', plan['cpu']), ('libggml-base.so.', plan['base']), ('libllama.so.', plan['llama'])]:
+             assert {row.split()[-1] for row in mapped if '/' + stem in row} == {str(Path(path).resolve())}
+         result['current'] = current
++        dispatch = dispatch_log(out)
++        if plan['shared_dispatch'] == 'on':
++            assert any(ranks == '4' and dispatch['attached'].count((group, ranks)) >= 2
++                       for group, ranks in dispatch['created']), 'No shared four-socket context group observed'
++        else:
++            assert not any(dispatch.values()), 'Shared dispatch unexpectedly enabled in control'
++        result['dispatch_after_load'] = dispatch
+         class ReservedMemoryGuard(ModelMeasurementGuard):
+             def inspect(self, *args, **kwargs):
+                 memory_gate(loading=True)
+@@ -239,6 +258,10 @@
+                 model.kill()
+                 model.wait(timeout=20)
+         result['owned_model_exit'] = model.returncode if model is not None else None
++        if (out / 'model.log').exists():
++            dispatch = dispatch_log(out)
++            result['dispatch_after_release'] = dispatch
++            result['dispatch_cleanup_valid'] = sorted(group for group, ranks in dispatch['created']) == sorted(dispatch['destroyed'])
+         try:
+             peer_after = process_info(plan['peer_pid'])
+             result['peer_preserved'] = all(peer_after[key] == plan['peer'][key] for key in ('start', 'exe', 'command', 'affinity'))
+@@ -256,7 +279,7 @@
+     parser.add_argument('label')
+     parser.add_argument('--peer-pid', type=int, default=1219506)
+     parser.add_argument('--start-ticks', default='103969952')
+-    parser.add_argument('--quantize-blocks', choices=('off', 'on'), default='on')
++    parser.add_argument('--shared-dispatch', choices=('off', 'on'), default='on')
+     parser.add_argument('--drafts', type=int, choices=range(5), default=4)
+     args = parser.parse_args()
+     assert re.fullmatch(r'qwen-private-[A-Za-z0-9_-]+', args.label)
