@@ -1,0 +1,6 @@
+{
+  "builder_sha256": "070f4a86cb2ecf8c867a8381da563c057c276e3b076396691d3a31d334351e89",
+  "checks": "Reproduce C79 object/library, 2 direct arithmetic arms, 8 CPU graph arms with 324 cases each at chunk 16/64, padded/unpadded, flag off/on.",
+  "fixture_adaptation": "The original Qwen graph fixture has no CPU-library marker. Add dladdr reporting to its private copy without changing graph arithmetic. The direct fixture adds a check-only early return after all correctness cases.",
+  "scope": "Only the x86 repack object is replaced. Q8 activation batches above NR=1 retain their original dispatch."
+}

@@ -1,0 +1,83 @@
+{
+  "started": 1788924975.2058718,
+  "controller_pid": 2667494,
+  "passed": true,
+  "steps": [
+    {
+      "mode": "cpu",
+      "exit_code": 0
+    }
+  ],
+  "checks": [
+    {
+      "passed": true,
+      "cases": 720,
+      "bytes_compared": 127476000,
+      "blocks_checked": 2025000,
+      "parallel_cases": 460,
+      "cpu_library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0",
+      "exact_bytes": true,
+      "single_writer_per_block": true,
+      "inputs_and_padding_preserved": true
+    }
+  ],
+  "compile_command": [
+    "g++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-ffp-contract=off",
+    "-fopenmp",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-quantize-blocks-0909.cpp",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0",
+    "-L/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-lggml",
+    "-lggml-base",
+    "-ldl",
+    "-pthread",
+    "-o",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-quantize-blocks-proof-0909/check"
+  ],
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/run_qwen_quantize_blocks_check_0909.py": "20d651934fbadfd58f453db0403647be154750b309d66f11c8581dce34794f49",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-quantize-blocks-0909.cpp": "7b8bb083da85b3cc3d2493e6ea9bfdd6ec1971d1aff7258c55a1d44578dc4c1e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen-quantize-blocks-0909.h": "f02fe6f74cb83b955a7cc9078570db1e54f026ab03347f3b4a47c72f48b2a3a8",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen-flash-20tps.json": "884e0de653e6eae6651ef6135aea2f76c40a355c31c32b093f385d46181cf4c3",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36"
+  },
+  "scope": "Quantization scheduling helper correctness only, with concurrent calls and byte/coverage checks. No graph integration or performance claim.",
+  "idle_gate": {
+    "time": 1788924995.7192812,
+    "quiet_seconds": 15.25298473215662,
+    "required_quiet_seconds": 15,
+    "state": {
+      "servers": {
+        "1219506": {
+          "processing": 0,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "compile_exit": 0,
+  "owned": {
+    "pid": 2669248,
+    "mode": "cpu"
+  },
+  "binary_sha256": "20430c7c73d74b1a634d349dba4e07f7cdd12de14a5c0fbcd8060e166abbcc0f",
+  "finished": 1788924998.1957417,
+  "peer_preserved": true,
+  "peer_after": {
+    "processing": 0,
+    "queued": 0.0
+  }
+}

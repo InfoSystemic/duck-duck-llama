@@ -7,9 +7,9 @@
     "all_reconstructed_trees_match": true
   },
   "archive": {
-    "archive_files": 3131,
+    "archive_files": 3228,
     "patches": 10,
-    "python_files": 817,
+    "python_files": 842,
     "shell_files": 29,
     "errors": [],
     "passed": true
@@ -176,7 +176,7 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 155,
+    "staged_files_scanned": 101,
     "credential_or_binary_findings": [],
     "manifest_files_not_tracked": [],
     "host_snapshot_filter_check_passed": true,
@@ -243,9 +243,9 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "updated_utc": "2026-09-09T02:55:24.135110+00:00",
-    "archive_files_added": 135,
-    "archive_files_updated": 17,
+    "updated_utc": "2026-09-09T03:40:42.548406+00:00",
+    "archive_files_added": 97,
+    "archive_files_updated": 1,
     "source_bundles_and_selected_overlays_unchanged": true,
     "source_audit": {
       "source_bundles": [
@@ -310,47 +310,245 @@
       "issues": [],
       "passed": true
     },
-    "hc_mix_private_comparison": {
+    "hc_norm_flat": {
       "off_on_pairs_completed": 1,
       "all_outputs_match": true,
       "both_model_targets_met": false,
-      "runtime_integrated": true,
+      "candidate_repeat_available": false,
       "runtime_promoted": false,
-      "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-hc-mix-0908.json"
+      "clean_completed_run_comparison_produced": true,
+      "earlier_diagnostic_profile_completed": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-hc-norm-flat-0909.json"
     },
-    "hc_norm_flat": {
-      "cpu_cases": 576,
-      "numa_cases": 192,
-      "bit_exact_outputs": 35892640,
-      "graph_proof_passed": true,
+    "q8_exact_sums": {
+      "off_on_pairs_completed": 1,
+      "all_outputs_match": true,
+      "both_model_targets_met": false,
+      "candidate_repeat_available": false,
+      "runtime_promoted": false,
+      "integer_cases": 18448,
+      "exact_outputs": 57600,
+      "graph_case_executions": 2592,
       "private_build_and_loader_passed": true,
-      "control_completed": true,
-      "enabled_unprofiled_measurements_completed": true,
-      "enabled_full_controller_passed": false,
-      "diagnostic_profile_completed": false,
-      "diagnostic_failure": "Code collection window was not wholly within the observed decode interval.",
-      "completed_run_comparison_produced": false,
-      "runtime_promoted": false,
-      "private_model_released": true,
-      "peer_preserved": true,
-      "evidence": "archive/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-profile-0908/result.json"
+      "model_speed_gain_established": false,
+      "cpu_sha256": "6f1050aa25f5057854e5d608f19225671127217a1697bd739c52a277f87fa275",
+      "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-q8-sums-0909.json"
     },
-    "export_policy": {
-      "additional_omitted_fields": [
-        "host_before",
-        "host_after",
-        "inference_before",
-        "inference_after"
+    "block_parallel_quantization": {
+      "passed": true,
+      "cases": 720,
+      "bytes_compared": 127476000,
+      "blocks_checked": 2025000,
+      "parallel_cases": 460,
+      "exact_bytes": true,
+      "single_writer_per_block": true,
+      "inputs_and_padding_preserved": true,
+      "runtime_integrated": false,
+      "model_performance_measured": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-quantize-blocks-proof-0909/result.json"
+    },
+    "prose_profile_analysis": {
+      "validated_prose_arm": true,
+      "full_profile_completed": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-hc-norm-flat-prose-analysis-0909/result.json",
+      "scope": "Only the completed prose capture is qualified. Code profiling failed. Period-weighted CPU samples are not removable wall-time fractions. Thread cohorts use observed activity, not assumed target/draft roles. OpenMP entries are not classified as wait loops without disassembly."
+    },
+    "scope": "Private experimental source and completed evidence. The selected source overlays, profiles, and reconstructed publication builds are unchanged. No runtime promotion or broad quality certification.",
+    "publication_review": {
+      "readme_local_links": 33,
+      "missing_links": [],
+      "non_archive_whitespace_passed": true,
+      "reviewed_archive_whitespace_warnings": [
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_q8_sums_0909.py.patch",
+          "line": 4,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_q8_sums_0909.py.patch",
+          "line": 5,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/isolate_qwen_q8_sums_runtime_0909.py.patch",
+          "line": 9,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/isolate_qwen_q8_sums_runtime_0909.py.patch",
+          "line": 10,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-proof.patch",
+          "line": 16,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-proof.patch",
+          "line": 17,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-proof.patch",
+          "line": 38,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_q8_sums_trial_0909.py.patch",
+          "line": 53,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_q8_sums_trial_0909.py.patch",
+          "line": 54,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-q8-sums-build-0909/private-cpu/q8-sums.patch",
+          "line": 6,
+          "reason": "Required unified-diff prefix on a blank context line."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-q8-sums-build-0909/private-cpu/qwen-q8-sums.h",
+          "line": 52,
+          "reason": "Original generated header EOF blank line, preserved to retain measured-source identity."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-q8-sums-proof-0909/kernel.patch",
+          "line": 1,
+          "reason": "Original difflib header with an empty filename, preserved byte for byte."
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-q8-sums-proof-0909/kernel.patch",
+          "line": 2,
+          "reason": "Original difflib header with an empty filename, preserved byte for byte."
+        }
       ],
-      "original_sources_and_raw_evidence_unchanged": true,
-      "published_evidence_hashes_updated": true
-    },
-    "scope": "Latest private experimental sources and evidence; the earlier reconstructed publication builds and selected profiles are unchanged. No new runtime promotion or model-quality certification.",
-    "whitespace_check": {
-      "non_patch_files_passed": true,
-      "archived_patch_warnings": 24,
-      "all_warnings_are_required_blank_context_prefixes": true,
-      "original_patch_bytes_preserved": true
+      "all_warned_archive_files_match_original_hashes": true,
+      "passed": true
     }
-  }
+  },
+  "previous_follow_ups": [
+    {
+      "updated_utc": "2026-09-09T02:55:24.135110+00:00",
+      "archive_files_added": 135,
+      "archive_files_updated": 17,
+      "source_bundles_and_selected_overlays_unchanged": true,
+      "source_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "hc_mix_private_comparison": {
+        "off_on_pairs_completed": 1,
+        "all_outputs_match": true,
+        "both_model_targets_met": false,
+        "runtime_integrated": true,
+        "runtime_promoted": false,
+        "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-hc-mix-0908.json"
+      },
+      "hc_norm_flat": {
+        "cpu_cases": 576,
+        "numa_cases": 192,
+        "bit_exact_outputs": 35892640,
+        "graph_proof_passed": true,
+        "private_build_and_loader_passed": true,
+        "control_completed": true,
+        "enabled_unprofiled_measurements_completed": true,
+        "enabled_full_controller_passed": false,
+        "diagnostic_profile_completed": false,
+        "diagnostic_failure": "Code collection window was not wholly within the observed decode interval.",
+        "completed_run_comparison_produced": false,
+        "runtime_promoted": false,
+        "private_model_released": true,
+        "peer_preserved": true,
+        "evidence": "archive/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-profile-0908/result.json"
+      },
+      "export_policy": {
+        "additional_omitted_fields": [
+          "host_before",
+          "host_after",
+          "inference_before",
+          "inference_after"
+        ],
+        "original_sources_and_raw_evidence_unchanged": true,
+        "published_evidence_hashes_updated": true
+      },
+      "scope": "Latest private experimental sources and evidence; the earlier reconstructed publication builds and selected profiles are unchanged. No new runtime promotion or model-quality certification.",
+      "whitespace_check": {
+        "non_patch_files_passed": true,
+        "archived_patch_warnings": 24,
+        "all_warnings_are_required_blank_context_prefixes": true,
+        "original_patch_bytes_preserved": true
+      }
+    }
+  ],
+  "previous_content_scans": [
+    {
+      "staged_files_scanned": 155,
+      "credential_or_binary_findings": [],
+      "manifest_files_not_tracked": [],
+      "host_snapshot_filter_check_passed": true,
+      "passed": true
+    }
+  ]
 }
