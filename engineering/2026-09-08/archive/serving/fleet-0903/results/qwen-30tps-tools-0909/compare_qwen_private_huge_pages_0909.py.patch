@@ -1,0 +1,57 @@
+--- compare_qwen_private_quantize_blocks_0909.py
++++ compare_qwen_private_huge_pages_0909.py
+@@ -21,6 +21,10 @@
+     result, plan = [json.loads(path.read_text()) for path in (result_path, plan_path)]
+     assert result['passed'] and result['finished'] and result['peer_preserved']
+     assert result['model_started'] and result['owned_model_exit'] is not None
++    pages = {key: result[key] for key in ('pages_after_load', 'pages_after_decode')}
++    for audit in pages.values():
++        assert audit['pid'] == result['model_pid'] and audit['start_ticks'] == result['current']['start']
++        assert audit['units'] == 'bytes' and audit['totals']['Rss'] > 0
+     assert result['plan_sha256'] == digest(plan_path)
+     assert all(digest(path) == value for path, value in plan['source_sha256'].items())
+     measurement_path = Path(result['measurement'])
+@@ -66,20 +70,21 @@
+             observed_other_host_cores=sum(item['cpu_percent'] for item in row['other_host_cpu']) / 100)
+         evidence[str(chunks_path)] = digest(chunks_path)
+     assert set(rows) == {'prose', 'code'}
+-    return dict(label=label, plan=plan, rows=rows, evidence=evidence)
++    return dict(label=label, plan=plan, rows=rows, evidence=evidence, page_backing=pages)
+ 
+ 
+ def compare(control, candidates):
++    assert control['plan']['huge_pages'] == 'off'
+     assert control['plan']['quantize_blocks'] == 'off'
+     comparisons = []
+     for candidate in candidates:
+         cp, pp = control['plan'], candidate['plan']
+-        assert pp['quantize_blocks'] == 'on'
++        assert pp['huge_pages'] == 'on' and pp['quantize_blocks'] == 'off'
+         for key in ('command', 'drafts', 'model_records', 'cpu_sha256', 'server_sha256', 'llama'):
+             assert cp[key] == pp[key], key
+         ce, pe = dict(cp['runtime_env']), dict(pp['runtime_env'])
+-        assert ce.pop('GGML_CPU_X16_QUANTIZE_BLOCKS') == '0'
+-        assert pe.pop('GGML_CPU_X16_QUANTIZE_BLOCKS') == '1'
++        assert ce.pop('GGML_CPU_NUMA_HUGEPAGES') == '0'
++        assert pe.pop('GGML_CPU_NUMA_HUGEPAGES') == '1'
+         assert ce == pe
+         workloads = []
+         for kind in ('prose', 'code'):
+@@ -89,7 +94,7 @@
+                 speed_change_percent=100 * (row['tok_s'] / baseline['tok_s'] - 1),
+                 bandwidth_change_percent=(100 * (row['adjusted_gb_s'] / baseline['adjusted_gb_s'] - 1)) if row['attribution_valid'] and baseline['attribution_valid'] else None,
+                 both_thresholds_met=row['attribution_valid'] and row['tok_s'] > 30 and row['adjusted_gb_s'] > 190))
+-        comparisons.append(dict(label=candidate['label'], workloads=workloads))
++        comparisons.append(dict(label=candidate['label'], workloads=workloads, page_backing=candidate['page_backing']))
+     return comparisons
+ 
+ 
+@@ -106,7 +111,7 @@
+     control = read_run(args.control)
+     candidates = [read_run(label) for label in args.candidates]
+     rows = compare(control, candidates)
+-    result = dict(time=time.time(), control=control['label'], control_rows=control['rows'], comparisons=rows,
++    result = dict(time=time.time(), control=control['label'], control_rows=control['rows'], control_page_backing=control['page_backing'], comparisons=rows,
+         all_outputs_match=all(row['output_matches_control'] for run in rows for row in run['workloads']),
+         all_candidate_thresholds_met=all(row['both_thresholds_met'] for run in rows for row in run['workloads']),
+         candidate_repeat_available=len(candidates) >= 2,

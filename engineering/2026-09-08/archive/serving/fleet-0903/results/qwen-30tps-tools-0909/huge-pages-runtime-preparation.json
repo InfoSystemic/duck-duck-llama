@@ -1,0 +1,22 @@
+{
+  "transforms": [
+    {
+      "source": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_private_quantize_blocks_trial_0909.py",
+      "source_sha256": "a11af4c7e0dad587a4f346142b8ff8071c7834b1752daef2b59e4d91a166dfaa",
+      "new": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_private_huge_pages_trial_0909.py",
+      "new_sha256": "aedc345ef3170a90af0d6544a9be9084107df06abae9ab17f5fafeabb56600fa",
+      "patch": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
+      "patch_sha256": "1bccc59049e588a931c28c7e8df2823287e2908d38c9f09184df89234941d534"
+    },
+    {
+      "source": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/compare_qwen_private_quantize_blocks_0909.py",
+      "source_sha256": "9a299383254dd6f5093f53220c53af721e6d7ad951d94adda7b74b87e75c6d49",
+      "new": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/compare_qwen_private_huge_pages_0909.py",
+      "new_sha256": "a8c32c7cbee279b49248b88735769d34ae85e43af4b0663dc969dd7c683584be",
+      "patch": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+      "patch_sha256": "e9b820819337a402232db42c16587c8e58eaf7d536f55d7b7f91665622ce443a"
+    }
+  ],
+  "page_audit_sha256": "8cc4d0a735d5060b33a25988a4968ef649e7558238a038d9bddd933fa2ac6974",
+  "scope": "Per-process huge-page flag comparison. Block quantization is fixed off; Q6 target, Q8 draft, HC graph changes, gates, and numerical checks are retained. Page audits execute outside timed decode."
+}
