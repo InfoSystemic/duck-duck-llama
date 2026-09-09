@@ -7,9 +7,9 @@
     "all_reconstructed_trees_match": true
   },
   "archive": {
-    "archive_files": 2910,
+    "archive_files": 2996,
     "patches": 10,
-    "python_files": 761,
+    "python_files": 780,
     "shell_files": 29,
     "errors": [],
     "passed": true
@@ -176,7 +176,7 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 2941,
+    "staged_files_scanned": 90,
     "credential_or_binary_findings": [],
     "manifest_files_not_staged": []
   },
@@ -187,5 +187,52 @@
     "These new binaries have not received fresh model quality or throughput validation.",
     "Filtered evidence has separate original and published hashes.",
     "No current model or service was replaced during publication."
-  ]
+  ],
+  "initial_archive": {
+    "archive_files": 2910,
+    "patches": 10,
+    "python_files": 761,
+    "shell_files": 29,
+    "errors": [],
+    "passed": true
+  },
+  "initial_content_scan": {
+    "staged_files_scanned": 2941,
+    "credential_or_binary_findings": [],
+    "manifest_files_not_staged": []
+  },
+  "follow_up": {
+    "updated_utc": "2026-09-09T02:06:38.898534+00:00",
+    "archive_files_added": 86,
+    "archive_files_updated": 1,
+    "source_bundles_and_selected_overlays_unchanged": true,
+    "hc_mix_graph_proof": {
+      "passed": true,
+      "cpu_cases": 576,
+      "numa_cases": 192,
+      "bit_exact_outputs": 19741536,
+      "runtime_integrated": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-hc-mix-proof-0908/result.json"
+    },
+    "hc_combine_private_comparison": {
+      "off_on_pairs_completed": 2,
+      "all_outputs_match": true,
+      "both_model_targets_met": false,
+      "runtime_promoted": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-hc-combine-repeat-0908.json"
+    },
+    "q6_expanded_layout": {
+      "component_run_finished": true,
+      "qualified_cases": 6,
+      "unqualified_cases": 2,
+      "global_layout_parked": true,
+      "runtime_integrated": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-q6-lossless-reuse-qualified-0908/result.json"
+    },
+    "whitespace_check": {
+      "non_patch_files_passed": true,
+      "archived_patch_context_preserved": "preview.patch lines 5, 9, and 94 contain the required unified-diff space prefix on blank context lines."
+    },
+    "scope": "New private experiment results are archived separately from the earlier reconstructed publication builds. Those builds have not received new model benchmarks or quality certification."
+  }
 }

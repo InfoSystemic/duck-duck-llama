@@ -1,0 +1,102 @@
+{
+  "started": 1788918730.457796,
+  "controller_pid": 740921,
+  "passed": true,
+  "steps": [
+    {
+      "mode": "cpu",
+      "exit_code": 0
+    },
+    {
+      "mode": "numa",
+      "exit_code": 0
+    }
+  ],
+  "checks": [
+    {
+      "passed": true,
+      "bit_exact": true,
+      "scalar_exact": true,
+      "inputs_preserved": true,
+      "mode": "cpu",
+      "cases": 576,
+      "outputs": 14806152,
+      "callback_calls": 576,
+      "hash": "d0a1168956cb06f2",
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0",
+      "base_library": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0"
+    },
+    {
+      "passed": true,
+      "bit_exact": true,
+      "scalar_exact": true,
+      "inputs_preserved": true,
+      "mode": "numa",
+      "cases": 192,
+      "outputs": 4935384,
+      "callback_calls": 768,
+      "hash": "d8f4c266d1fa4b2c",
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0",
+      "base_library": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0"
+    }
+  ],
+  "compile_command": [
+    "g++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-ffp-contract=off",
+    "-fopenmp",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-hc-mix-0908.cpp",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0",
+    "-L/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-lggml",
+    "-lggml-base",
+    "-ldl",
+    "-pthread",
+    "-o",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-hc-mix-proof-0908/check"
+  ],
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/run_qwen_hc_mix_check_0908.py": "189480b988c1fc4bdee6ae4320a69f1b750a33e4461049dbbaf9a10bb11ae170",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-hc-mix-0908.cpp": "3f1ea6daa0744a2a01a08d895a75d8fa6016498e2e836a3b7b28410521e5f44a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-hc-mix-0908.h": "e1ccef1db2d2d6fd28b5c121eca8dd9083511775e45b04ebe18db77b018e6155",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-flash-20tps.json": "884e0de653e6eae6651ef6135aea2f76c40a355c31c32b093f385d46181cf4c3",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36"
+  },
+  "scope": "Graph correctness only. No runtime integration or performance claim.",
+  "idle_gate": {
+    "time": 1788918750.9507952,
+    "quiet_seconds": 15.239773225039244,
+    "required_quiet_seconds": 15,
+    "state": {
+      "servers": {
+        "1219506": {
+          "processing": 0,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "compile_exit": 0,
+  "owned": {
+    "pid": 743438,
+    "mode": "numa"
+  },
+  "binary_sha256": "180a83d65697a860f59fbb0505edd5d73127e0c0e81da80c78d6359e35fe5e69",
+  "finished": 1788918753.1271262,
+  "peer_preserved": true,
+  "peer_after": {
+    "processing": 0,
+    "queued": 0.0
+  }
+}
