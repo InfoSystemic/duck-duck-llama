@@ -1,0 +1,113 @@
+{
+  "time": 1788985861.4483223,
+  "passed": true,
+  "diagnostic_only": true,
+  "target_reached": false,
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-ops-0909/plan.json": "cdb6ec7115b3e00a9b6dd76db40dd379cb60fc91e3af5e29396f9985599d3c6c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-ops-0909/result.json": "ba8f1672ea176c82047426af32763a4e9cb6094324a87053c5ba4f8e63bd1e47",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-ops-0909/prose-operations.json": "5191ff26d068c40157726a0dc8fd425b7b4c1ea1c0e8c643a946145ad7e78737",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-ops-0909/prose.log": "3f37ecbb352d534003658b7f012825b55f43c34fe80be6549f7a0ee95aa1b027",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-ops-0909/code-operations.json": "81f8f5f80a7812e3ecddd099e3ebeb2c119248c2cbf7d9dd2373166b69eb3eda",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-ops-0909/code.log": "a8514907d5970249b1624eeca14bc011278cec2dc922a261d3ad2c7c32e7dad9"
+  },
+  "source_hashes_verified": 28,
+  "rows": [
+    {
+      "workload": "prose",
+      "graph_count": 80,
+      "output_and_draft_counts_match": true,
+      "groups": [
+        {
+          "role": "draft",
+          "graphs": 56,
+          "graph_cpu_counts": {
+            "0": 14,
+            "16": 14,
+            "32": 14,
+            "48": 14
+          },
+          "graph_ms_range": [
+            2.353,
+            3.603
+          ],
+          "summed_socket_graph_ms": 172.25300000000004,
+          "matrix_stage_pct": 81.42093316226719,
+          "cross_socket_reduction_stage_pct": 11.116206974624529,
+          "output_projection_stage_pct": 49.28912703987737
+        },
+        {
+          "role": "target",
+          "graphs": 8,
+          "graph_cpu_counts": {
+            "0": 2,
+            "16": 2,
+            "32": 2,
+            "48": 2
+          },
+          "graph_ms_range": [
+            102.951,
+            105.956
+          ],
+          "summed_socket_graph_ms": 835.1980000000001,
+          "matrix_stage_pct": 57.947935699079665,
+          "cross_socket_reduction_stage_pct": 11.815162392630295,
+          "output_projection_stage_pct": 1.8184909446622235
+        }
+      ]
+    },
+    {
+      "workload": "code",
+      "graph_count": 80,
+      "output_and_draft_counts_match": true,
+      "groups": [
+        {
+          "role": "draft",
+          "graphs": 56,
+          "graph_cpu_counts": {
+            "0": 14,
+            "16": 14,
+            "32": 14,
+            "48": 14
+          },
+          "graph_ms_range": [
+            2.259,
+            3.636
+          ],
+          "summed_socket_graph_ms": 176.44500000000002,
+          "matrix_stage_pct": 80.279407180708,
+          "cross_socket_reduction_stage_pct": 12.449771883589792,
+          "output_projection_stage_pct": 48.79027458981551
+        },
+        {
+          "role": "target",
+          "graphs": 8,
+          "graph_cpu_counts": {
+            "0": 2,
+            "16": 2,
+            "32": 2,
+            "48": 2
+          },
+          "graph_ms_range": [
+            100.946,
+            101.326
+          ],
+          "summed_socket_graph_ms": 809.056,
+          "matrix_stage_pct": 58.29917830162558,
+          "cross_socket_reduction_stage_pct": 11.008879484238465,
+          "output_projection_stage_pct": 1.8364612585531779
+        }
+      ]
+    }
+  ],
+  "owned_model_exit": 0,
+  "dispatch_cleanup_valid": true,
+  "peer_preserved": true,
+  "peer_environment_preserved": true,
+  "limitations": [
+    "Each node timing includes the following worker barrier.",
+    "Summed concurrent socket graph time is not elapsed request time or a recoverable wall-time fraction.",
+    "Fused work is attributed to the first node; nodes below the print threshold are omitted.",
+    "These short instrumented captures do not establish throughput or DRAM bandwidth."
+  ]
+}
