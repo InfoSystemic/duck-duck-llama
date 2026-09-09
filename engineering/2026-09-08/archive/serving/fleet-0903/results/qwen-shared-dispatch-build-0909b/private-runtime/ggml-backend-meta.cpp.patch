@@ -1,0 +1,62 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-pinned-base-recovery-0909b/ggml-backend-meta.cpp
++++ private/ggml-backend-meta.cpp
+@@ -26,6 +26,8 @@
+ #include <tuple>
+ #include <utility>
+ #include <vector>
++
++#include "qwen-shared-dispatch-0909.h"
+ 
+ struct ggml_backend_meta_device;
+ struct ggml_backend_meta_buffer_type;
+@@ -2200,6 +2202,8 @@
+     void *                               comm_ctx       = nullptr;
+     ggml_backend_comm_allreduce_tensor_t comm_allreduce = nullptr;
+ 
++    std::shared_ptr<qwen_shared_numa_dispatch> shared_cpu_numa_dispatch;
++    std::vector<ggml_backend_t> shared_cpu_numa_backends;
+     bool                     parallel_cpu_numa = false;
+     bool                     fused_reduce_enabled = false;   // GGML_CPU_NUMA_FUSED_REDUCE
+     bool                     merge_reduce_enabled = false;   // GGML_CPU_NUMA_MERGE_REDUCE: adjacent unrelated partials share one all-reduce
+@@ -2237,6 +2241,9 @@
+     }
+ 
+     ggml_status dispatch_cpu_numa(const std::vector<ggml_cgraph *> & graphs) {
++        if (shared_cpu_numa_dispatch) {
++            return shared_cpu_numa_dispatch->run(shared_cpu_numa_backends, graphs);
++        }
+         GGML_ASSERT(parallel_cpu_numa);
+         GGML_ASSERT(graphs.size() == backend_configs.size());
+         GGML_ASSERT(dispatch_pending.load(std::memory_order_acquire) == 0);
+@@ -2291,6 +2298,19 @@
+                 strncmp(backend_name, "CPU-NUMA", strlen("CPU-NUMA")) == 0;
+         }
+         if (!parallel_cpu_numa) {
++            return;
++        }
++
++        const char * shared_env = getenv("GGML_CPU_NUMA_SHARED_DISPATCH");
++        if (shared_env != nullptr && atoi(shared_env) != 0) {
++            std::vector<ggml_backend_dev_t> devices;
++            for (const backend_config & bc : backend_configs) {
++                devices.push_back(ggml_backend_get_device(bc.backend));
++                shared_cpu_numa_backends.push_back(bc.backend);
++            }
++            shared_cpu_numa_dispatch = qwen_shared_numa_dispatch::obtain(devices);
++            GGML_LOG_INFO("SHARED_NUMA_DISPATCH attach group=%" PRIu64 " ranks=%zu\n",
++                shared_cpu_numa_dispatch->id(), n_devs);
+             return;
+         }
+ 
+@@ -2365,6 +2385,11 @@
+     }
+ 
+     void stop_cpu_numa_dispatch() {
++        if (shared_cpu_numa_dispatch) {
++            shared_cpu_numa_dispatch.reset();
++            shared_cpu_numa_backends.clear();
++            return;
++        }
+         if (dispatch_threads.empty()) {
+             return;
+         }

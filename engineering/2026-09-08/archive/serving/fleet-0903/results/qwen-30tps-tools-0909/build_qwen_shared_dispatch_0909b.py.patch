@@ -1,0 +1,66 @@
+--- build_qwen_shared_dispatch_0909.py
++++ build_qwen_shared_dispatch_0909b.py
+@@ -16,7 +16,7 @@
+ 
+ BASE = Path(__file__).resolve().parent
+ ENGINE = BASE.parents[1] / 'engines/llama.cpp-q4e-goal-0904'
+-OUT = BASE / 'results/qwen-shared-dispatch-build-0909'
++OUT = BASE / 'results/qwen-shared-dispatch-build-0909b'
+ PINNED_BASE = ENGINE / 'validated-iq-batch3-bin/libggml-base.so.0.22.0'
+ 
+ 
+@@ -31,6 +31,11 @@
+     assert sha256(PINNED_BASE) == 'a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36'
+     assert all(sha256(path) == value for path, value in parent['input_sha256'].items())
+     assert all(sha256(path) == value for path, value in parent['private_source_sha256'].items())
++    recovery_path = BASE / 'results/qwen-pinned-base-recovery-0909b/result.json'
++    recovery = json.loads(recovery_path.read_text())
++    assert recovery['passed'] and recovery['byte_identical']
++    assert sha256(recovery['library']) == recovery['library_sha256'] == sha256(PINNED_BASE)
++    assert all(sha256(path) == value for path, value in recovery['input_sha256'].items())
+     database = json.loads(database_path.read_text())
+     units = []
+     for name, transform in [('ggml-cpu.cpp', cpu_source), ('ggml-backend-meta.cpp', meta_source)]:
+@@ -41,6 +46,10 @@
+         directory = Path(row['directory'])
+         source = Path(row['file'])
+         obj = (directory / command[command.index('-o') + 1]).resolve()
++        if name == 'ggml-backend-meta.cpp':
++            source = Path(recovery['recovered_source'])
++            obj = Path(recovery['object'])
++            command = list(recovery['steps'][0]['command'])
+         original = source.read_text()
+         units.append(dict(name=name, directory=directory, command=command, source=source,
+                           object=obj, original=original, changed=transform(original)))
+@@ -50,11 +59,14 @@
+     for index, value in enumerate(base_link):
+         if value.endswith('.o') and not Path(value).is_absolute():
+             base_link[index] = str((directory / value).resolve())
++    original_meta_object = str((directory / 'CMakeFiles/ggml-base.dir/ggml-backend-meta.cpp.o').resolve())
++    assert original_meta_object in base_link
++    base_link = [str(units[1]['object']) if value == original_meta_object else value for value in base_link]
+     assert str(units[0]['object']) in parent['link_command']
+     assert str(units[1]['object']) in base_link
+     header = BASE / 'qwen-shared-dispatch-0909.h'
+     paths = [Path(__file__).resolve(), BASE / 'qwen_shared_dispatch_transform_0909.py',
+-             header, parent_path, database_path, base_link_path, PINNED_BASE,
++             header, parent_path, database_path, base_link_path, PINNED_BASE, recovery_path, Path(recovery['library']),
+              Path(parent['library']), BASE / 'model_measurement_guard.py', BASE / 'qwen_split_trial.py']
+     paths += [unit['source'] for unit in units]
+     paths += [Path(value) for link in (base_link, parent['link_command'])
+@@ -87,6 +99,7 @@
+         result = dict(started=time.time(), controller_pid=os.getpid(), passed=False,
+                       build_completed=False, input_sha256=inputs, private_source_sha256=private_sources,
+                       parent_cpu_sha256=parent['library_sha256'], parent_base_sha256=sha256(PINNED_BASE),
++                      pinned_base_recovery=str(recovery_path),
+                       baseline_objects={}, baseline_libraries={}, steps=[], model_loaded=False,
+                       scope='Only ggml-cpu.cpp.o and ggml-backend-meta.cpp.o change. Default-off shared ordered Meta dispatch and synchronous NUMA CPU execution; numeric kernels and weights are unchanged.')
+ 
+@@ -153,6 +166,7 @@
+             assert all(sha256(path) == value for path, value in {**inputs, **private_sources}.items())
+             result.update(passed=True, build_completed=True, libraries=libraries)
+             manifest = dict(input_sha256=inputs, private_source_sha256=private_sources,
++                            pinned_base_recovery=str(recovery_path),
+                             parent_cpu_manifest=str(parent_path), parent_base=str(PINNED_BASE),
+                             baseline_objects=result['baseline_objects'], baseline_libraries=result['baseline_libraries'],
+                             compile_commands=compiles, link_commands=links, libraries=libraries,
