@@ -1,0 +1,69 @@
+--- qwen_private_quantize_blocks_trial_0909.py
++++ qwen_private_huge_pages_trial_0909.py
+@@ -12,6 +12,7 @@
+ import time
+ import urllib.request
+ 
++from qwen_numa_page_audit_0909 import audit_pages
+ from benchmark_qwen_q6 import wait_background
+ from benchmark_qwen_resident_0908 import normalized_command
+ from glm_flash_q8_trial import memory_status, node_memory_status
+@@ -98,17 +99,19 @@
+     if args.drafts == 0:
+         for flag in [value for value in command if value.startswith('--spec-')]:
+             command = set_option(command, flag, None)
+-    env = dict(bundle['runtime_env'], GGML_CPU_X16_QUANTIZE_BLOCKS=str(int(args.quantize_blocks == 'on')))
++    env = dict(bundle['runtime_env'], GGML_CPU_X16_QUANTIZE_BLOCKS='0',
++               GGML_CPU_NUMA_HUGEPAGES=str(int(args.huge_pages == 'on')))
+     assert not any('AUDIT' in key or 'PROFILE' in key or 'REQUANT' in key for key in env)
+     records, source_paths = model_records(preset)
+-    source_paths += [Path(__file__).resolve(), preset_path, bundle_path, check_path, build_path,
++    source_paths += [Path(__file__).resolve(), BASE / 'qwen_numa_page_audit_0909.py',
++                     preset_path, bundle_path, check_path, build_path,
+                      BASE / 'measure-model-bandwidth.py', BASE / 'model_measurement_guard.py',
+                      BASE / 'guarded_inference_request.py', BASE / 'dram_bandwidth.py',
+                      BASE / 'benchmark_qwen_q6.py', BASE / 'glm_flash_q8_trial.py',
+                      BASE / 'benchmark_qwen_resident_0908.py',
+                      Path(bundle['cpu']), Path(bundle['llama']), Path(bundle['server'])]
+     plan = dict(prepared=time.time(), label=args.label, peer_pid=args.peer_pid, peer=peer, peer_runtime_env=peer_env,
+-                port=PORT, command=command, runtime_env=env, drafts=args.drafts, quantize_blocks=args.quantize_blocks,
++                port=PORT, command=command, runtime_env=env, drafts=args.drafts, huge_pages=args.huge_pages, quantize_blocks='off',
+                 cpu=bundle['cpu'], cpu_sha256=bundle['cpu_sha256'], llama=bundle['llama'],
+                 server_sha256=bundle['server_sha256'], model_records=records,
+                 source_sha256={str(path):sha256(path) for path in source_paths},
+@@ -118,7 +121,7 @@
+     verify_plan(plan)
+     out.mkdir(exist_ok=False)
+     (out / 'plan.json').write_text(json.dumps(plan, indent=2) + '\n')
+-    print(json.dumps(dict(prepared=True, path=str(out / 'plan.json'), quantize_blocks=args.quantize_blocks,
++    print(json.dumps(dict(prepared=True, path=str(out / 'plan.json'), huge_pages=args.huge_pages,
+                           drafts=args.drafts, private_port=PORT, peer_preserved=args.peer_pid)), flush=True)
+ 
+ 
+@@ -180,6 +183,8 @@
+         for stem, path in [('libggml-cpu.so.', plan['cpu']), ('libllama.so.', plan['llama'])]:
+             assert {row.split()[-1] for row in mapped if '/' + stem in row} == {str(Path(path).resolve())}
+         result['current'] = current
++        result['pages_after_load'] = audit_pages(model.pid)
++        assert result['pages_after_load']['start_ticks'] == current['start']
+         class ReservedMemoryGuard(ModelMeasurementGuard):
+             def inspect(self, *args, **kwargs):
+                 memory_gate(loading=True)
+@@ -216,6 +221,8 @@
+             rows.append(dict(workload=row['kind'], tok_s=speed, adjusted_gb_s=traffic,
+                              idle_before_gb_s=before, idle_after_gb_s=after, attribution_valid=attribution_valid,
+                              both_targets_met=attribution_valid and speed > 30 and traffic > 190))
++        result['pages_after_decode'] = audit_pages(model.pid)
++        assert result['pages_after_decode']['start_ticks'] == current['start']
+         verify_plan(plan)
+         result.update(passed=True, rows=rows, measurement=str(path), measurement_sha256=sha256(path),
+                       target_reached=all(row['both_targets_met'] for row in rows))
+@@ -256,7 +263,7 @@
+     parser.add_argument('label')
+     parser.add_argument('--peer-pid', type=int, default=1219506)
+     parser.add_argument('--start-ticks', default='103969952')
+-    parser.add_argument('--quantize-blocks', choices=('off', 'on'), default='on')
++    parser.add_argument('--huge-pages', choices=('off', 'on'), default='on')
+     parser.add_argument('--drafts', type=int, choices=range(5), default=4)
+     args = parser.parse_args()
+     assert re.fullmatch(r'qwen-private-[A-Za-z0-9_-]+', args.label)

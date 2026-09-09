@@ -1,0 +1,232 @@
+{
+  "time": 1788930268.418657,
+  "control": "qwen-private-huge-pages-off-0909",
+  "control_rows": {
+    "prose": {
+      "tok_s": 22.309508233823905,
+      "attribution_valid": true,
+      "idle_before_gb_s": 5.118130897962514,
+      "idle_after_gb_s": 6.38953291843862,
+      "adjusted_gb_s": 130.13517635451063,
+      "utilization": 0.34246099040660694,
+      "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+      "generated_tokens": 512,
+      "draft_tokens": 589,
+      "accepted_draft_tokens": 360,
+      "observed_other_host_cores": 3.4143266610987495
+    },
+    "code": {
+      "tok_s": 28.88025335908322,
+      "attribution_valid": true,
+      "idle_before_gb_s": 5.487792374663527,
+      "idle_after_gb_s": 6.4039477673041585,
+      "adjusted_gb_s": 139.32110368872435,
+      "utilization": 0.3666344833913799,
+      "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+      "generated_tokens": 318,
+      "draft_tokens": 292,
+      "accepted_draft_tokens": 244,
+      "observed_other_host_cores": 3.5057920624995296
+    }
+  },
+  "control_page_backing": {
+    "pages_after_load": {
+      "pid": 3420065,
+      "start_ticks": "107185629",
+      "time": 1788929698.0062869,
+      "elapsed_seconds": 1.5672726561315358,
+      "units": "bytes",
+      "totals": {
+        "Size": 203741708288,
+        "Rss": 122355503104,
+        "Anonymous": 120986038272,
+        "AnonHugePages": 0,
+        "Swap": 0
+      },
+      "groups": {
+        "hugepage_advised": {
+          "mappings": 0,
+          "Size": 0,
+          "Rss": 0,
+          "Anonymous": 0,
+          "AnonHugePages": 0,
+          "Swap": 0
+        },
+        "other": {
+          "mappings": 1173,
+          "Size": 203741708288,
+          "Rss": 122355503104,
+          "Anonymous": 120986038272,
+          "AnonHugePages": 0,
+          "Swap": 0
+        }
+      },
+      "anonymous_hugepage_fraction": 0.0,
+      "scope": "Per-process smaps totals; collected outside timed decode. No addresses or mapping paths retained."
+    },
+    "pages_after_decode": {
+      "pid": 3420065,
+      "start_ticks": "107185629",
+      "time": 1788929802.7048986,
+      "elapsed_seconds": 1.7365077938884497,
+      "units": "bytes",
+      "totals": {
+        "Size": 204736692224,
+        "Rss": 123469000704,
+        "Anonymous": 122034712576,
+        "AnonHugePages": 0,
+        "Swap": 0
+      },
+      "groups": {
+        "hugepage_advised": {
+          "mappings": 0,
+          "Size": 0,
+          "Rss": 0,
+          "Anonymous": 0,
+          "AnonHugePages": 0,
+          "Swap": 0
+        },
+        "other": {
+          "mappings": 1177,
+          "Size": 204736692224,
+          "Rss": 123469000704,
+          "Anonymous": 122034712576,
+          "AnonHugePages": 0,
+          "Swap": 0
+        }
+      },
+      "anonymous_hugepage_fraction": 0.0,
+      "scope": "Per-process smaps totals; collected outside timed decode. No addresses or mapping paths retained."
+    }
+  },
+  "comparisons": [
+    {
+      "label": "qwen-private-huge-pages-on-0909",
+      "workloads": [
+        {
+          "workload": "prose",
+          "tok_s": 22.146170183913323,
+          "attribution_valid": true,
+          "idle_before_gb_s": 4.7625117526873515,
+          "idle_after_gb_s": 5.5802322977974015,
+          "adjusted_gb_s": 128.1741726636533,
+          "utilization": 0.337300454378035,
+          "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+          "generated_tokens": 512,
+          "draft_tokens": 589,
+          "accepted_draft_tokens": 360,
+          "observed_other_host_cores": 3.4671945541264892,
+          "output_matches_control": true,
+          "speed_change_percent": -0.7321454520586079,
+          "bandwidth_change_percent": -1.5068974782922795,
+          "both_thresholds_met": false
+        },
+        {
+          "workload": "code",
+          "tok_s": 28.250095511166766,
+          "attribution_valid": true,
+          "idle_before_gb_s": 6.014399642312323,
+          "idle_after_gb_s": 5.171853358927455,
+          "adjusted_gb_s": 132.08384263169495,
+          "utilization": 0.34758905955709196,
+          "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+          "generated_tokens": 318,
+          "draft_tokens": 292,
+          "accepted_draft_tokens": 244,
+          "observed_other_host_cores": 3.519403384562904,
+          "output_matches_control": true,
+          "speed_change_percent": -2.1819678660064845,
+          "bandwidth_change_percent": -5.194662449128396,
+          "both_thresholds_met": false
+        }
+      ],
+      "page_backing": {
+        "pages_after_load": {
+          "pid": 3634163,
+          "start_ticks": "107224517",
+          "time": 1788930093.5129251,
+          "elapsed_seconds": 0.6633831749204546,
+          "units": "bytes",
+          "totals": {
+            "Size": 203741708288,
+            "Rss": 122611986432,
+            "Anonymous": 121259384832,
+            "AnonHugePages": 98641641472,
+            "Swap": 0
+          },
+          "groups": {
+            "hugepage_advised": {
+              "mappings": 48,
+              "Size": 121203900416,
+              "Rss": 120900280320,
+              "Anonymous": 120900280320,
+              "AnonHugePages": 98641641472,
+              "Swap": 0
+            },
+            "other": {
+              "mappings": 1122,
+              "Size": 82537807872,
+              "Rss": 1711706112,
+              "Anonymous": 359104512,
+              "AnonHugePages": 0,
+              "Swap": 0
+            }
+          },
+          "anonymous_hugepage_fraction": 0.8134763474898378,
+          "scope": "Per-process smaps totals; collected outside timed decode. No addresses or mapping paths retained."
+        },
+        "pages_after_decode": {
+          "pid": 3634163,
+          "start_ticks": "107224517",
+          "time": 1788930224.4852173,
+          "elapsed_seconds": 0.6627074680291116,
+          "units": "bytes",
+          "totals": {
+            "Size": 204736692224,
+            "Rss": 123653308416,
+            "Anonymous": 122231189504,
+            "AnonHugePages": 98654224384,
+            "Swap": 0
+          },
+          "groups": {
+            "hugepage_advised": {
+              "mappings": 52,
+              "Size": 121231261696,
+              "Rss": 120938381312,
+              "Anonymous": 120938381312,
+              "AnonHugePages": 98654224384,
+              "Swap": 0
+            },
+            "other": {
+              "mappings": 1124,
+              "Size": 83505430528,
+              "Rss": 2714927104,
+              "Anonymous": 1292808192,
+              "AnonHugePages": 0,
+              "Swap": 0
+            }
+          },
+          "anonymous_hugepage_fraction": 0.8071117100662065,
+          "scope": "Per-process smaps totals; collected outside timed decode. No addresses or mapping paths retained."
+        }
+      }
+    }
+  ],
+  "all_outputs_match": true,
+  "all_candidate_thresholds_met": false,
+  "candidate_repeat_available": false,
+  "evidence": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-off-0909/result.json": "ee6da2ea30d53cc47287eee5dffb7c2574b3e9943191e28d9a6d71f7f16591a2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-off-0909/plan.json": "4af12ecf8415f382648247749aa008efec6bd6a1cc78aa728b3cc6d20722d4f4",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-off-0909-decode/result.json": "f221583057d070adae47895e735e5e7d95efa881e91a853688b15c6cadd6ad68",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-off-0909-decode/prose-draft4/chunks.json": "b52ef6318fc5ebcdd3c167e146631a84553fbe9cf5ef664663f9cab7488405a7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-off-0909-decode/code-draft4/chunks.json": "658cb24860625ab27897815b57f758cda8e4b957a83b798858aec59fbf5159f7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-on-0909/result.json": "141eae4fd47962f719b47136f2aa36efc10d6a6c62e3ea5fd090d228b0e5d1cb",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-on-0909/plan.json": "87cce13273709f48df0e8c109b7ab51e3e9ca3bfc46089a13e0574af592f22cd",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-on-0909-decode/result.json": "15d5ed461ad9006f2486e9f3b863e449f5342b68a08cf661b8bda0b51be1a129",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-on-0909-decode/prose-draft4/chunks.json": "6c8a95ec3d00a5807c376f5093bc306d64b3abb462178e6d78f6667a8be8c905",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-huge-pages-on-0909-decode/code-draft4/chunks.json": "04c2f3d8d2241668913fbee03c9667d421b776c5977237e44d656799d1e16591"
+  },
+  "analyzer_sha256": "a8c32c7cbee279b49248b88735769d34ae85e43af4b0663dc969dd7c683584be",
+  "scope": "Fresh single-conversation decode. IMC attribution uses adjacent idle subtraction. This comparison does not itself certify broad quality or mark a goal complete."
+}

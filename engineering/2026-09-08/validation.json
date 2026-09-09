@@ -7,9 +7,9 @@
     "all_reconstructed_trees_match": true
   },
   "archive": {
-    "archive_files": 3293,
+    "archive_files": 3354,
     "patches": 10,
-    "python_files": 858,
+    "python_files": 874,
     "shell_files": 29,
     "errors": [],
     "passed": true
@@ -176,7 +176,7 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 69,
+    "staged_files_scanned": 66,
     "credential_or_binary_findings": [],
     "manifest_files_not_tracked": [],
     "host_snapshot_filter_check_passed": true,
@@ -243,8 +243,8 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "updated_utc": "2026-09-09T04:37:25.548382+00:00",
-    "archive_files_added": 65,
+    "updated_utc": "2026-09-09T05:43:02.974015+00:00",
+    "archive_files_added": 61,
     "archive_files_updated": 1,
     "source_bundles_and_selected_overlays_unchanged": true,
     "source_audit": {
@@ -310,183 +310,166 @@
       "issues": [],
       "passed": true
     },
-    "block_parallel_quantization": {
-      "helper_cases": 720,
-      "helper_exact_bytes": 127476000,
-      "helper_block_claims": 2025000,
-      "private_build_passed": true,
-      "parent_object_and_library_reproduced_byte_identically": true,
-      "cpu_graph_cases": 1728,
-      "cpu_arms": 12,
-      "numa_arms": 14,
-      "full_graph_outputs_bit_exact": true,
-      "q6_numa_new_expert_path_execution_confirmed": true,
-      "q8_numa_scope": "Compatibility only; the default non-x16 expert dispatcher does not execute the new helper.",
-      "private_loader_passed": true,
+    "huge_pages": {
       "off_on_pairs_completed": 1,
       "all_outputs_and_draft_counts_match": true,
       "all_bandwidth_attribution_windows_valid": true,
       "disabled_tok_s_prose_code": [
-        22.524819838909192,
-        29.398121228207135
+        22.309508233823905,
+        28.88025335908322
       ],
       "enabled_tok_s_prose_code": [
-        22.219168837854852,
-        16.909339695085666
+        22.146170183913323,
+        28.250095511166766
       ],
       "enabled_adjusted_gb_s_prose_code": [
-        129.59222080205785,
-        83.1076253012258
+        128.1741726636533,
+        132.08384263169495
       ],
-      "speed_change_percent_prose_code": [
-        -1.356952034423653,
-        -42.481563485555796
+      "enabled_anonymous_hugepage_fraction_after_load_decode": [
+        0.8134763474898378,
+        0.8071117100662065
       ],
-      "code_slowdown_cause_established": false,
+      "model_speed_gain_established": false,
       "candidate_repeat_available": false,
       "both_model_targets_met": false,
       "runtime_promoted": false,
-      "owned_models_exited_zero": true,
-      "peer_preserved": true,
-      "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-quantize-blocks-0909.json"
+      "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-huge-pages-0909.json"
     },
-    "scope": "Private experimental integration and completed correctness and model evidence. Selected source overlays, profiles, and reconstructed publication builds are unchanged. No runtime promotion or broad quality certification.",
+    "block_quantization_interval_analysis": {
+      "whole_run_scores_preserved": true,
+      "root_cause_established": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-quantize-blocks-interval-analysis-0909.json"
+    },
+    "shared_dispatch": {
+      "implementation_prepared": true,
+      "baseline_objects": {
+        "ggml-cpu.cpp": true,
+        "ggml-backend-meta.cpp": true
+      },
+      "baseline_libraries": {
+        "cpu": true,
+        "base": false
+      },
+      "build_completed": false,
+      "build_error": "AssertionError('base')",
+      "candidate_compiled": false,
+      "graph_lifecycle_loader_validated": false,
+      "model_loaded": false,
+      "model_speed_gain_established": false,
+      "runtime_promoted": false,
+      "peer_preserved": true,
+      "suspected_base_source_difference_proven": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/result.json",
+      "diagnosis": "archive/serving/fleet-0903/results/qwen-30tps-tools-0909/shared-dispatch-parent-base-diagnosis-0909.json"
+    },
     "publication_review": {
-      "readme_relative_links_checked": 36,
+      "readme_relative_links_checked": 69,
       "missing_readme_links": [],
       "whitespace_exit_code": 2,
       "whitespace_warnings": [
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_quantize_blocks_0909.py.patch",
-          "line": 4,
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+          "line": 20,
           "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_quantize_blocks_0909.py.patch",
-          "line": 5,
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+          "line": 21,
           "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/isolate_qwen_quantize_blocks_runtime_0909.py.patch",
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+          "line": 47,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_huge_pages_0909.py.patch",
+          "line": 48,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
+          "line": 6,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
+          "line": 41,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_huge_pages_trial_0909.py.patch",
+          "line": 42,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+          "line": 9,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+          "line": 15,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+          "line": 23,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+          "line": 50,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-backend-meta.cpp.patch",
+          "line": 53,
+          "diagnostic": "trailing whitespace.",
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-cpu.cpp.patch",
           "line": 16,
           "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/isolate_qwen_quantize_blocks_runtime_0909.py.patch",
-          "line": 17,
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909/private-runtime/ggml-cpu.cpp.patch",
+          "line": 40,
           "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-integration.patch",
-          "line": 5,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-integration.patch",
-          "line": 9,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-integration.patch",
-          "line": 14,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-integration.patch",
-          "line": 45,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-q6-fixture.patch",
-          "line": 5,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-q8-fixture.patch",
-          "line": 5,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_quantize_blocks_trial_0909.py.patch",
-          "line": 55,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_quantize_blocks_trial_0909.py.patch",
-          "line": 56,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-quantize-blocks-build-0909/private-cpu/quantize-blocks.patch",
-          "line": 5,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-quantize-blocks-build-0909/private-cpu/quantize-blocks.patch",
-          "line": 9,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-quantize-blocks-build-0909/private-cpu/quantize-blocks.patch",
-          "line": 14,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-quantize-blocks-build-0909/private-cpu/quantize-blocks.patch",
-          "line": 45,
-          "diagnostic": "trailing whitespace.",
-          "approved": true,
-          "original_hash_matches": true,
-          "reason": "Required unified-diff prefix on a blank context line."
+          "required_blank_diff_context_prefix": true,
+          "original_hash_matches": true
         }
       ],
       "passed": true
-    }
+    },
+    "scope": "Archive refresh only. Prepared shared-dispatch sources have not compiled or undergone runtime validation. Selected source overlays, profiles, and earlier reconstructed publication builds are unchanged. No new model benchmark or runtime promotion during publication."
   },
   "previous_follow_ups": [
     {
@@ -786,6 +769,252 @@
         "all_warned_archive_files_match_original_hashes": true,
         "passed": true
       }
+    },
+    {
+      "updated_utc": "2026-09-09T04:37:25.548382+00:00",
+      "archive_files_added": 65,
+      "archive_files_updated": 1,
+      "source_bundles_and_selected_overlays_unchanged": true,
+      "source_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "block_parallel_quantization": {
+        "helper_cases": 720,
+        "helper_exact_bytes": 127476000,
+        "helper_block_claims": 2025000,
+        "private_build_passed": true,
+        "parent_object_and_library_reproduced_byte_identically": true,
+        "cpu_graph_cases": 1728,
+        "cpu_arms": 12,
+        "numa_arms": 14,
+        "full_graph_outputs_bit_exact": true,
+        "q6_numa_new_expert_path_execution_confirmed": true,
+        "q8_numa_scope": "Compatibility only; the default non-x16 expert dispatcher does not execute the new helper.",
+        "private_loader_passed": true,
+        "off_on_pairs_completed": 1,
+        "all_outputs_and_draft_counts_match": true,
+        "all_bandwidth_attribution_windows_valid": true,
+        "disabled_tok_s_prose_code": [
+          22.524819838909192,
+          29.398121228207135
+        ],
+        "enabled_tok_s_prose_code": [
+          22.219168837854852,
+          16.909339695085666
+        ],
+        "enabled_adjusted_gb_s_prose_code": [
+          129.59222080205785,
+          83.1076253012258
+        ],
+        "speed_change_percent_prose_code": [
+          -1.356952034423653,
+          -42.481563485555796
+        ],
+        "code_slowdown_cause_established": false,
+        "candidate_repeat_available": false,
+        "both_model_targets_met": false,
+        "runtime_promoted": false,
+        "owned_models_exited_zero": true,
+        "peer_preserved": true,
+        "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-quantize-blocks-0909.json"
+      },
+      "scope": "Private experimental integration and completed correctness and model evidence. Selected source overlays, profiles, and reconstructed publication builds are unchanged. No runtime promotion or broad quality certification.",
+      "publication_review": {
+        "readme_relative_links_checked": 36,
+        "missing_readme_links": [],
+        "whitespace_exit_code": 2,
+        "whitespace_warnings": [
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_quantize_blocks_0909.py.patch",
+            "line": 4,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/compare_qwen_private_quantize_blocks_0909.py.patch",
+            "line": 5,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/isolate_qwen_quantize_blocks_runtime_0909.py.patch",
+            "line": 16,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/isolate_qwen_quantize_blocks_runtime_0909.py.patch",
+            "line": 17,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-integration.patch",
+            "line": 5,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-integration.patch",
+            "line": 9,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-integration.patch",
+            "line": 14,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-integration.patch",
+            "line": 45,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-q6-fixture.patch",
+            "line": 5,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/quantize-blocks-q8-fixture.patch",
+            "line": 5,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_quantize_blocks_trial_0909.py.patch",
+            "line": 55,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-30tps-tools-0909/qwen_private_quantize_blocks_trial_0909.py.patch",
+            "line": 56,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-quantize-blocks-build-0909/private-cpu/quantize-blocks.patch",
+            "line": 5,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-quantize-blocks-build-0909/private-cpu/quantize-blocks.patch",
+            "line": 9,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-quantize-blocks-build-0909/private-cpu/quantize-blocks.patch",
+            "line": 14,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-quantize-blocks-build-0909/private-cpu/quantize-blocks.patch",
+            "line": 45,
+            "diagnostic": "trailing whitespace.",
+            "approved": true,
+            "original_hash_matches": true,
+            "reason": "Required unified-diff prefix on a blank context line."
+          }
+        ],
+        "passed": true
+      }
     }
   ],
   "previous_content_scans": [
@@ -798,6 +1027,13 @@
     },
     {
       "staged_files_scanned": 101,
+      "credential_or_binary_findings": [],
+      "manifest_files_not_tracked": [],
+      "host_snapshot_filter_check_passed": true,
+      "passed": true
+    },
+    {
+      "staged_files_scanned": 69,
       "credential_or_binary_findings": [],
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,

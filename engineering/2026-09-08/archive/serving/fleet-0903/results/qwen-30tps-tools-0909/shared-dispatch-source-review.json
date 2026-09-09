@@ -1,0 +1,23 @@
+{
+  "time": 1788930603.1332908,
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-backend-meta.cpp": "369fb5f7350744bafe8b88d7691c0c4ecee638ad8d14c18d3f5831d5ed023415",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu.cpp": "0cc06844e26a256259de701283b9ab24054d51b2e81d1378f54ba3eb61223095",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu.c": "751d7d235c142bd51efa777e32127178e9d4b9e8d36c5adad5bcb1d284e5938c",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-backend.cpp": "fab7f02e2c676b308ab70c2c9c4e9af93ad5c2037d17b6207eafe9155181fe1c"
+  },
+  "design": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/QWEN-SHARED-DISPATCH-20260909.md",
+  "design_sha256": "66fb570cda87ba6d1538f1551d3896dcf48b91a6eb11213a8f83ad6ee83ab159",
+  "observed_call_path": [
+    "Meta driver thread",
+    "ggml_backend_graph_compute: submit then synchronize",
+    "NUMA CPU async dispatcher",
+    "ggml_graph_compute OpenMP region"
+  ],
+  "proposal": "Shared ordered Meta driver group plus synchronous NUMA CPU execution; keep private per-backend scratch and threadpool state.",
+  "implemented": false,
+  "built": false,
+  "validated": false,
+  "model_gain_established": false,
+  "scope": "Read-only source investigation. Runtime thread reuse, collective ordering, lifetime safety, output parity, and speed require direct validation."
+}
