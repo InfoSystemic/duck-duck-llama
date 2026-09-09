@@ -1,0 +1,319 @@
+{
+  "started": 1788992056.0440235,
+  "passed": true,
+  "model_loaded": false,
+  "controller_pid": 3111034,
+  "steps": [
+    {
+      "name": "compile-probe",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "compile-check",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "unarmed",
+      "exit_code": 0,
+      "log_sha256": "8f421719f780a48179055d344ffa946276330c5d8f728db126842b6240c2a0eb"
+    },
+    {
+      "name": "armed",
+      "exit_code": 0,
+      "log_sha256": "113dcbc058e5764fbbd0019b366059aa09d336013965ddd6d01bab07d1c223d2"
+    }
+  ],
+  "checks": [
+    {
+      "armed": false,
+      "cases": 3,
+      "exact": true,
+      "guards_preserved": true,
+      "inputs_preserved": true,
+      "traces": []
+    },
+    {
+      "armed": true,
+      "cases": 3,
+      "exact": true,
+      "guards_preserved": true,
+      "inputs_preserved": true,
+      "traces": [
+        {
+          "cpu": 127,
+          "ith": 0,
+          "nth": 15,
+          "src_ne": [
+            262144,
+            1,
+            5,
+            1
+          ],
+          "dst_ne": [
+            262144,
+            1,
+            5,
+            1
+          ],
+          "src_nb": [
+            4,
+            1048576,
+            1048576,
+            5242880
+          ],
+          "dst_nb": [
+            4,
+            1048576,
+            1048576,
+            5242880
+          ],
+          "src_contiguous": true,
+          "dst_contiguous": true,
+          "same_shape": true,
+          "forward_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-runtime-0909/bin/libggml-cpu.so.0"
+        },
+        {
+          "cpu": 127,
+          "ith": 0,
+          "nth": 15,
+          "src_ne": [
+            262144,
+            1,
+            5,
+            1
+          ],
+          "dst_ne": [
+            262144,
+            1,
+            5,
+            1
+          ],
+          "src_nb": [
+            4,
+            1048576,
+            1048640,
+            5243200
+          ],
+          "dst_nb": [
+            4,
+            1048576,
+            1048576,
+            5242880
+          ],
+          "src_contiguous": false,
+          "dst_contiguous": true,
+          "same_shape": true,
+          "forward_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-runtime-0909/bin/libggml-cpu.so.0"
+        },
+        {
+          "cpu": 127,
+          "ith": 0,
+          "nth": 15,
+          "src_ne": [
+            262144,
+            1,
+            5,
+            1
+          ],
+          "dst_ne": [
+            262144,
+            1,
+            5,
+            1
+          ],
+          "src_nb": [
+            4,
+            1048576,
+            1048576,
+            5242880
+          ],
+          "dst_nb": [
+            4,
+            1048576,
+            1048704,
+            5243520
+          ],
+          "src_contiguous": true,
+          "dst_contiguous": false,
+          "same_shape": true,
+          "forward_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-runtime-0909/bin/libggml-cpu.so.0"
+        }
+      ]
+    }
+  ],
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/build_qwen_cpy_strides_probe_0909b.py": "b8a031d6b959480d22f98bbcfac0acf12707d75d4cf6b693a841cbefe93bac1a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-cpy-strides-probe-0909b.cpp": "9014dd735459a34e8264aa1966e6773f8872087fabee62613f2dff7204ce2b17",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-cpy-strides-probe-0909b.cpp": "246c073452c1738f568b7a2ef8b1cd536a3eee8397756509628a98c55bbd61f4",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-runtime-0909/result.json": "0245e22d597fa90b13c3ae370c7456a1f33dd881f70561bd1d53fef7c0ce4d7e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-columns-build-0909/private-cpu/libggml-cpu.so.0.22.0": "12c61b337736ca9210433f57c64ce7fffbf7e4b66920aba9a03f97eaef3fd9b7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/private-runtime/libggml-base.so.0.22.0": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_qwen_q6.py": "dc54fad63ced5c123b4fe17c55b2aaa8104aa782497afc65f0a5f5d944805542",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ops.h": "54e14122be87481840faa6952b12d09b5a2e961abdc545fbb3f0dde7bb0b96eb",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu-impl.h": "e7008069e3e46f1db5e3d2eaafb4ddec3c7d0ece5c0454f99c5a8e33a50f20ba",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include/ggml.h": "bddf5fbc90e7d4a201f114073e6feafbd3473582af9960bb33b28321a7e3f879"
+  },
+  "private_source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-cpy-strides-probe-build-0909b/qwen-cpy-strides-probe-0909b.cpp": "9014dd735459a34e8264aa1966e6773f8872087fabee62613f2dff7204ce2b17",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-cpy-strides-probe-build-0909b/check-qwen-cpy-strides-probe-0909b.cpp": "246c073452c1738f568b7a2ef8b1cd536a3eee8397756509628a98c55bbd61f4"
+  },
+  "scope": "LD_PRELOAD diagnostic forwards CPY to the unchanged corrected CPU. It prints only tensor layout metadata after arming. Direct fixtures verify contiguous and strided copies, guard bytes, unchanged inputs, disabled logging, and the forwarded library. No performance result.",
+  "idle_gate": {
+    "time": 1788992123.6548054,
+    "quiet_seconds": 60.817730132024735,
+    "required_quiet_seconds": 60,
+    "state": {
+      "servers": {
+        "1219506": {
+          "processing": 0,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "background_gate": {
+    "max_cores": 4,
+    "samples": [
+      {
+        "time": 1788992128.8902295,
+        "background_cores": 3.432346884555445,
+        "quiet_seconds": 5.098552270093933,
+        "largest": [
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6766626715266448
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6492038964502013
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.6040930516817583
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3667707813782104
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.31773725445598977
+          }
+        ]
+      },
+      {
+        "time": 1788992134.1432335,
+        "background_cores": 3.224703490545135,
+        "quiet_seconds": 10.202897537266836,
+        "largest": [
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6758947170340655
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6700173716685518
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.6053665726479021
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.35851806729633034
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.1469336341378403
+          }
+        ]
+      },
+      {
+        "time": 1788992139.4088354,
+        "background_cores": 3.2847061866643092,
+        "quiet_seconds": 15.302288182312623,
+        "largest": [
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6687073490462863
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6530192000950538
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.6000716973846439
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3706325189728683
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.14511537779890082
+          }
+        ]
+      },
+      {
+        "time": 1788992144.6484318,
+        "background_cores": 3.164852461542164,
+        "quiet_seconds": 20.402051977347583,
+        "largest": [
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6392452927278471
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6314017922035792
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5980669149754398
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3509966484609959
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.15098738509216023
+          }
+        ]
+      }
+    ]
+  },
+  "library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-cpy-strides-probe-build-0909b/libqwen-cpy-strides.so",
+  "library_sha256": "514477532e8b4cb8451740ed7d9e3d250bb3bc73614cefae3fade52d27718577",
+  "fixture_sha256": "23c7ba9e49c7207eb4573b6c8ed42d15b1741faaf057f314705137bbd8f66d79",
+  "peer_preserved": true,
+  "finished": 1788992144.9072366
+}
