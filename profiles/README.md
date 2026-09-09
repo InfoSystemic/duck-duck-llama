@@ -1,5 +1,7 @@
 # SR950 launch profiles
 
+Use the [September 8 parameterized profiles](20260908/README.md) with the matching current source bundles. The shell launchers below are historical starting points, including the earlier single-socket Qwen/Flash workarounds; they do not describe the repaired and tuned four-socket engines.
+
 These launchers capture measured starting points for a four-socket Xeon Gold
 6242 host. They use environment variables for every path and contain no
 machine-specific directories, credentials, or network addresses.

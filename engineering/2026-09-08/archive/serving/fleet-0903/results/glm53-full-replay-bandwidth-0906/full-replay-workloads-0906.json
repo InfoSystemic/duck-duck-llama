@@ -1,0 +1,19 @@
+{
+  "source_path": "/home/kwebb/InfoSystemic/AI-Server/serving/glm-sr950/benchmark-replay.sh",
+  "source_sha256": "2b149116c0210d0ab82abe057de15cf3602e40841976a607642ddb9d68b37786",
+  "source_code": "def load_config(path):\n    with open(path) as f:\n        raw = f.read()\n    cfg = {}\n    for line in raw.splitlines():\n        line = line.strip()\n        if not line or line.startswith(\"#\"):\n            continue\n        if \"=\" not in line:\n            raise ValueError(\"bad line: %s\" % line)\n        key, value = line.split(\"=\", 1)\n        cfg[key.strip()] = value.strip()\n    return cfg\n\ndef validate_config(cfg, required):\n    missing = [k for k in required if k not in cfg]\n    if missing:\n        raise KeyError(\"missing keys: %s\" % \", \".join(sorted(missing)))\n    return True\n\ndef merge_config(base, override):\n    merged = dict(base)\n    for key, value in override.items():\n        merged[key] = value\n    return merged",
+  "workloads": [
+    {
+      "id": 1,
+      "expected_code": "def read_config(path):\n    with open(path) as f:\n        raw = f.read()\n    cfg = {}\n    for line in raw.splitlines():\n        line = line.strip()\n        if not line or line.startswith(\"#\"):\n            continue\n        if \"=\" not in line:\n            raise ValueError(\"bad line: %s\" % line)\n        key, value = line.split(\"=\", 1)\n        cfg[key.strip()] = value.strip()\n    return cfg\n\ndef validate_config(cfg, required):\n    missing = [k for k in required if k not in cfg]\n    if missing:\n        raise KeyError(\"missing keys: %s\" % \", \".join(sorted(missing)))\n    return True\n\ndef merge_config(base, override):\n    merged = dict(base)\n    for key, value in override.items():\n        merged[key] = value\n    return merged"
+    },
+    {
+      "id": 2,
+      "expected_code": "def load_config(path):\n    \"\"\"Load a configuration file.\"\"\"\n    with open(path) as f:\n        raw = f.read()\n    cfg = {}\n    for line in raw.splitlines():\n        line = line.strip()\n        if not line or line.startswith(\"#\"):\n            continue\n        if \"=\" not in line:\n            raise ValueError(\"bad line: %s\" % line)\n        key, value = line.split(\"=\", 1)\n        cfg[key.strip()] = value.strip()\n    return cfg\n\ndef validate_config(cfg, required):\n    \"\"\"Validate required configuration keys.\"\"\"\n    missing = [k for k in required if k not in cfg]\n    if missing:\n        raise KeyError(\"missing keys: %s\" % \", \".join(sorted(missing)))\n    return True\n\ndef merge_config(base, override):\n    \"\"\"Merge two configuration mappings.\"\"\"\n    merged = dict(base)\n    for key, value in override.items():\n        merged[key] = value\n    return merged"
+    },
+    {
+      "id": 3,
+      "expected_code": "def load_config(path):\n    with open(path) as f:\n        raw = f.read()\n    cfg = {}\n    for line in raw.splitlines():\n        line = line.strip()\n        if not line or line.startswith(\"#\"):\n            continue\n        if \"=\" not in line:\n            raise ConfigError(\"bad line: %s\" % line)\n        key, value = line.split(\"=\", 1)\n        cfg[key.strip()] = value.strip()\n    return cfg\n\ndef validate_config(cfg, required):\n    missing = [k for k in required if k not in cfg]\n    if missing:\n        raise KeyError(\"missing keys: %s\" % \", \".join(sorted(missing)))\n    return True\n\ndef merge_config(base, override):\n    merged = dict(base)\n    for key, value in override.items():\n        merged[key] = value\n    return merged"
+    }
+  ]
+}

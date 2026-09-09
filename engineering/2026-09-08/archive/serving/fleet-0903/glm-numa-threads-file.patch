@@ -1,0 +1,20 @@
+--- a/ggml/src/ggml-cpu/ggml-cpu.cpp
++++ b/ggml/src/ggml-cpu/ggml-cpu.cpp
+@@ -210,7 +210,16 @@
+ static enum ggml_status ggml_backend_cpu_graph_compute_impl(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
+     struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
+ 
+-    struct ggml_cplan cplan = ggml_graph_plan(cgraph, cpu_ctx->n_threads, cpu_ctx->threadpool);
++    int n_threads = cpu_ctx->n_threads;
++    static const char * threads_file = getenv("GGML_CPU_NUMA_THREADS_FILE");
++    if (threads_file && cpu_ctx->owns_threadpool) {
++        std::ifstream input(threads_file);
++        int requested = 0;
++        if (input >> requested && requested > 0) {
++            n_threads = std::min(n_threads, requested);
++        }
++    }
++    struct ggml_cplan cplan = ggml_graph_plan(cgraph, n_threads, cpu_ctx->threadpool);
+ 
+     if (cpu_ctx->work_size < cplan.work_size) {
+         delete[] cpu_ctx->work_data;

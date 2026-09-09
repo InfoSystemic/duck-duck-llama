@@ -1,0 +1,38 @@
+--- /home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/ggml-cpu/ops.cpp
++++ /home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908/private-cpu/ops.cpp
+@@ -5510,6 +5510,35 @@
+     }
+ }
+ 
++void ggml_compute_forward_softmax_pool_fused(
++        const ggml_compute_params * params,
++        const ggml_tensor * probs,
++        const ggml_tensor * mul,
++        ggml_tensor * dst) {
++    const ggml_tensor * gate = probs->src[0];
++    const bool probs_first = mul->src[0] == probs;
++    const ggml_tensor * keys = mul->src[probs_first ? 1 : 0];
++    const int64_t rows = ggml_nrows(gate);
++    const int64_t begin = rows * params->ith / params->nth;
++    const int64_t end = rows * (params->ith + 1) / params->nth;
++    float scale;
++    memcpy(&scale, (const float *) probs->op_params, sizeof(float));
++    for (int64_t row = begin; row < end; ++row) {
++        float work[4], probability[4], product[4];
++        const float * gp = (const float *) gate->data + row * 4;
++        const float * kp = (const float *) keys->data + row * 4;
++        ggml_vec_cpy_f32(4, work, gp);
++        ggml_vec_scale_f32(4, work, scale);
++        float max = -INFINITY;
++        ggml_vec_max_f32(4, &max, work);
++        ggml_float sum = ggml_vec_soft_max_f32(4, probability, work, max);
++        sum = 1.0 / sum;
++        ggml_vec_scale_f32(4, probability, sum);
++        ggml_vec_mul_f32(4, product, probs_first ? probability : kp, probs_first ? kp : probability);
++        ggml_vec_sum_f32(4, (float *) dst->data + row, product);
++    }
++}
++
+ // ggml_compute_forward_soft_max
+ 
+ static void ggml_compute_forward_soft_max_f32(

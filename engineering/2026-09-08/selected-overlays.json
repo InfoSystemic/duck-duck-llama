@@ -1,0 +1,88 @@
+[
+  {
+    "name": "qwen-q6-selected-overlay",
+    "patch": "patches/qwen-q6-selected-overlay.patch",
+    "patch_sha256": "8a5418e7c47b29c5ef7f7fb18bcb93142302a40d8b82e21b26fb3af06933617c",
+    "files": {
+      "ggml/src/ggml-cpu/repack.cpp": {
+        "source": "serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/repack.cpp",
+        "sha256": "62ec23388c0a33d10bd1105aa8a17034d487bd42fd2c3cd6c430a1a8ef28d116"
+      },
+      "ggml/src/ggml-cpu/arch/x86/repack.cpp": {
+        "source": "serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/repack-x86.cpp",
+        "sha256": "1bf6d914b2b556ae6cd1d39433cd3802ae5a4353bca49d85680a6a4ba1c3d6b3",
+        "original_sha256": "d74c47602059f73487f954a3b457a67ea25a038b675135e723c32d423e178de6",
+        "adaptation": "Relocate the private absolute repack.h include to ../../repack.h; no arithmetic change."
+      },
+      "ggml/src/ggml-cpu/arch/x86/qwen-q8-batch.h": {
+        "source": "serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/qwen-q8-batch.h",
+        "sha256": "d6f958743719b549dc728d9aea94d03ca10c5b8b7ddf213179c48a124a4ad15f"
+      },
+      "src/llama-model.cpp": {
+        "source": "serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/llama-model.cpp",
+        "sha256": "3e27e4c2868598ea5ab8d7487fc6db77cbeafe29be5186ce1ce70aae2ed4205a"
+      }
+    },
+    "manifests": [
+      "qwen-q6-q8-wide-batch-0907/private-cpu/manifest.json",
+      "qwen-expert-even-split-policy-0906b/private-split/manifest.json"
+    ],
+    "apply_check": true,
+    "note": "Source bytes match original selected files except the documented absolute-to-relative include relocation. Original measured binaries are identified separately.",
+    "source_matches_except_documented_include_relocation": true
+  },
+  {
+    "name": "glm-flash-q8-raw-overlay",
+    "patch": "patches/glm-flash-q8-raw-overlay.patch",
+    "patch_sha256": "805da8a48a7249a766d0735c4edd136cfdf8905fd1c38287f1853908f9218760",
+    "files": {
+      "ggml/src/ggml-cpu/repack.cpp": {
+        "source": "serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/repack.cpp",
+        "sha256": "34e3beff2fc1006832682b427fb1be5e425b788dc27c826637c8d761cec63c2f"
+      },
+      "ggml/src/ggml-cpu/flash-q8-r8-ordered-k-0908.h": {
+        "source": "serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/flash-q8-r8-ordered-k-0908.h",
+        "sha256": "381bc9012349b78c81425f1f40235ea9cc0086ab348f7a79219ad6e117768ace"
+      },
+      "ggml/src/ggml-cpu/arch/x86/repack.cpp": {
+        "source": "serving/fleet-0903/results/glm-flash-q8-sum16-0908/private-cpu/repack-x86.cpp",
+        "sha256": "738b4461e34a511d782eb0d69e364cd1b347508a5a36231b69201b00a9dd5bd4",
+        "original_sha256": "d6582c073ccffe1bd0d330b2c7bcae7179c07ac23c702070aff0f646e898c9be",
+        "adaptation": "Relocate the private absolute repack.h include to ../../repack.h; no arithmetic change."
+      },
+      "ggml/src/ggml-cpu/arch/x86/flash-q8-sum16.h": {
+        "source": "serving/fleet-0903/results/glm-flash-q8-sum16-0908/private-cpu/flash-q8-sum16.h",
+        "sha256": "1bdf8d875667b2ff5c88598c1eee5a8f868b70d1d04f1fa538ed0afcd947b44d"
+      },
+      "ggml/src/ggml-cpu/arch/x86/qwen-q8-batch.h": {
+        "source": "serving/fleet-0903/results/glm-flash-q8-sum16-0908/private-cpu/qwen-q8-batch.h",
+        "sha256": "bfc3ebc2995cc8483342d9e9e46ef1387cad91278a63e8b7467af60d8861ad0e"
+      },
+      "ggml/src/ggml-cpu/ops.cpp": {
+        "source": "serving/fleet-0903/results/glm-flash-rms-guard-0908/private-cpu/ops.cpp",
+        "sha256": "65081339cacb055e21401320c87745e4da438c1b8d4dae79149281c9ba757f0e"
+      },
+      "ggml/src/ggml-cpu/flash-rms-guarded-0908.h": {
+        "source": "serving/fleet-0903/results/glm-flash-rms-guard-0908/private-cpu/flash-rms-guarded-0908.h",
+        "sha256": "9b425380e396f50a1362e446cf64a07d145b4debd609dcc801f1ad493f63b53c"
+      },
+      "ggml/src/ggml-cpu/ops.h": {
+        "source": "serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/ops.h",
+        "sha256": "bedcc204220d9837a22d875f97a7e588df57abe247aced3ddf573a71cd6d2cad"
+      },
+      "ggml/src/ggml-cpu/ggml-cpu.c": {
+        "source": "serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/ggml-cpu.c",
+        "sha256": "f4051dd62e028cd60f870ea5f57fc462ad22ed0ebc995473c9b7b4b9aa2d3878"
+      }
+    },
+    "manifests": [
+      "glm-flash-q8-r8-ordered-k-0908/private-cpu/manifest.json",
+      "glm-flash-q8-sum16-0908/private-cpu/manifest.json",
+      "glm-flash-rms-guard-0908/private-cpu/manifest.json",
+      "glm-flash-q8-pool-0908c/private-cpu/manifest.json"
+    ],
+    "apply_check": true,
+    "note": "Source bytes match original selected files except the documented absolute-to-relative include relocation. Original measured binaries are identified separately.",
+    "source_matches_except_documented_include_relocation": true
+  }
+]

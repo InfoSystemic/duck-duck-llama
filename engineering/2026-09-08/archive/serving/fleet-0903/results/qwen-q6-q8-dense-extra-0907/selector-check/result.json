@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "started": 1788782238.1043758,
+  "library_sha256": "30410fa5323e91e5a21d53a162f66bcdc9b8bec6b18d9b1a9dfa7222103e0cb0",
+  "fixture_sha256": "61bb561b8a13fcaadefcfad93e21094c9f617f5fd174acdcba6b97ddf574caec",
+  "compile_command": [
+    "/usr/bin/c++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-fopenmp",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-dense-extra-0907/selector-check/graph-check.cpp",
+    "-L/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-dense-extra-0907/private-cpu",
+    "-L/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-Wl,-rpath,/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-dense-extra-0907/private-cpu:/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-lggml",
+    "-lggml-cpu",
+    "-lggml-base",
+    "-ldl",
+    "-o",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-dense-extra-0907/selector-check/graph-check"
+  ],
+  "checks": [
+    {
+      "padded": false,
+      "bit_exact_cases": 216
+    },
+    {
+      "padded": true,
+      "bit_exact_cases": 216
+    }
+  ],
+  "finished": 1788782245.00907
+}

@@ -1,0 +1,11 @@
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -2384,7 +2384,7 @@
+         const size_t n_devs = backend_configs.size();
+         parallel_cpu_numa = n_devs > 1;
+         for (const backend_config & bc : backend_configs) {
+-            const char * backend_name = ggml_backend_name(bc.backend);
++            const char * backend_name = ggml_backend_dev_name(ggml_backend_get_device(bc.backend));
+             parallel_cpu_numa = parallel_cpu_numa && backend_name != nullptr &&
+                 strncmp(backend_name, "CPU-NUMA", strlen("CPU-NUMA")) == 0;
+         }

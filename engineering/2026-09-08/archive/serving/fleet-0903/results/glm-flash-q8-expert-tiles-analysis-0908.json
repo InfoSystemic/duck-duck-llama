@@ -1,0 +1,90 @@
+{
+  "passed": true,
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/analyze_flash_expert_tiles_0908.py": "186389c0ad8d62c5247742fc809ac592efa007b079c4b8ede3f3261fcb510793",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-expert-tiles-0908/result.json": "bcc4078cf2b8a7016ac359cd1d1b864759af3ee727b779a85dcbd20933728f29",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-expert-tiles-rotating-0908/result.json": "249fc5daf506323a1ad977844fb78e5efef656d068d49144e8a9e13eea1d6bd9"
+  },
+  "library_sha256": "d0449ea0773ee19cfef28b1efdc618fccea0304e700218e0ef682f1f2369ba70",
+  "fixed_route_gate_up_ms": {
+    "64": {
+      "1": [
+        0.785861,
+        0.820596
+      ],
+      "3": [
+        5.664672,
+        6.406327
+      ],
+      "4": [
+        8.577222,
+        8.561177
+      ]
+    },
+    "32": {
+      "1": [
+        0.977569,
+        0.979699
+      ],
+      "3": [
+        6.500071,
+        6.438518
+      ],
+      "4": [
+        8.608123,
+        8.572955
+      ]
+    },
+    "48": {
+      "1": [
+        0.985745,
+        0.929482
+      ],
+      "3": [
+        6.450712,
+        6.438696
+      ],
+      "4": [
+        8.579828,
+        8.576975
+      ]
+    }
+  },
+  "rotating_route_gate_up_ms": {
+    "64": [
+      2.46182,
+      2.531325
+    ],
+    "32": [
+      2.442124,
+      2.460309
+    ],
+    "48": [
+      2.475982,
+      2.290299
+    ]
+  },
+  "fixed_route_time_change_percent": {
+    "32": {
+      "1": 21.865977626237832,
+      "3": 7.389067663644444,
+      "4": 0.24885951477544577
+    },
+    "48": {
+      "1": 19.196970414449567,
+      "3": 6.9820341383181495,
+      "4": 0.10742707960531561
+    }
+  },
+  "rotating_route_time_change_percent": {
+    "32": -1.8078924755921544,
+    "48": -4.606731093946525
+  },
+  "bit_exact_comparisons": 522,
+  "values_compared": 9306112,
+  "notes": [
+    "Positive time changes mean slower execution.",
+    "The first and last 64-row arms bracket the two 32-row and two 48-row arms.",
+    "These are one-socket component timings, not complete-model speed or DRAM utilization."
+  ]
+}

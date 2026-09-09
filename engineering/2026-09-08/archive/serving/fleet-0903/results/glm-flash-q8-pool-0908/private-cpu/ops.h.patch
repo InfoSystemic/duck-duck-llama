@@ -1,0 +1,10 @@
+--- /home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/ggml-cpu/ops.h
++++ /home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908/private-cpu/ops.h
+@@ -61,6 +61,7 @@
+ void ggml_compute_forward_diag(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_diag_mask_inf(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_diag_mask_zero(const struct ggml_compute_params * params, struct ggml_tensor * dst);
++void ggml_compute_forward_softmax_pool_fused(const struct ggml_compute_params * params, const struct ggml_tensor * probs, const struct ggml_tensor * mul, struct ggml_tensor * dst);
+ void ggml_compute_forward_soft_max(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_soft_max_ext_back(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_rope(const struct ggml_compute_params * params, struct ggml_tensor * dst);

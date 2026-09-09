@@ -1,0 +1,49 @@
+{
+  "started": 1788912376.6365476,
+  "controller_pid": 3955188,
+  "passed": true,
+  "compile_command": [
+    "g++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-ffp-contract=off",
+    "-fopenmp",
+    "-I/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-q6-packed-single-0908.cpp",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0",
+    "-L/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-lggml-base",
+    "-ldl",
+    "-o",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-packed-single-proof-0908/check"
+  ],
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/run_qwen_q6_packed_single_check_0908.py": "d51ebb37facfbdd7337895a15bb174d17432e88e005c3e5fae383a06e25681a7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-q6-packed-single-0908.cpp": "4ba6ae973930c85e71e728643b43c72c44093adacc86ff4314a4d02aabe4f73d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen-q6-packed-single-0908.h": "bbe68b8ed62b15a93d9f7942224a1cfb0e0ad69bbb83205f9a8fa318741fa5e5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-lossless-bytes-prototype-0908/result.json": "449ec1fe6791c728bb51c1c8c8074ed67813b0e6578a775f79f06928160e3a5c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437"
+  },
+  "scope": "Check the Q6 single-activation correction variant; no performance claim.",
+  "compile_exit": 0,
+  "check_exit": 0,
+  "check": {
+    "passed": true,
+    "bit_exact": true,
+    "scalar_reference_exact": true,
+    "cases": 432,
+    "outputs": 146880,
+    "guard_values_preserved": true,
+    "weight_storage_unchanged": true,
+    "cpu_library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0"
+  },
+  "binary_sha256": "7a586d910bc23232f1dfbbf51feb1ef4b4e147a2b1447d673987702b885caa73",
+  "finished": 1788912382.0874755,
+  "peer_preserved": true
+}

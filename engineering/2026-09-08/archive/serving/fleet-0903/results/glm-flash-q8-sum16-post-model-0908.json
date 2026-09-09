@@ -1,0 +1,118 @@
+{
+  "time": 1788888884.1366055,
+  "passed": true,
+  "service": {
+    "processing": 0,
+    "queued": 0.0
+  },
+  "memory": {
+    "MemTotal": 811215671296,
+    "MemAvailable": 129893797888,
+    "SwapTotal": 8589930496,
+    "SwapFree": 65536,
+    "Shmem": 279294332928
+  },
+  "node_memory": {
+    "node0": {
+      "MemFree": 1193840640,
+      "FilePages": 95552503808,
+      "AnonPages": 102391177216,
+      "Shmem": 70531993600,
+      "SReclaimable": 1614331904,
+      "estimated_available": 27828682752
+    },
+    "node1": {
+      "MemFree": 536150016,
+      "FilePages": 103239467008,
+      "AnonPages": 95657504768,
+      "Shmem": 60023230464,
+      "SReclaimable": 1783377920,
+      "estimated_available": 45535764480
+    },
+    "node2": {
+      "MemFree": 1776594944,
+      "FilePages": 101375062016,
+      "AnonPages": 95934455808,
+      "Shmem": 71418200064,
+      "SReclaimable": 2084032512,
+      "estimated_available": 33817489408
+    },
+    "node3": {
+      "MemFree": 700723200,
+      "FilePages": 104306597888,
+      "AnonPages": 95387865088,
+      "Shmem": 77320908800,
+      "SReclaimable": 1054355456,
+      "estimated_available": 28740767744
+    }
+  },
+  "mapped_libraries": {
+    "libggml-cpu.so.": {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-0908/private-cpu/libggml-cpu.so.0.22.0",
+      "sha256": "eb1fb1035f8e4ce972df6f9c40a5aadddb057bc34cb32b45a020d890b83b718f"
+    },
+    "libllama.so.": {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libllama.so.0.3.0",
+      "sha256": "8c794722eccdcc27aac88def7f1a1d549926a0d6aa3dd00586d6fdca5c8eb08a"
+    },
+    "libggml-base.so.": {
+      "path": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libggml-base.so.0.22.0",
+      "sha256": "01e54cdb7764b31968c533933ad96ac363fd215132e6fa8ce3e56a9f557ee28d"
+    }
+  },
+  "full": {
+    "MainPID": "0",
+    "ActiveState": "inactive",
+    "SubState": "dead",
+    "FragmentPath": "/home/kwebb/.config/systemd/user/glm53-sr950.service",
+    "DropInPaths": "/home/kwebb/.config/systemd/user/glm53-sr950.service.d/10-numa-tensor.conf"
+  },
+  "qwen_loaded": false,
+  "selected_q6_rollback_retained": true,
+  "retained_for_raw_tuning": true,
+  "retained_launch_command": [
+    "python3",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/glm_flash_q8_trial.py",
+    "launch",
+    "--drafts",
+    "0",
+    "--workers",
+    "15",
+    "--batching",
+    "--q8-experts",
+    "--q8-clamp",
+    "--pooling",
+    "--sum16"
+  ],
+  "rollback_command": [
+    "python3",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/glm_flash_q8_trial.py",
+    "launch",
+    "--drafts",
+    "0",
+    "--workers",
+    "15",
+    "--batching",
+    "--q8-experts",
+    "--q8-clamp",
+    "--pooling"
+  ],
+  "all_parity_checks_passed": true,
+  "all_streamed_texts_equal": true,
+  "profile_execution_verified": true,
+  "observed_speed_change_percent": [
+    0.5901417281278354,
+    1.5672156842101659
+  ],
+  "target_reached": false,
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-control-0908/preflight.json": "329de96f947fa16e3f69c7abf0bc9b3f88e8a7faea2d78bd026a1774bfb1c135",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-parity-0908/result.json": "975a92b32b01a267a82d90a2977a180a2f14673056a79cde0c6268e1df8432c2",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-profile-0908/analysis/result.json": "45826a7abc00706c0fa2fbe29942cbfac89b22ff96d38ce85c73537eee546c9b",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/glm_flash_q8_trial.py": "2fd2b9b3d5470c923a78c5ffb84f77c15d016861dadab4c2eca8f45b4ed8c699",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-raw-0908-comparison.json": "808ee271008d279dac863e884a021e96c8649594a43d95c121d16414c554a451",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-raw-repeat-0908-comparison.json": "81290287fe7e10fa10f1640fd641aff1164abb7d3c494f431016434b6c852a54",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen-flash-20tps.json": "884e0de653e6eae6651ef6135aea2f76c40a355c31c32b093f385d46181cf4c3"
+  },
+  "scope": "Retained raw Q8 tuning candidate after two unprofiled workload pairs, bounded output checks, and verified helper execution. Earlier controls were not interleaved; the precise causal gain remains uncertain. No source-checkpoint quality or all-model bandwidth completion claim."
+}

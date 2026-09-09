@@ -1,0 +1,158 @@
+--- a/tests/test-llama-archs.cpp
++++ b/tests/test-llama-archs.cpp
+@@ -16,6 +16,7 @@
+ #include <cstdio>
+ #include <cstring>
+ #include <cstdint>
++#include <cstdlib>
+ #include <random>
+ #include <stdexcept>
+ #include <string>
+@@ -89,6 +90,9 @@
+     uint32_t n_head  = 2;
+     uint32_t n_ff    = 384;
+     uint32_t n_layer = 2;
++    if (arch == LLM_ARCH_QWEN4EXP && std::getenv("LLAMA_TEST_Q4E_ROLLBACK")) {
++        n_head = 4;
++    }
+     if (arch == LLM_ARCH_LLAMA4) {
+         n_layer = 4; // hparams.n_no_rope_layer_step is hard-coded to 4
+     } else if (arch == LLM_ARCH_GEMMA4) {
+@@ -306,10 +310,16 @@
+     ms.add_kv(LLM_KV_XIELU_BETA,                1.0f);
+     ms.add_kv(LLM_KV_XIELU_EPS,                 1.0e-7f);
+     ms.add_kv(LLM_KV_SSM_INNER_SIZE,            arch == LLM_ARCH_QWEN3NEXT || arch == LLM_ARCH_QWEN35 || arch == LLM_ARCH_QWEN35MOE || arch == LLM_ARCH_QWEN4EXP ? 256 : 2*n_embd);
++    if (arch == LLM_ARCH_QWEN4EXP && std::getenv("LLAMA_TEST_Q4E_ROLLBACK")) {
++        ms.add_kv(LLM_KV_SSM_INNER_SIZE, uint32_t(512));
++    }
+     ms.add_kv(LLM_KV_SSM_CONV_KERNEL,           uint32_t(4));
+     ms.add_kv(LLM_KV_SSM_STATE_SIZE,            uint32_t(128));
+     ms.add_kv(LLM_KV_SSM_TIME_STEP_RANK,        n_head);
+     ms.add_kv(LLM_KV_SSM_GROUP_COUNT,           arch == LLM_ARCH_PLAMO2 ? 0 : uint32_t(2));
++    if (arch == LLM_ARCH_QWEN4EXP && std::getenv("LLAMA_TEST_Q4E_ROLLBACK")) {
++        ms.add_kv(LLM_KV_SSM_GROUP_COUNT, uint32_t(4));
++    }
+     ms.add_kv(LLM_KV_KDA_HEAD_DIM,              uint32_t(128));
+     ms.add_kv(LLM_KV_KDA_SAFE_GATE,              true);
+     ms.add_kv(LLM_KV_KDA_GATE_LOWER_BOUND,       -5.0f);
+--- a/tests/test-recurrent-state-rollback.cpp
++++ b/tests/test-recurrent-state-rollback.cpp
+@@ -6,6 +6,8 @@
+ #include <clocale>
+ #include <cmath>
+ #include <cstdio>
++#include <cstdlib>
++#include <limits>
+ #include <vector>
+ 
+ static llama_context * make_ctx(const common_params & params, llama_model * model) {
+@@ -82,19 +84,26 @@
+     };
+ 
+     bool ok = true;
++    const bool speculative_batches = std::getenv("LLAMA_TEST_SPECULATIVE_RS") != nullptr;
++    const llama_pos prefill_end = p0 - (speculative_batches ? 1 : 0);
+ 
+     // both contexts decode the identical [0, p0) prefill; only ctx_roll decodes
+     // the tail, which is then rolled back so its restore is pending at replay
+     for (uint32_t s = 0; s < n_seqs && ok; ++s) {
+         llama_batch batch = llama_batch_init(n_prompt, 0, 1);
+-        for (llama_pos pos = 0; pos < (llama_pos) p0; ++pos) {
++        for (llama_pos pos = 0; pos < prefill_end; ++pos) {
+             common_batch_add(batch, tok(s, pos), pos, { (llama_seq_id) s }, false);
+         }
+         ok = ok && llama_decode(ctx_roll, batch) == 0;
+         ok = ok && llama_decode(ctx_ref,  batch) == 0;
+ 
+         common_batch_clear(batch);
+-        for (llama_pos pos = p0; pos < (llama_pos) n_prompt; ++pos) {
++        if (speculative_batches) {
++            common_batch_add(batch, tok(s, prefill_end), prefill_end, { (llama_seq_id) s }, false);
++            ok = ok && llama_decode(ctx_ref, batch) == 0;
++            common_batch_clear(batch);
++        }
++        for (llama_pos pos = prefill_end; pos < (llama_pos) n_prompt; ++pos) {
+             common_batch_add(batch, tok(s, pos), pos, { (llama_seq_id) s }, false);
+         }
+         ok = ok && llama_decode(ctx_roll, batch) == 0;
+@@ -129,7 +138,7 @@
+ 
+     // identical ubatch shapes from bit-exact states: a correct implementation
+     // matches bitwise, so eps only allows backend scheduling noise
+-    constexpr float eps = 1e-7f;
++    const float eps = speculative_batches ? 1e-5f : 1e-7f;
+ 
+     float    diff_max  = 0.0f;
+     uint32_t seq_first = 0;
+@@ -142,8 +151,15 @@
+             cleanup();
+             return false;
+         }
++        if (std::max_element(l_roll, l_roll + n_vocab) - l_roll !=
++            std::max_element(l_ref, l_ref + n_vocab) - l_ref) {
++            fprintf(stderr, "%s : top-token mismatch at index %u\n", __func__, i);
++            cleanup();
++            return false;
++        }
+         for (int t = 0; t < n_vocab; ++t) {
+-            const float diff = std::fabs(l_roll[t] - l_ref[t]);
++            const float diff = std::isfinite(l_roll[t]) && std::isfinite(l_ref[t])
++                ? std::fabs(l_roll[t] - l_ref[t]) : std::numeric_limits<float>::infinity();
+             if (diff > eps && pos_first < 0) {
+                 seq_first = i/n_replay;
+                 pos_first = p0 + (int32_t) (i%n_replay);
+@@ -191,6 +207,7 @@
+         const float * l_ref  = llama_get_logits_ith(ctx_ref,  0);
+         ok = l_roll != nullptr && l_ref != nullptr;
+         for (int t = 0; ok && t < n_vocab; ++t) {
++            ok = std::isfinite(l_roll[t]) && std::isfinite(l_ref[t]);
+             diff_tail = std::max(diff_tail, std::fabs(l_roll[t] - l_ref[t]));
+         }
+     }
+@@ -245,6 +262,10 @@
+     }
+ 
+     if (llama_n_rs_seq(ctx_src) == 0) {
++        if (std::getenv("LLAMA_TEST_REQUIRE_RS")) {
++            fprintf(stderr, "Required recurrent rollback support is disabled\n");
++            return 1;
++        }
+         fprintf(stderr, "%s : skipping because n_rs_seq is disabled\n", __func__);
+         llama_free(ctx_src);
+         llama_free(ctx_dst);
+@@ -311,7 +332,8 @@
+ 
+             logits_src_replay[i].assign(logits_src, logits_src + n_vocab);
+             for (int token = 0; token < n_vocab; ++token) {
+-                if (std::fabs(logits_src[token] - logits_dst[token]) > eps) {
++                if (!std::isfinite(logits_src[token]) || !std::isfinite(logits_dst[token]) ||
++                    std::fabs(logits_src[token] - logits_dst[token]) > eps) {
+                     fprintf(stderr, "%s : %s logits mismatch at position %d, token %d (%g != %g)\n",
+                             __func__, mode, pos, token, (double) logits_src[token], (double) logits_dst[token]);
+                     return false;
+@@ -322,6 +344,15 @@
+     };
+     if (!replay_and_compare("full")) {
+         return 1;
++    }
++
++    if (std::getenv("LLAMA_TEST_SPECULATIVE_RS")) {
++        // Server rejection rewinds within the latest verification batch.
++        llama_memory_clear(llama_get_memory(ctx_src), true);
++        llama_memory_clear(llama_get_memory(ctx_dst), true);
++        if (!decode_tokens(ctx_src, tokens, n_tokens) || !decode_tokens(ctx_dst, tokens, n_tokens)) {
++            return 1;
++        }
+     }
+ 
+     if (!llama_memory_seq_rm(llama_get_memory(ctx_src), 0, rollback_pos, -1) ||
+@@ -380,7 +411,8 @@
+         }
+ 
+         for (int token = 0; token < n_vocab; ++token) {
+-            if (std::fabs(logits_src_replay[i][token] - logits_dirty[token]) > eps) {
++            if (!std::isfinite(logits_src_replay[i][token]) || !std::isfinite(logits_dirty[token]) ||
++                std::fabs(logits_src_replay[i][token] - logits_dirty[token]) > eps) {
+                 fprintf(stderr, "%s : dirty-ctx logits mismatch at position %d, token %d (%g != %g)\n",
+                         __func__, pos, token, (double) logits_src_replay[i][token], (double) logits_dirty[token]);
+                 return 1;

@@ -1,0 +1,144 @@
+{
+  "config": {
+    "label": "glm5n-goal-scheduler-t15",
+    "binary": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/GLM-5.3-Flash/UD-IQ2_XXS/GLM-5.3-Flash-UD-IQ2_XXS-00001-of-00004.gguf",
+    "alias": "glm5n-goal",
+    "ctx_size": 4096,
+    "mtp": null,
+    "draft_n": 1,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 15,
+    "fused": 1,
+    "merge": 1,
+    "repack": 0,
+    "port": 18106,
+    "bench": true,
+    "profile_cpu": true
+  },
+  "started": 1788560209.3909123,
+  "checks": [
+    {
+      "expected": "391",
+      "wall_s": 4.502180360024795,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    },
+    {
+      "expected": "Paris",
+      "wall_s": 9.770453457022086,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    },
+    {
+      "expected": "14, 16, 18",
+      "wall_s": 13.53220327803865,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    },
+    {
+      "expected": null,
+      "wall_s": 39.8309041619068,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    },
+    {
+      "expected": null,
+      "wall_s": 44.07271142699756,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    }
+  ],
+  "runtime_env": {
+    "GGML_GLM5N_SHEXP_TP": "1",
+    "GGML_GLM5N_ATTN_TP": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "0",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_CPU_OP_PROFILE": "*",
+    "GGML_CPU_OP_PROFILE_ARM_FILE": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm5n-goal-scheduler-t15/profile.arm",
+    "GGML_CPU_OP_PROFILE_SKIP": "0",
+    "GGML_CPU_OP_PROFILE_COUNT": "8"
+  },
+  "profile_response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "role": "assistant"
+        }
+      }
+    ],
+    "created": 1788560538,
+    "model": "glm5n-goal",
+    "system_fingerprint": "b0-unknown",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 16,
+      "prompt_tokens": 30,
+      "total_tokens": 46,
+      "prompt_tokens_details": {
+        "cached_tokens": 26
+      }
+    },
+    "id": "chatcmpl-JFZaDbkwiyHMJT3KVCKXmoN0tcd12yG6",
+    "timings": {
+      "cache_n": 26,
+      "prompt_n": 4,
+      "prompt_ms": 592.767,
+      "prompt_per_token_ms": 148.19175,
+      "prompt_per_second": 6.748013975136942,
+      "predicted_n": 16,
+      "predicted_ms": 3445.128,
+      "predicted_per_token_ms": 229.67520000000002,
+      "predicted_per_second": 4.35397465638432
+    }
+  },
+  "finished": 1788560546.9013164,
+  "server_exit": 0
+}

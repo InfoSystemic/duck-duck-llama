@@ -1,0 +1,86 @@
+diff --git a/tools/server/server-chat.cpp b/tools/server/server-chat.cpp
+index 0322e54ccea8006070c4c6b585faf3ff0094ec84..870d9ba5f1ee6d987db694507be63b4bb0e810aa 100644
+--- a/tools/server/server-chat.cpp
++++ b/tools/server/server-chat.cpp
+@@ -334,6 +334,12 @@ static void normalize_anthropic_billing_header(std::string & system_text) {
+ json server_chat_convert_anthropic_to_oai(const json & body) {
+     json oai_body;
+ 
++    // Preserve the requested alias so model-scoped compatibility handling in
++    // the shared chat parser also applies to Anthropic Messages requests.
++    if (body.contains("model")) {
++        oai_body["model"] = body.at("model");
++    }
++
+     // Convert system prompt
+     json oai_messages = json::array();
+     auto system_param = json_value(body, "system", json());
+@@ -582,15 +588,33 @@ json server_chat_convert_anthropic_to_oai(const json & body) {
+         }
+     }
+ 
+-    // Handle Anthropic-specific thinking param
++    // Anthropic omits `thinking` when it is disabled. Make that API
++    // semantic explicit for templates such as Qwen that otherwise enable
++    // reasoning by default. Adaptive and budgeted thinking opt back in.
++    bool enable_thinking = false;
+     if (body.contains("thinking")) {
+         json thinking = json_value(body, "thinking", json::object());
+         std::string thinking_type = json_value(thinking, "type", std::string());
++        enable_thinking = thinking_type == "enabled" || thinking_type == "adaptive";
+         if (thinking_type == "enabled") {
+             int budget_tokens = json_value(thinking, "budget_tokens", 10000);
+             oai_body["thinking_budget_tokens"] = budget_tokens;
+         }
+     }
++    if (!oai_body.contains("chat_template_kwargs") || !oai_body["chat_template_kwargs"].is_object()) {
++        oai_body["chat_template_kwargs"] = json::object();
++    }
++    oai_body["chat_template_kwargs"]["enable_thinking"] = enable_thinking;
++
++    // Claude Code sends adaptive-reasoning effort in output_config. Preserve it
++    // for templates that implement effort levels.
++    if (body.contains("output_config")) {
++        json output_config = json_value(body, "output_config", json::object());
++        std::string effort = json_value(output_config, "effort", std::string());
++        if (!effort.empty()) {
++            oai_body["reasoning_effort"] = effort;
++        }
++    }
+ 
+     // Handle Anthropic-specific metadata param
+     if (body.contains("metadata")) {
+diff --git a/tools/server/server-common.cpp b/tools/server/server-common.cpp
+index 7ed486528cab2fe249f10c88a8a84649a474a87d..f244f9eaef91d28ae3b4b4a609a15e984c1a2e2a 100644
+--- a/tools/server/server-common.cpp
++++ b/tools/server/server-common.cpp
+@@ -1166,6 +1166,29 @@ json oaicompat_chat_params_parse(
+     if (!messages.is_array()) {
+         throw std::invalid_argument("Expected 'messages' to be an array");
+     }
++
++    // Qwen3.8's shipped template accepts system/developer messages only as a
++    // leading block. Claude Code and Codex can emit developer instructions
++    // later in the history, so preserve their relative order while hoisting
++    // that block before template application. Scope this compatibility shim
++    // to Qwen3.8 aliases so other models retain their native role semantics.
++    const std::string request_model = json_value(body, "model", std::string());
++    if (request_model.find("qwen3.8") != std::string::npos ||
++        request_model.find("Qwen3.8") != std::string::npos) {
++        json leading = json::array();
++        json remaining = json::array();
++        for (const auto & msg : messages) {
++            const std::string role = json_value(msg, "role", std::string());
++            if (role == "system" || role == "developer") {
++                leading.push_back(msg);
++            } else {
++                remaining.push_back(msg);
++            }
++        }
++        leading.insert(leading.end(), remaining.begin(), remaining.end());
++        messages = std::move(leading);
++    }
++
+     for (auto & msg : messages) {
+         std::string role = json_value(msg, "role", std::string());
+         if (role != "assistant" && !msg.contains("content")) {

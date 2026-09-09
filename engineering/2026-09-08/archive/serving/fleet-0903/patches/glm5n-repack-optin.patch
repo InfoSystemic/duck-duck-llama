@@ -1,0 +1,22 @@
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -1293,13 +1293,12 @@
+         }
+     }
+ 
+-    // A Meta (tensor-parallel) device composes its extra buffer types from the
+-    // matching per-device ones -- for CPU-NUMA devices that is the node-local
+-    // REPACK buffer, which is what selects the x16 AVX-512-VNNI kernels. Offer it
+-    // BEFORE the plain device buffer or a tensor-parallel load silently runs on
+-    // the stock kernels while a single-socket load of the same model runs on the
+-    // fast ones, which makes every TP-vs-1-socket comparison meaningless.
+-    if (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_META) {
++    // NUMA repacking is opt-in; use each device's local extra buffer when enabled.
++    static const bool meta_repack_bufts = []() {
++        const char * v = getenv("GGML_CPU_NUMA_REPACK");
++        return v != nullptr && atoi(v) != 0;
++    }();
++    if (meta_repack_bufts && ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_META) {
+         ggml_backend_buffer_type_t * meta_extra_bufts = ggml_backend_meta_device_get_extra_bufts(dev);
+         while (meta_extra_bufts != nullptr && *meta_extra_bufts != nullptr) {
+             buft_list.emplace_back(dev, *meta_extra_bufts++);

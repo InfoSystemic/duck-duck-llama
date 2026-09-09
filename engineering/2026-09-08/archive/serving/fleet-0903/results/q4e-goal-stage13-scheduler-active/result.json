@@ -1,0 +1,50 @@
+{
+  "config": {
+    "label": "q4e-goal-stage13-scheduler-active",
+    "binary": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/build-goal/bin/llama-server",
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 15,
+    "fused": 1,
+    "merge": 1,
+    "repack": 0,
+    "port": 18105,
+    "bench": true
+  },
+  "started": 1788558967.4660585,
+  "checks": [
+    {
+      "expected": "391",
+      "wall_s": 56.574859705986455,
+      "pass": true
+    },
+    {
+      "expected": "Paris",
+      "wall_s": 32.260240587056614,
+      "pass": true
+    },
+    {
+      "expected": "14, 16, 18",
+      "wall_s": 106.36102773505263,
+      "pass": true
+    }
+  ],
+  "runtime_env": {
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "0",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0"
+  },
+  "error": "Remote end closed connection without response",
+  "finished": 1788559606.435828,
+  "server_exit": -9,
+  "cancelled_reason": "Deliberately stopped own benchmark after all three correctness checks passed. Competing active GLM inference on port 18096 invalidated throughput measurements.",
+  "throughput_valid": false
+}

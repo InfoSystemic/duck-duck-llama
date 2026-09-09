@@ -1,0 +1,72 @@
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -158,12 +158,7 @@
+ 
+ static ggml_backend_buffer_type_t ggml_backend_meta_device_get_host_buffer_type(ggml_backend_dev_t dev);
+ 
+-static bool ggml_backend_meta_device_supports_op(ggml_backend_dev_t dev, const ggml_tensor * op) {
+-    GGML_ASSERT(ggml_backend_dev_is_meta(dev));
+-    const ggml_backend_meta_device_context * meta_dev_ctx = (const ggml_backend_meta_device_context *) dev->context;
+-    return std::all_of(meta_dev_ctx->simple_devs.begin(), meta_dev_ctx->simple_devs.end(),
+-        [op](ggml_backend_dev_t simple_dev) { return ggml_backend_dev_supports_op(simple_dev, op); });
+-}
++static bool ggml_backend_meta_device_supports_op(ggml_backend_dev_t dev, const ggml_tensor * op);
+ 
+ static bool ggml_backend_meta_device_supports_buft(ggml_backend_dev_t dev, ggml_backend_buffer_type_t buft) {
+     GGML_ASSERT(ggml_backend_dev_is_meta(dev));
+@@ -571,6 +566,55 @@
+         return nullptr;
+     }
+     return it->second[index];
++}
++
++static bool ggml_backend_meta_device_supports_op(ggml_backend_dev_t dev, const ggml_tensor * op) {
++    GGML_ASSERT(ggml_backend_dev_is_meta(dev));
++    const size_t n_devs = ggml_backend_meta_dev_n_devs(dev);
++
++    for (size_t j = 0; j < n_devs; ++j) {
++        ggml_tensor simple_op = *op;
++        std::array<ggml_tensor, GGML_MAX_SRC> simple_srcs;
++        std::array<ggml_backend_buffer, GGML_MAX_SRC> simple_buffers;
++        bool child_inactive = false;
++
++        for (size_t i = 0; i < GGML_MAX_SRC; ++i) {
++            const ggml_tensor * src = op->src[i];
++            if (src == nullptr || src->buffer == nullptr || !ggml_backend_buft_is_meta(src->buffer->buft)) {
++                continue;
++            }
++
++            ggml_tensor * simple_src = ggml_backend_buffer_is_meta(src->buffer)
++                ? ggml_backend_meta_buffer_simple_tensor(src, j) : nullptr;
++            if (simple_src != nullptr) {
++                simple_op.src[i] = simple_src;
++                child_inactive = child_inactive || ggml_nelements(simple_src) == 0;
++                continue;
++            }
++
++            // Weight-buffer selection probes with a zero-sized Meta buffer
++            // before the source tensor has been initialized. Recreate that
++            // source for the child device so its extra-buffer traits can make
++            // the real support decision instead of seeing the outer wrapper.
++            simple_srcs[i] = *src;
++            simple_buffers[i] = *src->buffer;
++            simple_buffers[i].buft = ggml_backend_meta_buft_simple_buft(src->buffer->buft, j);
++            simple_srcs[i].buffer = &simple_buffers[i];
++            simple_op.src[i] = &simple_srcs[i];
++        }
++
++        // A sharded source can be empty on this child. The meta graph disables
++        // that child operation during tensor initialization, so it must not
++        // veto support for the children that actually execute it.
++        if (child_inactive) {
++            continue;
++        }
++
++        if (!ggml_backend_dev_supports_op(ggml_backend_meta_dev_simple_dev(dev, j), &simple_op)) {
++            return false;
++        }
++    }
++    return true;
+ }
+ 
+ static struct ggml_backend_meta_split_state ggml_backend_meta_get_split_state(const struct ggml_tensor * tensor, bool assume_sync);

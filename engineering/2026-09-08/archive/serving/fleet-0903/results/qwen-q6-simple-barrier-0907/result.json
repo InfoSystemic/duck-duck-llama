@@ -1,0 +1,119 @@
+{
+  "passed": true,
+  "started": 1788784087.2978716,
+  "steps": [
+    {
+      "label": "baseline-compile",
+      "exit_code": 0
+    },
+    {
+      "label": "original-text",
+      "exit_code": 0
+    },
+    {
+      "label": "rebuilt-text",
+      "exit_code": 0
+    },
+    {
+      "label": "private-compile",
+      "exit_code": 0
+    },
+    {
+      "label": "private-link",
+      "exit_code": 0
+    },
+    {
+      "label": "q8-compile",
+      "exit_code": 0
+    },
+    {
+      "label": "q8-padded0-barrier0",
+      "exit_code": 0
+    },
+    {
+      "label": "q8-padded0-barrier1",
+      "exit_code": 0
+    },
+    {
+      "label": "q8-padded1-barrier0",
+      "exit_code": 0
+    },
+    {
+      "label": "q8-padded1-barrier1",
+      "exit_code": 0
+    },
+    {
+      "label": "q6-compile",
+      "exit_code": 0
+    },
+    {
+      "label": "q6-padded0-barrier0",
+      "exit_code": 0
+    },
+    {
+      "label": "q6-padded0-barrier1",
+      "exit_code": 0
+    },
+    {
+      "label": "q6-padded1-barrier0",
+      "exit_code": 0
+    },
+    {
+      "label": "q6-padded1-barrier1",
+      "exit_code": 0
+    },
+    {
+      "label": "numa-reduce-check-compile",
+      "exit_code": 0
+    },
+    {
+      "label": "numa-reduce-check",
+      "exit_code": 0
+    },
+    {
+      "label": "numa-thread-limit-check-compile",
+      "exit_code": 0
+    },
+    {
+      "label": "numa-thread-limit-check",
+      "exit_code": 0
+    }
+  ],
+  "graph_checks": [
+    {
+      "kind": "q8",
+      "padded": false,
+      "bit_exact_cases": 216
+    },
+    {
+      "kind": "q8",
+      "padded": true,
+      "bit_exact_cases": 216
+    },
+    {
+      "kind": "q6",
+      "padded": false,
+      "bit_exact_cases": 216
+    },
+    {
+      "kind": "q6",
+      "padded": true,
+      "bit_exact_cases": 216
+    }
+  ],
+  "numa_checks": [
+    {
+      "fixture": "numa-reduce-check",
+      "cases": 20
+    },
+    {
+      "fixture": "numa-thread-limit-check",
+      "cases": 40
+    }
+  ],
+  "parent_cpu_sha256": "d968fc147f1e2622bda86426ca5110de3b9b6dd71940d222f246b409b138036a",
+  "unpatched_text_identical": true,
+  "library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-simple-barrier-0907/private-cpu/libggml-cpu.so.0.22.0",
+  "library_sha256": "a1edb0d7864efe1d938f45e257108fd14d7a954d7831680f9627b23c859d18a7",
+  "finished": 1788784168.908161
+}

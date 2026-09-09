@@ -1,0 +1,22 @@
+--- 
++++ 
+@@ -7760,10 +7760,19 @@
+ #include "qwen-q8-batch.h"
+ #endif
+ 
++#if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++#include "flash-q8-sum16.h"
++#endif
++
+ void ggml_gemv_q8_0_x16_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+ #if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
+     if (nr > 1) return qwen_q8_batch_dispatch(n, s, bs, vx, vy, nr, nc);
+     GGML_ASSERT(nr == 1 && n % QK8_0 == 0 && nc % 16 == 0);
++    static const bool fast_sum = [] {
++        const char * value = std::getenv("GGML_CPU_Q8_FAST_SUM");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    if (fast_sum && nc == 16) return flash_q8_sum_candidate<2>(n, s, bs, vx, vy, nr, 16);
+     GGML_UNUSED(bs);
+     const int nb = n / QK8_0;
+     const block_q8_0_x16 * vxb = (const block_q8_0_x16 *) vx; const block_q8_0 * vy8 = (const block_q8_0 *) vy;

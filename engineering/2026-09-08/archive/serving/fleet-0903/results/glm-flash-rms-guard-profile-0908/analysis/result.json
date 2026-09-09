@@ -1,0 +1,261 @@
+{
+  "time": 1788891918.8053863,
+  "passed": true,
+  "pid": 3999694,
+  "cpu_sha256": "a4a77255f5b65541f1268b3463977b04ab25bdd6bdcbf2febe58bd6fc8aaa5a9",
+  "sample_count": 94339,
+  "sample_counts": {
+    "other": 11400,
+    "gomp_spin": 27297,
+    "q8_x8": 1025,
+    "q8_sum16": 24101,
+    "f32_dot": 3394,
+    "q8_x16": 25699,
+    "gomp_other": 1340,
+    "rms_guard": 56,
+    "rms_norm": 27
+  },
+  "period_percent": {
+    "other": 11.505274436730705,
+    "gomp_spin": 29.473410646058696,
+    "q8_x8": 1.0886369429254334,
+    "q8_sum16": 25.73419587380144,
+    "f32_dot": 3.5770490104269146,
+    "q8_x16": 27.108904711958882,
+    "gomp_other": 1.4264572216369555,
+    "rms_guard": 0.05804576179966624,
+    "rms_norm": 0.028025394661305304
+  },
+  "total_sampled_period": 1184812285475,
+  "fast_sum_offsets": {
+    "0x1b2c3c": 2424,
+    "0x1b2c58": 511,
+    "0x1b2bec": 708,
+    "0x1b2c9f": 349,
+    "0x1b2bb6": 6689,
+    "0x1b2ba4": 4206,
+    "0x1b2c28": 2332,
+    "0x1b2c2e": 359,
+    "0x1b2c42": 398,
+    "0x1b2c00": 743,
+    "0x1b2be5": 52,
+    "0x1b2c14": 2242,
+    "0x1b2c1a": 280,
+    "0x1b2bd8": 870,
+    "0x1b2c7f": 125,
+    "0x1b2c99": 274,
+    "0x1b2baa": 66,
+    "0x1b2bf2": 232,
+    "0x1b2bc0": 57,
+    "0x1b2c35": 20,
+    "0x1b2c06": 269,
+    "0x1b2b9a": 52,
+    "0x1b2c6e": 108,
+    "0x1b2bca": 153,
+    "0x1b2c93": 148,
+    "0x1b2bde": 173,
+    "0x1b2c85": 104,
+    "0x1b2c0d": 40,
+    "0x1b2c47": 8,
+    "0x1b2c76": 10,
+    "0x1b2bf9": 6,
+    "0x1b2c52": 14,
+    "0x1b2c21": 7,
+    "0x1b2bd1": 5,
+    "0x1b2b10": 1,
+    "0x1b2cc1": 2,
+    "0x1b2b51": 1,
+    "0x1b2bb9": 16,
+    "0x1b2cc2": 5,
+    "0x1b2c8c": 9,
+    "0x1b2c4e": 10,
+    "0x1b2cb3": 1,
+    "0x1b2b69": 1,
+    "0x1b2b82": 2,
+    "0x1b2b44": 1,
+    "0x1b2c63": 7,
+    "0x1b2cae": 3,
+    "0x1b2b0c": 1,
+    "0x1b2b90": 1,
+    "0x1b2b06": 1,
+    "0x1b2b88": 1,
+    "0x1b2b37": 1,
+    "0x1b2b60": 1,
+    "0x1b2b24": 1,
+    "0x1b2c5f": 1
+  },
+  "rms_offsets": {
+    "0x112f54": 19,
+    "0x112f26": 5,
+    "0x112f43": 9,
+    "0x112f5a": 7,
+    "0x112f61": 3,
+    "0x113204": 1,
+    "0x112f37": 7,
+    "0x112f65": 3,
+    "0x112f20": 1,
+    "0x11304f": 1
+  },
+  "helper_ranges": {
+    "rms_guard": [
+      1125952,
+      1126981
+    ],
+    "q8_sum16": [
+      1780480,
+      1780988
+    ]
+  },
+  "mapped_libraries": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-0908/private-cpu/libggml-cpu.so.0.22.0": [
+      [
+        129370895155200,
+        129370895314944,
+        0
+      ],
+      [
+        129370895314944,
+        129370896945152,
+        159744
+      ],
+      [
+        129370896945152,
+        129370897125376,
+        1789952
+      ],
+      [
+        129370897125376,
+        129370897133568,
+        1970176
+      ],
+      [
+        129370897133568,
+        129370897141760,
+        1978368
+      ]
+    ],
+    "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0": [
+      [
+        129370923466752,
+        129370923511808,
+        0
+      ],
+      [
+        129370923511808,
+        129370923757568,
+        45056
+      ],
+      [
+        129370923757568,
+        129370923810816,
+        290816
+      ],
+      [
+        129370923810816,
+        129370923814912,
+        344064
+      ],
+      [
+        129370923814912,
+        129370923819008,
+        348160
+      ]
+    ]
+  },
+  "gomp_sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1",
+  "lost_records": 0,
+  "loss_check_command": [
+    "sudo",
+    "-n",
+    "perf",
+    "script",
+    "-G",
+    "--show-lost-events",
+    "-F",
+    "event",
+    "-i",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-profile-0908/prose-draft0/perf.data"
+  ],
+  "earlier_sum16_period_percent": {
+    "other": 11.61768924972214,
+    "gomp_spin": 31.026545460914747,
+    "q8_sum16": 24.89052819495585,
+    "gomp_other": 1.498176838340234,
+    "q8_x8": 1.0587735501092144,
+    "q8_x16": 26.38443427375085,
+    "f32_dot": 3.5238524322069695
+  },
+  "top_symbols": [
+    {
+      "symbol": "[unknown]",
+      "percent": 33.09269041844968
+    },
+    {
+      "symbol": "ggml_gemv_q8_0_x16_q8_0",
+      "percent": 27.108904711958882
+    },
+    {
+      "symbol": "void flash_q8_sum_candidate<2>(int, float*, unsigned long, void const*, void const*, int, int) [clone .constprop.0]",
+      "percent": 25.73419587380144
+    },
+    {
+      "symbol": "ggml_vec_dot_f32",
+      "percent": 3.5770490104269146
+    },
+    {
+      "symbol": "ggml_compute_forward_concat",
+      "percent": 1.6741147583600515
+    },
+    {
+      "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+      "percent": 1.0886369429254334
+    },
+    {
+      "symbol": "ggml_vec_dot_q8_0_q8_0",
+      "percent": 0.9158737778997286
+    },
+    {
+      "symbol": "ggml_threadpool_chunk_add",
+      "percent": 0.6765852386301194
+    },
+    {
+      "symbol": "ggml_compute_forward_add_non_quantized",
+      "percent": 0.6564852003439258
+    },
+    {
+      "symbol": "ggml_compute_forward_dsv4_hc_pre",
+      "percent": 0.5155689125514974
+    },
+    {
+      "symbol": "ggml_graph_compute_thread.isra.0",
+      "percent": 0.3944068013378649
+    },
+    {
+      "symbol": "ggml_compute_forward_gated_delta_net",
+      "percent": 0.36235944930962566
+    },
+    {
+      "symbol": "ggml_backend_meta_fused_reduce_op(ggml_tensor*, int, int, void*)",
+      "percent": 0.34984200289063094
+    },
+    {
+      "symbol": "ggml_compute_forward_dsv4_hc_post",
+      "percent": 0.3306814016896578
+    },
+    {
+      "symbol": "ggml_compute_forward_mul",
+      "percent": 0.29943054933615115
+    }
+  ],
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/analyze_flash_rms_guard_profile_0908.py": "8931846b9ef31563bdaf2068a051e9039e32d5004785849c736571309f0cc3f7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-profile-0908/result.json": "148c00d2b0945915753b7a423c8e75716e4713ab372464c1df7b91b4120536cc",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-profile-0908/prose-draft0/samples-by-thread.txt": "ad2deff5a278d6aea149a1d354eed018f0e07b22e5d0cb3fdc730d02ae9d33eb",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-profile-0908/prose-draft0/record.log": "8db0d23f979acd86ddd742e8d64cd1dd50c8e9a8c6854550ca68e216611aea8f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-profile-0908/analysis/host-library.json": "7963d3d7a79a23eb104c1a7e10012d0f8f42f50a24bedb034e8ff7668a453e65",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-profile-0908/analysis/result.json": "45826a7abc00706c0fa2fbe29942cbfac89b22ff96d38ce85c73537eee546c9b",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-0908/private-cpu/libggml-cpu.so.0.22.0": "a4a77255f5b65541f1268b3463977b04ab25bdd6bdcbf2febe58bd6fc8aaa5a9",
+    "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+  },
+  "scope": "Verified helper execution and sampled user-cycle distribution. Sample fractions are not removable wall-time fractions; profiled speed is not the unprofiled benchmark."
+}

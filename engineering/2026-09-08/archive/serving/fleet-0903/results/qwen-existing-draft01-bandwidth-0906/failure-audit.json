@@ -1,0 +1,78 @@
+{
+  "started": 1788697736.5757458,
+  "result_sha256": "8a6a1b5eb6ab86541fabce0d2364c4862f6fc44fae72e352ea1ec1ae7b942f7f",
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/audit-qwen-draft-request-capability-0906.py": "df22b6f83ae8fcf54dd396568f4808090cb2f8b91bfce5f9871ee6f015e8f71c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/audit-full-replay-bandwidth-0906.py": "d0c1f1b52252c84c30552ba27ef4ee7c1af01f57cee424f3919cbea595f56454",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/tools/server/server-schema.cpp": "c3d2899d2a078adae6c4971b3da825bad1aab9cda6b2af652e41e6aef1665274",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/tools/server/server-context.cpp": "c8e4d0095d5c87c17e0e1356574fcaf753f9c04d4a83f4df4778ab4a241f9134"
+  },
+  "requested_draft_limit": 0,
+  "observed_timings": {
+    "cache_n": 0,
+    "prompt_n": 28,
+    "prompt_ms": 734.754,
+    "prompt_per_token_ms": 26.241214285714285,
+    "prompt_per_second": 38.10799260704944,
+    "predicted_n": 512,
+    "predicted_ms": 23366.402,
+    "predicted_per_token_ms": 45.726814090019566,
+    "predicted_per_second": 21.86900661899081,
+    "draft_n": 398,
+    "draft_n_accepted": 312
+  },
+  "complete_counter_intervals": 71,
+  "observed_gross_decode": {
+    "valid": true,
+    "samples": 43,
+    "sampled_seconds": 21.640040356,
+    "read_gb_s": 97.40571300604833,
+    "write_gb_s": 9.195343130503357,
+    "total_gb_s": 106.60105613655169,
+    "utilization_of_380": 0.2805290950961887,
+    "sockets": [
+      {
+        "socket": 0,
+        "read_gb_s": 24.354395900188496,
+        "write_gb_s": 2.6724309884960733,
+        "total_gb_s": 27.02682688868457
+      },
+      {
+        "socket": 1,
+        "read_gb_s": 24.646045335210463,
+        "write_gb_s": 2.5162680771185526,
+        "total_gb_s": 27.162313412329016
+      },
+      {
+        "socket": 2,
+        "read_gb_s": 23.708473319647446,
+        "write_gb_s": 2.1537061572899407,
+        "total_gb_s": 25.862179476937385
+      },
+      {
+        "socket": 3,
+        "read_gb_s": 24.696798451001925,
+        "write_gb_s": 1.8529379075987893,
+        "total_gb_s": 26.549736358600715
+      }
+    ],
+    "interval_min_gb_s": 86.54556785346212,
+    "interval_median_gb_s": 108.09301820185739,
+    "interval_max_gb_s": 114.33772783974895
+  },
+  "requested_condition_honored": false,
+  "valid_zero_draft_measurement": false,
+  "one_draft_condition_attempted": false,
+  "schema_excerpt": "// TODO: to keep things simple, we disable speculative parameter adjustments for now\n#if 0\n    // TODO: for now, be able to adjust only the draft-model based speculative parameters\n    add((new field_num(\"speculative.n_max\", params.speculative.draft.n_max))\n        ->set_hard_limits(0, INT32_MAX)\n        ->set_desc(\"Maximum number of tokens to draft during speculative decoding\"));\n\n    add((new field_num(\"speculative.n_min\", params.speculative.draft.n_min))\n        ->set_hard_limits(0, INT32_MAX)\n        ->set_desc(\"Minimum number of draft tokens to use for speculative decoding\");\n\n    add((new field_num(\"speculative.p_min\", params.speculative.draft.p_min))\n        ->set_hard_limits(0.0f, 1.0f)\n        ->set_desc(\"Minimum speculative decoding probability for draft tokens (0 = greedy)\"));\n\n\n    add((new field_str(\"speculative.type\"))\n        ->set_desc(\"Speculative decoding method (for debugging and research purposes)\")\n        ->set_handler([&](field_eval_context & ctx, const json & data) {\n            ctx.params.speculative.types = { common_speculative_type_from_name(data.at(\"speculative.type\").get<std::string>()) };\n        }));\n\n    add((new field_num(\"speculative.ngram_size_n\", params.speculative.ngram_simple.size_n))\n        ->set_desc(\"Ngram size for lookup in ngram-based speculative decoding\"));\n\n    add((new field_num(\"speculative.ngram_size_m\", params.speculative.ngram_simple.size_m))\n        ->set_desc(\"Mgram size for speculative tokens in ngram-based speculative decoding\"));\n\n    add((new field_num(\"speculative.ngram_min_hits\", params.speculative.ngram_simple.min_hits))\n        ->set_desc(\"Minimum hits at ngram lookup for mgram to be proposed\"));\n#endif",
+  "draft_limit_excerpt": "    int get_n_draft_max() const {\n        GGML_ASSERT(task);\n\n        if (!can_speculate()) {\n            return 0;\n        }\n\n        // determine the max draft that fits the current slot state\n        // note: slot.prompt is not yet expanded with the `id` token sampled above\n        //       also, need to leave space for 1 extra token to allow context shifts\n        int n_draft_max = n_ctx - prompt.n_tokens() - 2;\n\n        if (n_remaining() > 0) {\n            n_draft_max = std::min(n_draft_max, n_remaining() - 1);\n        }\n\n        SLT_DBG(*this, \"max possible draft: %d\\n\", n_draft_max);\n\n        return n_draft_max;\n    }",
+  "real_model_requests": 0,
+  "real_model_signals": 0,
+  "verified_qwen_pinned_entries": 21,
+  "current_inference_pids": [
+    "2308651",
+    "4005448"
+  ],
+  "active_measurement_runners": [],
+  "note": "The request sweep stopped correctly when the requested zero-draft condition was not honored. The loaded fork fixes MTP settings at launch and compiles out these per-request fields. The saved capture is not a zero-draft benchmark; no adjusted bandwidth is reconstructed because its background bounds were not saved before the validity assertion. Existing MTP2 baselines and the separate split-only trial remain unchanged.",
+  "finished": 1788697736.830175
+}

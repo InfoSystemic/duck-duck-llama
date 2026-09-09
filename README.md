@@ -1,5 +1,9 @@
 # llama-llama-duck
 
+**Current engineering snapshot: September 8, 2026.** The [source and evidence bundle](engineering/2026-09-08/README.md) contains the later GLM Full/Flash and Qwen work: eight complete source patches, selected Q6/Q8 overlays, kernel and rollback fixtures, benchmark controllers, and experimental variants. Start there and with the [current profiles](profiles/20260908/README.md). Earlier findings below describe historical engines, quantizations and workloads; they are not current performance limits.
+
+The retained Qwen Q6/MTP4 measurements are 21.53 tok/s on prose and 28.46 on code, using 126.0/136.6 adjusted GB/s. GLM Flash Q8 raw reaches about 234.5-237.1 GB/s; its separately measured MTP2 stack reaches 13.60-14.78 tok/s. Full's Q4-based mixed MTP2 runtime measured 7.89-9.64 tok/s. The source bundle records validation scope, unsuccessful candidates, and unresolved prompt-cache and quality limits. No result establishes 85-93% whole-server bandwidth utilization.
+
 Measurement tools and findings for running large language models on
 **multi-socket CPU servers** with `llama.cpp`.
 
@@ -22,12 +26,11 @@ Measured on one 4-socket box, same engine, same day:
 | 284B MoE, MXFP4 | ~5.7 GB | 1.9 | 11 |
 
 > **Reading the GB/s column.** These are *non-speculative* runs, where
-> `tok/s x active bytes/token` genuinely measures DRAM traffic. Do **not** apply
+> `tok/s x active bytes/token` estimates active-weight traffic; it is not a hardware measurement of DRAM traffic. Caching, activations, KV traffic and implementation details can change actual traffic. Do **not** apply
 > that formula to a speculative run: accepted drafts emit K tokens per single
 > target forward pass, so weights are not re-read per emitted token. The product
 > then measures *effective output throughput*, not bandwidth, and will exceed the
-> real DRAM rate by the acceptance multiple. Quote raw bandwidth only from
-> speculation-off arms.
+> real DRAM rate by the acceptance multiple. Use decode-window IMC counters for measured bandwidth in either raw or speculative runs; the current snapshot includes that tooling.
 
 **Throughput is set by active bytes per token, not parameter count, not
 dense-vs-MoE, not quant name.** The two "slow" models above have the *highest*
@@ -520,7 +523,7 @@ before applying or rebasing them.
 | `tools/prefetch-model.sh` | warm page cache before mmap load |
 | `tools/decode_bench.py` | decode tok/s from the server's own timings, plus draft acceptance |
 | `tools/sweep_config.sh` | one arm = one fresh server; prints NUMA placement and RssAnon/RssFile |
-| `tools/quality_probe.py` | four deterministic prompts with known answers — run before trusting any tok/s |
+| `tools/quality_probe.py` | three deterministic prompts with known answers — run before trusting any tok/s |
 | `tools/concurrent_bench.py` | per-stream vs aggregate vs wall-clock throughput at N concurrent requests |
 | `tools/active_bytes.py` | active bytes/token from the GGUF tensor table — scales experts by n_used/n_expert and excludes gathered embeddings |
 

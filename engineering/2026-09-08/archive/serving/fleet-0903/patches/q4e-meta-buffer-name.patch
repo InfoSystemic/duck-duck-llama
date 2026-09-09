@@ -1,0 +1,16 @@
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -257,11 +257,11 @@
+ 
+     ggml_backend_meta_buffer_type_context(std::vector<ggml_backend_buffer_type_t> simple_bufts) : simple_bufts(std::move(simple_bufts)) {
+         name = "Meta(";
+-        for (size_t i = 0; i < simple_bufts.size(); i++) {
++        for (size_t i = 0; i < this->simple_bufts.size(); i++) {
+             if (i > 0) {
+                 name += ",";
+             }
+-            name += ggml_backend_buft_name(simple_bufts[i]);
++            name += ggml_backend_buft_name(this->simple_bufts[i]);
+         }
+         name += ")";
+     }

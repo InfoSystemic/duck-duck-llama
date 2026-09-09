@@ -1,0 +1,67 @@
+--- validate_glm_flash_q8_expert_prefill_0908.py
++++ validate_glm_flash_q8_clamp_prefill_0908.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Exercise all 288 Flash experts in a 64-token prefill using the private layout."""
++"""Check clamped Q8 fusion with all 288 experts active during 64-token prefill."""
+ import array
+ import fcntl
+ import json
+@@ -11,25 +11,29 @@
+ import time
+ 
+ from model_measurement_guard import ModelMeasurementGuard
++from glm_flash_q8_trial import Manager, PORT
+ from qwen_split_trial import inference_snapshot, sha256
+ 
+ BASE = Path(__file__).resolve().parent
+ ENGINE = BASE.parents[1] / 'engines/llama.cpp-glm5n-goal-0904'
+ PINNED = ENGINE / 'validated-chunk16-bin'
+-OUT = BASE / 'results/glm-flash-q8-experts-prefill-0908'
++OUT = BASE / 'results/glm-flash-q8-clamp-prefill-0908'
+ 
+ 
+ def main():
+-    parent_path = BASE / 'results/glm-flash-q8-experts-0908/result.json'
++    parent_path = BASE / 'results/glm-flash-q8-clamp-0908/result.json'
+     parent = json.loads(parent_path.read_text())
+     assert parent['passed']
+     library = Path(parent['library'])
+     assert sha256(library) == parent['library_sha256']
+-    baseline = BASE / 'results/glm-flash-q8-batch-0908/private-cpu/libggml-cpu.so.0.22.0'
++    baseline = BASE / 'results/glm-flash-q8-experts-0908/private-cpu/libggml-cpu.so.0.22.0'
+     assert sha256(baseline) == parent['parent_sha256']
+     OUT.mkdir()
+-    pid = json.loads((BASE / 'results/qwen-q6-trial-0907/state.json').read_text())['current']['pid']
+-    guard = ModelMeasurementGuard(pid, {pid: 18095}, inference_snapshot)
++    manager = Manager()
++    current = manager.validate_current()
++    assert not current.get('op_profile_count')
++    pid = current['pid']
++    guard = ModelMeasurementGuard(pid, {pid: PORT}, inference_snapshot)
+     guard.assert_idle()
+     source_path = parent_path.parent / 'expert-check.cpp'
+     source = source_path.read_text()
+@@ -90,19 +94,21 @@
+         run(command, 'compile')
+         env = {k: v for k, v in os.environ.items() if not k.startswith(('GGML_', 'LLAMA_', 'OMP_', 'GOMP_', 'REPACK_TEST_'))}
+         env.update(GGML_CPU_X16_Q8_0='1', GGML_CPU_X16_Q8_BATCH='1', GGML_CPU_X16_CHUNK_MAX='16',
++                   GGML_CPU_X16_Q8_EXPERTS='1', GGML_CPU_MOE_CLAMP_FUSION='1', REPACK_TEST_CLAMP='1',
+                    REPACK_TEST_DOWN='1', REPACK_TEST_THREADS='15', REPACK_TEST_REPEATS='1',
+                    REPACK_TEST_PERSISTENT_POOL='1', REPACK_TEST_PIN_POOL='1', REPACK_TEST_PADDED='1')
+         for name, cpu, enabled in [('baseline', baseline, '0'), ('candidate', library, '1')]:
+             directory = OUT / name
+             directory.mkdir()
+             env.update(LD_LIBRARY_PATH=str(cpu.parent) + ':' + str(PINNED),
+-                       GGML_CPU_X16_Q8_EXPERTS=enabled, REPACK_TEST_OUTPUT_DIR=str(directory))
++                       GGML_CPU_X16_Q8_CLAMP_FUSION=enabled, REPACK_TEST_OUTPUT_DIR=str(directory))
+             log = run(['taskset', '-c', '48-62', str(binary), 'q8'], name, env)
+             mapped, = re.findall(r'^CPU_LIBRARY (.+)$', log, re.M)
+             assert Path(mapped).resolve() == cpu.resolve()
+             assert re.findall(r'^ACTIVE_EXPERTS (\d+)$', log, re.M) == ['288'] * 6
+             rows = [dict(x.split('=', 1) for x in line.split()[1:]) for line in log.splitlines() if line.startswith('PASS ')]
+             assert len(rows) == 3
++            assert ('Q8_X16_CLAMP_FUSION_ACTIVE' in log) == (name == 'candidate')
+             result['runs'].append(dict(name=name, rows=rows, all_288_active=True))
+             save()
+         for path in sorted((OUT / 'candidate').glob('*.f32')):

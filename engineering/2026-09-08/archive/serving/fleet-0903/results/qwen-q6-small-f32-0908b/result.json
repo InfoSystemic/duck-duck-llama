@@ -1,0 +1,84 @@
+{
+  "passed": true,
+  "started": 1788856180.6284273,
+  "steps": [
+    {
+      "label": "baseline-compile"
+    },
+    {
+      "label": "original-text"
+    },
+    {
+      "label": "rebuilt-text"
+    },
+    {
+      "label": "private-compile"
+    },
+    {
+      "label": "private-sgemm-compile"
+    },
+    {
+      "label": "private-link"
+    },
+    {
+      "label": "fixture-compile"
+    },
+    {
+      "label": "check-0"
+    },
+    {
+      "label": "check-1"
+    },
+    {
+      "label": "timing-0-0"
+    },
+    {
+      "label": "timing-1-1"
+    },
+    {
+      "label": "timing-2-1"
+    },
+    {
+      "label": "timing-3-0"
+    }
+  ],
+  "graph_checks": {
+    "bit_exact_cases": 44,
+    "canonical_reference_passed": true
+  },
+  "timings": [
+    {
+      "enabled": false,
+      "graph_ms": {
+        "1": 0.802882,
+        "5": 3.126028
+      }
+    },
+    {
+      "enabled": true,
+      "graph_ms": {
+        "1": 1.276485,
+        "5": 2.583327
+      }
+    },
+    {
+      "enabled": true,
+      "graph_ms": {
+        "1": 1.196346,
+        "5": 2.44308
+      }
+    },
+    {
+      "enabled": false,
+      "graph_ms": {
+        "1": 0.800582,
+        "5": 2.824178
+      }
+    }
+  ],
+  "parent_cpu_sha256": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+  "unpatched_text_identical": true,
+  "library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-small-f32-0908b/private-cpu/libggml-cpu.so.0.22.0",
+  "library_sha256": "37fc04795f553b5e1b7b96650df64abf9568e259b98ff18fb4b5b495de87758b",
+  "finished": 1788856198.5898542
+}

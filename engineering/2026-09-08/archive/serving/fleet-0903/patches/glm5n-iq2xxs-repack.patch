@@ -1,0 +1,165 @@
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -4001,7 +4001,8 @@
+ #endif
+ }
+ 
+-static block_iq2_xs_r8 make_block_iq2_xs_r8(const block_iq2_xs * in) {
++template <typename BLOC_TYPE>
++static block_iq2_xs_r8 make_block_iq2_r8(const BLOC_TYPE * in) {
+     block_iq2_xs_r8 out = {};
+     constexpr int nrows_interleaved = 8;
+     constexpr int values_per_subblock = 16;
+@@ -4009,7 +4010,14 @@
+     for (int row = 0; row < nrows_interleaved; ++row) {
+         out.d[row] = in[row].d;
+         for (int ib32 = 0; ib32 < QK_K / 32; ++ib32) {
+-            out.scales[ib32 * nrows_interleaved + row] = in[row].scales[ib32];
++            if constexpr (std::is_same_v<BLOC_TYPE, block_iq2_xs>) {
++                out.scales[ib32 * nrows_interleaved + row] = in[row].scales[ib32];
++            } else {
++                uint32_t packed;
++                memcpy(&packed, in[row].qs + 4 * ib32 + 2, sizeof(packed));
++                const uint8_t scale = packed >> 28;
++                out.scales[ib32 * nrows_interleaved + row] = scale | (scale << 4);
++            }
+         }
+     }
+ 
+@@ -4022,9 +4030,18 @@
+                 const int pos32 = offset32 + k;
+                 const int grid_part = pos32 / 8;
+                 const int grid_pos = pos32 % 8;
+-                const uint16_t packed_grid = in[row].qs[4 * ib32 + grid_part];
+-                const uint8_t * grid = (const uint8_t *) (iq2xs_grid + (packed_grid & 511));
+-                const uint8_t signs = ksigns_iq2xs[packed_grid >> 9];
++                const uint8_t * grid;
++                uint8_t signs;
++                if constexpr (std::is_same_v<BLOC_TYPE, block_iq2_xs>) {
++                    const uint16_t packed_grid = in[row].qs[4 * ib32 + grid_part];
++                    grid = (const uint8_t *) (iq2xs_grid + (packed_grid & 511));
++                    signs = ksigns_iq2xs[packed_grid >> 9];
++                } else {
++                    uint32_t packed[2];
++                    memcpy(packed, in[row].qs + 4 * ib32, sizeof(packed));
++                    grid = (const uint8_t *) (iq2xxs_grid + ((const uint8_t *) packed)[grid_part]);
++                    signs = ksigns_iq2xs[(packed[1] >> (7 * grid_part)) & 127];
++                }
+                 const uint8_t code = iq2_xs_r8_code(
+                     grid[grid_pos], (signs & kmask_iq2xs[grid_pos]) != 0);
+                 const int code_index = (row % 4) * values_per_subblock + k;
+@@ -4040,32 +4057,34 @@
+     return out;
+ }
+ 
+-static int repack_iq2_xs_to_iq2_xs_r8(
++template <typename BLOC_TYPE>
++static int repack_iq2_to_r8(
+         struct ggml_tensor * t, const void * GGML_RESTRICT data, size_t data_size) {
+-    GGML_ASSERT(t->type == GGML_TYPE_IQ2_XS);
++    GGML_ASSERT(t->type == (std::is_same_v<BLOC_TYPE, block_iq2_xs>
++        ? GGML_TYPE_IQ2_XS : GGML_TYPE_IQ2_XXS));
+     constexpr int nrows_interleaved = 8;
+ 
+     const int64_t nrows = ggml_nrows(t);
+     const int64_t nblocks = t->ne[0] / QK_K;
+-    GGML_ASSERT(data_size == (size_t) nrows * nblocks * sizeof(block_iq2_xs));
++    GGML_ASSERT(data_size == (size_t) nrows * nblocks * sizeof(BLOC_TYPE));
+ 
+     if (t->ne[0] % QK_K != 0 || t->ne[1] % nrows_interleaved != 0) {
+         return -1;
+     }
+ 
+-    const block_iq2_xs * src = (const block_iq2_xs *) data;
++    const BLOC_TYPE * src = (const BLOC_TYPE *) data;
+     block_iq2_xs_r8 * dst = (block_iq2_xs_r8 *) t->data;
+     const int64_t ngroups = nrows / nrows_interleaved;
+     parallel_repack_groups(ngroups, [&](int64_t group) {
+-        const block_iq2_xs * src_group =
++        const BLOC_TYPE * src_group =
+             src + group * nrows_interleaved * nblocks;
+         block_iq2_xs_r8 * dst_group = dst + group * nblocks;
+-        block_iq2_xs rows[nrows_interleaved];
++        BLOC_TYPE rows[nrows_interleaved];
+         for (int64_t block = 0; block < nblocks; ++block) {
+             for (int i = 0; i < nrows_interleaved; ++i) {
+                 rows[i] = src_group[block + i * nblocks];
+             }
+-            dst_group[block] = make_block_iq2_xs_r8(rows);
++            dst_group[block] = make_block_iq2_r8(rows);
+         }
+     });
+ 
+@@ -4876,7 +4895,11 @@
+ }
+ 
+ template <> int repack<block_iq2_xs, 8, 8>(struct ggml_tensor * t, const void * data, size_t data_size) {
+-    return repack_iq2_xs_to_iq2_xs_r8(t, data, data_size);
++    return repack_iq2_to_r8<block_iq2_xs>(t, data, data_size);
++}
++
++template <> int repack<block_iq2_xxs, 8, 8>(struct ggml_tensor * t, const void * data, size_t data_size) {
++    return repack_iq2_to_r8<block_iq2_xxs>(t, data, data_size);
+ }
+ 
+ template <> int repack<block_iq3_xxs, 8, 8>(struct ggml_tensor * t, const void * data, size_t data_size) {
+@@ -4992,6 +5015,12 @@
+ }
+ 
+ template <>
++void gemv<block_iq2_xxs, 8, 8, GGML_TYPE_Q8_K>(
++        int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemv_iq2_xs_r8_q8_K(n, s, bs, vx, vy, nr, nc);
++}
++
++template <>
+ void gemv<block_iq3_xxs, 8, 8, GGML_TYPE_Q8_K>(
+         int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemv_iq3_xxs_r8_q8_K(n, s, bs, vx, vy, nr, nc);
+@@ -5115,6 +5144,12 @@
+     ggml_gemm_iq2_xs_r8_q8_K(n, s, bs, vx, vy, nr, nc);
+ }
+ 
++template <>
++void gemm<block_iq2_xxs, 8, 8, GGML_TYPE_Q8_K>(
++        int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemm_iq2_xs_r8_q8_K(n, s, bs, vx, vy, nr, nc);
++}
++
+ template <> void gemm<block_iq3_xxs, 8, 8, GGML_TYPE_Q8_K>(
+         int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemm_iq3_xxs_r8_q8_K(n, s, bs, vx, vy, nr, nc);
+@@ -5215,7 +5250,8 @@
+ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PARAM_TYPE> class tensor_traits : public tensor_traits_base {
+ 
+     static constexpr bool expanded_iq2_xs =
+-        std::is_same_v<BLOC_TYPE, block_iq2_xs> && INTER_SIZE == 8 && NB_COLS == 8;
++        (std::is_same_v<BLOC_TYPE, block_iq2_xs> || std::is_same_v<BLOC_TYPE, block_iq2_xxs>) &&
++        INTER_SIZE == 8 && NB_COLS == 8;
+     static constexpr bool expanded_iq3_xxs =
+         std::is_same_v<BLOC_TYPE, block_iq3_xxs> && INTER_SIZE == 8 && NB_COLS == 8;
+     static constexpr bool expanded_q5_K =
+@@ -6901,6 +6937,7 @@
+     // tensor footprint from 2.3125 to 4.3125 bits per weight.  The extra bit
+     // replaces three AVX-512 mask expansions with a packed-nibble decode.
+     static const ggml::cpu::repack::tensor_traits<block_iq2_xs, 8, 8, GGML_TYPE_Q8_K> iq2_xs_r8_q8_K;
++    static const ggml::cpu::repack::tensor_traits<block_iq2_xxs, 8, 8, GGML_TYPE_Q8_K> iq2_xxs_r8_q8_K;
+ 
+     // Exact compact in-memory IQ3_XXS.  This is independently opt-in because
+     // it increases the tensor footprint from 3.0625 to 4.1875 bits per weight.
+@@ -7021,6 +7058,15 @@
+         if (enabled && ggml_cpu_has_avx512() && ggml_cpu_has_avx512_vnni() &&
+                 cur->ne[0] % QK_K == 0 && cur->ne[1] % 8 == 0) {
+             return &iq2_xs_r8_q8_K;
++        }
++    } else if (cur->type == GGML_TYPE_IQ2_XXS) {
++        static const bool enabled = []() {
++            const char * value = getenv("GGML_CPU_IQ2_XXS_REPACK");
++            return value != nullptr && strcmp(value, "1") == 0;
++        }();
++        if (enabled && ggml_cpu_has_avx512() && ggml_cpu_has_avx512_vnni() &&
++                cur->ne[0] % QK_K == 0 && cur->ne[1] % 8 == 0) {
++            return &iq2_xxs_r8_q8_K;
+         }
+     } else if (cur->type == GGML_TYPE_IQ3_XXS) {
+         static const bool enabled = []() {

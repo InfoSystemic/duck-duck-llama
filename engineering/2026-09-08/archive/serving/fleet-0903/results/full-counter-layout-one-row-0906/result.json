@@ -1,0 +1,1901 @@
+{
+  "started": 1788679243.3928745,
+  "pid": 4077093,
+  "config": {
+    "label": "full-counter-layout-one-row-0906",
+    "k": 4096,
+    "rows": 6144,
+    "matrices": 8,
+    "tokens": 1,
+    "seconds": 4.0,
+    "rounds": 2,
+    "comparison": "counter_layout"
+  },
+  "order": [
+    "packed",
+    "padded",
+    "padded",
+    "packed",
+    "padded",
+    "packed",
+    "packed",
+    "padded",
+    "packed",
+    "padded",
+    "padded",
+    "packed",
+    "padded",
+    "packed",
+    "packed",
+    "padded"
+  ],
+  "scope": "Synthetic resident Full graphs, not a model-decode measurement.",
+  "fixtures": {
+    "packed": {
+      "ready": {
+        "event": "ready",
+        "pid": 4078583,
+        "workers": 60,
+        "chunk": 64,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 16384,
+        "rows": 6144,
+        "tokens": 1,
+        "matrices": 8,
+        "bytes_per_pass": 566231040,
+        "weight_hash": "b6a01643dcf8ab25",
+        "output_hash": "7ffb83f6f4b01025",
+        "max_reference_error": 7.77222169e-07
+      },
+      "placement": {
+        "page_size": 4096,
+        "nodes": {
+          "0": {
+            "pages": 34612,
+            "nonlocal_pages": 0
+          },
+          "1": {
+            "pages": 34612,
+            "nonlocal_pages": 0
+          },
+          "2": {
+            "pages": 34612,
+            "nonlocal_pages": 0
+          },
+          "3": {
+            "pages": 34612,
+            "nonlocal_pages": 0
+          }
+        }
+      },
+      "next_phase": 9,
+      "mapped_base_library": [
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/packed/libggml-base.so.0.20.2"
+      ],
+      "exit_code": 0
+    },
+    "padded": {
+      "ready": {
+        "event": "ready",
+        "pid": 4078811,
+        "workers": 60,
+        "chunk": 64,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 16384,
+        "rows": 6144,
+        "tokens": 1,
+        "matrices": 8,
+        "bytes_per_pass": 566231040,
+        "weight_hash": "b6a01643dcf8ab25",
+        "output_hash": "7ffb83f6f4b01025",
+        "max_reference_error": 7.77222169e-07
+      },
+      "placement": {
+        "page_size": 4096,
+        "nodes": {
+          "0": {
+            "pages": 34612,
+            "nonlocal_pages": 0
+          },
+          "1": {
+            "pages": 34612,
+            "nonlocal_pages": 0
+          },
+          "2": {
+            "pages": 34612,
+            "nonlocal_pages": 0
+          },
+          "3": {
+            "pages": 34612,
+            "nonlocal_pages": 0
+          }
+        }
+      },
+      "next_phase": 9,
+      "mapped_base_library": [
+        "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/padded/libggml-base.so.0.20.2"
+      ],
+      "exit_code": 0
+    }
+  },
+  "phases": [
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 1,
+        "start": 821636.393405287,
+        "end": 821640.394777846,
+        "passes": 2048,
+        "bytes": 1159641169920,
+        "logical_gb_s": 289.81084685,
+        "graph_ms": 1.953795195,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821636.393405287,
+            "end": 821640.394777846
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821636.393342556,
+      "elapsed_seconds": 4.001805816078559,
+      "warmup": false,
+      "index": 0,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        821637.393405287,
+        821639.394777846
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5119801710000011,
+        "read_gb_s": 265.1581526896623,
+        "write_gb_s": 3.6275934717664997,
+        "total_gb_s": 268.7857461614288,
+        "utilization_of_380": 0.7073309109511284,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 65.34308536235422,
+            "write_gb_s": 0.93531847906754,
+            "total_gb_s": 66.27840384142175
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 67.28035492851707,
+            "write_gb_s": 0.7896532730917666,
+            "total_gb_s": 68.07000820160884
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 66.40552454345641,
+            "write_gb_s": 0.9378081862159546,
+            "total_gb_s": 67.34333272967237
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 66.1291878553346,
+            "write_gb_s": 0.9648135333912384,
+            "total_gb_s": 67.09400138872584
+          }
+        ],
+        "interval_min_gb_s": 265.9668274509219,
+        "interval_median_gb_s": 269.66893296281904,
+        "interval_max_gb_s": 270.74591527643923
+      },
+      "adjusted_read_gb_s": 260.75457201953617,
+      "adjusted_total_gb_s": 262.75258071986013,
+      "complete": true,
+      "read_counter_over_logical": 0.8997405544123656
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 1,
+        "start": 821640.898250443,
+        "end": 821644.900153071,
+        "passes": 2087,
+        "bytes": 1181724180480,
+        "logical_gb_s": 295.290588085,
+        "graph_ms": 1.917538394,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821640.898250443,
+            "end": 821644.900153071
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821640.898203049,
+      "elapsed_seconds": 4.002191814011894,
+      "warmup": false,
+      "index": 1,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        821641.898250443,
+        821643.900153071
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5070902559999997,
+        "read_gb_s": 270.55560568088504,
+        "write_gb_s": 4.138496224475624,
+        "total_gb_s": 274.69410190536064,
+        "utilization_of_380": 0.7228792155404228,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 66.82130811711653,
+            "write_gb_s": 0.878865575997726,
+            "total_gb_s": 67.70017369311425
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 68.35597104209532,
+            "write_gb_s": 0.9111350135356461,
+            "total_gb_s": 69.26710605563096
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 68.22511909906477,
+            "write_gb_s": 0.9231090760631925,
+            "total_gb_s": 69.14822817512797
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 67.15320742260842,
+            "write_gb_s": 1.4253865588790593,
+            "total_gb_s": 68.57859398148747
+          }
+        ],
+        "interval_min_gb_s": 273.99097180349986,
+        "interval_median_gb_s": 274.92648592670963,
+        "interval_max_gb_s": 275.16633193325583
+      },
+      "adjusted_read_gb_s": 266.1520250107589,
+      "adjusted_total_gb_s": 268.660936463792,
+      "complete": true,
+      "read_counter_over_logical": 0.9013224117192197
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 2,
+        "start": 821645.403493288,
+        "end": 821649.404295565,
+        "passes": 2068,
+        "bytes": 1170965790720,
+        "logical_gb_s": 292.682744521,
+        "graph_ms": 1.934623925,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821645.403493288,
+            "end": 821649.404295565
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821645.403408729,
+      "elapsed_seconds": 4.001063934992999,
+      "warmup": false,
+      "index": 2,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        821646.403493288,
+        821648.404295565
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.516742573000002,
+        "read_gb_s": 270.5840959199868,
+        "write_gb_s": 5.224101382693891,
+        "total_gb_s": 275.8081973026807,
+        "utilization_of_380": 0.7258110455333703,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 67.385173219635,
+            "write_gb_s": 0.9648190839303342,
+            "total_gb_s": 68.34999230356534
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 68.1762945880203,
+            "write_gb_s": 0.910853536963387,
+            "total_gb_s": 69.08714812498368
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 67.60633794074947,
+            "write_gb_s": 0.9271828505600985,
+            "total_gb_s": 68.53352079130957
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 67.41629017158199,
+            "write_gb_s": 2.4212459112400713,
+            "total_gb_s": 69.83753608282207
+          }
+        ],
+        "interval_min_gb_s": 274.4885000228916,
+        "interval_median_gb_s": 275.31355613175197,
+        "interval_max_gb_s": 277.6279746025933
+      },
+      "adjusted_read_gb_s": 266.18051524986066,
+      "adjusted_total_gb_s": 269.77503186111204,
+      "complete": true,
+      "read_counter_over_logical": 0.9094506602549717
+    },
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 2,
+        "start": 821649.908206563,
+        "end": 821653.909872621,
+        "passes": 1994,
+        "bytes": 1129064693760,
+        "logical_gb_s": 282.148654436,
+        "graph_ms": 2.00685359,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821649.908206563,
+            "end": 821653.909872621
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821649.908172875,
+      "elapsed_seconds": 4.002986392006278,
+      "warmup": false,
+      "index": 3,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        821650.908206563,
+        821652.909872621
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5071490410000017,
+        "read_gb_s": 260.6679776273563,
+        "write_gb_s": 5.2726468697530695,
+        "total_gb_s": 265.9406244971094,
+        "utilization_of_380": 0.6998437486766037,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 64.8624973855654,
+            "write_gb_s": 0.9889452395836401,
+            "total_gb_s": 65.85144262514905
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 65.24290428887974,
+            "write_gb_s": 0.8757561489235612,
+            "total_gb_s": 66.1186604378033
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 65.02696908654298,
+            "write_gb_s": 1.0873360515643906,
+            "total_gb_s": 66.11430513810737
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 65.53560686636823,
+            "write_gb_s": 2.3206094296814777,
+            "total_gb_s": 67.85621629604971
+          }
+        ],
+        "interval_min_gb_s": 264.9273484417086,
+        "interval_median_gb_s": 266.06194283146345,
+        "interval_max_gb_s": 266.8305617181178
+      },
+      "adjusted_read_gb_s": 256.2643969572302,
+      "adjusted_total_gb_s": 259.90745905554076,
+      "complete": true,
+      "read_counter_over_logical": 0.9082602129345219
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 3,
+        "start": 821654.414418406,
+        "end": 821658.415126546,
+        "passes": 2051,
+        "bytes": 1161339863040,
+        "logical_gb_s": 290.283575401,
+        "graph_ms": 1.950613428,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821654.414418406,
+            "end": 821658.415126546
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821654.414385099,
+      "elapsed_seconds": 4.001026690006256,
+      "warmup": false,
+      "index": 4,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        821655.414418406,
+        821657.415126546
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.519519099,
+        "read_gb_s": 267.3197359267414,
+        "write_gb_s": 4.409180781846823,
+        "total_gb_s": 271.7289167085882,
+        "utilization_of_380": 0.7150760966015479,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 66.30429485690854,
+            "write_gb_s": 0.8792539108453813,
+            "total_gb_s": 67.18354876775392
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 67.24909170732312,
+            "write_gb_s": 0.8056785453277148,
+            "total_gb_s": 68.05477025265083
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 67.45181385258783,
+            "write_gb_s": 0.9362882755052492,
+            "total_gb_s": 68.38810212809308
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 66.31453550992188,
+            "write_gb_s": 1.7879600501684776,
+            "total_gb_s": 68.10249556009036
+          }
+        ],
+        "interval_min_gb_s": 269.180717597525,
+        "interval_median_gb_s": 270.5221146307194,
+        "interval_max_gb_s": 275.4995712405686
+      },
+      "adjusted_read_gb_s": 262.91615525661524,
+      "adjusted_total_gb_s": 265.69575126701955,
+      "complete": true,
+      "read_counter_over_logical": 0.9057217753137455
+    },
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 3,
+        "start": 821658.917245659,
+        "end": 821662.91777355,
+        "passes": 2028,
+        "bytes": 1148316549120,
+        "logical_gb_s": 287.041255657,
+        "graph_ms": 1.972646889,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821658.917245659,
+            "end": 821662.91777355
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821658.917214364,
+      "elapsed_seconds": 4.001610965933651,
+      "warmup": false,
+      "index": 5,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        821659.917245659,
+        821661.91777355
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5148576889999994,
+        "read_gb_s": 262.40710845365766,
+        "write_gb_s": 4.274459587523672,
+        "total_gb_s": 266.6815680411813,
+        "utilization_of_380": 0.7017936001083719,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 64.99294195981734,
+            "write_gb_s": 0.9302054363470973,
+            "total_gb_s": 65.92314739616444
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 66.12079658342087,
+            "write_gb_s": 0.9762640513223816,
+            "total_gb_s": 67.09706063474326
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 65.37874342724483,
+            "write_gb_s": 0.9013686178939814,
+            "total_gb_s": 66.28011204513881
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 65.91462648317459,
+            "write_gb_s": 1.4666214819602115,
+            "total_gb_s": 67.3812479651348
+          }
+        ],
+        "interval_min_gb_s": 263.86041694246995,
+        "interval_median_gb_s": 267.3485747191302,
+        "interval_max_gb_s": 268.8151448144722
+      },
+      "adjusted_read_gb_s": 258.0035277835315,
+      "adjusted_total_gb_s": 260.64840259961267,
+      "complete": true,
+      "read_counter_over_logical": 0.8988377896863469
+    },
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 4,
+        "start": 821663.422255152,
+        "end": 821667.423038069,
+        "passes": 2001,
+        "bytes": 1133028311040,
+        "logical_gb_s": 283.201646913,
+        "graph_ms": 1.999391763,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821663.422255152,
+            "end": 821667.423038069
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821663.422200584,
+      "elapsed_seconds": 4.001043575000949,
+      "warmup": false,
+      "index": 6,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        821664.422255152,
+        821666.423038069
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.512008772999998,
+        "read_gb_s": 262.61903043198845,
+        "write_gb_s": 5.565104519191841,
+        "total_gb_s": 268.1841349511803,
+        "utilization_of_380": 0.7057477235557376,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 65.44383520346156,
+            "write_gb_s": 1.0563856454026024,
+            "total_gb_s": 66.50022084886416
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 65.52573045569235,
+            "write_gb_s": 0.8928586704172528,
+            "total_gb_s": 66.41858912610961
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 65.326169292326,
+            "write_gb_s": 1.106241261313106,
+            "total_gb_s": 66.4324105536391
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 66.32329548050852,
+            "write_gb_s": 2.50961894205888,
+            "total_gb_s": 68.8329144225674
+          }
+        ],
+        "interval_min_gb_s": 266.3041351756424,
+        "interval_median_gb_s": 266.6477168232399,
+        "interval_max_gb_s": 271.61366257632216
+      },
+      "adjusted_read_gb_s": 258.2154497618623,
+      "adjusted_total_gb_s": 262.1509695096116,
+      "complete": true,
+      "read_counter_over_logical": 0.911772415791023
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 4,
+        "start": 821667.928804771,
+        "end": 821671.93128658,
+        "passes": 2042,
+        "bytes": 1156243783680,
+        "logical_gb_s": 288.881708614,
+        "graph_ms": 1.96007924,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821667.928804771,
+            "end": 821671.93128658
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821667.928747076,
+      "elapsed_seconds": 4.005286558065563,
+      "warmup": false,
+      "index": 7,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        821668.928804771,
+        821670.93128658
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5153219509999971,
+        "read_gb_s": 266.0417303737988,
+        "write_gb_s": 4.216303637562769,
+        "total_gb_s": 270.2580340113616,
+        "utilization_of_380": 0.7112053526614779,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 65.5107482244083,
+            "write_gb_s": 1.189455330578791,
+            "total_gb_s": 66.7002035549871
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 66.92674472708156,
+            "write_gb_s": 0.8187880807647605,
+            "total_gb_s": 67.74553280784632
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 66.48956413661838,
+            "write_gb_s": 0.8491522649895293,
+            "total_gb_s": 67.33871640160791
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 67.11467328569056,
+            "write_gb_s": 1.3589079612296884,
+            "total_gb_s": 68.47358124692025
+          }
+        ],
+        "interval_min_gb_s": 268.58802490376047,
+        "interval_median_gb_s": 269.9654299219522,
+        "interval_max_gb_s": 272.224359988974
+      },
+      "adjusted_read_gb_s": 261.6381497036727,
+      "adjusted_total_gb_s": 264.22486856979293,
+      "complete": true,
+      "read_counter_over_logical": 0.9056930290220285
+    },
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 5,
+        "start": 821677.447817974,
+        "end": 821681.447971796,
+        "passes": 2027,
+        "bytes": 1147750318080,
+        "logical_gb_s": 286.926545616,
+        "graph_ms": 1.973435531,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821677.447817974,
+            "end": 821681.447971796
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821677.44776149,
+      "elapsed_seconds": 4.000426174025051,
+      "warmup": false,
+      "index": 8,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        821678.447817974,
+        821680.447971796
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5123018819999956,
+        "read_gb_s": 267.12541935237846,
+        "write_gb_s": 4.580592782784106,
+        "total_gb_s": 271.70601213516255,
+        "utilization_of_380": 0.7150158214083225,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 65.91280349313239,
+            "write_gb_s": 1.6706679981239405,
+            "total_gb_s": 67.58347149125633
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 66.39987798351514,
+            "write_gb_s": 0.8659148275529315,
+            "total_gb_s": 67.26579281106807
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 66.19091187784444,
+            "write_gb_s": 0.9351195093731981,
+            "total_gb_s": 67.12603138721764
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 68.62182599788652,
+            "write_gb_s": 1.1088904477340358,
+            "total_gb_s": 69.73071644562056
+          }
+        ],
+        "interval_min_gb_s": 270.2864216185324,
+        "interval_median_gb_s": 271.2044930831618,
+        "interval_max_gb_s": 273.62077693203645
+      },
+      "adjusted_read_gb_s": 262.7218386822523,
+      "adjusted_total_gb_s": 265.6728466935939,
+      "complete": true,
+      "read_counter_over_logical": 0.9156414514321678
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 5,
+        "start": 821681.950883014,
+        "end": 821685.952527203,
+        "passes": 2085,
+        "bytes": 1180591718400,
+        "logical_gb_s": 295.026659703,
+        "graph_ms": 1.919253808,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821681.950883014,
+            "end": 821685.952527203
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821681.950823196,
+      "elapsed_seconds": 4.001924654003233,
+      "warmup": false,
+      "index": 9,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        821682.950883014,
+        821684.952527203
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5136871109999959,
+        "read_gb_s": 271.6896642575436,
+        "write_gb_s": 5.01891664378453,
+        "total_gb_s": 276.7085809013281,
+        "utilization_of_380": 0.7281804760561266,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 66.92056268053952,
+            "write_gb_s": 2.3314094738565885,
+            "total_gb_s": 69.2519721543961
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 68.60526049965176,
+            "write_gb_s": 0.9652772563246091,
+            "total_gb_s": 69.57053775597637
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 67.73907822518301,
+            "write_gb_s": 0.8647898877960412,
+            "total_gb_s": 68.60386811297904
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 68.42476285216931,
+            "write_gb_s": 0.8574400258072908,
+            "total_gb_s": 69.2822028779766
+          }
+        ],
+        "interval_min_gb_s": 276.51846137096487,
+        "interval_median_gb_s": 276.54866507633227,
+        "interval_max_gb_s": 277.05898900376866
+      },
+      "adjusted_read_gb_s": 267.28608358741747,
+      "adjusted_total_gb_s": 270.67541545975945,
+      "complete": true,
+      "read_counter_over_logical": 0.9059726461889624
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 6,
+        "start": 821686.455537151,
+        "end": 821690.456921203,
+        "passes": 2073,
+        "bytes": 1173796945920,
+        "logical_gb_s": 293.347734352,
+        "graph_ms": 1.930238327,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821686.455537151,
+            "end": 821690.456921203
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821686.455480918,
+      "elapsed_seconds": 4.001660986919887,
+      "warmup": false,
+      "index": 10,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        821687.455537151,
+        821689.456921203
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5060354189999998,
+        "read_gb_s": 272.443138094563,
+        "write_gb_s": 5.07826085479335,
+        "total_gb_s": 277.52139894935635,
+        "utilization_of_380": 0.7303194709193588,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 67.28305384908083,
+            "write_gb_s": 2.405645525126923,
+            "total_gb_s": 69.68869937420776
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 68.43753254639758,
+            "write_gb_s": 0.7946919079995424,
+            "total_gb_s": 69.23222445439711
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 67.66977852108538,
+            "write_gb_s": 0.9363090012692458,
+            "total_gb_s": 68.60608752235463
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 69.05277317799923,
+            "write_gb_s": 0.9416144203976388,
+            "total_gb_s": 69.99438759839687
+          }
+        ],
+        "interval_min_gb_s": 276.5994267934091,
+        "interval_median_gb_s": 277.1176157241132,
+        "interval_max_gb_s": 278.8465049439401
+      },
+      "adjusted_read_gb_s": 268.03955742443685,
+      "adjusted_total_gb_s": 271.4882335077877,
+      "complete": true,
+      "read_counter_over_logical": 0.9137263596616199
+    },
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 6,
+        "start": 821690.959738467,
+        "end": 821694.961137717,
+        "passes": 2026,
+        "bytes": 1147184087040,
+        "logical_gb_s": 286.695732009,
+        "graph_ms": 1.975024309,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821690.959738467,
+            "end": 821694.961137717
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821690.959698159,
+      "elapsed_seconds": 4.001674290979281,
+      "warmup": false,
+      "index": 11,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        821691.959738467,
+        821693.961137717
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5107604340000051,
+        "read_gb_s": 267.2252371864265,
+        "write_gb_s": 4.6591295254956195,
+        "total_gb_s": 271.88436671192215,
+        "utilization_of_380": 0.7154851755576899,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 66.09917173915058,
+            "write_gb_s": 2.2240762817329576,
+            "total_gb_s": 68.32324802088354
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 66.57044639526194,
+            "write_gb_s": 0.7467586380806661,
+            "total_gb_s": 67.3172050333426
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 65.70635494331437,
+            "write_gb_s": 0.7907974848115434,
+            "total_gb_s": 66.49715242812591
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 68.84926410869961,
+            "write_gb_s": 0.8974971208704525,
+            "total_gb_s": 69.74676122957007
+          }
+        ],
+        "interval_min_gb_s": 271.6064232551907,
+        "interval_median_gb_s": 271.987828303065,
+        "interval_max_gb_s": 272.05934800812673
+      },
+      "adjusted_read_gb_s": 262.8216565163004,
+      "adjusted_total_gb_s": 265.8512012703535,
+      "complete": true,
+      "read_counter_over_logical": 0.9167267844365742
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 7,
+        "start": 821695.464400879,
+        "end": 821699.465036544,
+        "passes": 2042,
+        "bytes": 1156243783680,
+        "logical_gb_s": 289.015016735,
+        "graph_ms": 1.959175154,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821695.464400879,
+            "end": 821699.465036544
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821695.464356346,
+      "elapsed_seconds": 4.00175907893572,
+      "warmup": false,
+      "index": 12,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        821696.464400879,
+        821698.465036544
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.515718739999997,
+        "read_gb_s": 272.5070535658884,
+        "write_gb_s": 5.475350306007312,
+        "total_gb_s": 277.9824038718957,
+        "utilization_of_380": 0.7315326417681466,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 66.59767180309468,
+            "write_gb_s": 2.323006071799315,
+            "total_gb_s": 68.920677874894
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 68.4189283212268,
+            "write_gb_s": 0.9481688496376333,
+            "total_gb_s": 69.36709717086444
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 68.10069286432403,
+            "write_gb_s": 1.1382688935547522,
+            "total_gb_s": 69.23896175787878
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 69.38976057724285,
+            "write_gb_s": 1.065906491015611,
+            "total_gb_s": 70.45566706825846
+          }
+        ],
+        "interval_min_gb_s": 277.13086015594837,
+        "interval_median_gb_s": 278.3047600577717,
+        "interval_max_gb_s": 278.52824659853263
+      },
+      "adjusted_read_gb_s": 268.10347289576225,
+      "adjusted_total_gb_s": 271.94923843032706,
+      "complete": true,
+      "read_counter_over_logical": 0.9276454764341476
+    },
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 7,
+        "start": 821699.970141816,
+        "end": 821703.970390262,
+        "passes": 2042,
+        "bytes": 1156243783680,
+        "logical_gb_s": 289.042993025,
+        "graph_ms": 1.958985527,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821699.970141816,
+            "end": 821703.970390262
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821699.969851374,
+      "elapsed_seconds": 4.000765303964727,
+      "warmup": false,
+      "index": 13,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        821700.970141816,
+        821702.970390262
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.510992373999997,
+        "read_gb_s": 266.5862070797194,
+        "write_gb_s": 4.543965613740426,
+        "total_gb_s": 271.1301726934598,
+        "utilization_of_380": 0.7135004544564733,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 65.86033613472108,
+            "write_gb_s": 2.1437207040728627,
+            "total_gb_s": 68.00405683879394
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 66.41966507958047,
+            "write_gb_s": 0.7008770098266571,
+            "total_gb_s": 67.12054208940712
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 65.59878762167743,
+            "write_gb_s": 0.7680389538749599,
+            "total_gb_s": 66.3668265755524
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 68.70741824374039,
+            "write_gb_s": 0.9313289459659461,
+            "total_gb_s": 69.63874718970634
+          }
+        ],
+        "interval_min_gb_s": 270.1951458523147,
+        "interval_median_gb_s": 271.36872211197834,
+        "interval_max_gb_s": 271.82529103095544
+      },
+      "adjusted_read_gb_s": 262.18262640959324,
+      "adjusted_total_gb_s": 265.09700725189117,
+      "complete": true,
+      "read_counter_over_logical": 0.9070713794709303
+    },
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 8,
+        "start": 821704.473505672,
+        "end": 821708.474921112,
+        "passes": 2042,
+        "bytes": 1156243783680,
+        "logical_gb_s": 288.958694996,
+        "graph_ms": 1.959557023,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821704.473505672,
+            "end": 821708.474921112
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821704.473460619,
+      "elapsed_seconds": 4.00168854102958,
+      "warmup": false,
+      "index": 14,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        821705.473505672,
+        821707.474921112
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.509290627999988,
+        "read_gb_s": 267.7295710903488,
+        "write_gb_s": 4.346403340841557,
+        "total_gb_s": 272.0759744311904,
+        "utilization_of_380": 0.7159894063978695,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 66.10940695628622,
+            "write_gb_s": 1.6364570645965875,
+            "total_gb_s": 67.7458640208828
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 67.10264587583512,
+            "write_gb_s": 0.8386158998133062,
+            "total_gb_s": 67.94126177564843
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 65.93458762461805,
+            "write_gb_s": 0.8526428533020813,
+            "total_gb_s": 66.78723047792013
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 68.58293063360945,
+            "write_gb_s": 1.0186875231295824,
+            "total_gb_s": 69.60161815673904
+          }
+        ],
+        "interval_min_gb_s": 270.0756341369643,
+        "interval_median_gb_s": 272.7753743478187,
+        "interval_max_gb_s": 273.3922557678949
+      },
+      "adjusted_read_gb_s": 263.3259904202227,
+      "adjusted_total_gb_s": 266.04280898962173,
+      "complete": true,
+      "read_counter_over_logical": 0.9112928421270308
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 8,
+        "start": 821708.978071509,
+        "end": 821712.979053186,
+        "passes": 2080,
+        "bytes": 1177760563200,
+        "logical_gb_s": 294.367897253,
+        "graph_ms": 1.923548883,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821708.978071509,
+            "end": 821712.979053186
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821708.978033555,
+      "elapsed_seconds": 4.00212758500129,
+      "warmup": false,
+      "index": 15,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        821709.978071509,
+        821711.979053186
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.511727792000002,
+        "read_gb_s": 270.7689335994422,
+        "write_gb_s": 4.533709008162489,
+        "total_gb_s": 275.3026426076047,
+        "utilization_of_380": 0.724480638441065,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 66.67961351899248,
+            "write_gb_s": 1.9050479849880249,
+            "total_gb_s": 68.58466150398051
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 68.24395860219778,
+            "write_gb_s": 0.8447828297384363,
+            "total_gb_s": 69.08874143193621
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 67.49432065944308,
+            "write_gb_s": 0.8566230515129659,
+            "total_gb_s": 68.35094371095605
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 68.35104081880891,
+            "write_gb_s": 0.9272551419230626,
+            "total_gb_s": 69.27829596073198
+          }
+        ],
+        "interval_min_gb_s": 273.8734611128016,
+        "interval_median_gb_s": 274.3605880415987,
+        "interval_max_gb_s": 277.68179420357035
+      },
+      "adjusted_read_gb_s": 266.3653529293161,
+      "adjusted_total_gb_s": 269.26947716603604,
+      "complete": true,
+      "read_counter_over_logical": 0.9048722887753734
+    }
+  ],
+  "background_windows": [
+    [
+      821631.890647515,
+      821635.89074748
+    ],
+    [
+      821672.937251371,
+      821676.937404986
+    ],
+    [
+      821713.982736694,
+      821717.982821037
+    ]
+  ],
+  "completed": true,
+  "idle_gate": {
+    "time": 1788679309.2439256,
+    "quiet_seconds": 60.74438158294652,
+    "required_quiet_seconds": 60,
+    "state": {
+      "servers": {
+        "4005448": {
+          "processing": false,
+          "queued": 0.0
+        },
+        "2308651": {
+          "processing": false,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "node_free_kib": {
+    "0": 2531124,
+    "1": 3172512,
+    "2": 6061664,
+    "3": 10984060
+  },
+  "fixture_environment": {
+    "GGML_CPU_ROUTER_F16": "1",
+    "GGML_GLM_QA_TP": "2",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_CPU_ATTN_REQUANT": "q5_K",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_MOE_SINGLE_TOKEN_THREADS": "15",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "0",
+    "GGML_CPU_NUMA_DISPATCH_SPIN_US": "20000",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_GLM_SHEXP_TP": "1",
+    "GGML_CPU_NUMA_DISPATCH_HARD_SPIN_US": "300",
+    "GGML_GLM_ATTN_TP": "1",
+    "GGML_GLM_OUTPUT_TP": "1",
+    "GGML_CPU_SHEXP_REQUANT": "q5_K",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_IQ2_XS_REPACK": "0",
+    "GGML_CPU_MOE_DOWN_WEIGHTED_SUM_TILE": "192",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_IQ3_XXS_MOE_2ROW": "1",
+    "GGML_CPU_SINGLE_TASK_MAX_ELEMENTS": "32768",
+    "GGML_CPU_MOE_WEIGHTED_SUM_FUSION": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_OUTPUT_REQUANT": "q6_K",
+    "GGML_CPU_Q8_0_REPACK_FFN": "1",
+    "GGML_CPU_Q8_0_REPACK_X_TILE": "auto",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_CPU_Q5_K_REPACK_MOE_DOWN": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_MOE_DOWN_WEIGHTED_SUM_FUSION": "1",
+    "GGML_CPU_NUMA_POLL": "100",
+    "OMP_NUM_THREADS": "1"
+  },
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/cold-graph-check.cpp": "d7cd4a7af0a2dcae430b1821e8e571f104d82f96e573600f338be67553624bca",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/run-interleaved-full-graph.py": "b5878b2023a4283990c6b182740036372ab030f62419ae16b63e360eb9326f2c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/dram_bandwidth.py": "011ad0dfde74277c36f3f526380de20da0dd2b0ce1aee5e0c89618b247483e85",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/inference_contention_guard.py": "d78b0e557b17e553c7fabb071b093a27d5d2eab2249fa8d344ebca8fc0493a23",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-backend-meta.cpp": "305ade87258bcf632401620bd014e6a85cdfe00e88f102a976e53e50801ab865",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-cpu/repack.cpp": "6f1d6f0db75aab477ad3d52543a087549585321375a45a6d0ca7c3baded9ee45",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-cpu/arch/x86/repack.cpp": "0d112976b6f81449df82915b358944a331fa692bb4fa3b399c463632c435b2bb",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-cpu.so.0.20.2": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-base.so.0.20.2": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-base.so.0": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-cpu.so.0": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml.so.0.20.2": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml.so.0": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/build-private-counter-layout.py": "8120ecc7b7845bb4cfefa9a9ae86a167e37a347bb94eca7e3bf8d4354cc97a8b"
+  },
+  "build_steps": [
+    {
+      "cwd": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src",
+      "log": "counter-packed-compile.log",
+      "started": 1788679309.3932714,
+      "exit_code": 0,
+      "finished": 1788679315.6169121
+    },
+    {
+      "cwd": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src",
+      "log": "counter-packed-link.log",
+      "started": 1788679315.6197248,
+      "exit_code": 0,
+      "finished": 1788679315.8246462
+    },
+    {
+      "cwd": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src",
+      "log": "counter-padded-compile.log",
+      "started": 1788679315.836252,
+      "exit_code": 0,
+      "finished": 1788679322.2609742
+    },
+    {
+      "cwd": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src",
+      "log": "counter-padded-link.log",
+      "started": 1788679322.2621257,
+      "exit_code": 0,
+      "finished": 1788679322.4726439
+    },
+    {
+      "cwd": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903",
+      "log": "build.log",
+      "started": 1788679322.4942176,
+      "exit_code": 0,
+      "finished": 1788679323.9127724
+    }
+  ],
+  "private_counter_build": {
+    "input_sha256": {
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-backend-meta.cpp": "305ade87258bcf632401620bd014e6a85cdfe00e88f102a976e53e50801ab865",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/compile_commands.json": "5ba663a5622a6a541b361954c65d691e20459b99635cab7b03f6de4c4ba3678a",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/link.txt": "e9a3ed3f55523d31566cd193601e2464d12675f7901eef7d04c06a37a128a20c",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o": "34c902e3e13762b1f865be1a39e28f1c6e2c910d780a9f287f61bed0c2582cb7",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml.cpp.o": "118aa15ccfd53952e9221cd0cfadd9b02bf189de4744ac71db4629e3d1c467e7",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-alloc.c.o": "f0f002bb24ce94b3869fc5247bd9851d436e74ad8ceb47d052a698b67ae035c2",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-backend.cpp.o": "31e0d5069de3cab5bddf0cbb3b4aa882a152b383fdec7fec504df5dce23c2839",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-backend-meta.cpp.o": "0205c7da3f45bbed520ca76bf534079ee17f9acc18a4d9d3f79a536bba37e8ef",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-opt.cpp.o": "53a7437dbe9cf239a05324374358bca5f5b0cea3a4c4b2bc3017a63f0f02f57d",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-threading.cpp.o": "fd4bbd7ed8b0f8651159dd9878b7e4d3afb0739340def9073ba64e0d21ea65a9",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-quants.c.o": "e7d1ae4944e264a438d02192f80d12bc976d84975866cb4c392ccc4fb22ab0c4",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/gguf.cpp.o": "77eefa06e7431c9e55937e9d4786f4d6bb0a67bd7bfc101ac354cfc7aafdbb12",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-backend-dl.h": "225bd83a197c4e8b5f985717176824d1144e2b74a79f04838f51b84115c14dc5",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-impl.h": "2ed56e264202906d107e26d08eabb242d3107b026ebfb78096fa1e5f94bdbbb8",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-backend-impl.h": "d9c62d72b13bff67ef7ada8feccf90c9cd1b6d176eae85df3ed1d4f3d2240e52",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-quants.h": "28ae5fca1f3be636b36cd6c4fa2ca74fd42d229bfbd5352eaf66f3727bb8a6da",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-threading.h": "9652729043ed91482392c1aa08af5d813190d0ace2e7982d2539d28240ab8d8b",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-feats.h": "4490179fd8c6df80fe29fc602ed7236eb828c51e9c379efb0dd510cb5cb81fec",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-common.h": "af255601767325f087313fa84b9435cb77aeec37df6b61b98d9ecc65f29fb4a0",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-backend.h": "24d6a27518632495c49794b7601c6a45abf54ee0f242ad2f27a581f2e67b9b04",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-cpu.h": "316279e004cdeb8e6ef78599acb602bf79a8abdf897fed9fd1914808c1518c6e",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-opencl.h": "8e443e1aa9c8bc6e0cf116c4cc3f42f4858938fa15e65b06bc07b26686e1233a",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-alloc.h": "94e4cd069b9313b2ceb35dacec901981e0bb478d8bb31035b7126be091998c23",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-hexagon.h": "b2c12bac390f14707b16bdd27c8c75ce4f075ed509c729ee28fd4f03b17e7375",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-vulkan.h": "7eae5dad2cc7bb4d3eca828539f441816d5fd59fdc7b224d49aa229fc7b7248c",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/gguf.h": "e56714aab702e5ce62ee587a409643c08f7e93e8fbb77f48ef7cc85075f96fa4",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-cpp.h": "bc15ba002c68685df23faae42df0d2b3d58032011f88b649021ab92485862c72",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-virtgpu.h": "ed231e7db3f0f58b84073f5ee67f9ec9d63046d1a7ed091c36a6cfe9f685a463",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-cuda.h": "9cbfcea49f6da4d07f41dc22fa8dbf870825faaa2a68e34e65fe30ea6c41e042",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-opt.h": "3586de1bc8a934b5c72339e2b6937b0641e8f149b512231e666f67de0736eea2",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-cann.h": "2cdb134f27fe5c4ec19d52f1eb58f5355aa42b8f54bf385f0e487501c5df7362",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-zendnn.h": "2cb034b842438281616ce647232d922fb224450323f0d422d2af567c334aa8ff",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-blas.h": "e76cb8594dc9866d99e7d63191b9fff6ab8b50244b4a28ce3af0f962964a6b5b",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-et.h": "33118c0642b8059a99ea930fd4e4a045e78ccb41760b173ede221f1297c35977",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-rpc.h": "3d396875aadee0c8dea93a68adac82e0aa1ecbf6d492e06ea680f74fd45b2a4a",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-sycl.h": "58429f8045b335f5e740faa2198caf72ba3beb04df0eb970103b932340daca8b",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-metal.h": "322f36cd30f3e9e7aad7b5b9bc63078012fd0b7706ac4e24f5721b604f3d8980",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-webgpu.h": "a91d855313a9e85e75ba597ff869a267247dea936a2c0faef03aeb7f1ea6e79c",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml.h": "6fe9b62d3ea48c2de82cce6e9e06d3ae4f0de34f4b5831399c49c099badefb09",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-zdnn.h": "ee1d79c95ade45ba195a6b71f59a05c18617de4a596d2b2b03ecf38975a9a448",
+      "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include/ggml-openvino.h": "c2e3f301e28ad815b4285888aad6130808a77e6acb4e8b558de63a648cf9743e"
+    },
+    "variants": {
+      "packed": {
+        "directory": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/packed",
+        "library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/packed/libggml-base.so.0.20.2",
+        "library_sha256": "bdaa05a166c46971407806989f008279250cd1cc4e1f58ba2ef28cb4404df3b2",
+        "object_sha256": "bf3e75bef7748a08ffc33dd7a019dec53f128792a62b07250b7be085d880c9fa",
+        "compile_command": [
+          "/bin/c++",
+          "-DGGML_BUILD",
+          "-DGGML_COMMIT=\"a302733-dirty\"",
+          "-DGGML_SCHED_MAX_COPIES=4",
+          "-DGGML_SHARED",
+          "-DGGML_USE_OPENMP",
+          "-DGGML_VERSION=\"0.20.2\"",
+          "-D_GNU_SOURCE",
+          "-D_XOPEN_SOURCE=600",
+          "-Dggml_base_EXPORTS",
+          "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/.",
+          "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/../include",
+          "-O3",
+          "-DNDEBUG",
+          "-std=gnu++17",
+          "-fPIC",
+          "-Wmissing-declarations",
+          "-Wmissing-noreturn",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Wcast-qual",
+          "-Wno-unused-function",
+          "-Wno-array-bounds",
+          "-Wextra-semi",
+          "-fopenmp",
+          "-o",
+          "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/packed/ggml-backend-meta.cpp.o",
+          "-c",
+          "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/ggml-backend-meta.cpp",
+          "-DGGML_PRIVATE_PAD_COUNTERS=0"
+        ],
+        "link_command": [
+          "/bin/c++",
+          "-fPIC",
+          "-O3",
+          "-DNDEBUG",
+          "-shared",
+          "-Wl,-soname,libggml-base.so.0",
+          "-o",
+          "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/packed/libggml-base.so.0.20.2",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-alloc.c.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-backend.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/packed/ggml-backend-meta.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-opt.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-threading.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-quants.c.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/gguf.cpp.o",
+          "-lm",
+          "/usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so",
+          "/usr/lib/x86_64-linux-gnu/libpthread.a"
+        ],
+        "counter_stride_bytes": 4
+      },
+      "padded": {
+        "directory": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/padded",
+        "library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/padded/libggml-base.so.0.20.2",
+        "library_sha256": "56501cead5f6d61b58453d3d924dd01314b824055bf90b580f99b83b5bf492b3",
+        "object_sha256": "686668642aa2d53f40d344bcc374a4f2a376bd241cd63467cb89fb56f58ad388",
+        "compile_command": [
+          "/bin/c++",
+          "-DGGML_BUILD",
+          "-DGGML_COMMIT=\"a302733-dirty\"",
+          "-DGGML_SCHED_MAX_COPIES=4",
+          "-DGGML_SHARED",
+          "-DGGML_USE_OPENMP",
+          "-DGGML_VERSION=\"0.20.2\"",
+          "-D_GNU_SOURCE",
+          "-D_XOPEN_SOURCE=600",
+          "-Dggml_base_EXPORTS",
+          "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/.",
+          "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/../include",
+          "-O3",
+          "-DNDEBUG",
+          "-std=gnu++17",
+          "-fPIC",
+          "-Wmissing-declarations",
+          "-Wmissing-noreturn",
+          "-Wall",
+          "-Wextra",
+          "-Wpedantic",
+          "-Wcast-qual",
+          "-Wno-unused-function",
+          "-Wno-array-bounds",
+          "-Wextra-semi",
+          "-fopenmp",
+          "-o",
+          "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/padded/ggml-backend-meta.cpp.o",
+          "-c",
+          "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/ggml-backend-meta.cpp",
+          "-DGGML_PRIVATE_PAD_COUNTERS=1"
+        ],
+        "link_command": [
+          "/bin/c++",
+          "-fPIC",
+          "-O3",
+          "-DNDEBUG",
+          "-shared",
+          "-Wl,-soname,libggml-base.so.0",
+          "-o",
+          "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/padded/libggml-base.so.0.20.2",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-alloc.c.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-backend.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/counter-layout/padded/ggml-backend-meta.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-opt.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-threading.cpp.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/ggml-quants.c.o",
+          "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/ggml/src/CMakeFiles/ggml-base.dir/gguf.cpp.o",
+          "-lm",
+          "/usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so",
+          "/usr/lib/x86_64-linux-gnu/libpthread.a"
+        ],
+        "counter_stride_bytes": 64
+      }
+    },
+    "private_source_sha256": "a2112e47365b0d63464d1aadfe111fbfa6e13fb69af64f6d7fcfe4a6a9c3eec5",
+    "scope": "Private libggml-base variants; all original source, objects, and libraries remain read-only."
+  },
+  "build_command": [
+    "g++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-pthread",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/cold-graph-check.cpp",
+    "-o",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-counter-layout-one-row-0906/cold-graph-check",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/ggml/src/ggml-cpu",
+    "-L/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin",
+    "-lggml",
+    "-lggml-cpu",
+    "-lggml-base"
+  ],
+  "binary_sha256": "0443e7dd234e65c1bc93f38570597a359587bf592dc1a08781e86d6a75158b10",
+  "warmups": [
+    {
+      "mode": "packed",
+      "measurement": {
+        "event": "done",
+        "phase": 0,
+        "start": 821621.841750496,
+        "end": 821625.842088725,
+        "passes": 2046,
+        "bytes": 1158508707840,
+        "logical_gb_s": 289.602688953,
+        "graph_ms": 1.955199525,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821621.841750496,
+            "end": 821625.842088725
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "padded": 0.0
+      },
+      "started_monotonic": 821621.841682342,
+      "elapsed_seconds": 4.000840403023176,
+      "warmup": true
+    },
+    {
+      "mode": "padded",
+      "measurement": {
+        "event": "done",
+        "phase": 0,
+        "start": 821626.346475042,
+        "end": 821630.347521834,
+        "passes": 2066,
+        "bytes": 1169833328640,
+        "logical_gb_s": 292.38181643,
+        "graph_ms": 1.936615098,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 821626.346475042,
+            "end": 821630.347521834
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "packed": 0.0
+      },
+      "started_monotonic": 821626.346389675,
+      "elapsed_seconds": 4.001416440936737,
+      "warmup": true
+    }
+  ],
+  "counter_metadata": {
+    "valid": true,
+    "errors": [],
+    "required_counters_per_interval": 48,
+    "anchor_monotonic": 821630.8880497221,
+    "anchor_spread_seconds": 0.0149262830382213,
+    "timing_note": "Align perf elapsed time to reception of each interval; exclude boundary intervals.",
+    "exit_code": 0,
+    "pmus": [
+      "uncore_imc_0",
+      "uncore_imc_1",
+      "uncore_imc_2",
+      "uncore_imc_3",
+      "uncore_imc_4",
+      "uncore_imc_5"
+    ],
+    "cpus": [
+      0,
+      16,
+      32,
+      48
+    ],
+    "socket_ids": {
+      "0": 0,
+      "16": 1,
+      "32": 2,
+      "48": 3
+    },
+    "scope": "System-wide physical DRAM traffic; includes unrelated host work."
+  },
+  "backgrounds": [
+    {
+      "valid": true,
+      "samples": 7,
+      "sampled_seconds": 3.5159803089999997,
+      "read_gb_s": 1.8259371283640486,
+      "write_gb_s": 1.1830097106496622,
+      "total_gb_s": 3.008946839013711,
+      "utilization_of_380": 0.00791828115529924,
+      "sockets": [
+        {
+          "socket": 0,
+          "read_gb_s": 0.450150591102187,
+          "write_gb_s": 0.3261399784136277,
+          "total_gb_s": 0.7762905695158147
+        },
+        {
+          "socket": 1,
+          "read_gb_s": 0.47713457512426594,
+          "write_gb_s": 0.38416389454244815,
+          "total_gb_s": 0.8612984696667141
+        },
+        {
+          "socket": 2,
+          "read_gb_s": 0.5544481031733787,
+          "write_gb_s": 0.2833884962124229,
+          "total_gb_s": 0.8378365993858016
+        },
+        {
+          "socket": 3,
+          "read_gb_s": 0.344203858964217,
+          "write_gb_s": 0.18931734148116355,
+          "total_gb_s": 0.5335212004453805
+        }
+      ],
+      "interval_min_gb_s": 1.68391924484613,
+      "interval_median_gb_s": 3.5097885293109212,
+      "interval_max_gb_s": 4.79315822839327
+    },
+    {
+      "valid": true,
+      "samples": 7,
+      "sampled_seconds": 3.519814771,
+      "read_gb_s": 4.4035806701261215,
+      "write_gb_s": 1.6295847714425082,
+      "total_gb_s": 6.03316544156863,
+      "utilization_of_380": 0.01587675116202271,
+      "sockets": [
+        {
+          "socket": 0,
+          "read_gb_s": 0.7372711340440022,
+          "write_gb_s": 0.22976045406225723,
+          "total_gb_s": 0.9670315881062594
+        },
+        {
+          "socket": 1,
+          "read_gb_s": 0.5457767808884508,
+          "write_gb_s": 0.33181431305494113,
+          "total_gb_s": 0.877591093943392
+        },
+        {
+          "socket": 2,
+          "read_gb_s": 0.8477706447354414,
+          "write_gb_s": 0.2552016764634459,
+          "total_gb_s": 1.1029723211988873
+        },
+        {
+          "socket": 3,
+          "read_gb_s": 2.2727621104582267,
+          "write_gb_s": 0.8128083278618641,
+          "total_gb_s": 3.085570438320091
+        }
+      ],
+      "interval_min_gb_s": 4.690001669883597,
+      "interval_median_gb_s": 5.918200743114138,
+      "interval_max_gb_s": 8.49546911303991
+    },
+    {
+      "valid": true,
+      "samples": 7,
+      "sampled_seconds": 3.514811404999989,
+      "read_gb_s": 3.6913108669965866,
+      "write_gb_s": 1.436360686942751,
+      "total_gb_s": 5.127671553939337,
+      "utilization_of_380": 0.013493872510366677,
+      "sockets": [
+        {
+          "socket": 0,
+          "read_gb_s": 0.7075001059068224,
+          "write_gb_s": 0.3103146007687441,
+          "total_gb_s": 1.0178147066755665
+        },
+        {
+          "socket": 1,
+          "read_gb_s": 0.5612822836962446,
+          "write_gb_s": 0.36602785119277376,
+          "total_gb_s": 0.9273101348890183
+        },
+        {
+          "socket": 2,
+          "read_gb_s": 0.850776387827275,
+          "write_gb_s": 0.27618557346749106,
+          "total_gb_s": 1.1269619612947661
+        },
+        {
+          "socket": 3,
+          "read_gb_s": 1.5717520895662445,
+          "write_gb_s": 0.4838326615137421,
+          "total_gb_s": 2.0555847510799867
+        }
+      ],
+      "interval_min_gb_s": 3.5152049784776085,
+      "interval_median_gb_s": 5.169510447093132,
+      "interval_max_gb_s": 6.202335666299461
+    }
+  ],
+  "analysis": {
+    "baseline": "packed",
+    "candidate": "padded",
+    "pair_speedups": [
+      1.0189079922015893,
+      1.0373352485031426,
+      1.0112956573987042,
+      1.020056598834239,
+      1.028230618990649,
+      1.0232023068724403,
+      0.9999032107978643,
+      1.018719638642009
+    ],
+    "geometric_mean_speedup": 1.019653583967464,
+    "median_pair_speedup": 1.0194822955179141,
+    "pairs_favoring_candidate": 7,
+    "median_graph_ms": {
+      "packed": 1.9730412099999999,
+      "padded": 1.932431126
+    },
+    "selected_for_production": false,
+    "scope": "Adjacent balanced comparisons; no model gain follows from this synthetic result."
+  },
+  "owned_exit_codes": {
+    "4078301": 0,
+    "4078406": 0,
+    "4078409": 0,
+    "4078558": 0,
+    "4078563": 0,
+    "4078583": 0,
+    "4078811": 0
+  },
+  "finished": 1788679425.3122585
+}

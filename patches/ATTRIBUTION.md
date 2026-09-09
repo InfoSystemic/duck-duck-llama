@@ -1,5 +1,7 @@
 # Patch attribution
 
+The [September 8 source inventory](../engineering/2026-09-08/source-bundles.json) extends these bundles with exact snapshots of the local engineering source lines. Qwen's goal snapshot uses ggml-org/llama.cpp at `daef7b6874397a5a7c3d7e38b55e2ee0adf7da38`; GLM Flash uses unslothai/llama.cpp at `2e0e57f1008053bae4902a772da85e3eb99d4aff`. The Full, earlier NUMA and dense-server snapshots retain the bases listed in the inventory. Existing upstream notices are preserved. Private CPU/model overlays and archived local fixtures are published with their source hashes; upstream model-support code is not claimed as locally authored.
+
 The repository separates locally developed engineering from changes derived
 from upstream work. Patch filenames pin the source revision they target.
 

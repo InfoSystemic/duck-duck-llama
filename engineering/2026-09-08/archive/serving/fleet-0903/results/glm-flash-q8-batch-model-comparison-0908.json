@@ -1,0 +1,52 @@
+{
+  "passed": true,
+  "scope": "Private Q8 batching comparison against the same pinned MTP2 runtime. The independent raw-versus-MTP greedy sequence comparison failed; source-checkpoint quality is not certified.",
+  "reference_raw_parity_passed": false,
+  "baseline": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-mtp2-parity-0908/result.json",
+  "baseline_sha256": "6c5bf51b5b546dc31ddd7437360e374be26edcc634ca8c6c27573bbf2b92f27e",
+  "candidate": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-mtp2-batch-parity-0908/result.json",
+  "candidate_sha256": "dd6bfa0a996aebcf9eda94f9ec89f988952ecf78a7d5a9581f8d94801c8dedc4",
+  "commands_identical": true,
+  "only_runtime_env_differences": [
+    "LD_LIBRARY_PATH",
+    "GGML_CPU_X16_Q8_BATCH"
+  ],
+  "token_checks": [
+    {
+      "kind": "arithmetic",
+      "prompt_tokens_equal": true,
+      "generated_tokens_equal": true,
+      "tokens": 44
+    },
+    {
+      "kind": "prose",
+      "prompt_tokens_equal": true,
+      "generated_tokens_equal": true,
+      "tokens": 64
+    },
+    {
+      "kind": "code",
+      "prompt_tokens_equal": true,
+      "generated_tokens_equal": true,
+      "tokens": 64
+    }
+  ],
+  "default_cache_off_checks": [
+    {
+      "name": "repeat",
+      "passed": true
+    },
+    {
+      "name": "extend",
+      "passed": true
+    },
+    {
+      "name": "trim_one",
+      "passed": true
+    },
+    {
+      "name": "trim_three",
+      "passed": true
+    }
+  ]
+}

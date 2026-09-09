@@ -1,0 +1,39 @@
+--- /home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu.c
++++ /home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-small-f32-0908/private-cpu/ggml-cpu.c
+@@ -574,6 +574,7 @@
+ };
+ 
+ static struct ggml_state g_state = {0};
++static bool ggml_cpu_single_small_f32_mm = false;
+ 
+ void ggml_barrier(struct ggml_threadpool * tp) {
+     int n_threads = atomic_load_explicit(&tp->n_graph, memory_order_relaxed) & GGML_THREADPOOL_N_THREADS_MASK;
+@@ -3799,6 +3800,17 @@
+     if (ggml_get_n_tasks((struct ggml_tensor *) node, n_threads) == 1) {
+         return true;
+     }
++    if (ggml_cpu_single_small_f32_mm && node->op == GGML_OP_MUL_MAT) {
++        const struct ggml_tensor * a = node->src[0];
++        const struct ggml_tensor * b = node->src[1];
++        if (a->type == GGML_TYPE_F32 && b->type == GGML_TYPE_F32 &&
++                a->ne[0] >= 4096 && a->ne[0] <= 16384 && a->ne[1] <= 4 && b->ne[1] <= 8 &&
++                a->ne[2] == 1 && a->ne[3] == 1 && b->ne[2] == 1 && b->ne[3] == 1 &&
++                a->ne[0] * a->ne[1] * b->ne[1] <= 262144 &&
++                ggml_is_contiguous(a) && ggml_is_contiguous(b)) {
++            return true;
++        }
++    }
+     const int64_t max_el = ggml_cpu_single_task_max_elements();
+     if (max_el <= 0) {
+         return false;
+@@ -4768,6 +4780,10 @@
+ #endif
+ 
+         {
++            const char * env = getenv("GGML_CPU_SINGLE_SMALL_F32_MM");
++            ggml_cpu_single_small_f32_mm = (env != NULL && atoi(env) == 1);
++        }
++        {
+             const char * env = getenv("GGML_CPU_DISABLE_FUSION");
+             ggml_cpu_disable_fusion = (env != NULL && atoi(env) == 1);
+         }

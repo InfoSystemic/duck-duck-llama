@@ -1,0 +1,71 @@
+{
+  "started": 1788912411.181333,
+  "controller_pid": 3957276,
+  "passed": false,
+  "cases": [
+    {
+      "rows": 64,
+      "matrices": 1,
+      "activations": 1,
+      "attempts": []
+    }
+  ],
+  "compile_command": [
+    "g++",
+    "-DNDEBUG",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-ffp-contract=off",
+    "-fopenmp",
+    "-I/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src",
+    "-I/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/benchmark-qwen-q6-packed-single-0908.cpp",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0",
+    "-L/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-lggml-base",
+    "-ldl",
+    "-o",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-packed-single-component-0908/benchmark"
+  ],
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/run_qwen_q6_packed_single_benchmark_0908.py": "68edeaed677240e3832d9e9cc1c8cd6730f76603337d936f6243f2a8910fe1e5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/benchmark-qwen-q6-packed-single-0908.cpp": "b4081a52eb85a7b9a903e68e4b50bec70b405471baa9910ed7a9cf7d55cd0c06",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen-q6-packed-single-0908.h": "bbe68b8ed62b15a93d9f7942224a1cfb0e0ad69bbb83205f9a8fa318741fa5e5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-packed-single-proof-0908/result.json": "9038d482772ef0ac29b16e6ecad96bbc19ca0de5df8033bf97f3d71dfd01da29",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_qwen_q6.py": "dc54fad63ced5c123b4fe17c55b2aaa8104aa782497afc65f0a5f5d944805542",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/inference_contention_guard.py": "d78b0e557b17e553c7fabb071b093a27d5d2eab2249fa8d344ebca8fc0493a23"
+  },
+  "scope": "Single reserved-core component comparison, 2560-wide Q6 tiles, distinct activation rows and shuffled matrix order. No model tok/s or IMC utilization claim.",
+  "stage": "finished; owned component released",
+  "compile_exit": 0,
+  "idle_gate": {
+    "time": 1788912448.4235144,
+    "quiet_seconds": 30.496700599091128,
+    "required_quiet_seconds": 30,
+    "state": {
+      "servers": {
+        "1219506": {
+          "processing": 0,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "l3_size": "22528K",
+  "error": "TimeoutError('No quiet CPU window within 300 seconds; model service preserved')",
+  "finished": 1788912748.4243083,
+  "peer_preserved": true,
+  "peer_after": {
+    "processing": 0,
+    "queued": 0.0
+  }
+}
