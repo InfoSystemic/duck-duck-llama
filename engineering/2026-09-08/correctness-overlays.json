@@ -1,0 +1,30 @@
+[
+  {
+    "name": "qwen-get-rows-columns-correction",
+    "patch": "patches/qwen-get-rows-columns-correction.patch",
+    "patch_sha256": "a88b3a997ee72817958a55803352056e9a522e1502f1cc155d41bffec71cbf5d",
+    "source_path": "ggml/src/ggml-cpu/ops.cpp",
+    "before_sha256": "d7c5d60b88b0377e2a9dc9e69bcae928272b31adb9d1ec2e93572cf8f1b37110",
+    "after_sha256": "78981e3be02814477055cc9045d26d128514feb031701b4459eecc4ecfc7af4f",
+    "parent": "qwen-flash-next-goal-source.patch, optionally followed by qwen-q6-selected-overlay.patch; neither selected overlay changes ops.cpp",
+    "archived_source": "archive/serving/fleet-0903/results/qwen-get-rows-columns-build-0909/private-cpu/ops.cpp",
+    "validation": "archive/serving/fleet-0903/results/qwen-get-rows-columns-validation-0909/result.json",
+    "apply_check": true,
+    "reconstructed_file_identical": true,
+    "scope": "Correct the misplaced FP32 memcpy branch and restore canonical quantized dequantization. No model-weight change. Source application verified; reconstructed model performance requires separate validation.",
+    "selected_overlay_composition": {
+      "passed": true,
+      "base_commit": "daef7b6874397a5a7c3d7e38b55e2ee0adf7da38",
+      "patch_order": [
+        "patches/qwen-flash-next-goal-source.patch",
+        "patches/qwen-q6-selected-overlay.patch",
+        "patches/qwen-get-rows-columns-correction.patch"
+      ],
+      "corrected_ops_sha256": "78981e3be02814477055cc9045d26d128514feb031701b4459eecc4ecfc7af4f",
+      "reconstructed_tree": "7d8dc3ce888867008de8d2e74277c4676b4dce89",
+      "reconstructed_corrected_file_identical": true,
+      "temporary_index_only": true,
+      "no_model_loaded": true
+    }
+  }
+]

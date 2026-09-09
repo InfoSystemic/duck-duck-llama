@@ -1,0 +1,33 @@
+--- qwen_private_shared_dispatch_trial_0909.py
++++ qwen_private_shared_dispatch_trial_0909b.py
+@@ -106,6 +106,7 @@
+     command = set_option(command, '--port', PORT)
+     command = set_option(command, '--alias', 'qwen-q6-private')
+     command = set_option(command, '--spec-draft-n-max', args.drafts)
++    command = set_option(command, '--verbosity', 4)
+     if args.drafts == 0:
+         for flag in [value for value in command if value.startswith('--spec-')]:
+             command = set_option(command, flag, None)
+@@ -125,7 +126,7 @@
+                 server_sha256=bundle['server_sha256'], model_records=records,
+                 source_sha256={str(path):sha256(path) for path in source_paths},
+                 memory_preflight=memory_gate(), target_tok_s=30, target_gb_s=190, capacity_gb_s=380,
+-                no_model_loaded=True,
++                no_model_loaded=True, logging_verbosity=4,
+                 scope='Temporary second Q6 instance with explicit peer identity and memory reserves; the public exclusion guard remains unchanged')
+     verify_plan(plan)
+     out.mkdir(exist_ok=False)
+@@ -193,12 +194,12 @@
+             assert {row.split()[-1] for row in mapped if '/' + stem in row} == {str(Path(path).resolve())}
+         result['current'] = current
+         dispatch = dispatch_log(out)
++        result['dispatch_after_load'] = dispatch
+         if plan['shared_dispatch'] == 'on':
+             assert any(ranks == '4' and dispatch['attached'].count((group, ranks)) >= 2
+                        for group, ranks in dispatch['created']), 'No shared four-socket context group observed'
+         else:
+             assert not any(dispatch.values()), 'Shared dispatch unexpectedly enabled in control'
+-        result['dispatch_after_load'] = dispatch
+         class ReservedMemoryGuard(ModelMeasurementGuard):
+             def inspect(self, *args, **kwargs):
+                 memory_gate(loading=True)

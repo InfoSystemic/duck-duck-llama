@@ -1,0 +1,70 @@
+{
+  "time": 1788938977.9433253,
+  "passed": true,
+  "rows": [
+    {
+      "arm": "off",
+      "workload": "prose",
+      "verified_spin_percent_of_all_cycles": 48.60554147432948,
+      "verified_spin_fraction_of_openmp_cycles": 0.9755430364994934,
+      "per_loop_percent_of_all_cycles": {
+        "spin-loop-256c0": 14.463666595674189,
+        "spin-loop-258a0": 34.141874878655294
+      },
+      "other_openmp_percent_of_all_cycles": 1.2185458860180713
+    },
+    {
+      "arm": "off",
+      "workload": "code",
+      "verified_spin_percent_of_all_cycles": 48.033989306887634,
+      "verified_spin_fraction_of_openmp_cycles": 0.9764124882920089,
+      "per_loop_percent_of_all_cycles": {
+        "spin-loop-256c0": 15.3734881995094,
+        "spin-loop-258a0": 32.66050110737823
+      },
+      "other_openmp_percent_of_all_cycles": 1.16037258714259
+    },
+    {
+      "arm": "on",
+      "workload": "prose",
+      "verified_spin_percent_of_all_cycles": 45.860382456782204,
+      "verified_spin_fraction_of_openmp_cycles": 0.9693878669134645,
+      "per_loop_percent_of_all_cycles": {
+        "spin-loop-256c0": 13.97476118414505,
+        "spin-loop-258a0": 31.885621272637156
+      },
+      "other_openmp_percent_of_all_cycles": 1.448217147215192
+    },
+    {
+      "arm": "on",
+      "workload": "code",
+      "verified_spin_percent_of_all_cycles": 45.31767017244316,
+      "verified_spin_fraction_of_openmp_cycles": 0.9722534708481303,
+      "per_loop_percent_of_all_cycles": {
+        "spin-loop-256c0": 13.874007991921156,
+        "spin-loop-258a0": 31.443662180522004
+      },
+      "other_openmp_percent_of_all_cycles": 1.2932924327208946
+    }
+  ],
+  "inspected_loops": [
+    {
+      "name": "spin-loop-256c0",
+      "start": "0x256c0",
+      "end_exclusive": "0x256d1",
+      "bytes": "f3904883c0014839f074158b0f39ca74ef"
+    },
+    {
+      "name": "spin-loop-258a0",
+      "start": "0x258a0",
+      "end_exclusive": "0x258b3",
+      "bytes": "f3904883c0014839d07435418b0c2439cb74ed"
+    }
+  ],
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-wait-addresses-0909b/result.json": "567758dfc467aee6a933e2b1c15962bd7985c4bb4f9ba206328ede1005edf80f",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/classify_qwen_shared_dispatch_waits_0909.py": "ca9ada2cb5bfbd77ecc1ebc81ef2a8f3034c56578c2f3740e4a996e3d7f762aa",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/inspect_qwen_shared_dispatch_waits_0909b.py": "769128664fcd5dd4827fa21cc9a181cdd7991629fde276556db0fb6629e5110a"
+  },
+  "scope": "Both inspected loops execute PAUSE, increment a spin counter, and reload/compare a shared synchronization word before looping or leaving the spin path. This classifies sampled instructions as spinning; it does not distinguish inherent synchronization cost from waiting for useful work elsewhere, or establish removable wall time. More graph-level attribution is required before choosing the next synchronization change."
+}

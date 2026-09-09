@@ -4,7 +4,7 @@ These parameterized profiles accompany the [engineering source snapshot](../../e
 
 | Profile | Required source | Status |
 | --- | --- | --- |
-| [qwen-flash-next-q6-mtp4.json](qwen-flash-next-q6-mtp4.json) | Qwen goal patch plus selected Q6 overlay | Selected UD-Q6_K_XL target, Q8 draft, MTP4, 15 workers/socket |
+| [qwen-flash-next-q6-mtp4.json](qwen-flash-next-q6-mtp4.json) | Qwen goal patch, selected Q6 overlay, then gather correctness fix | Selected UD-Q6_K_XL target, Q8 draft, MTP4, 15 workers/socket |
 | [glm-flash-q8-raw.json](glm-flash-q8-raw.json) | GLM Flash goal patch plus Q8 raw overlay | Retained Q8 raw experimental stack; no MTP in this profile |
 | [glm-full-q4-mixed-mtp2.json](glm-full-q4-mixed-mtp2.json) | Current Full/SR950 patch | Q4-based mixed runtime with hybrid draft; MTP default 2 and maximum 32 |
 
@@ -20,6 +20,8 @@ python3 tools/render_profile.py profiles/20260908/qwen-flash-next-q6-mtp4.json \
 ```
 
 The renderer prints a shell-quoted command and does not execute it. Each profile lists its required parameters. Full additionally requires `CHAT_TEMPLATE`; the recorded template is archived [here](../../engineering/2026-09-08/archive/serving/glm-sr950/chat-template-glm-5.3-llamacpp.jinja). `HOST` defaults to `127.0.0.1`. Point `LIBRARY_PATH` to a complete matching runtime; do not accidentally mix libraries from different source lines.
+
+New Qwen source builds should include the [gather correctness fix](../../engineering/2026-09-08/patches/qwen-get-rows-columns-correction.patch). It moves a misplaced FP32 copy branch out of quantized gather and into FP32/I32 gather. The recorded selected binary predates this correction; the corrected source still requires model validation after a new build. See the snapshot for the exact component and runtime evidence.
 
 Load one large model at a time on this server. Full is not required to remain resident alongside either Flash model. The historical [exclusive model-load guard](../../engineering/2026-09-08/archive/serving/fleet-0903/exclusive_model_launch.py) and its fixtures document the overlap checks used during tuning. The rendered command itself is not a service manager or a concurrency guard.
 

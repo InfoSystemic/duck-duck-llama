@@ -35,13 +35,17 @@ def verify(root):
                 report['errors'].append(entry['path'] + ': ' + checked.stderr.strip())
             else:
                 report['shell_files'] += 1
-    for name in ['source-bundles.json', 'selected-overlays.json']:
+    for name in ['source-bundles.json', 'selected-overlays.json', 'correctness-overlays.json']:
         for entry in json.loads((root / name).read_text()):
             path = root / entry['patch']
             if not path.is_file() or digest(path) != entry['patch_sha256']:
                 report['errors'].append('Missing or changed patch: ' + entry['patch'])
             else:
                 report['patches'] += 1
+            if 'archived_source' in entry:
+                source = root / entry['archived_source']
+                if not source.is_file() or digest(source) != entry['after_sha256']:
+                    report['errors'].append('Corrected source mismatch: ' + entry['archived_source'])
     report['passed'] = not report['errors']
     return report
 

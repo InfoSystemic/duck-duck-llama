@@ -1,0 +1,36 @@
+{
+  "started": 1788986289.2584367,
+  "passed": true,
+  "model_started": false,
+  "model_stopped": false,
+  "state_before_sha256": "62469d7cf067c826f9a9e333486abd2040fc7084a01ec55ed6ce79b476aedffe",
+  "preserved_configuration": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-oom-reconcile-0908/last-measured-configuration.json",
+  "sources": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/reconcile_flash_oom_0908.py": "dff8a36d1be8ed967b36181ae6327e8d09b77666dfaffb0cbc13600dfc8689c1",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-post-model-0908.json": "f291cc2452a7f024c80a2bf3419f3b94fa83d6252730e280f4fc3b46a6c9d3ec",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-external-qwen-oom-0908.json": "94439e44cc0f2985e5918d2bffd0e4fb88f8b199621f0b6f83c6e6ceab72708d",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/glm_flash_q8_trial.py": "3a99a4512a3d9ceebce8de82b0c1048774bed028b48c6d8c0e3bca25c9fc802d"
+  },
+  "checks": [
+    "manager quiet gate refuses external Qwen",
+    "direct Flash start refuses before process creation"
+  ],
+  "qwen_service": {
+    "processing": 0,
+    "queued": 0.0
+  },
+  "state_after_sha256": "778c7f2488ed737cd3cbd44486a7562188fcc84f0fc4645af2caaae9172e449c",
+  "qwen_state_unchanged": true,
+  "controller_unchanged": true,
+  "flash_current": null,
+  "full_stopped": true,
+  "memory": {
+    "MemTotal": 811215671296,
+    "MemAvailable": 360005230592,
+    "SwapTotal": 8589930496,
+    "SwapFree": 12500992,
+    "Shmem": 279322234880
+  },
+  "remaining": "External Qwen release or user permission to pause it is required before a whole-server model trial",
+  "finished": 1788986289.6094596
+}
