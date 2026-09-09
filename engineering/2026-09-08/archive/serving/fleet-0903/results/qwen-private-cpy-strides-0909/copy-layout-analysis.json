@@ -1,0 +1,253 @@
+{
+  "time": 1788992832.185965,
+  "passed": true,
+  "diagnostic_only": true,
+  "target_reached": false,
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/analyze_qwen_cpy_strides_0909.py": "f21a26897a70b36710d35fc77f67e44b50689eafb23ba77671fa15ee7e9cd1d5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-cpy-strides-0909/plan.json": "520b9da42393428a40effb79cce40772d2ec7ece4a89fefea3b0be0d51ea38fc",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-cpy-strides-0909/result.json": "4b80511b73475af02f226dee51a7d32f013346be944266c30c39c1a1d068d5b1",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-columns-build-0909/result.json": "b524ead0196ac646b4207aa16618bd64f26a649526315958313b36e7a581b12e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-columns-build-0909/private-cpu/ops.cpp": "78981e3be02814477055cc9045d26d128514feb031701b4459eecc4ecfc7af4f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-cpy-strides-0909/prose-copy-layouts.json": "212fa0a21c5b4348f2dcd5c25bb119926b5204310ff6550c200ed0bf11389863",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-cpy-strides-0909/prose-operations.json": "8640551b7baa3fb2d871d822c7f14bcf5ecd7099bb1d78c379d5b79ae3d49b4f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-cpy-strides-0909/code-copy-layouts.json": "c434c8788ea9828d97d590c9a9448ee40855539085077adbd72ff0a37c0c4e43",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-cpy-strides-0909/code-operations.json": "4cff1dee57bca03f9f232dbee57ee7fd1df28c70ba290b71059d77f849539643"
+  },
+  "runtime_cpu_sha256": "12c61b337736ca9210433f57c64ce7fffbf7e4b66920aba9a03f97eaef3fd9b7",
+  "rows": [
+    {
+      "kind": "prose",
+      "output_and_draft_counts_match": true,
+      "copy_contiguity_counts": {
+        "both": 128,
+        "source_only": 0,
+        "destination_only": 0,
+        "neither": 0
+      },
+      "cpu_counts": {
+        "48": 32,
+        "0": 32,
+        "16": 32,
+        "32": 32
+      },
+      "copy_paths": [
+        {
+          "source_path": "contiguous block split",
+          "inferred_active_workers": 15,
+          "count": 128
+        }
+      ],
+      "layouts": [
+        {
+          "src_ne": [
+            786432,
+            1,
+            5,
+            1
+          ],
+          "dst_ne": [
+            786432,
+            1,
+            5,
+            1
+          ],
+          "src_nb": [
+            4,
+            3145728,
+            3145728,
+            15728640
+          ],
+          "dst_nb": [
+            4,
+            3145728,
+            3145728,
+            15728640
+          ],
+          "source_path": "contiguous block split",
+          "inferred_active_workers": 15,
+          "count": 120
+        },
+        {
+          "src_ne": [
+            786432,
+            1,
+            1,
+            1
+          ],
+          "dst_ne": [
+            786432,
+            1,
+            1,
+            1
+          ],
+          "src_nb": [
+            4,
+            3145728,
+            3145728,
+            3145728
+          ],
+          "dst_nb": [
+            4,
+            3145728,
+            3145728,
+            3145728
+          ],
+          "source_path": "contiguous block split",
+          "inferred_active_workers": 15,
+          "count": 4
+        },
+        {
+          "src_ne": [
+            786432,
+            1,
+            2,
+            1
+          ],
+          "dst_ne": [
+            786432,
+            1,
+            2,
+            1
+          ],
+          "src_nb": [
+            4,
+            3145728,
+            3145728,
+            6291456
+          ],
+          "dst_nb": [
+            4,
+            3145728,
+            3145728,
+            6291456
+          ],
+          "source_path": "contiguous block split",
+          "inferred_active_workers": 15,
+          "count": 4
+        }
+      ],
+      "operation_groups": [
+        {
+          "first": "blk.48.hc_attn_norm.weight (reshaped)",
+          "last": "mtp_tok_embd-48",
+          "graphs": 14,
+          "summed_socket_graph_ms": 0.07800000000000003,
+          "summed_copy_stage_ms": 0
+        },
+        {
+          "first": "norm-48",
+          "last": "result_output",
+          "graphs": 56,
+          "summed_socket_graph_ms": 173.14,
+          "summed_copy_stage_ms": 0
+        },
+        {
+          "first": "model.input_embed",
+          "last": "model.input_embed (reshaped)",
+          "graphs": 2,
+          "summed_socket_graph_ms": 0.6910000000000001,
+          "summed_copy_stage_ms": 0
+        },
+        {
+          "first": "hc_init",
+          "last": "result_output",
+          "graphs": 8,
+          "summed_socket_graph_ms": 766.8270000000001,
+          "summed_copy_stage_ms": 23.572999999999993
+        }
+      ]
+    },
+    {
+      "kind": "code",
+      "output_and_draft_counts_match": true,
+      "copy_contiguity_counts": {
+        "both": 128,
+        "source_only": 0,
+        "destination_only": 0,
+        "neither": 0
+      },
+      "cpu_counts": {
+        "48": 32,
+        "16": 32,
+        "32": 32,
+        "0": 32
+      },
+      "copy_paths": [
+        {
+          "source_path": "contiguous block split",
+          "inferred_active_workers": 15,
+          "count": 128
+        }
+      ],
+      "layouts": [
+        {
+          "src_ne": [
+            786432,
+            1,
+            5,
+            1
+          ],
+          "dst_ne": [
+            786432,
+            1,
+            5,
+            1
+          ],
+          "src_nb": [
+            4,
+            3145728,
+            3145728,
+            15728640
+          ],
+          "dst_nb": [
+            4,
+            3145728,
+            3145728,
+            15728640
+          ],
+          "source_path": "contiguous block split",
+          "inferred_active_workers": 15,
+          "count": 128
+        }
+      ],
+      "operation_groups": [
+        {
+          "first": "blk.48.hc_attn_norm.weight (reshaped)",
+          "last": "mtp_tok_embd-48",
+          "graphs": 14,
+          "summed_socket_graph_ms": 0.07200000000000002,
+          "summed_copy_stage_ms": 0
+        },
+        {
+          "first": "norm-48",
+          "last": "result_output",
+          "graphs": 56,
+          "summed_socket_graph_ms": 168.43899999999996,
+          "summed_copy_stage_ms": 0
+        },
+        {
+          "first": "model.input_embed",
+          "last": "model.input_embed (reshaped)",
+          "graphs": 2,
+          "summed_socket_graph_ms": 0.609,
+          "summed_copy_stage_ms": 0
+        },
+        {
+          "first": "hc_init",
+          "last": "result_output",
+          "graphs": 8,
+          "summed_socket_graph_ms": 760.9370000000001,
+          "summed_copy_stage_ms": 23.489000000000022
+        }
+      ]
+    }
+  ],
+  "underfilled_strided_copy_observed": false,
+  "limitations": [
+    "Worker counts are inferred from the verified current source branch and tensor layout, not sampled worker execution.",
+    "Only the first 128 large FP32 copies after arming each request were logged.",
+    "Operation timings include following barriers and diagnostic overhead. Concurrent socket times cannot be summed into request wall time.",
+    "No model throughput or memory-bandwidth claim follows from these diagnostic requests."
+  ]
+}
