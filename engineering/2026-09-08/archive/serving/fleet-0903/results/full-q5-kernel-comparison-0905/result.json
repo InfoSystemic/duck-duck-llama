@@ -1,0 +1,70 @@
+{
+  "started": 1788665165.7838085,
+  "scope": "Single-socket Q5 kernels, synthetic identical canonical weights; no full-model performance claim.",
+  "binaries": {
+    "full": {
+      "executable": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/full-q5-kernel-comparison-0905/full-q5-check",
+      "libraries": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin",
+      "sha256": {
+        "libggml-cpu.so.0.20.2": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+        "libggml-base.so.0.20.2": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+        "libggml-base.so.0": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+        "libggml-cpu.so.0": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+        "libggml.so.0.20.2": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d",
+        "libggml.so.0": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d"
+      }
+    },
+    "new": {
+      "executable": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/full-q5-kernel-comparison-0905/new-q5-check",
+      "libraries": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/bin",
+      "sha256": {
+        "libggml-cpu.so.0.22.0": "a2a32ca4f23eb0d11b8130a25cf05ea1d619f511d2267cee00564519289d2b61",
+        "libggml-base.so.0.22.0": "01e54cdb7764b31968c533933ad96ac363fd215132e6fa8ce3e56a9f557ee28d",
+        "libggml-base.so.0": "01e54cdb7764b31968c533933ad96ac363fd215132e6fa8ce3e56a9f557ee28d",
+        "libggml.so.0.22.0": "fee7b0b8269797a1ed8c43d4032a6b96f5feaa8a43968ec12ee07307af7f0119",
+        "libggml-cpu.so.0": "a2a32ca4f23eb0d11b8130a25cf05ea1d619f511d2267cee00564519289d2b61",
+        "libggml.so.0": "fee7b0b8269797a1ed8c43d4032a6b96f5feaa8a43968ec12ee07307af7f0119"
+      }
+    }
+  },
+  "runs": [
+    {
+      "label": "build-full",
+      "started": 1788665231.6501358,
+      "exit": 0,
+      "contention": null,
+      "finished": 1788665233.5213432
+    },
+    {
+      "label": "build-new",
+      "started": 1788665233.5504973,
+      "exit": 0,
+      "contention": null,
+      "finished": 1788665235.5211995
+    },
+    {
+      "label": "0-0-full",
+      "started": 1788665235.5489478,
+      "exit": -15,
+      "contention": {
+        "time": 1788665260.3444638,
+        "test_pid": 2698330,
+        "reason": "Other inference became active or changed during this isolated test.",
+        "process_churn": [],
+        "terminate_sent": true,
+        "kill_sent": false
+      },
+      "finished": 1788665260.3787544
+    }
+  ],
+  "records": [],
+  "idle": {
+    "time": 1788665231.6497219,
+    "foreign_pids": [],
+    "process_churn": [],
+    "quiet_seconds": 60.74728271597996,
+    "required_quiet_seconds": 60
+  },
+  "error": "AssertionError('Other inference interrupted the kernel comparison')",
+  "finished": 1788665260.3794794
+}

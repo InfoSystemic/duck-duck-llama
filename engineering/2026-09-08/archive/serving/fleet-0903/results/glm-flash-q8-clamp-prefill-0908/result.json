@@ -1,0 +1,151 @@
+{
+  "started": 1788870336.8922484,
+  "passed": true,
+  "parent": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-0908/result.json",
+  "parent_sha256": "1efc14c1ab8f033b4d86dd7fcb8e2e6fb24b9aeeb748e6ef4d07ea95b1b67074",
+  "library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-0908/private-cpu/libggml-cpu.so.0.22.0",
+  "library_sha256": "0f2feaaa6a173a23bf5adde440ec5541348f1cb7ac2edee7d77bebc15af9ec23",
+  "baseline_sha256": "b9b7a2e4f9ddc7d1938fe6d69e0f05c1880642282dfd1594dc44b03afc9b19b6",
+  "fixture_sha256": "2a605627fbbb4fa053f95d5a5faf9b6c6a5be1aefff842d44459d3a0405486c1",
+  "experts": 288,
+  "tokens": 64,
+  "runs": [
+    {
+      "name": "baseline",
+      "rows": [
+        {
+          "type": "q8_0",
+          "k": "4096",
+          "rows": "512",
+          "threads": "15",
+          "tokens": "64",
+          "moe": "1",
+          "fused": "0",
+          "max_abs": "9.5367432e-06",
+          "max_scaled": "3.7137615e-06",
+          "native_ms": "8.363246",
+          "packed_ms": "7.197045",
+          "hash": "544ab42a9f2983e3"
+        },
+        {
+          "type": "q8_0",
+          "k": "4096",
+          "rows": "512",
+          "threads": "15",
+          "tokens": "64",
+          "moe": "1",
+          "fused": "1",
+          "max_abs": "8.046627e-07",
+          "max_scaled": "7.757082e-07",
+          "native_ms": "16.258980",
+          "packed_ms": "14.125705",
+          "hash": "7cb787e635aa4959"
+        },
+        {
+          "type": "q8_0",
+          "k": "512",
+          "rows": "4096",
+          "threads": "15",
+          "tokens": "64",
+          "moe": "1",
+          "fused": "0",
+          "max_abs": "1.4305115e-06",
+          "max_scaled": "6.2429609e-07",
+          "native_ms": "9.195198",
+          "packed_ms": "7.140896",
+          "hash": "9b133bda5e3ddece"
+        }
+      ],
+      "all_288_active": true
+    },
+    {
+      "name": "candidate",
+      "rows": [
+        {
+          "type": "q8_0",
+          "k": "4096",
+          "rows": "512",
+          "threads": "15",
+          "tokens": "64",
+          "moe": "1",
+          "fused": "0",
+          "max_abs": "9.5367432e-06",
+          "max_scaled": "3.7137615e-06",
+          "native_ms": "8.111328",
+          "packed_ms": "7.228143",
+          "hash": "544ab42a9f2983e3"
+        },
+        {
+          "type": "q8_0",
+          "k": "4096",
+          "rows": "512",
+          "threads": "15",
+          "tokens": "64",
+          "moe": "1",
+          "fused": "1",
+          "max_abs": "8.046627e-07",
+          "max_scaled": "7.757082e-07",
+          "native_ms": "16.434001",
+          "packed_ms": "14.853711",
+          "hash": "7cb787e635aa4959"
+        },
+        {
+          "type": "q8_0",
+          "k": "512",
+          "rows": "4096",
+          "threads": "15",
+          "tokens": "64",
+          "moe": "1",
+          "fused": "0",
+          "max_abs": "1.4305115e-06",
+          "max_scaled": "6.2429609e-07",
+          "native_ms": "9.430376",
+          "packed_ms": "7.250459",
+          "hash": "9b133bda5e3ddece"
+        }
+      ],
+      "all_288_active": true
+    }
+  ],
+  "comparisons": [
+    {
+      "case": "4096-512-64-0",
+      "values": 262144,
+      "max_scaled_error": 0.0,
+      "bit_exact": true
+    },
+    {
+      "case": "4096-512-64-1",
+      "values": 262144,
+      "max_scaled_error": 0.0,
+      "bit_exact": true
+    },
+    {
+      "case": "512-4096-64-0",
+      "values": 2097152,
+      "max_scaled_error": 0.0,
+      "bit_exact": true
+    }
+  ],
+  "scope": "Capacity and numerical component validation; no bandwidth or model-quality claim.",
+  "compile_command": [
+    "c++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-fopenmp",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/include",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/ggml-cpu",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-prefill-0908/prefill.cpp",
+    "-L/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin",
+    "-Wl,-rpath,/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin",
+    "-lggml",
+    "-lggml-cpu",
+    "-lggml-base",
+    "-ldl",
+    "-o",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-prefill-0908/prefill"
+  ],
+  "finished": 1788870381.513619
+}

@@ -1,0 +1,45 @@
+{
+  "started": 1788906131.339572,
+  "passed": true,
+  "compile_command": [
+    "g++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-ffp-contract=off",
+    "-fopenmp",
+    "-I/home/user/InfoSystemic/AI-Server/serving/fleet-0903",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-q6-lossless-bytes-0908.cpp",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0",
+    "-L/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-lggml-base",
+    "-ldl",
+    "-o",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-lossless-bytes-prototype-0908/check"
+  ],
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-q6-lossless-bytes-0908.h": "cfdef54190db89e01d0fe5edd94eb7e95cfefb546e3dda4aac48bc6bf82a0a70",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-q6-lossless-bytes-0908.cpp": "12243d2c5f754d2af8b71c1fb316fc215ca6004bac3e9e6511d349caa1dbd424",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/repack.h": "80d654fa34a49575ffc83e23ba630112fac6267ee76965a6b2f21256a26ae2de",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf"
+  },
+  "scope": "Standalone primitive correctness only. No model runtime is changed or loaded; no speed claim.",
+  "compile_exit": 0,
+  "check_exit": 0,
+  "checks": {
+    "passed": true,
+    "bit_exact": true,
+    "cases": 432,
+    "outputs": 29376,
+    "codes_preserved": 20193280,
+    "max_scalar_reference_error": 0,
+    "native_block_bytes": 3360,
+    "expanded_block_bytes": 4384,
+    "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0"
+  },
+  "binary_sha256": "f8711a53fa8001a95ad639da3dd4c588ac0de0b5296707ba255751fe3dc9fc80",
+  "finished": 1788906133.5305781
+}

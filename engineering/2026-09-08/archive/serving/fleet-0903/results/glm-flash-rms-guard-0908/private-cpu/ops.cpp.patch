@@ -1,0 +1,54 @@
+--- 
++++ 
+@@ -13,6 +13,29 @@
+ #include <cmath>
+ #include <cstdlib>
+ #include <cstring>
++
++#include <atomic>
++#include "flash-rms-guarded-0908.h"
++
++static std::atomic<uint64_t> flash_rms_guard_counts[FLASH_RMS_GUARD_STATUS_COUNT];
++extern "C" uint64_t ggml_cpu_rms_guard_count(int status);
++extern "C" uint64_t ggml_cpu_rms_guard_count(int status) {
++    return status >= 0 && status < FLASH_RMS_GUARD_STATUS_COUNT ? flash_rms_guard_counts[status].load(std::memory_order_relaxed) : 0;
++}
++static bool flash_rms_try_guarded(const ggml_compute_params * params, const float * x, int64_t n, float * mean) {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_RMS_F64_SIMD");
++        return value && std::strcmp(value,"1") == 0;
++    }();
++    static const bool audit = [] {
++        const char * value = std::getenv("GGML_CPU_RMS_F64_AUDIT");
++        return value && std::strcmp(value,"1") == 0;
++    }();
++    if (!enabled || params->use_ref) return false;
++    const auto status = flash_rms_guarded_mean(x,n,mean);
++    if (audit) flash_rms_guard_counts[status].fetch_add(1,std::memory_order_relaxed);
++    return status == FLASH_RMS_GUARD_OK;
++}
+ 
+ bool ggml_cpu_parallel_copy_enabled(void) {
+     static const bool enabled = []() {
+@@ -3864,13 +3887,14 @@
+             for (int64_t i01 = ith; i01 < ne01; i01 += nth) {
+                 const float * x = (float *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+ 
+-                ggml_float sum = 0.0;
+-                // worth switching to explicit SIMD?
+-                for (int64_t i00 = 0; i00 < ne00; i00++) {
+-                    sum += (ggml_float)(x[i00] * x[i00]);
+-                }
+-
+-                const float mean  = sum/ne00;
++                float mean;
++                if (!flash_rms_try_guarded(params,x,ne00,&mean)) {
++                    ggml_float sum = 0.0;
++                    for (int64_t i00 = 0; i00 < ne00; i00++) {
++                        sum += (ggml_float)(x[i00] * x[i00]);
++                    }
++                    mean = sum/ne00;
++                }
+                 const float scale = 1.0f/sqrtf(mean + eps);
+ 
+                 // if you hit this, likely you got an inf somewhere earlier

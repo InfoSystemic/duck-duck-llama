@@ -1,0 +1,504 @@
+{
+  "config": {
+    "label": "glm5n-goal-iq-scale32-1024-t15",
+    "binary": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/GLM-5.3-Flash/UD-IQ2_XXS/GLM-5.3-Flash-UD-IQ2_XXS-00001-of-00004.gguf",
+    "alias": "glm-flash-goal",
+    "runtime": "llama",
+    "ctx_size": 4096,
+    "mtp": "/models/gguf/GLM-5.3-Flash/MTP/GLM-5.3-Flash-MTP-Q8_0-goal-0904.gguf",
+    "spec_type": "draft-mtp",
+    "ngram_n": 4,
+    "ngram_m": 4,
+    "draft_n": 2,
+    "draft_sweep": null,
+    "draft_p_min": 0.0,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 15,
+    "numa_poll": 100,
+    "thread_sweep": null,
+    "fused": 1,
+    "merge": 1,
+    "repack": 1,
+    "huge_pages": 0,
+    "port": 18135,
+    "bench": true,
+    "bench_direct": true,
+    "bench_tokens": 1024,
+    "cache_check": true,
+    "profile_cpu": true,
+    "profile_phase": true,
+    "profile_perf": true,
+    "profile_answer_prefix": true
+  },
+  "started": 1788639879.224897,
+  "checks": [
+    {
+      "expected": "391",
+      "reasoning_budget_tokens": null,
+      "started": 1788640284.534147,
+      "finished": 1788640288.7150857,
+      "wall_s": 4.180937228957191,
+      "pass": true,
+      "effective_numa_threads": 15,
+      "effective_draft_n": 2,
+      "effective_mtp_draft_n": 2,
+      "effective_ngram_max": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": [],
+      "other_host_cpu_percent": [
+        {
+          "pid": 3959217,
+          "name": "chrome",
+          "cpu_percent": 1288.84
+        },
+        {
+          "pid": 4035731,
+          "name": "chrome",
+          "cpu_percent": 1288.38
+        },
+        {
+          "pid": 123203,
+          "name": "node",
+          "cpu_percent": 131.86
+        },
+        {
+          "pid": 113656,
+          "name": "node",
+          "cpu_percent": 102.56
+        },
+        {
+          "pid": 122122,
+          "name": "node",
+          "cpu_percent": 93.63
+        },
+        {
+          "pid": 121799,
+          "name": "node",
+          "cpu_percent": 92.26
+        },
+        {
+          "pid": 111909,
+          "name": "node",
+          "cpu_percent": 71.65
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 60.44
+        },
+        {
+          "pid": 2769410,
+          "name": "Paseo",
+          "cpu_percent": 58.15
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 56.54
+        },
+        {
+          "pid": 4063094,
+          "name": "Paseo",
+          "cpu_percent": 40.52
+        },
+        {
+          "pid": 3959268,
+          "name": "chrome",
+          "cpu_percent": 22.89
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 19.23
+        },
+        {
+          "pid": 4063072,
+          "name": "Paseo",
+          "cpu_percent": 18.54
+        },
+        {
+          "pid": 3904097,
+          "name": "codex",
+          "cpu_percent": 17.17
+        },
+        {
+          "pid": 4035880,
+          "name": "chrome",
+          "cpu_percent": 12.13
+        },
+        {
+          "pid": 4094507,
+          "name": "codex",
+          "cpu_percent": 10.99
+        },
+        {
+          "pid": 4062995,
+          "name": "Paseo",
+          "cpu_percent": 9.16
+        },
+        {
+          "pid": 108667,
+          "name": "node",
+          "cpu_percent": 8.47
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 8.24
+        }
+      ],
+      "host_pressure": {
+        "before": {
+          "cpu": "some avg10=8.78 avg60=6.67 avg300=4.55 total=28052701117\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1512540940\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1475115166\n",
+          "io": "some avg10=0.06 avg60=0.56 avg300=0.40 total=8360688855\nfull avg10=0.05 avg60=0.51 avg300=0.36 total=8154420756\n"
+        },
+        "after": {
+          "cpu": "some avg10=7.86 avg60=6.62 avg300=4.57 total=28052973760\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1512540941\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1475115167\n",
+          "io": "some avg10=0.04 avg60=0.52 avg300=0.39 total=8360689579\nfull avg10=0.03 avg60=0.48 avg300=0.36 total=8154421223\n"
+        }
+      }
+    },
+    {
+      "expected": "Paris",
+      "reasoning_budget_tokens": null,
+      "started": 1788640288.9751525,
+      "finished": 1788640292.9555743,
+      "wall_s": 3.9804218490608037,
+      "pass": true,
+      "effective_numa_threads": 15,
+      "effective_draft_n": 2,
+      "effective_mtp_draft_n": 2,
+      "effective_ngram_max": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": [],
+      "other_host_cpu_percent": [
+        {
+          "pid": 4035731,
+          "name": "chrome",
+          "cpu_percent": 1321.22
+        },
+        {
+          "pid": 3959217,
+          "name": "chrome",
+          "cpu_percent": 1315.22
+        },
+        {
+          "pid": 124345,
+          "name": "node",
+          "cpu_percent": 123.28
+        },
+        {
+          "pid": 124136,
+          "name": "node",
+          "cpu_percent": 108.14
+        },
+        {
+          "pid": 113656,
+          "name": "node",
+          "cpu_percent": 99.97
+        },
+        {
+          "pid": 111909,
+          "name": "node",
+          "cpu_percent": 95.4
+        },
+        {
+          "pid": 122122,
+          "name": "node",
+          "cpu_percent": 91.32
+        },
+        {
+          "pid": 124843,
+          "name": "node",
+          "cpu_percent": 89.64
+        },
+        {
+          "pid": 2769410,
+          "name": "Paseo",
+          "cpu_percent": 60.32
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 59.6
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 58.88
+        },
+        {
+          "pid": 3959268,
+          "name": "chrome",
+          "cpu_percent": 26.43
+        },
+        {
+          "pid": 4063094,
+          "name": "Paseo",
+          "cpu_percent": 23.31
+        },
+        {
+          "pid": 4063072,
+          "name": "Paseo",
+          "cpu_percent": 19.22
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 16.1
+        },
+        {
+          "pid": 3904097,
+          "name": "codex",
+          "cpu_percent": 14.66
+        },
+        {
+          "pid": 4035880,
+          "name": "chrome",
+          "cpu_percent": 11.53
+        },
+        {
+          "pid": 108667,
+          "name": "node",
+          "cpu_percent": 9.13
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 8.17
+        },
+        {
+          "pid": 4129773,
+          "name": "claude",
+          "cpu_percent": 7.69
+        }
+      ],
+      "host_pressure": {
+        "before": {
+          "cpu": "some avg10=7.86 avg60=6.62 avg300=4.57 total=28052977152\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1512540941\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1475115167\n",
+          "io": "some avg10=0.04 avg60=0.52 avg300=0.39 total=8360689591\nfull avg10=0.03 avg60=0.48 avg300=0.36 total=8154421228\n"
+        },
+        "after": {
+          "cpu": "some avg10=6.56 avg60=6.45 avg300=4.56 total=28053129724\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1512540946\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1475115172\n",
+          "io": "some avg10=0.02 avg60=0.49 avg300=0.38 total=8360690555\nfull avg10=0.02 avg60=0.45 avg300=0.35 total=8154422000\n"
+        }
+      }
+    },
+    {
+      "expected": "14, 16, 18",
+      "reasoning_budget_tokens": null,
+      "started": 1788640293.248596,
+      "finished": 1788640297.9511728,
+      "wall_s": 4.702576796989888,
+      "pass": true,
+      "effective_numa_threads": 15,
+      "effective_draft_n": 2,
+      "effective_mtp_draft_n": 2,
+      "effective_ngram_max": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": [],
+      "other_host_cpu_percent": [
+        {
+          "pid": 3959217,
+          "name": "chrome",
+          "cpu_percent": 1340.01
+        },
+        {
+          "pid": 4035731,
+          "name": "chrome",
+          "cpu_percent": 1336.95
+        },
+        {
+          "pid": 111909,
+          "name": "node",
+          "cpu_percent": 102.73
+        },
+        {
+          "pid": 113656,
+          "name": "node",
+          "cpu_percent": 100.29
+        },
+        {
+          "pid": 124843,
+          "name": "node",
+          "cpu_percent": 86.66
+        },
+        {
+          "pid": 2769410,
+          "name": "Paseo",
+          "cpu_percent": 63.47
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 56.96
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 55.74
+        },
+        {
+          "pid": 3959268,
+          "name": "chrome",
+          "cpu_percent": 27.26
+        },
+        {
+          "pid": 4063094,
+          "name": "Paseo",
+          "cpu_percent": 23.8
+        },
+        {
+          "pid": 4063072,
+          "name": "Paseo",
+          "cpu_percent": 18.11
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 16.48
+        },
+        {
+          "pid": 4035880,
+          "name": "chrome",
+          "cpu_percent": 14.65
+        },
+        {
+          "pid": 4105492,
+          "name": "codex",
+          "cpu_percent": 9.56
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 7.73
+        },
+        {
+          "pid": 95727,
+          "name": "codex",
+          "cpu_percent": 6.92
+        },
+        {
+          "pid": 108667,
+          "name": "node",
+          "cpu_percent": 6.92
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 6.92
+        },
+        {
+          "pid": 3904097,
+          "name": "codex",
+          "cpu_percent": 5.49
+        },
+        {
+          "pid": 4167443,
+          "name": "Runner.Worker",
+          "cpu_percent": 5.29
+        }
+      ],
+      "host_pressure": {
+        "before": {
+          "cpu": "some avg10=6.56 avg60=6.45 avg300=4.56 total=28053136100\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1512540946\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1475115172\n",
+          "io": "some avg10=0.02 avg60=0.49 avg300=0.38 total=8360690555\nfull avg10=0.02 avg60=0.45 avg300=0.35 total=8154422000\n"
+        },
+        "after": {
+          "cpu": "some avg10=4.50 avg60=6.03 avg300=4.51 total=28053261453\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1512540948\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1475115174\n",
+          "io": "some avg10=0.01 avg60=0.44 avg300=0.38 total=8360691026\nfull avg10=0.01 avg60=0.40 avg300=0.34 total=8154422355\n"
+        }
+      }
+    }
+  ],
+  "runtime_env": {
+    "GGML_GLM5N_MLA_TP": "1",
+    "GGML_GLM5N_ATTN_TP": "1",
+    "GGML_GLM5N_SHEXP_TP": "1",
+    "GGML_CPU_IQ2_XXS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_GLM5N_KPOOL_REUSE": "1",
+    "GGML_CPU_PARALLEL_COPY": "1",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_Q8_0_REPACK_FORCE": "1",
+    "GGML_CPU_IQ_R16_REPACK": "1",
+    "GGML_CPU_HC_POST_VECTOR": "1",
+    "GGML_CPU_X16_Q5_BATCH2": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE_SINGLE_MAX_ELEMENTS": "65536",
+    "GGML_CPU_X16_Q5_BYTES": "0",
+    "GGML_CPU_SINGLE_TASK_MAX_ELEMENTS": "4096",
+    "GGML_CPU_IQ_R16_NIBBLE2": "1",
+    "GGML_CPU_ARGSORT_TOP_K": "1",
+    "GGML_CPU_X16_Q5_BYTES_BATCH3": "1",
+    "GGML_CPU_IQ_R16_BATCH3": "1",
+    "GGML_CPU_MOE_CLAMP_FUSION": "1",
+    "GGML_CPU_X16_Q5_COMPACT_P4": "1",
+    "GGML_CPU_IQ_R16_DYNAMIC_TILES": "1",
+    "GGML_CPU_X16_CHUNK_MAX": "16",
+    "GGML_CPU_IQ_R16_SCALE32": "1",
+    "GGML_CPU_OP_PROFILE": "*",
+    "GGML_CPU_OP_PROFILE_ARM_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm5n-goal-iq-scale32-1024-t15/cpu-profile.arm",
+    "GGML_CPU_OP_PROFILE_SKIP": "0",
+    "GGML_CPU_OP_PROFILE_COUNT": "96",
+    "LLAMA_GRAPH_PHASE_ARM_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm5n-goal-iq-scale32-1024-t15/phase-profile.arm"
+  },
+  "memory_after_load": {
+    "VmRSS": "179308536 kB",
+    "RssAnon": "178917432 kB",
+    "RssFile": "391104 kB",
+    "Pss": "179303161 kB",
+    "AnonHugePages": "0 kB",
+    "FilePmdMapped": "0 kB"
+  },
+  "error": "Remote end closed connection without response",
+  "finished": 1788640673.287889,
+  "server_exit": -9
+}

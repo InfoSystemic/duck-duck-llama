@@ -1,0 +1,1703 @@
+{
+  "started": 1788683898.8779485,
+  "pid": 117709,
+  "config": {
+    "label": "qwen-expert-even-split-cold-one-row-0906",
+    "k": 2560,
+    "rows": 640,
+    "matrices": 16,
+    "tokens": 1,
+    "seconds": 4.0,
+    "rounds": 2,
+    "comparison": "expert_split",
+    "chunks": "128,32"
+  },
+  "order": [
+    "128",
+    "32",
+    "32",
+    "128",
+    "32",
+    "128",
+    "128",
+    "32",
+    "128",
+    "32",
+    "32",
+    "128",
+    "32",
+    "128",
+    "128",
+    "32"
+  ],
+  "scope": "Synthetic resident component graphs, not a model-decode measurement.",
+  "fixtures": {
+    "128": {
+      "ready": {
+        "event": "ready",
+        "pid": 120203,
+        "workers": 60,
+        "chunk": 128,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 2560,
+        "rows": 640,
+        "tokens": 1,
+        "matrices": 16,
+        "experts": 32,
+        "used": 10,
+        "bytes_per_pass": 282624000,
+        "packed_weight_bytes": 904396800,
+        "weight_hash": "90e02091b9832bb5",
+        "output_hash": "abc4895345ea52cd",
+        "max_reference_error": 7.4505806e-09
+      },
+      "placement": {
+        "page_size": 4096,
+        "nodes": {
+          "0": {
+            "pages": 55243,
+            "nonlocal_pages": 0
+          },
+          "1": {
+            "pages": 55239,
+            "nonlocal_pages": 0
+          },
+          "2": {
+            "pages": 55239,
+            "nonlocal_pages": 0
+          },
+          "3": {
+            "pages": 55239,
+            "nonlocal_pages": 0
+          }
+        }
+      },
+      "next_phase": 9,
+      "mapped_libraries": [
+        "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0.22.0",
+        "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-cpu.so.0.22.0",
+        "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml.so.0.22.0"
+      ],
+      "exit_code": 0
+    },
+    "32": {
+      "ready": {
+        "event": "ready",
+        "pid": 122871,
+        "workers": 60,
+        "chunk": 32,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 2560,
+        "rows": 640,
+        "tokens": 1,
+        "matrices": 16,
+        "experts": 32,
+        "used": 10,
+        "bytes_per_pass": 282624000,
+        "packed_weight_bytes": 904396800,
+        "weight_hash": "90e02091b9832bb5",
+        "output_hash": "abc4895345ea52cd",
+        "max_reference_error": 7.4505806e-09
+      },
+      "placement": {
+        "page_size": 4096,
+        "nodes": {
+          "0": {
+            "pages": 55243,
+            "nonlocal_pages": 0
+          },
+          "1": {
+            "pages": 55243,
+            "nonlocal_pages": 0
+          },
+          "2": {
+            "pages": 55243,
+            "nonlocal_pages": 0
+          },
+          "3": {
+            "pages": 55243,
+            "nonlocal_pages": 0
+          }
+        }
+      },
+      "next_phase": 9,
+      "mapped_libraries": [
+        "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0.22.0",
+        "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-cpu.so.0.22.0",
+        "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml.so.0.22.0"
+      ],
+      "exit_code": 0
+    }
+  },
+  "phases": [
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 1,
+        "start": 826302.239488602,
+        "end": 826306.239875032,
+        "passes": 2010,
+        "bytes": 568074240000,
+        "logical_gb_s": 142.004841269,
+        "graph_ms": 1.990242005,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826302.239488602,
+            "end": 826306.239875032
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826302.239408244,
+      "elapsed_seconds": 4.000778905930929,
+      "warmup": false,
+      "index": 0,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        826303.239488602,
+        826305.239875032
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5064195619999996,
+        "read_gb_s": 112.50690838875342,
+        "write_gb_s": 1.9078628762522674,
+        "total_gb_s": 114.41477126500568,
+        "utilization_of_380": 0.30109150332896234,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 28.08951336482977,
+            "write_gb_s": 0.5551798137363807,
+            "total_gb_s": 28.64469317856615
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 28.85585348435618,
+            "write_gb_s": 0.6852686505939043,
+            "total_gb_s": 29.541122134950086
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 27.7332917202784,
+            "write_gb_s": 0.37556547662516354,
+            "total_gb_s": 28.108857196903564
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 27.828249819289063,
+            "write_gb_s": 0.29184893529681877,
+            "total_gb_s": 28.120098754585882
+          }
+        ],
+        "interval_min_gb_s": 108.19009332517314,
+        "interval_median_gb_s": 108.86169648258446,
+        "interval_max_gb_s": 126.20282609648393
+      },
+      "adjusted_read_gb_s": 110.74371333489084,
+      "adjusted_total_gb_s": 111.55361424952771,
+      "complete": true,
+      "read_counter_over_logical": 0.7798587171060517
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 1,
+        "start": 826306.742677849,
+        "end": 826310.742891741,
+        "passes": 2108,
+        "bytes": 595771392000,
+        "logical_gb_s": 148.934884006,
+        "graph_ms": 1.897634674,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826306.742677849,
+            "end": 826310.742891741
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826306.742633027,
+      "elapsed_seconds": 4.0005849950248376,
+      "warmup": false,
+      "index": 1,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        826307.742677849,
+        826309.742891741
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5100034539999996,
+        "read_gb_s": 108.24300292494564,
+        "write_gb_s": 2.578678588691494,
+        "total_gb_s": 110.82168151363713,
+        "utilization_of_380": 0.2916360039832556,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 26.719301140035675,
+            "write_gb_s": 0.6971972820401245,
+            "total_gb_s": 27.4164984220758
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 27.56309040040117,
+            "write_gb_s": 0.8191790296130015,
+            "total_gb_s": 28.38226943001417
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 27.00275627803962,
+            "write_gb_s": 0.57337532251764,
+            "total_gb_s": 27.57613160055726
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 26.957855106469186,
+            "write_gb_s": 0.48892695452072793,
+            "total_gb_s": 27.446782060989914
+          }
+        ],
+        "interval_min_gb_s": 100.2181296479352,
+        "interval_median_gb_s": 107.33018665668865,
+        "interval_max_gb_s": 124.77245160187924
+      },
+      "adjusted_read_gb_s": 106.47980787108307,
+      "adjusted_total_gb_s": 107.96052449815916,
+      "complete": true,
+      "read_counter_over_logical": 0.7149420270592444
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 2,
+        "start": 826311.245919179,
+        "end": 826315.246756911,
+        "passes": 2187,
+        "bytes": 618098688000,
+        "logical_gb_s": 154.492316211,
+        "graph_ms": 1.829372534,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826311.245919179,
+            "end": 826315.246756911
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826311.245880224,
+      "elapsed_seconds": 4.001172175980173,
+      "warmup": false,
+      "index": 2,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        826312.245919179,
+        826314.246756911
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.506832021000001,
+        "read_gb_s": 119.78765902904838,
+        "write_gb_s": 1.7917756620862242,
+        "total_gb_s": 121.57943469113461,
+        "utilization_of_380": 0.3199458807661437,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 29.753073583455507,
+            "write_gb_s": 0.5412146057918154,
+            "total_gb_s": 30.29428818924732
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 30.49530041830719,
+            "write_gb_s": 0.5511657062403238,
+            "total_gb_s": 31.04646612454751
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 29.78297559648155,
+            "write_gb_s": 0.3836601545647666,
+            "total_gb_s": 30.166635751046314
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 29.75630943080414,
+            "write_gb_s": 0.3157351954893184,
+            "total_gb_s": 30.072044626293458
+          }
+        ],
+        "interval_min_gb_s": 112.70257057639476,
+        "interval_median_gb_s": 125.14538981926806,
+        "interval_max_gb_s": 126.90782867393462
+      },
+      "adjusted_read_gb_s": 118.02446397518581,
+      "adjusted_total_gb_s": 118.71827767565664,
+      "complete": true,
+      "read_counter_over_logical": 0.7639503819335084
+    },
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 2,
+        "start": 826315.749793101,
+        "end": 826319.750701562,
+        "passes": 1909,
+        "bytes": 539529216000,
+        "logical_gb_s": 134.851677126,
+        "graph_ms": 2.095813756,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826315.749793101,
+            "end": 826319.750701562
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826315.749728977,
+      "elapsed_seconds": 4.001339931041002,
+      "warmup": false,
+      "index": 3,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        826316.749793101,
+        826318.750701562
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5174284580000013,
+        "read_gb_s": 99.68578224663813,
+        "write_gb_s": 2.2116218765155105,
+        "total_gb_s": 101.89740412315363,
+        "utilization_of_380": 0.26815106348198325,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 24.913681932805805,
+            "write_gb_s": 0.6309442778092403,
+            "total_gb_s": 25.544626210615046
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 25.390680395213707,
+            "write_gb_s": 0.7215095824438525,
+            "total_gb_s": 26.11218997765756
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 24.69768927852806,
+            "write_gb_s": 0.45140992867816604,
+            "total_gb_s": 25.149099207206227
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 24.683730640090563,
+            "write_gb_s": 0.4077580875842514,
+            "total_gb_s": 25.091488727674815
+          }
+        ],
+        "interval_min_gb_s": 94.36149809607006,
+        "interval_median_gb_s": 98.54358374155098,
+        "interval_max_gb_s": 112.92271158612684
+      },
+      "adjusted_read_gb_s": 97.92258719277555,
+      "adjusted_total_gb_s": 99.03624710767566,
+      "complete": true,
+      "read_counter_over_logical": 0.7261503103241395
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 3,
+        "start": 826320.253887982,
+        "end": 826324.253962137,
+        "passes": 2140,
+        "bytes": 604815360000,
+        "logical_gb_s": 151.20103692,
+        "graph_ms": 1.86919353,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826320.253887982,
+            "end": 826324.253962137
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826320.253829385,
+      "elapsed_seconds": 4.0004342389293015,
+      "warmup": false,
+      "index": 4,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        826321.253887982,
+        826323.253962137
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5101009659999995,
+        "read_gb_s": 118.56680300811095,
+        "write_gb_s": 1.864930906560324,
+        "total_gb_s": 120.43173391467127,
+        "utilization_of_380": 0.3169256155649244,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 29.45156531855368,
+            "write_gb_s": 0.5526112111897028,
+            "total_gb_s": 30.004176529743383
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 30.172430478506175,
+            "write_gb_s": 0.556471934870612,
+            "total_gb_s": 30.728902413376787
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 29.535737427294652,
+            "write_gb_s": 0.4084590104420874,
+            "total_gb_s": 29.94419643773674
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 29.407069783756445,
+            "write_gb_s": 0.3473887500579217,
+            "total_gb_s": 29.754458533814365
+          }
+        ],
+        "interval_min_gb_s": 119.9948976880568,
+        "interval_median_gb_s": 120.62558074010535,
+        "interval_max_gb_s": 120.67303743694133
+      },
+      "adjusted_read_gb_s": 116.80360795424838,
+      "adjusted_total_gb_s": 117.5705768991933,
+      "complete": true,
+      "read_counter_over_logical": 0.7725053368254928
+    },
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 3,
+        "start": 826324.757170823,
+        "end": 826328.758213634,
+        "passes": 1924,
+        "bytes": 543768576000,
+        "logical_gb_s": 135.906712747,
+        "graph_ms": 2.079544081,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826324.757170823,
+            "end": 826328.758213634
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826324.757108236,
+      "elapsed_seconds": 4.001412371988408,
+      "warmup": false,
+      "index": 5,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        826325.757170823,
+        826327.758213634
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5076941700000006,
+        "read_gb_s": 98.11859916922006,
+        "write_gb_s": 2.491519961027639,
+        "total_gb_s": 100.6101191302477,
+        "utilization_of_380": 0.2647634713953887,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 24.56411967952359,
+            "write_gb_s": 0.8181942823590009,
+            "total_gb_s": 25.38231396188259
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 25.254101629802005,
+            "write_gb_s": 0.6827211054347975,
+            "total_gb_s": 25.936822735236802
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 24.10151205919964,
+            "write_gb_s": 0.53126572405596,
+            "total_gb_s": 24.632777783255598
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 24.198865800694836,
+            "write_gb_s": 0.45933884917788054,
+            "total_gb_s": 24.658204649872715
+          }
+        ],
+        "interval_min_gb_s": 98.69736947280582,
+        "interval_median_gb_s": 101.01563716075792,
+        "interval_max_gb_s": 102.12579639426738
+      },
+      "adjusted_read_gb_s": 96.35540411535749,
+      "adjusted_total_gb_s": 97.74896211476972,
+      "complete": true,
+      "read_counter_over_logical": 0.7089819345033377
+    },
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 4,
+        "start": 826329.262165723,
+        "end": 826333.2624457,
+        "passes": 1959,
+        "bytes": 553660416000,
+        "logical_gb_s": 138.405416417,
+        "graph_ms": 2.042001009,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826329.262165723,
+            "end": 826333.2624457
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826329.262116426,
+      "elapsed_seconds": 4.000608765985817,
+      "warmup": false,
+      "index": 6,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        826330.262165723,
+        826332.2624457
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5108973170000013,
+        "read_gb_s": 100.64992770311463,
+        "write_gb_s": 1.8940401751206482,
+        "total_gb_s": 102.54396787823528,
+        "utilization_of_380": 0.26985254704798756,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 25.110910133517677,
+            "write_gb_s": 0.5585868448001217,
+            "total_gb_s": 25.6694969783178
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 25.90738236700434,
+            "write_gb_s": 0.6080835508161798,
+            "total_gb_s": 26.51546591782052
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 24.791652215661433,
+            "write_gb_s": 0.4020878654588276,
+            "total_gb_s": 25.19374008112026
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 24.83998298693118,
+            "write_gb_s": 0.32528191404551915,
+            "total_gb_s": 25.165264900976698
+          }
+        ],
+        "interval_min_gb_s": 97.70656280019396,
+        "interval_median_gb_s": 102.40004156958905,
+        "interval_max_gb_s": 107.54617237703269
+      },
+      "adjusted_read_gb_s": 98.88673264925205,
+      "adjusted_total_gb_s": 99.68281086275731,
+      "complete": true,
+      "read_counter_over_logical": 0.7144715518308721
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 4,
+        "start": 826333.765739058,
+        "end": 826337.767162068,
+        "passes": 2331,
+        "bytes": 658796544000,
+        "logical_gb_s": 164.640564707,
+        "graph_ms": 1.716612188,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826333.765739058,
+            "end": 826337.767162068
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826333.765673288,
+      "elapsed_seconds": 4.001859101932496,
+      "warmup": false,
+      "index": 7,
+      "block": 0,
+      "background_before_index": 0,
+      "background_after_index": 1,
+      "stable_window": [
+        826334.765739058,
+        826336.767162068
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.506337428000002,
+        "read_gb_s": 125.73778946893415,
+        "write_gb_s": 2.2964169643403403,
+        "total_gb_s": 128.0342064332745,
+        "utilization_of_380": 0.33693212219282764,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 31.538966488934605,
+            "write_gb_s": 0.7510048428272862,
+            "total_gb_s": 32.28997133176189
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 31.868219386074994,
+            "write_gb_s": 0.6981770824856638,
+            "total_gb_s": 32.566396468560654
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 31.087984899595774,
+            "write_gb_s": 0.45804710215299727,
+            "total_gb_s": 31.54603200174877
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 31.242618694328787,
+            "write_gb_s": 0.38918793687439285,
+            "total_gb_s": 31.63180663120318
+          }
+        ],
+        "interval_min_gb_s": 117.99711955011352,
+        "interval_median_gb_s": 118.59746494571087,
+        "interval_max_gb_s": 147.43341683938127
+      },
+      "adjusted_read_gb_s": 123.97459441507158,
+      "adjusted_total_gb_s": 125.17304941779653,
+      "complete": true,
+      "read_counter_over_logical": 0.7530015135437674
+    },
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 5,
+        "start": 826343.287498925,
+        "end": 826347.288675043,
+        "passes": 1859,
+        "bytes": 525398016000,
+        "logical_gb_s": 131.310894722,
+        "graph_ms": 2.152327121,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826343.287498925,
+            "end": 826347.288675043
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826343.287439977,
+      "elapsed_seconds": 4.001498646917753,
+      "warmup": false,
+      "index": 8,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        826344.287498925,
+        826346.288675043
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5106072509999962,
+        "read_gb_s": 94.25067570895723,
+        "write_gb_s": 2.66270110268391,
+        "total_gb_s": 96.91337681164114,
+        "utilization_of_380": 0.25503520213589775,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 23.682044004699467,
+            "write_gb_s": 0.8367535230373412,
+            "total_gb_s": 24.518797527736808
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 23.995289483434433,
+            "write_gb_s": 0.7001116623132129,
+            "total_gb_s": 24.695401145747645
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 23.48029856197221,
+            "write_gb_s": 0.6721655037521084,
+            "total_gb_s": 24.152464065724317
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 23.09304365885113,
+            "write_gb_s": 0.4536704135812477,
+            "total_gb_s": 23.546714072432376
+          }
+        ],
+        "interval_min_gb_s": 86.18106054049541,
+        "interval_median_gb_s": 100.65827894816152,
+        "interval_max_gb_s": 103.91999817906022
+      },
+      "adjusted_read_gb_s": 92.65797232613671,
+      "adjusted_total_gb_s": 94.33225385508162,
+      "complete": true,
+      "read_counter_over_logical": 0.7056381157275953
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 5,
+        "start": 826347.790869718,
+        "end": 826351.795068621,
+        "passes": 2143,
+        "bytes": 605663232000,
+        "logical_gb_s": 151.257029597,
+        "graph_ms": 1.868501588,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826347.790869718,
+            "end": 826351.795068621
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826347.790816022,
+      "elapsed_seconds": 4.004602404078469,
+      "warmup": false,
+      "index": 9,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        826348.790869718,
+        826350.795068621
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5039960309999998,
+        "read_gb_s": 123.88400379335843,
+        "write_gb_s": 3.62083172375074,
+        "total_gb_s": 127.50483551710917,
+        "utilization_of_380": 0.3355390408344978,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 31.102212732900494,
+            "write_gb_s": 1.0898874719171385,
+            "total_gb_s": 32.192100204817635
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 30.95071959439234,
+            "write_gb_s": 0.9027538104187992,
+            "total_gb_s": 31.853473404811137
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 31.443949015155354,
+            "write_gb_s": 1.0479931247637717,
+            "total_gb_s": 32.491942139919125
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 30.387122450910248,
+            "write_gb_s": 0.5801973166510306,
+            "total_gb_s": 30.96731976756128
+          }
+        ],
+        "interval_min_gb_s": 120.50956734396541,
+        "interval_median_gb_s": 130.2534062536081,
+        "interval_max_gb_s": 131.76531769526886
+      },
+      "adjusted_read_gb_s": 122.29130041053791,
+      "adjusted_total_gb_s": 124.92371256054965,
+      "complete": true,
+      "read_counter_over_logical": 0.8084999469866847
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 6,
+        "start": 826352.298584958,
+        "end": 826356.298711209,
+        "passes": 2110,
+        "bytes": 596336640000,
+        "logical_gb_s": 149.079454642,
+        "graph_ms": 1.895794432,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826352.298584958,
+            "end": 826356.298711209
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826352.298546395,
+      "elapsed_seconds": 4.0085033680079505,
+      "warmup": false,
+      "index": 10,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        826353.298584958,
+        826355.298711209
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5082865279999993,
+        "read_gb_s": 118.92144077367246,
+        "write_gb_s": 3.0542386424869017,
+        "total_gb_s": 121.97567941615937,
+        "utilization_of_380": 0.32098863004252465,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 29.553498748694,
+            "write_gb_s": 0.8429839363784336,
+            "total_gb_s": 30.396482685072435
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 29.41431073828435,
+            "write_gb_s": 0.595676854099701,
+            "total_gb_s": 30.00998759238405
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 31.0019341929175,
+            "write_gb_s": 1.17945171160476,
+            "total_gb_s": 32.18138590452226
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 28.951697093776616,
+            "write_gb_s": 0.436126140404007,
+            "total_gb_s": 29.387823234180622
+          }
+        ],
+        "interval_min_gb_s": 118.70246192904811,
+        "interval_median_gb_s": 120.57634507890839,
+        "interval_max_gb_s": 126.6644246771483
+      },
+      "adjusted_read_gb_s": 117.32873739085194,
+      "adjusted_total_gb_s": 119.39455645959984,
+      "complete": true,
+      "read_counter_over_logical": 0.7870215092522684
+    },
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 6,
+        "start": 826356.80921943,
+        "end": 826360.809484095,
+        "passes": 1886,
+        "bytes": 533028864000,
+        "logical_gb_s": 133.248399453,
+        "graph_ms": 2.121031106,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826356.80921943,
+            "end": 826360.809484095
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826356.809186679,
+      "elapsed_seconds": 4.001421035034582,
+      "warmup": false,
+      "index": 11,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        826357.80921943,
+        826359.809484095
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5067752850000034,
+        "read_gb_s": 103.9180217313424,
+        "write_gb_s": 3.1356054325512708,
+        "total_gb_s": 107.05362716389368,
+        "utilization_of_380": 0.28172007148393075,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 25.667297037567163,
+            "write_gb_s": 0.8737812723016605,
+            "total_gb_s": 26.541078309868823
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 26.05806293436775,
+            "write_gb_s": 0.7191715357077931,
+            "total_gb_s": 26.777234470075545
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 27.089996111689544,
+            "write_gb_s": 1.128706053816111,
+            "total_gb_s": 28.218702165505654
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 25.102665647717945,
+            "write_gb_s": 0.4139465707257062,
+            "total_gb_s": 25.51661221844365
+          }
+        ],
+        "interval_min_gb_s": 92.39869213373113,
+        "interval_median_gb_s": 103.3462104639856,
+        "interval_max_gb_s": 125.33018788972215
+      },
+      "adjusted_read_gb_s": 102.32531834852189,
+      "adjusted_total_gb_s": 104.47250420733415,
+      "complete": true,
+      "read_counter_over_logical": 0.7679290615765675
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 7,
+        "start": 826361.314186748,
+        "end": 826365.314810255,
+        "passes": 2122,
+        "bytes": 599728128000,
+        "logical_gb_s": 149.908664726,
+        "graph_ms": 1.885307967,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826361.314186748,
+            "end": 826365.314810255
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826361.314153041,
+      "elapsed_seconds": 4.001017731032334,
+      "warmup": false,
+      "index": 12,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        826362.314186748,
+        826364.314810255
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.508739071000008,
+        "read_gb_s": 114.36281857858712,
+        "write_gb_s": 2.158667878920452,
+        "total_gb_s": 116.52148645750758,
+        "utilization_of_380": 0.3066354906776515,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 28.739127439167223,
+            "write_gb_s": 0.7117858422584686,
+            "total_gb_s": 29.45091328142569
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 28.76304939268042,
+            "write_gb_s": 0.570519826247673,
+            "total_gb_s": 29.33356921892809
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 28.46976568660743,
+            "write_gb_s": 0.4706481028355342,
+            "total_gb_s": 28.940413789442964
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 28.39087606013205,
+            "write_gb_s": 0.40571410757877613,
+            "total_gb_s": 28.79659016771083
+          }
+        ],
+        "interval_min_gb_s": 114.75649026591792,
+        "interval_median_gb_s": 117.35258606824817,
+        "interval_max_gb_s": 117.45806567278049
+      },
+      "adjusted_read_gb_s": 112.7701151957666,
+      "adjusted_total_gb_s": 113.94036350094805,
+      "complete": true,
+      "read_counter_over_logical": 0.7522588197412439
+    },
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 7,
+        "start": 826365.819800918,
+        "end": 826369.820771315,
+        "passes": 2034,
+        "bytes": 574857216000,
+        "logical_gb_s": 143.679447473,
+        "graph_ms": 1.967045426,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826365.819800918,
+            "end": 826369.820771315
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826365.818301377,
+      "elapsed_seconds": 4.002768030040897,
+      "warmup": false,
+      "index": 13,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        826366.819800918,
+        826368.820771315
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5070211489999963,
+        "read_gb_s": 98.63710244103572,
+        "write_gb_s": 1.8807515655375897,
+        "total_gb_s": 100.51785400657332,
+        "utilization_of_380": 0.2645206684383508,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 24.525340518628706,
+            "write_gb_s": 0.572450448391154,
+            "total_gb_s": 25.09779096701986
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 25.299118908436828,
+            "write_gb_s": 0.5641496281350475,
+            "total_gb_s": 25.863268536571876
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 24.38003789548682,
+            "write_gb_s": 0.4000953615814197,
+            "total_gb_s": 24.78013325706824
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 24.432605118483373,
+            "write_gb_s": 0.3440561274299684,
+            "total_gb_s": 24.776661245913342
+          }
+        ],
+        "interval_min_gb_s": 94.55438782010212,
+        "interval_median_gb_s": 100.53311178106983,
+        "interval_max_gb_s": 106.46479848538749
+      },
+      "adjusted_read_gb_s": 97.0443990582152,
+      "adjusted_total_gb_s": 97.93673105001379,
+      "complete": true,
+      "read_counter_over_logical": 0.6754229694295812
+    },
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 8,
+        "start": 826370.324724528,
+        "end": 826374.325660265,
+        "passes": 2010,
+        "bytes": 568074240000,
+        "logical_gb_s": 141.985344763,
+        "graph_ms": 1.990515292,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826370.324724528,
+            "end": 826374.325660265
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826370.324686528,
+      "elapsed_seconds": 4.0012554820859805,
+      "warmup": false,
+      "index": 14,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        826371.324724528,
+        826373.325660265
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.506570087,
+        "read_gb_s": 102.44084484462488,
+        "write_gb_s": 2.2342573398511925,
+        "total_gb_s": 104.67510218447607,
+        "utilization_of_380": 0.27546079522230543,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 25.66710416583494,
+            "write_gb_s": 0.7533457530011345,
+            "total_gb_s": 26.420449918836074
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 26.000363909043944,
+            "write_gb_s": 0.5999677620839421,
+            "total_gb_s": 26.600331671127886
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 25.375771591355115,
+            "write_gb_s": 0.49296439355097854,
+            "total_gb_s": 25.868735984906092
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 25.397605178390876,
+            "write_gb_s": 0.38797943121513734,
+            "total_gb_s": 25.785584609606012
+          }
+        ],
+        "interval_min_gb_s": 103.02883343796326,
+        "interval_median_gb_s": 105.26546499996424,
+        "interval_max_gb_s": 105.73244923034326
+      },
+      "adjusted_read_gb_s": 100.84814146180436,
+      "adjusted_total_gb_s": 102.09397922791655,
+      "complete": true,
+      "read_counter_over_logical": 0.7102714835121801
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 8,
+        "start": 826374.831883771,
+        "end": 826378.836597459,
+        "passes": 2174,
+        "bytes": 614424576000,
+        "logical_gb_s": 153.425344197,
+        "graph_ms": 1.842094613,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826374.831883771,
+            "end": 826378.836597459
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826374.831847711,
+      "elapsed_seconds": 4.005066860001534,
+      "warmup": false,
+      "index": 15,
+      "block": 1,
+      "background_before_index": 1,
+      "background_after_index": 2,
+      "stable_window": [
+        826375.831883771,
+        826377.836597459
+      ],
+      "dram": {
+        "valid": true,
+        "samples": 3,
+        "sampled_seconds": 1.5140658380000076,
+        "read_gb_s": 118.36494747557938,
+        "write_gb_s": 1.8320679481046358,
+        "total_gb_s": 120.19701542368402,
+        "utilization_of_380": 0.3163079353254843,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 29.5375862552681,
+            "write_gb_s": 0.5159545248256212,
+            "total_gb_s": 30.05354078009372
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 30.12796981738635,
+            "write_gb_s": 0.6676728573807204,
+            "total_gb_s": 30.79564267476707
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 29.218089207029433,
+            "write_gb_s": 0.34149956535773673,
+            "total_gb_s": 29.55958877238717
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 29.48130219589551,
+            "write_gb_s": 0.3069410005405575,
+            "total_gb_s": 29.788243196436067
+          }
+        ],
+        "interval_min_gb_s": 116.7724659758843,
+        "interval_median_gb_s": 121.02604638899496,
+        "interval_max_gb_s": 122.76807236808239
+      },
+      "adjusted_read_gb_s": 116.77224409275887,
+      "adjusted_total_gb_s": 117.6158924671245,
+      "complete": true,
+      "read_counter_over_logical": 0.7611013988850623
+    }
+  ],
+  "background_windows": [
+    [
+      826297.736975107,
+      826301.738193033
+    ],
+    [
+      826338.7775682,
+      826342.777707794
+    ],
+    [
+      826379.840432702,
+      826383.840567467
+    ]
+  ],
+  "completed": true,
+  "idle_gate": {
+    "time": 1788683964.7747734,
+    "quiet_seconds": 60.78707244701218,
+    "required_quiet_seconds": 60,
+    "state": {
+      "servers": {
+        "4005448": {
+          "processing": false,
+          "queued": 0.0
+        },
+        "2308651": {
+          "processing": false,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "node_free_kib": {
+    "0": 5222584,
+    "1": 4410092,
+    "2": 4151316,
+    "3": 9725068
+  },
+  "fixture_environment": {
+    "GGML_CPU_IQ2_XS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_Q4E_HC_TP": "1",
+    "GGML_CPU_PARALLEL_COPY": "1",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_Q8_0_REPACK_FORCE": "1",
+    "GGML_Q4E_RS_ROLLBACK": "1",
+    "GGML_CPU_PARALLEL_SIGMOID": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE_SINGLE_MAX_ELEMENTS": "65536",
+    "GGML_CPU_IQ_R16_REPACK": "1",
+    "GGML_CPU_X16_Q5_BATCH2": "1",
+    "GGML_CPU_SINGLE_TASK_MAX_ELEMENTS": "4096",
+    "GGML_CPU_X16_Q5_BYTES": "0",
+    "GGML_CPU_IQ_R16_NIBBLE2": "1",
+    "GGML_CPU_ARGSORT_TOP_K": "1",
+    "GGML_CPU_X16_Q5_BYTES_BATCH3": "0",
+    "GGML_CPU_IQ_R16_BATCH3": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-expert-graph-check.cpp": "4e55230a1592eb50d59bb051244aaa1a8e5d6cc955fe3c5b536e7d8c11bc76ba",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/run-interleaved-full-graph.py": "7f228b8d417d468fe860b6cccfcd8025f341f4ca40abe9565f8439fdf432b260",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/dram_bandwidth.py": "011ad0dfde74277c36f3f526380de20da0dd2b0ce1aee5e0c89618b247483e85",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/inference_contention_guard.py": "d78b0e557b17e553c7fabb071b093a27d5d2eab2249fa8d344ebca8fc0493a23",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-backend-meta.cpp": "369fb5f7350744bafe8b88d7691c0c4ecee638ad8d14c18d3f5831d5ed023415",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/repack.cpp": "e5a9a4b789ae67eda16e997284118df906285b1187639edc9016201d44f068ee",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/arch/x86/repack.cpp": "4a6882aef7eb69e2f20dfbd46b8c332bb597416264302db1cb519c28b93f2340",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-cpu.so.0.22.0": "d5537e494dd02492edcfb2e84d737d8cc361b9f023dc4db135f66b09654bfa4b",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0.22.0": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml.so.0.22.0": "fa52e08f7801188376f416fbffc4ea84106a231676c249892ad633722c1b81a7",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-cpu.so.0": "d5537e494dd02492edcfb2e84d737d8cc361b9f023dc4db135f66b09654bfa4b",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml.so.0": "fa52e08f7801188376f416fbffc4ea84106a231676c249892ad633722c1b81a7"
+  },
+  "build_command": [
+    "g++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-pthread",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-expert-graph-check.cpp",
+    "-o",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-cold-one-row-0906/qwen-expert-graph-check",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/include",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu",
+    "-L/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-lggml",
+    "-lggml-cpu",
+    "-lggml-base"
+  ],
+  "build_steps": [
+    {
+      "cwd": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903",
+      "log": "build.log",
+      "started": 1788683964.8670144,
+      "exit_code": 0,
+      "finished": 1788683966.4995062
+    }
+  ],
+  "binary_sha256": "1a300389024c3ef6e8b76399e2b0357a44fda5af4b4a96da83e111f2d030080c",
+  "warmups": [
+    {
+      "mode": "128",
+      "measurement": {
+        "event": "done",
+        "phase": 0,
+        "start": 826287.688168329,
+        "end": 826291.688806368,
+        "passes": 1907,
+        "bytes": 538963968000,
+        "logical_gb_s": 134.719502923,
+        "graph_ms": 2.097869973,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826287.688168329,
+            "end": 826291.688806368
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "32": 0.0
+      },
+      "started_monotonic": 826287.688124849,
+      "elapsed_seconds": 4.001015617977828,
+      "warmup": true
+    },
+    {
+      "mode": "32",
+      "measurement": {
+        "event": "done",
+        "phase": 0,
+        "start": 826292.190979332,
+        "end": 826296.192296122,
+        "passes": 2231,
+        "bytes": 630534144000,
+        "logical_gb_s": 157.581660511,
+        "graph_ms": 1.793508198,
+        "checksums_exact": true,
+        "threads": [
+          {
+            "start": 826292.190979332,
+            "end": 826296.192296122
+          }
+        ]
+      },
+      "inactive_fixture_cpu_percent": {
+        "128": 0.0
+      },
+      "started_monotonic": 826292.190950276,
+      "elapsed_seconds": 4.002144937054254,
+      "warmup": true
+    }
+  ],
+  "counter_metadata": {
+    "valid": true,
+    "errors": [],
+    "required_counters_per_interval": 48,
+    "anchor_monotonic": 826296.734782897,
+    "anchor_spread_seconds": 0.009912517038173974,
+    "timing_note": "Align perf elapsed time to reception of each interval; exclude boundary intervals.",
+    "exit_code": 0,
+    "pmus": [
+      "uncore_imc_0",
+      "uncore_imc_1",
+      "uncore_imc_2",
+      "uncore_imc_3",
+      "uncore_imc_4",
+      "uncore_imc_5"
+    ],
+    "cpus": [
+      0,
+      16,
+      32,
+      48
+    ],
+    "socket_ids": {
+      "0": 0,
+      "16": 1,
+      "32": 2,
+      "48": 3
+    },
+    "scope": "System-wide physical DRAM traffic; includes unrelated host work."
+  },
+  "backgrounds": [
+    {
+      "valid": true,
+      "samples": 7,
+      "sampled_seconds": 3.515439402,
+      "read_gb_s": 1.7631950538625725,
+      "write_gb_s": 1.097961961615403,
+      "total_gb_s": 2.8611570154779757,
+      "utilization_of_380": 0.007529360567047305,
+      "sockets": [
+        {
+          "socket": 0,
+          "read_gb_s": 0.4483764999115749,
+          "write_gb_s": 0.31746853016583443,
+          "total_gb_s": 0.7658450300774093
+        },
+        {
+          "socket": 1,
+          "read_gb_s": 0.5615369664676699,
+          "write_gb_s": 0.3539120585643365,
+          "total_gb_s": 0.9154490250320064
+        },
+        {
+          "socket": 2,
+          "read_gb_s": 0.4213376568167622,
+          "write_gb_s": 0.24869471822572464,
+          "total_gb_s": 0.6700323750424868
+        },
+        {
+          "socket": 3,
+          "read_gb_s": 0.33194393066656536,
+          "write_gb_s": 0.1778866546595076,
+          "total_gb_s": 0.509830585326073
+        }
+      ],
+      "interval_min_gb_s": 1.5521258779819873,
+      "interval_median_gb_s": 3.427725225172768,
+      "interval_max_gb_s": 4.591666844112223
+    },
+    {
+      "valid": true,
+      "samples": 7,
+      "sampled_seconds": 3.518255674999999,
+      "read_gb_s": 1.5927033828205226,
+      "write_gb_s": 0.9843469900748475,
+      "total_gb_s": 2.57705037289537,
+      "utilization_of_380": 0.006781711507619395,
+      "sockets": [
+        {
+          "socket": 0,
+          "read_gb_s": 0.34069090540442326,
+          "write_gb_s": 0.2141317937957992,
+          "total_gb_s": 0.5548226992002224
+        },
+        {
+          "socket": 1,
+          "read_gb_s": 0.5641632289614654,
+          "write_gb_s": 0.3801810200618806,
+          "total_gb_s": 0.944344249023346
+        },
+        {
+          "socket": 2,
+          "read_gb_s": 0.3748789133467398,
+          "write_gb_s": 0.20858827581369574,
+          "total_gb_s": 0.5834671891604355
+        },
+        {
+          "socket": 3,
+          "read_gb_s": 0.3129703351078941,
+          "write_gb_s": 0.181445900403472,
+          "total_gb_s": 0.49441623551136615
+        }
+      ],
+      "interval_min_gb_s": 1.948735171677061,
+      "interval_median_gb_s": 2.7302177095775138,
+      "interval_max_gb_s": 3.199101473990982
+    },
+    {
+      "valid": true,
+      "samples": 7,
+      "sampled_seconds": 3.5124891399999996,
+      "read_gb_s": 1.5834277947746198,
+      "write_gb_s": 0.9976951617848989,
+      "total_gb_s": 2.581122956559519,
+      "utilization_of_380": 0.006792428833051365,
+      "sockets": [
+        {
+          "socket": 0,
+          "read_gb_s": 0.3892057471243883,
+          "write_gb_s": 0.27966989076014626,
+          "total_gb_s": 0.6688756378845346
+        },
+        {
+          "socket": 1,
+          "read_gb_s": 0.5542677925318796,
+          "write_gb_s": 0.3644219610256219,
+          "total_gb_s": 0.9186897535575016
+        },
+        {
+          "socket": 2,
+          "read_gb_s": 0.35717967421815294,
+          "write_gb_s": 0.19832402381178613,
+          "total_gb_s": 0.555503698029939
+        },
+        {
+          "socket": 3,
+          "read_gb_s": 0.2827745809001989,
+          "write_gb_s": 0.15527928618734463,
+          "total_gb_s": 0.43805386708754357
+        }
+      ],
+      "interval_min_gb_s": 1.5997825928559912,
+      "interval_median_gb_s": 1.9416325023070045,
+      "interval_max_gb_s": 4.448082247847963
+    }
+  ],
+  "analysis": {
+    "baseline": "128",
+    "candidate": "32",
+    "pair_speedups": [
+      1.0488014538671946,
+      1.1456462350057346,
+      1.112535458540775,
+      1.1895529015083515,
+      1.1519000758804814,
+      1.1188085955935545,
+      1.043354963979739,
+      1.080571691569243
+    ],
+    "geometric_mean_speedup": 1.1103559230833864,
+    "median_pair_speedup": 1.1156720270671647,
+    "pairs_favoring_candidate": 8,
+    "median_graph_ms": {
+      "128": 2.060772545,
+      "32": 1.868847559
+    },
+    "selected_for_production": false,
+    "scope": "Adjacent balanced comparisons; no model gain follows from this synthetic result."
+  },
+  "owned_exit_codes": {
+    "120177": 0,
+    "120203": 0,
+    "122871": 0
+  },
+  "finished": 1788684091.1600769
+}

@@ -1,0 +1,122 @@
+--- 
++++ 
+@@ -43,6 +43,7 @@
+ 
+ #ifdef GGML_USE_OPENMP
+ #include <omp.h>
++#include "flash-local-barrier-0908.h"
+ #endif
+ 
+ #if defined(__ARM_FEATURE_SVE) || defined(__ARM_FEATURE_MATMUL_INT8)
+@@ -487,6 +488,10 @@
+     struct ggml_cgraph * cgraph;
+     struct ggml_cplan  * cplan;
+ 
++#ifdef GGML_USE_OPENMP
++    struct flash_local_barrier * dissemination;
++#endif
++
+     // synchronization primitives
+     atomic_int n_graph;       // updated when there is work to be done (i.e each graph) holds graph and active thread counts.
+     atomic_int GGML_CACHE_ALIGN n_barrier;
+@@ -516,6 +521,9 @@
+     bool cpumask[GGML_MAX_N_THREADS];
+     struct ggml_threadpool * threadpool;
+     int ith;
++#ifdef GGML_USE_OPENMP
++    struct flash_local_cursor dissemination_cursor;
++#endif
+ };
+ 
+ // Helpers for polling loops
+@@ -578,6 +586,14 @@
+ 
+ #ifdef GGML_USE_OPENMP
+ static bool ggml_cpu_omp_simple_barrier = false;
++static bool flash_dissemination_enabled = false;
++static bool flash_dissemination_audit = false;
++static atomic_uint_fast64_t flash_dissemination_calls;
++GGML_BACKEND_API uint64_t ggml_cpu_dissemination_count(int ignored);
++uint64_t ggml_cpu_dissemination_count(int ignored) {
++    GGML_UNUSED(ignored);
++    return atomic_load_explicit(&flash_dissemination_calls, memory_order_relaxed);
++}
+ #endif
+ 
+ void ggml_barrier(struct ggml_threadpool * tp) {
+@@ -587,6 +603,16 @@
+     }
+ 
+ #ifdef GGML_USE_OPENMP
++    if (flash_dissemination_enabled && n_threads <= FLASH_LOCAL_MAX_THREADS) {
++        const int ith = omp_get_thread_num();
++        GGML_ASSERT(tp->dissemination != NULL && tp->dissemination->threads == n_threads);
++        GGML_ASSERT(ith < n_threads && omp_get_num_threads() == n_threads);
++        if (flash_dissemination_audit && ith == 0) {
++            atomic_fetch_add_explicit(&flash_dissemination_calls, 1, memory_order_relaxed);
++        }
++        flash_dissemination_wait(tp->dissemination, ith, &tp->workers[ith].dissemination_cursor);
++        return;
++    }
+     if (!ggml_cpu_omp_simple_barrier) {
+         #pragma omp barrier
+         return;
+@@ -3211,6 +3237,11 @@
+ #endif // GGML_USE_OPENMP
+ 
+     const size_t workers_size = sizeof(struct ggml_compute_state) * n_threads;
++#ifdef GGML_USE_OPENMP
++    if (threadpool->dissemination != NULL) {
++        ggml_aligned_free(threadpool->dissemination, sizeof(struct flash_local_barrier));
++    }
++#endif
+     ggml_aligned_free(threadpool->workers, workers_size);
+     ggml_aligned_free(threadpool, sizeof(struct ggml_threadpool));
+ }
+@@ -3910,6 +3941,10 @@
+ static thread_ret_t ggml_graph_compute_thread(void * data) {
+     struct ggml_compute_state * state = (struct ggml_compute_state *) data;
+     struct ggml_threadpool    * tp    = state->threadpool;
++#ifdef GGML_USE_OPENMP
++    state->dissemination_cursor.parity = 0;
++    state->dissemination_cursor.sense = 1;
++#endif
+ 
+     const struct ggml_cgraph * cgraph = tp->cgraph;
+     const struct ggml_cplan  * cplan  = tp->cplan;
+@@ -4214,6 +4249,9 @@
+     {
+         threadpool->cgraph           = cgraph;
+         threadpool->cplan            = cplan;
++#ifdef GGML_USE_OPENMP
++        threadpool->dissemination    = NULL;
++#endif
+         threadpool->n_graph          = 0;
+         threadpool->n_barrier        = 0;
+         threadpool->n_barrier_passed = 0;
+@@ -4322,6 +4360,14 @@
+                 // update the number of threads from the actual number of threads that we got from OpenMP
+                 n_threads = omp_get_num_threads();
+                 atomic_store_explicit(&threadpool->n_graph, n_threads, memory_order_relaxed);
++                // The preceding region has joined; this existing omp-single
++                // barrier publishes fresh flags to the actual next team.
++                if (flash_dissemination_enabled && n_threads <= FLASH_LOCAL_MAX_THREADS) {
++                    if (threadpool->dissemination == NULL) {
++                        threadpool->dissemination = ggml_aligned_malloc(sizeof(struct flash_local_barrier));
++                    }
++                    flash_local_barrier_init(threadpool->dissemination, n_threads);
++                }
+             }
+ 
+             // Apply thread CPU mask and priority
+@@ -4835,6 +4881,10 @@
+         {
+             const char * env = getenv("GGML_CPU_OMP_SIMPLE_BARRIER");
+             ggml_cpu_omp_simple_barrier = (env != NULL && atoi(env) == 1);
++            env = getenv("GGML_CPU_DISSEMINATION_BARRIER");
++            flash_dissemination_enabled = (env != NULL && strcmp(env, "1") == 0);
++            env = getenv("GGML_CPU_DISSEMINATION_AUDIT");
++            flash_dissemination_audit = (env != NULL && strcmp(env, "1") == 0);
+         }
+ #endif
+         {

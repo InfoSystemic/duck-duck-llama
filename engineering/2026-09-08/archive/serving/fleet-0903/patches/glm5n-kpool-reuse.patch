@@ -1,0 +1,93 @@
+--- a/src/llama-kv-cache-kpool.h
++++ b/src/llama-kv-cache-kpool.h
+@@ -187,6 +187,7 @@
+     ~llm_graph_input_kpool() = default;
+ 
+     void set_input(const llama_ubatch * ubatch) override;
++    bool can_reuse(const llm_graph_params & params) override;
+ 
+     ggml_tensor * k_idxs     = nullptr;   // I32 [n_tokens]
+     ggml_tensor * pool_cells = nullptr;   // I32 [kpool*n_pools, n_stream]
+@@ -205,4 +206,5 @@
+     const llama_kv_cache_context * mctx_idx;
+ 
+     const uint32_t kpool;
++    uint32_t n_kv_idx = 0;
+ };
+--- a/src/llama-kv-cache-kpool.cpp
++++ b/src/llama-kv-cache-kpool.cpp
+@@ -3,9 +3,11 @@
+ #include "llama-batch.h"
+ #include "llama-kv-cache.h"
+ #include "llama-kv-cells.h"
++#include "llama-memory-hybrid.h"
+ 
+ #include <algorithm>
+ #include <cmath>
++#include <cstdlib>
+ #include <vector>
+ 
+ uint32_t llama_kpool_n_pools(uint32_t n_kv, uint32_t kpool, uint32_t n_seqs) {
+@@ -418,6 +420,52 @@
+     }
+ }
+ 
++bool llm_graph_input_kpool::can_reuse(const llm_graph_params & params) {
++    static const bool enabled = []() {
++        const char * value = std::getenv("GGML_GLM5N_KPOOL_REUSE");
++        return value != nullptr && std::atoi(value) != 0;
++    }();
++    if (!enabled || params.arch != LLM_ARCH_GLM5NEXT) {
++        return false;
++    }
++
++    const auto * next = static_cast<const llama_memory_hybrid_context *>(params.mctx);
++    if (next->get_idx() == nullptr || k_idxs->ne[0] != params.ubatch.n_tokens ||
++            n_kv_idx != next->get_idx()->get_n_kv()) {
++        return false;
++    }
++
++    const auto & ubatch = params.ubatch;
++    const int64_t n_stream = params.cparams.kv_unified ? 1 : ubatch.n_seqs_unq;
++    if (n_stream == 0 || ubatch.n_tokens % n_stream != 0 || ubatch.n_seqs_unq % n_stream != 0) {
++        return false;
++    }
++    const bool scoring = params.cparams.n_ctx > params.hparams.indexer_top_k + kpool - 1;
++    if (scoring != (pool_cells != nullptr)) {
++        return false;
++    }
++    if (scoring) {
++        const int64_t n_kv = next->get_attn()->get_n_kv();
++        const int64_t n_tps = ubatch.n_tokens / n_stream;
++        const int64_t n_pools = llama_kpool_n_pools(n_kv, kpool, ubatch.n_seqs_unq / n_stream);
++        auto shape = [](const ggml_tensor * tensor, int64_t a, int64_t b, int64_t c, int64_t d) {
++            return tensor != nullptr && tensor->ne[0] == a && tensor->ne[1] == b &&
++                tensor->ne[2] == c && tensor->ne[3] == d;
++        };
++        if (!shape(pool_cells, kpool * n_pools, n_stream, 1, 1) ||
++            !shape(pool_bias, n_pools, n_tps, n_stream, 1) ||
++            !shape(sel_mask, n_kv, n_tps, 1, n_stream) ||
++            !shape(cand_mask, n_kv, n_tps, 1, n_stream) ||
++            (pool_bias_f16 != nullptr && !shape(pool_bias_f16, n_pools, n_tps, 1, n_stream))) {
++            return false;
++        }
++    }
++
++    mctx_attn = next->get_attn();
++    mctx_idx = next->get_idx();
++    return true;
++}
++
+ void llm_graph_input_kpool::set_input(const llama_ubatch * ubatch) {
+     // unconditional: the indexer key and gate STORE runs on the dense path too,
+     // and k_idxs is what tells cpy_k where to put them. Gating the store the way
+--- a/src/llama-graph.cpp
++++ b/src/llama-graph.cpp
+@@ -3566,6 +3566,7 @@
+     GGML_ASSERT(kpool > 0);
+ 
+     auto inp = std::make_unique<llm_graph_input_kpool>(mctx_attn, mctx_idx, kpool);
++    inp->n_kv_idx = mctx_idx->get_n_kv();
+ 
+     inp->k_idxs = mctx_idx->build_input_k_idxs(ctx0, ubatch);
+     ggml_set_input(inp->k_idxs);

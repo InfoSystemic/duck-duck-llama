@@ -1,5 +1,9 @@
 # Reproducible llama.cpp patch bundles
 
+The [September 8 engineering snapshot](../engineering/2026-09-08/README.md) adds eight complete source snapshots and two selected source overlays. Use its pinned-base table for current GLM Full/Flash and Qwen work. The patches below remain historical artifacts; in particular, the old Qwen tensor-split exclusion describes an earlier correctness failure that the later goal engine repairs. Do not stack that exclusion onto the current Qwen source bundle.
+
+Two additional Full snapshots are preserved here: `llama.cpp-a302733-glm-sr950-20260901-session-start.patch` and `llama.cpp-a302733-glm-sr950-20260902-fast-stack.patch`. Both are independent deltas against `a30273376ef669023334fc20ad02ae4ed8196a65`, not patches to stack together. The current Full delta is in the September 8 bundle.
+
 These patches publish the exact source deltas used for the measured CPU and
 NUMA work in this repository. Each bundle is pinned to one upstream commit so
 it can be audited, reproduced, and rebased deliberately.

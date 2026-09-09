@@ -1,0 +1,99 @@
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -5876,8 +5876,6 @@
+             }
+         }
+ 
+-        ggml_barrier(params->threadpool);
+-
+         int active_nth = nth;
+         if (n_tokens == 1) {
+             const int requested = moe_single_token_threads();
+@@ -5885,25 +5883,27 @@
+                 active_nth = std::min(active_nth, requested);
+             }
+         }
++        static const int requested_task_rows = [] {
++            const char * value = getenv("GGML_CPU_IQ_MOE_TASK_ROWS");
++            const int rows = value ? atoi(value) : 0;
++            return rows == 16 || rows == 32 || rows == 64 ? rows : 0;
++        }();
++        const int task_rows = expanded_iq && NB_COLS == 16 && k == 2560 &&
++            n_out > 0 && n_out <= 256 && n_out % 16 == 0 && n_tokens <= 3 ? requested_task_rows : 0;
++        if (ith == 0 && task_rows) {
++            ggml_threadpool_chunk_set(params->threadpool, active_nth);
++            static std::atomic<bool> logged { false };
++            if (!logged.exchange(true, std::memory_order_relaxed)) {
++                GGML_LOG_INFO("IQ_MOE_TASK_ROWS rows=%d n_out=%" PRId64 " n_tokens=%" PRId64 "\n", task_rows, n_out, n_tokens);
++            }
++        }
++        ggml_barrier(params->threadpool);
+         if (ith >= active_nth) {
+             return;
+         }
+ 
+-        int64_t row_start = (ith * n_out) / active_nth;
+-        int64_t row_end = ((ith + 1) * n_out) / active_nth;
+-        row_start = GGML_PAD(row_start, NB_COLS);
+-        row_end = GGML_PAD(row_end, NB_COLS);
+-        row_end = std::min(row_end, n_out);
+-        if (row_start >= row_end) {
+-            return;
+-        }
+-
+-        for (int64_t expert = 0; expert < n_experts; ++expert) {
++        auto compute_rows = [&](int64_t expert, int64_t row_start, int64_t row_end) {
+             const int64_t n_rows = matrix_row_counts[expert];
+-            if (n_rows == 0) {
+-                continue;
+-            }
+-
+             const char * gate_cur = (const char *) gate_w->data + physical_expert_offset(gate_w, expert);
+             const char * up_cur = (const char *) up_w->data + physical_expert_offset(up_w, expert);
+ 
+@@ -5933,7 +5933,7 @@
+                             }
+                         }
+                     }
+-                    continue;
++                    return;
+                 }
+             }
+             for (int64_t row = 0; row < n_rows; ++row) {
+@@ -5959,6 +5959,36 @@
+                         src1_col, 1, tile_rows);
+                     ggml_vec_swiglu_f32(
+                         tile_rows, out_dst + tile_start - row_start, gate_tmp, up_tmp);
++                }
++            }
++        };
++
++        if (task_rows) {
++            const int64_t tiles = (n_out + task_rows - 1) / task_rows;
++            int64_t current = ith;
++            int64_t base = 0;
++            for (int64_t expert = 0; expert < n_experts; ++expert) {
++                if (matrix_row_counts[expert] == 0) {
++                    continue;
++                }
++                const int64_t end = base + tiles;
++                while (current < end) {
++                    GGML_ASSERT(current >= base);
++                    const int64_t row_start = (current - base) * task_rows;
++                    compute_rows(expert, row_start, std::min(row_start + task_rows, n_out));
++                    current = ggml_threadpool_chunk_add(params->threadpool, 1);
++                }
++                base = end;
++            }
++            return;
++        }
++
++        int64_t row_start = GGML_PAD((ith * n_out) / active_nth, NB_COLS);
++        int64_t row_end = std::min<int64_t>(GGML_PAD(((ith + 1) * n_out) / active_nth, NB_COLS), n_out);
++        if (row_start < row_end) {
++            for (int64_t expert = 0; expert < n_experts; ++expert) {
++                if (matrix_row_counts[expert] > 0) {
++                    compute_rows(expert, row_start, row_end);
+                 }
+             }
+         }

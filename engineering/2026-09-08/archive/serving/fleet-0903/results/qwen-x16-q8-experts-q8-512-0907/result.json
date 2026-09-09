@@ -1,0 +1,3422 @@
+{
+  "started": 1788780224.2954278,
+  "passed": true,
+  "candidate_sha256": "d213ba477ef5d3f2a68568b30a31595ef9578b6dce4b3b81e95da6f83a3dac8b",
+  "experts": 512,
+  "x16_q8_experts": true,
+  "weight_type": "q8_0",
+  "q8_gate_up_layers": [
+    2
+  ],
+  "geometry": [
+    {
+      "even_split": false,
+      "splits": [
+        {
+          "event": "split",
+          "tensor": "blk.0.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.0.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.0.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.1.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.1.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.1.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.2.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.2.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.2.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.3.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.3.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.3.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.4.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.4.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.4.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.5.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.5.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.5.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.6.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.6.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.6.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.7.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.7.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.7.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.8.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.8.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.8.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.9.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.9.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.9.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.10.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.10.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.10.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.11.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.11.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.11.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.12.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.12.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.12.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.13.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.13.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.13.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.14.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.14.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.14.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.15.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.15.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.15.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.16.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.16.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.16.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.17.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.17.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.17.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.18.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.18.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.18.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.19.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.19.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.19.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.20.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.20.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.20.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.21.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.21.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.21.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.22.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.22.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.22.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.23.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.23.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.23.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.24.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.24.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.24.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.25.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.25.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.25.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.26.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.26.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.26.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.27.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.27.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.27.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.28.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.28.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.28.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.29.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.29.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.29.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.30.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.30.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.30.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.31.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.31.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.31.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.32.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.32.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.32.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.33.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.33.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.33.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.34.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.34.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.34.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.35.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.35.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.35.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.36.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.36.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.36.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.37.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.37.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.37.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.38.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.38.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.38.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.39.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.39.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.39.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.40.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.40.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.40.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.41.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.41.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.41.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.42.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.42.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.42.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            128,
+            256
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.43.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.43.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.43.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.44.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.44.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.44.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            256,
+            128,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.45.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.45.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.45.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            256,
+            128,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.46.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.46.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.46.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.47.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.47.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.47.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            128,
+            128,
+            256,
+            128
+          ]
+        }
+      ]
+    },
+    {
+      "even_split": true,
+      "splits": [
+        {
+          "event": "split",
+          "tensor": "blk.0.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.0.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.0.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.1.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.1.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.1.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.2.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.2.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.2.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.3.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.3.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.3.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.4.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.4.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.4.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.5.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.5.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.5.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.6.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.6.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.6.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.7.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.7.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.7.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.8.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.8.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.8.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.9.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.9.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.9.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.10.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.10.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.10.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.11.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.11.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.11.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.12.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.12.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.12.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.13.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.13.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.13.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.14.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.14.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.14.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.15.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.15.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.15.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.16.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.16.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.16.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.17.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.17.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.17.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.18.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.18.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.18.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.19.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.19.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.19.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.20.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.20.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.20.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.21.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.21.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.21.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.22.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.22.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.22.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.23.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.23.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.23.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.24.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.24.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.24.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.25.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.25.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.25.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.26.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.26.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.26.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.27.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.27.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.27.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.28.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.28.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.28.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.29.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.29.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.29.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.30.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.30.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.30.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.31.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.31.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.31.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.32.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.32.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.32.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.33.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.33.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.33.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.34.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.34.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.34.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.35.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.35.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.35.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.36.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.36.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.36.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.37.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.37.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.37.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.38.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.38.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.38.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.39.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.39.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.39.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.40.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.40.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.40.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.41.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.41.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.41.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.42.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.42.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.42.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.43.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.43.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.43.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.44.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.44.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.44.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.45.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.45.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.45.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.46.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.46.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.46.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.47.ffn_gate_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.47.ffn_up_exps.weight",
+          "axis": 1,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        },
+        {
+          "event": "split",
+          "tensor": "blk.47.ffn_down_exps.weight",
+          "axis": 0,
+          "slices": [
+            160,
+            160,
+            160,
+            160
+          ]
+        }
+      ]
+    }
+  ],
+  "numeric": [
+    {
+      "tokens": 1,
+      "even_split": false,
+      "reference": {
+        "event": "ready",
+        "pid": 277279,
+        "workers": 60,
+        "chunk": 128,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 2560,
+        "rows": 640,
+        "tokens": 1,
+        "matrices": 4,
+        "experts": 512,
+        "used": 10,
+        "bytes_per_pass": 208896000,
+        "packed_weight_bytes": 10695475200,
+        "weight_hash": "2fc96920384b0b25",
+        "output_hash": "06c1410ff0001139",
+        "max_reference_error": 1.14440918e-05,
+        "weight_type": "q8_0",
+        "down_checked": true,
+        "max_down_error": 1.52587891e-05,
+        "max_down_scaled_error": 1.25242968e-05,
+        "policy_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0"
+      }
+    },
+    {
+      "tokens": 1,
+      "even_split": true,
+      "reference": {
+        "event": "ready",
+        "pid": 278070,
+        "workers": 60,
+        "chunk": 32,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 2560,
+        "rows": 640,
+        "tokens": 1,
+        "matrices": 4,
+        "experts": 512,
+        "used": 10,
+        "bytes_per_pass": 208896000,
+        "packed_weight_bytes": 10695475200,
+        "weight_hash": "2fc96920384b0b25",
+        "output_hash": "aed2d0d423aa53b6",
+        "max_reference_error": 1.14440918e-05,
+        "weight_type": "q8_0",
+        "down_checked": true,
+        "max_down_error": 3.05175781e-05,
+        "max_down_scaled_error": 1.09923858e-05,
+        "policy_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0"
+      }
+    },
+    {
+      "tokens": 3,
+      "even_split": false,
+      "reference": {
+        "event": "ready",
+        "pid": 279209,
+        "workers": 60,
+        "chunk": 128,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 2560,
+        "rows": 640,
+        "tokens": 3,
+        "matrices": 4,
+        "experts": 512,
+        "used": 10,
+        "bytes_per_pass": 292454400,
+        "packed_weight_bytes": 10695475200,
+        "weight_hash": "2fc96920384b0b25",
+        "output_hash": "890eaf3c6f8e151d",
+        "max_reference_error": 1.14440918e-05,
+        "weight_type": "q8_0",
+        "down_checked": true,
+        "max_down_error": 2.28881836e-05,
+        "max_down_scaled_error": 1.25242968e-05,
+        "policy_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0"
+      }
+    },
+    {
+      "tokens": 3,
+      "even_split": true,
+      "reference": {
+        "event": "ready",
+        "pid": 280751,
+        "workers": 60,
+        "chunk": 32,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 2560,
+        "rows": 640,
+        "tokens": 3,
+        "matrices": 4,
+        "experts": 512,
+        "used": 10,
+        "bytes_per_pass": 292454400,
+        "packed_weight_bytes": 10695475200,
+        "weight_hash": "2fc96920384b0b25",
+        "output_hash": "359c98b39be116f6",
+        "max_reference_error": 1.14440918e-05,
+        "weight_type": "q8_0",
+        "down_checked": true,
+        "max_down_error": 3.05175781e-05,
+        "max_down_scaled_error": 1.09923858e-05,
+        "policy_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0"
+      }
+    },
+    {
+      "tokens": 64,
+      "even_split": false,
+      "reference": {
+        "event": "ready",
+        "pid": 287268,
+        "workers": 60,
+        "chunk": 128,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 2560,
+        "rows": 640,
+        "tokens": 64,
+        "matrices": 4,
+        "experts": 512,
+        "used": 10,
+        "bytes_per_pass": 2840985600,
+        "packed_weight_bytes": 10695475200,
+        "weight_hash": "2fc96920384b0b25",
+        "output_hash": "5b627c751d5a3ab6",
+        "max_reference_error": 2.47955322e-05,
+        "weight_type": "q8_0",
+        "down_checked": true,
+        "max_down_error": 3.05175781e-05,
+        "max_down_scaled_error": 1.57612558e-05,
+        "policy_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0"
+      }
+    },
+    {
+      "tokens": 64,
+      "even_split": true,
+      "reference": {
+        "event": "ready",
+        "pid": 287989,
+        "workers": 60,
+        "chunk": 32,
+        "group": 1,
+        "controller_cores": 4,
+        "k": 2560,
+        "rows": 640,
+        "tokens": 64,
+        "matrices": 4,
+        "experts": 512,
+        "used": 10,
+        "bytes_per_pass": 2840985600,
+        "packed_weight_bytes": 10695475200,
+        "weight_hash": "2fc96920384b0b25",
+        "output_hash": "ce28e96ce8ca3020",
+        "max_reference_error": 2.47955322e-05,
+        "weight_type": "q8_0",
+        "down_checked": true,
+        "max_down_error": 3.05175781e-05,
+        "max_down_scaled_error": 1.45845861e-05,
+        "policy_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0"
+      }
+    }
+  ],
+  "scope": "Functional component validation; no performance claim",
+  "cpu_manifest": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-experts-0907/private-cpu/manifest.json",
+  "cpu_sha256": "c67a9b2e8ad0fe7a1565b8b261463b81cbd3524f9d8b12a3e6a95ecba68d27a8",
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-expert-graph-check.cpp": "79bfc345fdca426d446df57fb4b50e37402041a7519308ff9c3980211c121caf",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-expert-split-check.cpp": "d47305b9555d4e10e619e8b27e73f41bb9b8443359b60ae5d001b4815c676c23",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0.3.0": "d213ba477ef5d3f2a68568b30a31595ef9578b6dce4b3b81e95da6f83a3dac8b",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/llama-eval-callback": "7c89b793bd87604537d616a21c090fad75496e5b5a431a3b8c1e49f76fb1dca5",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0.22.0": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libllama-common.so.0.3.0": "254bbb98edcf3c08f51ec8c1d18caff0fb59e5ef787bffab53f6047f3f9d2932",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/llama-server": "f64facaad271e4a3250462293a1e8369a61ef1ad3b0c06cb5f63cb3f6956d845",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml.so.0.22.0": "fa52e08f7801188376f416fbffc4ea84106a231676c249892ad633722c1b81a7",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libllama-server-impl.so": "d107a53e7b8df2215771b779893f4b7c6b33e6ff41b9560dc60bb5a130700066",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libmtmd.so.0.3.0": "f6943c5ff024cd31446a8b6aef94fa405edfaceaca81cd0d32993c43a6b84fe2",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-cpu.so.0.22.0": "d5537e494dd02492edcfb2e84d737d8cc361b9f023dc4db135f66b09654bfa4b",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libllama.so.0.3.0": "f14c91f2db56f7e1bf0d88e4494595d3ca34b816e4b5dec0cacaecaa8520b98e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-experts-0907/private-cpu/manifest.json": "24e63872d5a5ef744f5e57381e72f94fcae3024d15cd65f1dc3f4067e6282c4e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-experts-0907/private-cpu/libggml-cpu.so.0.22.0": "c67a9b2e8ad0fe7a1565b8b261463b81cbd3524f9d8b12a3e6a95ecba68d27a8"
+  },
+  "cross_layout": [
+    {
+      "tokens": 1,
+      "values": 307200,
+      "max_scaled_error": 7.050809843349183e-06
+    },
+    {
+      "tokens": 3,
+      "values": 921600,
+      "max_scaled_error": 8.896645775488918e-06
+    },
+    {
+      "tokens": 64,
+      "values": 19660800,
+      "max_scaled_error": 1.4359883242930577e-05
+    }
+  ],
+  "unfused_prefill": {
+    "event": "ready",
+    "pid": 290292,
+    "workers": 60,
+    "chunk": 32,
+    "group": 1,
+    "controller_cores": 4,
+    "k": 2560,
+    "rows": 640,
+    "tokens": 64,
+    "matrices": 4,
+    "experts": 512,
+    "used": 10,
+    "bytes_per_pass": 2840985600,
+    "packed_weight_bytes": 10695475200,
+    "weight_hash": "2fc96920384b0b25",
+    "output_hash": "ce28e96ce8ca3020",
+    "max_reference_error": 2.47955322e-05,
+    "weight_type": "q8_0",
+    "down_checked": true,
+    "max_down_error": 3.05175781e-05,
+    "max_down_scaled_error": 1.45845861e-05,
+    "policy_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-expert-even-split-policy-0906b/private-split/libllama.so.0"
+  },
+  "finished": 1788780593.9643862
+}

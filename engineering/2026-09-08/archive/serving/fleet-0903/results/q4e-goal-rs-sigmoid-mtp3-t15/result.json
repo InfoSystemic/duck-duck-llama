@@ -1,0 +1,265 @@
+{
+  "config": {
+    "label": "q4e-goal-rs-sigmoid-mtp3-t15",
+    "binary": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/Qwen3.8-Flash-Next/UD-Q2_K_XL/Qwen3.8-Flash-Next-UD-Q2_K_XL-00001-of-00003.gguf",
+    "alias": "qwen-goal",
+    "runtime": "llama",
+    "ctx_size": 4096,
+    "mtp": "/models/gguf/Qwen3.8-Flash-Next/MTP/mtp-Qwen3.8-Flash-Next-Q8_0.gguf",
+    "draft_n": 3,
+    "draft_p_min": 0,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 15,
+    "fused": 1,
+    "merge": 1,
+    "repack": 1,
+    "huge_pages": 0,
+    "port": 18107,
+    "bench": true,
+    "bench_tokens": 512,
+    "profile_cpu": true,
+    "profile_phase": true
+  },
+  "started": 1788571102.5688376,
+  "checks": [
+    {
+      "expected": "391",
+      "started": 1788571322.0273829,
+      "finished": 1788571323.3533282,
+      "wall_s": 1.3259450129698962,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "Paris",
+      "started": 1788571323.4420242,
+      "finished": 1788571324.7943177,
+      "wall_s": 1.3522934620268643,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "14, 16, 18",
+      "started": 1788571324.8832386,
+      "finished": 1788571326.8836038,
+      "wall_s": 2.0003650550497696,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788571326.968681,
+      "finished": 1788571359.1156535,
+      "wall_s": 32.14697226509452,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788571359.2129889,
+      "finished": 1788571375.423307,
+      "wall_s": 16.210317578050308,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    }
+  ],
+  "runtime_env": {
+    "GGML_CPU_IQ2_XS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_Q4E_HC_TP": "1",
+    "GGML_CPU_PARALLEL_COPY": "1",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_Q8_0_REPACK_FORCE": "1",
+    "GGML_CPU_OP_PROFILE": "*",
+    "GGML_CPU_OP_PROFILE_ARM_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/q4e-goal-rs-sigmoid-mtp3-t15/cpu-profile.arm",
+    "GGML_CPU_OP_PROFILE_SKIP": "0",
+    "GGML_CPU_OP_PROFILE_COUNT": "96",
+    "LLAMA_GRAPH_PHASE_ARM_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/q4e-goal-rs-sigmoid-mtp3-t15/phase-profile.arm",
+    "GGML_Q4E_RS_ROLLBACK": "1",
+    "GGML_CPU_PARALLEL_SIGMOID": "1"
+  },
+  "memory_after_load": {
+    "VmRSS": "75067484 kB",
+    "RssAnon": "74389756 kB",
+    "RssFile": "677728 kB",
+    "Pss": "75062023 kB",
+    "AnonHugePages": "0 kB",
+    "FilePmdMapped": "0 kB"
+  },
+  "profile_responses": {
+    "phase": {
+      "choices": [
+        {
+          "finish_reason": "length",
+          "index": 0,
+          "message": {
+            "role": "assistant"
+          }
+        }
+      ],
+      "created": 1788571377,
+      "model": "qwen-goal",
+      "system_fingerprint": "b0-unknown",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 16,
+        "prompt_tokens": 30,
+        "total_tokens": 46,
+        "prompt_tokens_details": {
+          "cached_tokens": 26
+        }
+      },
+      "id": "chatcmpl-xO7ZJZIwfNadnR5Umi9xW5PjXjCt3f38",
+      "timings": {
+        "cache_n": 26,
+        "prompt_n": 4,
+        "prompt_ms": 267.449,
+        "prompt_per_token_ms": 66.86225,
+        "prompt_per_second": 14.956122475686954,
+        "predicted_n": 16,
+        "predicted_ms": 766.205,
+        "predicted_per_token_ms": 51.080333333333336,
+        "predicted_per_second": 19.5770061537056,
+        "draft_n": 12,
+        "draft_n_accepted": 11
+      }
+    },
+    "cpu": {
+      "choices": [
+        {
+          "finish_reason": "length",
+          "index": 0,
+          "message": {
+            "role": "assistant"
+          }
+        }
+      ],
+      "created": 1788571378,
+      "model": "qwen-goal",
+      "system_fingerprint": "b0-unknown",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 16,
+        "prompt_tokens": 30,
+        "total_tokens": 46,
+        "prompt_tokens_details": {
+          "cached_tokens": 26
+        }
+      },
+      "id": "chatcmpl-95aq0b18KMZQbFHmMIhrtfonzRVEoKso",
+      "timings": {
+        "cache_n": 26,
+        "prompt_n": 4,
+        "prompt_ms": 333.891,
+        "prompt_per_token_ms": 83.47275,
+        "prompt_per_second": 11.979957531050552,
+        "predicted_n": 16,
+        "predicted_ms": 904.408,
+        "predicted_per_token_ms": 60.293866666666666,
+        "predicted_per_second": 16.58543489221679,
+        "draft_n": 12,
+        "draft_n_accepted": 11
+      }
+    }
+  },
+  "profile_response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "role": "assistant"
+        }
+      }
+    ],
+    "created": 1788571378,
+    "model": "qwen-goal",
+    "system_fingerprint": "b0-unknown",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 16,
+      "prompt_tokens": 30,
+      "total_tokens": 46,
+      "prompt_tokens_details": {
+        "cached_tokens": 26
+      }
+    },
+    "id": "chatcmpl-95aq0b18KMZQbFHmMIhrtfonzRVEoKso",
+    "timings": {
+      "cache_n": 26,
+      "prompt_n": 4,
+      "prompt_ms": 333.891,
+      "prompt_per_token_ms": 83.47275,
+      "prompt_per_second": 11.979957531050552,
+      "predicted_n": 16,
+      "predicted_ms": 904.408,
+      "predicted_per_token_ms": 60.293866666666666,
+      "predicted_per_second": 16.58543489221679,
+      "draft_n": 12,
+      "draft_n_accepted": 11
+    }
+  },
+  "finished": 1788571386.433043,
+  "server_exit": 0
+}

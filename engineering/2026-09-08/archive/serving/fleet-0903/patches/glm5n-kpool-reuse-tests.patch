@@ -1,0 +1,57 @@
+--- a/tests/test-glm5next-memory.cpp
++++ b/tests/test-glm5next-memory.cpp
+@@ -350,6 +350,7 @@
+ 
+     llama_model_params mparams = llama_model_default_params();
+     mparams.n_gpu_layers = 0;
++    mparams.load_mtp = std::getenv("LLAMA_TEST_MTP_SIDECAR") != nullptr;
+ 
+     llama_model * model = llama_model_load_from_file(argv[1], mparams);
+     if (model == nullptr) {
+@@ -487,6 +488,46 @@
+ 
+                     kpool_tensors kt = alloc_kpool_tensors(ctx, n_kv, n_tps, n_tps, n_stream, kpool, n_pools);
+ 
++                    if (const char * reuse_env = std::getenv("GGML_GLM5N_KPOOL_REUSE"); reuse_env && std::atoi(reuse_env)) {
++                        llm_graph_params params = {};
++                        params.arch = model->arch;
++                        params.hparams = hparams;
++                        params.cparams = cp;
++                        params.cparams.n_ctx = hparams.indexer_top_k + kpool;
++                        params.ubatch = ub;
++                        params.mctx = mc;
++                        llm_graph_input_kpool input(nullptr, nullptr, kpool);
++                        input.n_kv_idx = mc->get_idx()->get_n_kv();
++                        input.k_idxs = ggml_new_tensor_1d(ctx, GGML_TYPE_I32, ub.n_tokens);
++                        input.pool_cells = kt.pool_cells;
++                        input.pool_bias = kt.pool_bias;
++                        input.sel_mask = kt.sel_mask_f16;
++                        input.cand_mask = kt.cand_mask_f16;
++                        CHECK(input.can_reuse(params), "pooled input reuses matching shapes across two unified sequences");
++                        CHECK(input.mctx_attn == mc->get_attn() && input.mctx_idx == mc->get_idx(),
++                                "pooled input refreshes both memory contexts");
++                        input.n_kv_idx++;
++                        CHECK(!input.can_reuse(params), "pooled input rejects a changed indexer cache width");
++                        input.n_kv_idx--;
++                        params.ubatch.n_tokens--;
++                        CHECK(!input.can_reuse(params), "pooled input rejects a changed token count");
++                        params.ubatch.n_tokens++;
++                        params.ubatch.n_seqs_unq++;
++                        CHECK(!input.can_reuse(params), "pooled input rejects a changed per-sequence pool budget");
++                        params.ubatch.n_seqs_unq--;
++                        ggml_tensor wrong_mask = *input.sel_mask;
++                        wrong_mask.ne[1]--;
++                        input.sel_mask = &wrong_mask;
++                        CHECK(!input.can_reuse(params), "pooled input rejects an incompatible mask shape");
++                        input.sel_mask = kt.sel_mask_f16;
++                        params.cparams.n_ctx = hparams.indexer_top_k;
++                        CHECK(!input.can_reuse(params), "pooled input rejects a change from sparse to dense topology");
++                        llm_graph_input_kpool dense(nullptr, nullptr, kpool);
++                        dense.k_idxs = input.k_idxs;
++                        dense.n_kv_idx = input.n_kv_idx;
++                        CHECK(dense.can_reuse(params), "dense indexer storage reuses matching input and cache widths");
++                    }
++
+                     ggml_backend_t        backend = ggml_backend_cpu_init();
+                     ggml_backend_buffer_t buf     = ggml_backend_alloc_ctx_tensors(ctx, backend);
+ 

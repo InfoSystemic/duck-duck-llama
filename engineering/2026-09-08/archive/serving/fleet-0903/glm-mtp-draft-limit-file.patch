@@ -1,0 +1,48 @@
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -16,6 +16,7 @@
+ #include <cassert>
+ #include <cstring>
+ #include <iomanip>
++#include <fstream>
+ #include <map>
+ #include <cinttypes>
+ 
+@@ -1289,6 +1290,7 @@
+     std::vector<llama_sampler *> backend_chains;
+ 
+     int32_t n_embd = 0;
++    int32_t reported_n_max = -1;
+ 
+     // One MTP draft driver, three modes (set once in the ctor):
+     //   is_mem_shared (gemma4): shares the target KV, runs all heads in one graph.
+@@ -1551,6 +1553,20 @@
+ 
+     void draft(common_speculative_draft_params_vec & dparams) override {
+         auto & ctx_dft = params.ctx_dft;
++        int32_t n_max = params.n_max;
++        static const char * limit_file = getenv("LLAMA_MTP_DRAFT_N_FILE");
++        if (limit_file) {
++            std::ifstream input(limit_file);
++            int32_t requested = 0;
++            if (input >> requested && requested > 0) {
++                n_max = std::min(n_max, requested);
++            }
++            if (reported_n_max != n_max) {
++                SPC_INF("MTP_DRAFT_LIMIT active=%d configured=%d\n", n_max, params.n_max);
++                reported_n_max = n_max;
++            }
++        }
++
+ 
+         common_batch_clear(batch);
+ 
+@@ -1647,7 +1663,7 @@
+ 
+                 result.push_back(id);
+ 
+-                if (params.n_max <= (int) result.size()) {
++                if (n_max <= (int) result.size()) {
+                     drafting[seq_id] = false;
+                     n_drafting--;
+                     continue;

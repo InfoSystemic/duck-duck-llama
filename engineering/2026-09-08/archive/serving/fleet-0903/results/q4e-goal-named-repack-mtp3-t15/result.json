@@ -1,0 +1,139 @@
+{
+  "config": {
+    "label": "q4e-goal-named-repack-mtp3-t15",
+    "binary": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/Qwen3.8-Flash-Next/UD-Q2_K_XL/Qwen3.8-Flash-Next-UD-Q2_K_XL-00001-of-00003.gguf",
+    "alias": "qwen-goal",
+    "runtime": "llama",
+    "ctx_size": 4096,
+    "mtp": "/models/gguf/Qwen3.8-Flash-Next/MTP/mtp-Qwen3.8-Flash-Next-Q8_0.gguf",
+    "draft_n": 3,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 15,
+    "fused": 1,
+    "merge": 1,
+    "repack": 1,
+    "huge_pages": 0,
+    "port": 18105,
+    "bench": true,
+    "bench_tokens": 160,
+    "profile_cpu": false
+  },
+  "started": 1788564556.4730654,
+  "checks": [
+    {
+      "expected": "391",
+      "started": 1788564679.9883575,
+      "finished": 1788564681.6160777,
+      "wall_s": 1.6277193609857932,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.61
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "Paris",
+      "started": 1788564681.70969,
+      "finished": 1788564683.2743387,
+      "wall_s": 1.5646491619991139,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "14, 16, 18",
+      "started": 1788564683.3701391,
+      "finished": 1788564686.0145483,
+      "wall_s": 2.644408321939409,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788564686.106688,
+      "finished": 1788564706.0724828,
+      "wall_s": 19.965794855961576,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788564706.163341,
+      "finished": 1788564720.253807,
+      "wall_s": 14.090465788030997,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    }
+  ],
+  "runtime_env": {
+    "GGML_CPU_IQ2_XS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0"
+  },
+  "memory_after_load": {
+    "VmRSS": "76669188 kB",
+    "RssAnon": "75991652 kB",
+    "RssFile": "677536 kB",
+    "Pss": "76663729 kB",
+    "AnonHugePages": "0 kB",
+    "FilePmdMapped": "0 kB"
+  },
+  "finished": 1788564726.1882422,
+  "server_exit": 0
+}

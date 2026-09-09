@@ -1,0 +1,130 @@
+{
+  "config": {
+    "label": "ik-qwen-goal-t64-repack-faon",
+    "binary": "/home/user/InfoSystemic/AI-Server/engines/ik_llama.cpp-flash-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/Qwen3.8-Flash-Next/UD-Q2_K_XL/Qwen3.8-Flash-Next-UD-Q2_K_XL-00001-of-00003.gguf",
+    "alias": "qwen-goal",
+    "runtime": "ik",
+    "ctx_size": 4096,
+    "mtp": null,
+    "draft_n": 1,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 0,
+    "threads": 64,
+    "fused": 0,
+    "merge": 0,
+    "repack": 1,
+    "huge_pages": 0,
+    "port": 18105,
+    "bench": true,
+    "bench_tokens": 160,
+    "profile_cpu": false,
+    "profile_phase": false
+  },
+  "started": 1788565913.1689484,
+  "checks": [
+    {
+      "expected": "391",
+      "started": 1788566050.575717,
+      "finished": 1788566051.551974,
+      "wall_s": 0.976258235052228,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "Paris",
+      "started": 1788566051.6361542,
+      "finished": 1788566052.5852396,
+      "wall_s": 0.9490849330322817,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "14, 16, 18",
+      "started": 1788566052.6729796,
+      "finished": 1788566054.606911,
+      "wall_s": 1.9339314990211278,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788566054.7015831,
+      "finished": 1788566073.2786615,
+      "wall_s": 18.577078005997464,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788566073.369332,
+      "finished": 1788566089.0024107,
+      "wall_s": 15.633078737999313,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    }
+  ],
+  "runtime_env": {
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "64",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "0",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "0",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "0",
+    "GGML_CPU_NUMA_HUGEPAGES": "0"
+  },
+  "memory_after_load": {
+    "VmRSS": "77377664 kB",
+    "RssAnon": "77364532 kB",
+    "RssFile": "13132 kB",
+    "Pss": "77373482 kB",
+    "AnonHugePages": "0 kB",
+    "FilePmdMapped": "0 kB"
+  },
+  "finished": 1788566096.5395045,
+  "server_exit": 0
+}

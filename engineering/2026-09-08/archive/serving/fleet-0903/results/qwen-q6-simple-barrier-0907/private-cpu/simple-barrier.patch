@@ -1,0 +1,48 @@
+--- /home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu.c
++++ /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-simple-barrier-0907/private-cpu/ggml-cpu.c
+@@ -575,6 +575,10 @@
+ 
+ static struct ggml_state g_state = {0};
+ 
++#ifdef GGML_USE_OPENMP
++static bool ggml_cpu_omp_simple_barrier = false;
++#endif
++
+ void ggml_barrier(struct ggml_threadpool * tp) {
+     int n_threads = atomic_load_explicit(&tp->n_graph, memory_order_relaxed) & GGML_THREADPOOL_N_THREADS_MASK;
+     if (n_threads == 1) {
+@@ -582,8 +586,11 @@
+     }
+ 
+ #ifdef GGML_USE_OPENMP
+-    #pragma omp barrier
+-#else
++    if (!ggml_cpu_omp_simple_barrier) {
++        #pragma omp barrier
++        return;
++    }
++#endif
+     int n_passed = atomic_load_explicit(&tp->n_barrier_passed, memory_order_relaxed);
+ 
+     // enter barrier (full seq-cst fence)
+@@ -610,7 +617,6 @@
+     #else
+     atomic_thread_fence(memory_order_seq_cst);
+     #endif
+-#endif
+ }
+ 
+ void ggml_threadpool_chunk_set(struct ggml_threadpool * tp, int value) {
+@@ -4767,6 +4773,12 @@
+         ggml_init_riscv_arch_features();
+ #endif
+ 
++#ifdef GGML_USE_OPENMP
++        {
++            const char * env = getenv("GGML_CPU_OMP_SIMPLE_BARRIER");
++            ggml_cpu_omp_simple_barrier = (env != NULL && atoi(env) == 1);
++        }
++#endif
+         {
+             const char * env = getenv("GGML_CPU_DISABLE_FUSION");
+             ggml_cpu_disable_fusion = (env != NULL && atoi(env) == 1);

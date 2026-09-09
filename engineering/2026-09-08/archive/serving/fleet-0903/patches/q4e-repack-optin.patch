@@ -1,0 +1,19 @@
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -1247,15 +1247,7 @@
+         }
+     }
+ 
+-    // A Meta (tensor-parallel) device composes its extra buffer types from the
+-    // matching per-device ones. Offer those BEFORE the plain device buffer so
+-    // eligible weights keep node locality and land on the repacked kernels;
+-    // without this the x16 AVX-512-VNNI paths are compiled but never selected.
+-    // Only offer the meta device its composed node-local REPACK buffers when
+-    // repacking was actually asked for. The repack buffer's set_tensor asserts
+-    // size == ggml_nbytes(tensor), which a tensor-parallel load violates because
+-    // it writes per-device SLICES, so preferring it unconditionally turns every
+-    // TP load into an abort.
++    // NUMA repacking is opt-in; use each device's local extra buffer when enabled.
+     static const bool meta_repack_bufts = []() {
+         const char * v = getenv("GGML_CPU_NUMA_REPACK");
+         return v != nullptr && atoi(v) != 0;

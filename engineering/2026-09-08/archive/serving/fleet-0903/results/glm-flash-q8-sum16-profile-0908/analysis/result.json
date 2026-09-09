@@ -1,0 +1,227 @@
+{
+  "time": 1788888670.6502845,
+  "passed": true,
+  "pid": 3335065,
+  "cpu_sha256": "eb1fb1035f8e4ce972df6f9c40a5aadddb057bc34cb32b45a020d890b83b718f",
+  "sample_count": 94196,
+  "sample_counts": {
+    "other": 11489,
+    "gomp_spin": 28769,
+    "q8_sum16": 23274,
+    "gomp_other": 1405,
+    "q8_x8": 995,
+    "q8_x16": 24933,
+    "f32_dot": 3331
+  },
+  "period_percent": {
+    "other": 11.61768924972214,
+    "gomp_spin": 31.026545460914747,
+    "q8_sum16": 24.89052819495585,
+    "gomp_other": 1.498176838340234,
+    "q8_x8": 1.0587735501092144,
+    "q8_x16": 26.38443427375085,
+    "f32_dot": 3.5238524322069695
+  },
+  "total_sampled_period": 1182407870664,
+  "fast_sum_offsets": {
+    "0x1b26bc": 2269,
+    "0x1b2713": 145,
+    "0x1b26ff": 104,
+    "0x1b2636": 6493,
+    "0x1b271f": 347,
+    "0x1b2624": 4069,
+    "0x1b2686": 288,
+    "0x1b2694": 2226,
+    "0x1b2672": 255,
+    "0x1b2680": 710,
+    "0x1b26a8": 2226,
+    "0x1b26ae": 364,
+    "0x1b2719": 255,
+    "0x1b26d8": 478,
+    "0x1b265e": 131,
+    "0x1b2658": 831,
+    "0x1b2665": 50,
+    "0x1b268d": 52,
+    "0x1b266c": 715,
+    "0x1b26d2": 21,
+    "0x1b262a": 71,
+    "0x1b26c2": 354,
+    "0x1b264a": 139,
+    "0x1b269a": 271,
+    "0x1b2705": 109,
+    "0x1b2651": 2,
+    "0x1b272e": 6,
+    "0x1b2679": 7,
+    "0x1b2639": 29,
+    "0x1b25fa": 2,
+    "0x1b2640": 47,
+    "0x1b26a1": 6,
+    "0x1b261a": 43,
+    "0x1b26f6": 7,
+    "0x1b26ce": 8,
+    "0x1b270c": 5,
+    "0x1b26ee": 89,
+    "0x1b26b5": 21,
+    "0x1b2742": 1,
+    "0x1b26e3": 4,
+    "0x1b26c7": 16,
+    "0x1b2602": 2,
+    "0x1b25e9": 1,
+    "0x1b25c0": 1,
+    "0x1b2586": 2,
+    "0x1b26df": 1,
+    "0x1b25a4": 1
+  },
+  "mapped_libraries": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-0908/private-cpu/libggml-cpu.so.0.22.0": [
+      [
+        133027919298560,
+        133027919458304,
+        0
+      ],
+      [
+        133027919458304,
+        133027921084416,
+        159744
+      ],
+      [
+        133027921084416,
+        133027921264640,
+        1785856
+      ],
+      [
+        133027921264640,
+        133027921272832,
+        1966080
+      ],
+      [
+        133027921272832,
+        133027921281024,
+        1974272
+      ]
+    ],
+    "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0": [
+      [
+        133027947380736,
+        133027947425792,
+        0
+      ],
+      [
+        133027947425792,
+        133027947671552,
+        45056
+      ],
+      [
+        133027947671552,
+        133027947724800,
+        290816
+      ],
+      [
+        133027947724800,
+        133027947728896,
+        344064
+      ],
+      [
+        133027947728896,
+        133027947732992,
+        348160
+      ]
+    ]
+  },
+  "gomp_sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1",
+  "lost_records": 0,
+  "loss_check_command": [
+    "sudo",
+    "-n",
+    "perf",
+    "script",
+    "-G",
+    "--show-lost-events",
+    "-F",
+    "event",
+    "-i",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-profile-0908/prose-draft0/perf.data"
+  ],
+  "earlier_pool_categories": {
+    "total_sampled_cycles": 1181490094083,
+    "q8_x16_pct": 51.43198034890265,
+    "other_pct": 11.785237521527476,
+    "gomp_spin_pct": 30.74725445962815,
+    "f32_dot_pct": 3.472775841412818,
+    "q8_x8_pct": 1.1324643254317506,
+    "gomp_other_pct": 1.4302875030971578
+  },
+  "top_symbols": [
+    {
+      "symbol": "[unknown]",
+      "percent": 34.658840663574516
+    },
+    {
+      "symbol": "ggml_gemv_q8_0_x16_q8_0",
+      "percent": 26.38443427375085
+    },
+    {
+      "symbol": "void flash_q8_sum_candidate<2>(int, float*, unsigned long, void const*, void const*, int, int) [clone .constprop.0]",
+      "percent": 24.89052819495585
+    },
+    {
+      "symbol": "ggml_vec_dot_f32",
+      "percent": 3.5238524322069695
+    },
+    {
+      "symbol": "ggml_compute_forward_concat",
+      "percent": 1.6419738701584667
+    },
+    {
+      "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+      "percent": 1.0587735501092144
+    },
+    {
+      "symbol": "ggml_vec_dot_q8_0_q8_0",
+      "percent": 0.9274847786526912
+    },
+    {
+      "symbol": "ggml_compute_forward_add_non_quantized",
+      "percent": 0.6786389410190442
+    },
+    {
+      "symbol": "ggml_threadpool_chunk_add",
+      "percent": 0.6375301023467308
+    },
+    {
+      "symbol": "ggml_compute_forward_dsv4_hc_pre",
+      "percent": 0.5074069443254651
+    },
+    {
+      "symbol": "ggml_graph_compute_thread.isra.0",
+      "percent": 0.3958921586314607
+    },
+    {
+      "symbol": "ggml_compute_forward_gated_delta_net",
+      "percent": 0.3792078772684471
+    },
+    {
+      "symbol": "ggml_compute_forward_dsv4_hc_post",
+      "percent": 0.33708882940382745
+    },
+    {
+      "symbol": "ggml_backend_meta_fused_reduce_op(ggml_tensor*, int, int, void*)",
+      "percent": 0.3099081057319257
+    },
+    {
+      "symbol": "ggml_compute_forward_mul",
+      "percent": 0.2886412667469324
+    }
+  ],
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/analyze_flash_sum16_profile_0908.py": "527ff983e1e0e0485f38a6e197ad024c95354ca3d81e37cc1f7b2e0ac6f06b1e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-profile-0908/result.json": "b394e8f42cb910529b416a6bff1576296aba48ac9230de6e8388b8e92040948c",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-profile-0908/prose-draft0/samples-by-thread.txt": "ff9cbee231bf7a961c43bad14553ade75b6c17ea4c89ed91a0eed4226423001a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-profile-0908/prose-draft0/record.log": "4915c08bb62f955da7ad3de0599aae4f80d552edd3ed156ea66c595b974aba7d",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-profile-0908/analysis/host-library.json": "7963d3d7a79a23eb104c1a7e10012d0f8f42f50a24bedb034e8ff7668a453e65",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-profile-0908/analysis/thread-analysis.json": "71e250dbb2bebf51979b1821668f2d7d0716da5063beed38e52192904030ee76",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-0908/private-cpu/libggml-cpu.so.0.22.0": "eb1fb1035f8e4ce972df6f9c40a5aadddb057bc34cb32b45a020d890b83b718f",
+    "/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+  },
+  "scope": "Verified helper execution and sampled user-cycle distribution. Sample fractions are not removable wall-time fractions; profiled speed is not the unprofiled benchmark."
+}

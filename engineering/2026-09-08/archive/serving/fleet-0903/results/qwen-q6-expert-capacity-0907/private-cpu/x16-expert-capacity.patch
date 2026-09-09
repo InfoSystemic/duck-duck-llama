@@ -1,0 +1,24 @@
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -7121,8 +7121,8 @@
+         ggml_barrier(params->threadpool);
+         constexpr int64_t tile = 64;
+         const int64_t n_tiles = (nr0 + tile - 1) / tile;
+-        int active[256]; int n_active = 0;
+-        GGML_ASSERT(n_as <= 256);
++        int active[512]; int n_active = 0;
++        GGML_ASSERT(n_as <= 512);
+         for (int e = 0; e < n_as; ++e) {
+             if (counts[e] > 0) active[n_active++] = e;
+         }
+@@ -7196,8 +7196,8 @@
+         // shared with another process does not stall the whole socket at the next barrier.
+         constexpr int64_t tile = 64;
+         const int64_t n_tiles = (n_out + tile - 1) / tile;
+-        int active[256]; int n_active = 0;
+-        GGML_ASSERT(n_experts <= 256);
++        int active[512]; int n_active = 0;
++        GGML_ASSERT(n_experts <= 512);
+         for (int64_t e = 0; e < n_experts; ++e) {
+             if (counts[e] > 0) active[n_active++] = (int) e;
+         }

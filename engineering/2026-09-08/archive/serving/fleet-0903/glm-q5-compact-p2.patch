@@ -1,0 +1,58 @@
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -6766,10 +6766,11 @@
+     }
+ }
+ 
+-template <int NR, bool COMPACT = false>
++template <int NR, bool COMPACT = false, int NP = 4>
+ static void ggml_gemv_q5_K_x16_bytes_impl(
+         int n, float * s, size_t bs, const void * vx, const void * vy, int nc) {
+     GGML_ASSERT(n % QK_K == 0 && nc % 16 == 0 && NR >= 1 && NR <= 3);
++    static_assert(NP == 2 || NP == 4);
+     const int nb = n / QK_K;
+     using block_type = std::conditional_t<COMPACT, block_q5_K_x16, block_q5_K_x16_bytes>;
+     const auto * weights = (const block_type *) vx;
+@@ -6783,8 +6784,8 @@
+             __m512i isum[NR], imin[NR];
+             for (int y = 0; y < NR; ++y) isum[y] = imin[y] = _mm512_setzero_si512();
+             for (int sb = 0; sb < 8; ++sb) {
+-                __m512i dots[NR][4];
+-                for (int y = 0; y < NR; ++y) for (int part = 0; part < 4; ++part) dots[y][part] = _mm512_setzero_si512();
++                __m512i dots[NR][NP];
++                for (int y = 0; y < NR; ++y) for (int part = 0; part < NP; ++part) dots[y][part] = _mm512_setzero_si512();
+ #if defined(__GNUC__)
+ #pragma GCC unroll 8
+ #endif
+@@ -6805,14 +6806,15 @@
+                     for (int y = 0; y < NR; ++y) {
+                         int32_t aq;
+                         memcpy(&aq, activations[y * nb + b].qs + sb * 32 + chunk * 4, sizeof(aq));
+-                        dots[y][chunk & 3] = _mm512_dpbusd_epi32(dots[y][chunk & 3], q, _mm512_set1_epi32(aq));
++                        dots[y][chunk & (NP - 1)] = _mm512_dpbusd_epi32(dots[y][chunk & (NP - 1)], q, _mm512_set1_epi32(aq));
+                     }
+                 }
+                 const __m512i scale = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i *) w[b].scales[sb]));
+                 const __m512i min = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i *) w[b].mins[sb]));
+                 for (int y = 0; y < NR; ++y) {
+                     const block_q8_K & a = activations[y * nb + b];
+-                    const __m512i dot = _mm512_add_epi32(_mm512_add_epi32(dots[y][0], dots[y][1]), _mm512_add_epi32(dots[y][2], dots[y][3]));
++                    __m512i dot = _mm512_add_epi32(dots[y][0], dots[y][1]);
++                    if constexpr (NP == 4) dot = _mm512_add_epi32(dot, _mm512_add_epi32(dots[y][2], dots[y][3]));
+                     isum[y] = _mm512_add_epi32(isum[y], _mm512_mullo_epi32(dot, scale));
+                     imin[y] = _mm512_add_epi32(imin[y], _mm512_mullo_epi32(min, _mm512_set1_epi32(int(a.bsums[2 * sb]) + a.bsums[2 * sb + 1])));
+                 }
+@@ -6864,7 +6866,12 @@
+ static void ggml_gemv_q5_K_x16_compact_p4_q8_K(
+         int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     GGML_ASSERT(nr >= 1 && nr <= 3);
+-    if (nr == 3) ggml_gemv_q5_K_x16_bytes_impl<3, true>(n, s, bs, vx, vy, nc);
++    static const bool pair_accumulators = [] {
++        const char * value = getenv("GGML_CPU_X16_Q5_COMPACT_P2");
++        return value && atoi(value) == 1;
++    }();
++    if (nr == 3 && pair_accumulators) ggml_gemv_q5_K_x16_bytes_impl<3, true, 2>(n, s, bs, vx, vy, nc);
++    else if (nr == 3) ggml_gemv_q5_K_x16_bytes_impl<3, true>(n, s, bs, vx, vy, nc);
+     else if (nr == 2) ggml_gemv_q5_K_x16_bytes_impl<2, true>(n, s, bs, vx, vy, nc);
+     else ggml_gemv_q5_K_x16_bytes_impl<1, true>(n, s, bs, vx, vy, nc);
+ }

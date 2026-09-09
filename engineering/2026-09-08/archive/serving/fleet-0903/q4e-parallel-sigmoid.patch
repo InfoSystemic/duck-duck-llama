@@ -1,0 +1,84 @@
+--- a/ggml/src/ggml-cpu/unary-ops.h
++++ b/ggml/src/ggml-cpu/unary-ops.h
+@@ -5,6 +5,8 @@
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
++
++bool ggml_cpu_parallel_sigmoid_enabled(void);
+ 
+ void ggml_compute_forward_abs(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_sgn(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+--- a/ggml/src/ggml-cpu/unary-ops.cpp
++++ b/ggml/src/ggml-cpu/unary-ops.cpp
+@@ -1,4 +1,14 @@
+ #include "unary-ops.h"
++
++#include <cstdlib>
++
++bool ggml_cpu_parallel_sigmoid_enabled(void) {
++    static const bool enabled = []() {
++        const char * value = std::getenv("GGML_CPU_PARALLEL_SIGMOID");
++        return value != nullptr && std::atoi(value) != 0;
++    }();
++    return enabled;
++}
+ 
+ static inline float op_abs(float x) {
+     return fabsf(x);
+@@ -117,6 +127,27 @@
+ 
+     GGML_ASSERT( nb0 == sizeof(dst_t));
+     GGML_ASSERT(nb00 == sizeof(src0_t));
++
++    if constexpr (op == op_sigmoid) {
++        if (ggml_cpu_parallel_sigmoid_enabled()) {
++            const int64_t count = ggml_nelements(dst);
++            const int64_t chunk = (count + params->nth * 64 - 1) / (params->nth * 64) * 64;
++            const int64_t end = std::min(count, chunk * (params->ith + 1));
++            for (int64_t first = chunk * params->ith; first < end;) {
++                const int64_t column = first % ne0;
++                const int64_t row = first / ne0;
++                const int64_t i01 = row % ne1;
++                const int64_t i02 = (row / ne1) % ne2;
++                const int64_t i03 = row / (ne1 * ne2);
++                const int64_t length = std::min(end - first, ne0 - column);
++                auto * out = (dst_t *) ((char *) dst->data + i01 * nb1 + i02 * nb2 + i03 * nb3) + column;
++                const auto * in = (const src0_t *) ((const char *) src0->data + i01 * nb01 + i02 * nb02 + i03 * nb03) + column;
++                vec_unary_op<op>(length, out, in);
++                first += length;
++            }
++            return;
++        }
++    }
+ 
+     const auto [ir0, ir1] = get_thread_range(params, src0);
+ 
+@@ -334,4 +365,3 @@
+ 
+     unary_op_functor(params, dst, xielu_op_params);
+ }
+-
+--- a/ggml/src/ggml-cpu/ggml-cpu.c
++++ b/ggml/src/ggml-cpu/ggml-cpu.c
+@@ -2739,7 +2739,6 @@
+                 case GGML_UNARY_OP_TANH:
+                 case GGML_UNARY_OP_ELU:
+                 case GGML_UNARY_OP_RELU:
+-                case GGML_UNARY_OP_SIGMOID:
+                 case GGML_UNARY_OP_HARDSWISH:
+                 case GGML_UNARY_OP_HARDSIGMOID:
+                 case GGML_UNARY_OP_EXP:
+@@ -2751,6 +2750,12 @@
+                 case GGML_UNARY_OP_TRUNC:
+                     {
+                         n_tasks = 1;
++                    } break;
++
++                case GGML_UNARY_OP_SIGMOID:
++                    {
++                        n_tasks = ggml_cpu_parallel_sigmoid_enabled()
++                            ? MIN(n_threads, MAX(1, (ggml_nelements(node) + 1023) / 1024)) : 1;
+                     } break;
+ 
+                 case GGML_UNARY_OP_GELU:

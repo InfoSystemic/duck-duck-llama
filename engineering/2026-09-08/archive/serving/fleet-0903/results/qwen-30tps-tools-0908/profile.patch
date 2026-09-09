@@ -1,0 +1,117 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/profile_glm_flash_q8_0908.py
++++ /home/user/InfoSystemic/AI-Server/serving/fleet-0903/profile_qwen_resident_0908.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Sample the loaded Flash Q8 decode after warmup with queue-aware guards."""
++"""Profile resident Qwen Q6 after warmup without adopting or reconfiguring it."""
+ import argparse
+ import fcntl
+ import shutil
+@@ -27,6 +27,7 @@
+ parser.add_argument('--drafts',default='2')
+ parser.add_argument('--allowed-idle-pids',default='4005448')
+ parser.add_argument('--after',type=Path,required=True)
++parser.add_argument('--resident-controller',type=Path,required=True)
+ parser.add_argument('--counter-events',help='Collect perf stat totals for these events instead of cycle samples')
+ parser.add_argument('--record-event',default='cycles:u',help='Event to sample when not collecting stat totals')
+ parser.add_argument('--sample-frequency',type=int,default=199)
+@@ -35,7 +36,8 @@
+ parser.add_argument('--call-graph', choices=('dwarf,8192',))
+ options=parser.parse_args()
+ assert re.fullmatch(r"[A-Za-z0-9_-]+", options.label)
+-assert options.port == 18131 and options.alias == 'glm-flash-q8-trial' and options.allowed_idle_pids == ''
++assert options.port == 18095 and options.alias == 'qwen-goal' and options.allowed_idle_pids == ''
++assert int(options.drafts) == 4
+ assert options.sample_frequency == 199 and options.record_event == 'cycles:u'
+ assert not options.counter_events and not options.sample_addresses
+ assert 32 <= options.tokens <= 1024
+@@ -46,7 +48,7 @@
+ assert shutil.disk_usage(base).free > (5 << 30)
+ out=base/'results'/options.label
+ out.mkdir(exist_ok=False)
+-result=dict(config={**vars(options),'after':str(options.after)},started=time.time(),profiles=[],completed=False,checks=[])
++result=dict(config={**vars(options),'after':str(options.after),'resident_controller':str(options.resident_controller)},started=time.time(),profiles=[],completed=False,checks=[])
+ 
+ def save():
+     temporary = out / 'result.json.tmp'
+@@ -107,10 +109,16 @@
+ 
+ for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+     signal.signal(signum, signal_abort)
+-from glm_flash_q8_trial import Manager
+-manager = Manager()
+-current = manager.validate_current()
+-assert manager.qwen.state['full_stopped'] and not manager.qwen.state.get('current')
++from qwen_high_quant_trial import unit_state
++controller = json.loads(options.resident_controller.read_text())
++assert controller['passed'] and controller['measurement'] == str(options.after)
++assert controller['measurement_sha256'] == hashlib.sha256(options.after.read_bytes()).hexdigest()
++assert all(hashlib.sha256(Path(p).read_bytes()).hexdigest() == h for p, h in controller['source_sha256'].items())
++assert all(hashlib.sha256(Path(p).read_bytes()).hexdigest() == h for p, h in controller['mapped_libraries'].items())
++assert unit_state()['ActiveState'] == 'inactive'
++assert controller['effective_draft_limit'] == 4 and controller['effective_p_min'] == 0.3
++current = dict(pid=controller['config']['pid'], info=controller['process'],
++               command=controller['process']['command'], runtime_env=controller['runtime_env'], workers=15, drafts=int(options.drafts))
+ result['current'] = current
+ assert current['pid'] == options.pid and str(current['drafts']) == options.drafts
+ plan = dict(protected={str(options.pid): dict(start_ticks=current['info']['start'], exe=current['info']['exe'])},
+@@ -125,18 +133,19 @@
+ assert result['protected_before'][str(options.pid)]['info']['command'] == plan['original_command']
+ assert result['protected_before'][str(options.pid)]['environment'] == plan['original_environment']
+ source_paths = [Path(__file__).resolve(), base / 'model_measurement_guard.py', base / 'guarded_inference_request.py',
+-                base / 'qwen_split_trial.py', base / 'inference_contention_guard.py', base / 'glm_flash_q8_trial.py', plan_path]
++                base / 'qwen_split_trial.py', base / 'inference_contention_guard.py', options.resident_controller, plan_path]
+ result['source_sha256'] = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
+ for p in source_paths:
+     (out / p.name).write_bytes(p.read_bytes())
+-guard = ModelMeasurementGuard(options.pid, {str(options.pid): 18131}, snapshot)
+-result['note'] = 'Cycle profiles of the unchanged launched Flash Q8 configuration, armed after 32 streamed events. Sampling can affect throughput; these are not independent bandwidth or completed-task speed benchmarks.'
++guard = ModelMeasurementGuard(options.pid, {str(options.pid): 18095}, snapshot)
++result['note'] = 'Cycle profiles of the unchanged resident Qwen Q6 runtime after 32 streamed events. This pinned server ignores request speculative overrides; the verified effective launch configuration is MTP4/p_min=0.3. Fresh requests disable prompt reuse. Profiling rates are excluded from throughput and bandwidth claims.'
+ save()
+ try:
+     prior = json.loads(options.after.read_text())
+     assert prior.get('finished') and not prior.get('error'), 'Required completed baseline is absent or invalid'
+     assert prior['input_integrity_verified'] and prior['target_pid'] == options.pid
+     assert prior['server_command'] == current['command'] and prior['runtime_env'] == current['runtime_env']
++    assert {x['kind'] for x in prior['measurements'] if x['draft_n'] == int(options.drafts)} == {'prose','code'}
+     result['baseline_sha256'] = hashlib.sha256(options.after.read_bytes()).hexdigest()
+     result['effective_numa_threads'] = int(current['runtime_env']['GGML_CPU_NUMA_THREADS'])
+     assert result['effective_numa_threads'] == current['workers'] and current['workers'] in (15, 16)
+@@ -153,7 +162,8 @@
+         check = dict(prompt=prompt, expected=expected, abort=[])
+         result['checks'].append(check)
+         body = dict(model=options.alias, messages=[dict(role='user', content=prompt)], temperature=0, seed=42,
+-                    max_tokens=512, cache_prompt=False, stream=True, chat_template_kwargs={'reasoning_effort':'max'}, reasoning_budget_tokens=0)
++                    max_tokens=512, cache_prompt=False, stream=True, chat_template_kwargs={'enable_thinking':False},
++                    **{'speculative.n_max':0, 'speculative.p_min':0})
+         chunks = stream_completion(options.port, body, guard.abort_reason, check['abort'], interval=0.5)
+         content = ''.join(c.get('delta', {}).get('content') or '' for x in chunks for c in x.get('choices', []))
+         check.update(chunks=chunks, content=content, passed=content.strip().rstrip('.') == expected)
+@@ -162,7 +172,7 @@
+         print('short check', check['passed'], content[:80], flush=True)
+     prompts = [('prose', 'Explain how a refrigerator moves heat. Give a detailed explanation in plain English.'),
+                ('code', 'Write a Python function that merges two sorted lists. Include an explanation of its time complexity.')]
+-    for kind, prompt in prompts[:1]:
++    for kind, prompt in prompts:
+         draft = int(options.drafts)
+         guard.assert_idle()
+         guard.reset_activity()
+@@ -219,7 +229,8 @@
+                         print('profiling', options.alias, kind, 'after 32 streamed events', flush=True)
+             payload=dict(model=options.alias,messages=[dict(role='user',content=prompt)],
+                          temperature=0,seed=42,max_tokens=options.tokens,cache_prompt=False,stream=True,
+-                         chat_template_kwargs={'reasoning_effort':'max'})
++                         chat_template_kwargs={'enable_thinking':False},
++                         **{'speculative.n_max':draft, 'speculative.p_min':0})
+             entry['payload'] = payload
+             try:
+                 stream_completion(options.port,payload,check_abort,entry['abort'],on_chunk)
+@@ -264,6 +275,7 @@
+         timings=[c['timings'] for c in chunks if c.get('timings')]
+         assert timings
+         entry['timings']=timings[-1]
++        assert entry['timings']['cache_n'] == 0
+         assert bool(timings[-1].get('draft_n',0))==bool(draft),'Unexpected speculative mode'
+         if options.counter_events:
+             entry['finished']=time.time()

@@ -1,0 +1,181 @@
+{
+  "config": {
+    "label": "glm5n-goal-iq2xxs-repack-t15",
+    "binary": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/GLM-5.3-Flash/UD-IQ2_XXS/GLM-5.3-Flash-UD-IQ2_XXS-00001-of-00004.gguf",
+    "alias": "glm-flash-goal",
+    "runtime": "llama",
+    "ctx_size": 4096,
+    "mtp": null,
+    "draft_n": 1,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 15,
+    "fused": 1,
+    "merge": 1,
+    "repack": 1,
+    "huge_pages": 0,
+    "port": 18106,
+    "bench": true,
+    "bench_tokens": 160,
+    "profile_cpu": true
+  },
+  "started": 1788564793.4311619,
+  "checks": [
+    {
+      "expected": "391",
+      "started": 1788565014.0164967,
+      "finished": 1788565022.3661187,
+      "wall_s": 8.349621761008166,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "Paris",
+      "started": 1788565022.4576714,
+      "finished": 1788565029.4477954,
+      "wall_s": 6.990125000011176,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "14, 16, 18",
+      "started": 1788565029.5322063,
+      "finished": 1788565039.181672,
+      "wall_s": 9.64946659700945,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788565039.2685595,
+      "finished": 1788565066.1490932,
+      "wall_s": 26.880533860996366,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788565066.232963,
+      "finished": 1788565094.3585014,
+      "wall_s": 28.125538462074474,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    }
+  ],
+  "runtime_env": {
+    "GGML_GLM5N_MLA_TP": "1",
+    "GGML_GLM5N_ATTN_TP": "1",
+    "GGML_GLM5N_SHEXP_TP": "1",
+    "GGML_CPU_IQ2_XXS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_CPU_OP_PROFILE": "*",
+    "GGML_CPU_OP_PROFILE_ARM_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm5n-goal-iq2xxs-repack-t15/profile.arm",
+    "GGML_CPU_OP_PROFILE_SKIP": "0",
+    "GGML_CPU_OP_PROFILE_COUNT": "16"
+  },
+  "memory_after_load": {
+    "VmRSS": "165933124 kB",
+    "RssAnon": "165909856 kB",
+    "RssFile": "23268 kB",
+    "Pss": "165927639 kB",
+    "AnonHugePages": "0 kB",
+    "FilePmdMapped": "0 kB"
+  },
+  "profile_response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "role": "assistant"
+        }
+      }
+    ],
+    "created": 1788565098,
+    "model": "glm-flash-goal",
+    "system_fingerprint": "b0-unknown",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 16,
+      "prompt_tokens": 30,
+      "total_tokens": 46,
+      "prompt_tokens_details": {
+        "cached_tokens": 26
+      }
+    },
+    "id": "chatcmpl-K2QYtGlX23X3qUL8Jg24TMPVe6MAC0jM",
+    "timings": {
+      "cache_n": 26,
+      "prompt_n": 4,
+      "prompt_ms": 505.902,
+      "prompt_per_token_ms": 126.4755,
+      "prompt_per_second": 7.906669671201142,
+      "predicted_n": 16,
+      "predicted_ms": 2531.832,
+      "predicted_per_token_ms": 168.78879999999998,
+      "predicted_per_second": 5.924563715128018
+    }
+  },
+  "finished": 1788565112.980946,
+  "server_exit": 0
+}

@@ -1,0 +1,31 @@
+{
+  "time": 1788900402.655902,
+  "finding": "Live Qwen ignores request-level speculative controls; zero requested still drafted",
+  "observed_requested_drafts": 0,
+  "actual_timings": {
+    "cache_n": 0,
+    "prompt_n": 28,
+    "prompt_ms": 752.465,
+    "prompt_per_token_ms": 26.87375,
+    "prompt_per_second": 37.21103307130564,
+    "predicted_n": 512,
+    "predicted_ms": 26954.611,
+    "predicted_per_token_ms": 52.74874951076321,
+    "predicted_per_second": 18.957795384247987,
+    "draft_n": 587,
+    "draft_n_accepted": 358
+  },
+  "source_notes": [
+    "server-schema.cpp speculative fields are disabled inside #if 0",
+    "server-context.cpp can_speculate uses initialized spec; n_draft_max is bounded by context and remaining output",
+    "common/speculative.cpp MTP drafting reads launch params.n_max and params.p_min"
+  ],
+  "scope": "Observed runtime behavior plus current source; not an exact rebuilt-source equivalence proof",
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/tools/server/server-schema.cpp": "c3d2899d2a078adae6c4971b3da825bad1aab9cda6b2af652e41e6aef1665274",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/tools/server/server-context.cpp": "c8e4d0095d5c87c17e0e1356574fcaf753f9c04d4a83f4df4778ab4a241f9134",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/common/speculative.cpp": "c5f38b84c5fd302516329c5ebb04aadda691b5ff31d705c218595eb9e220ddb4",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-30tps-resident-sweep-0908c/result.json": "204391457c1f0c0e170ee33ca621ba638f81206e56513fb6d04363f5d01a46d6",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-30tps-resident-sweep-0908c/prose-draft0/chunks.json": "ca7bb73933307855523b02752a228de5308c505f5caefd6f6af5b7cd424435d4"
+  }
+}

@@ -1,0 +1,149 @@
+--- profile_qwen_q6.py
++++ profile_glm_flash_q8_0908.py
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env python3
+-"""Profile the loaded Qwen Q6 configuration with queue-aware guards."""
++"""Sample the loaded Flash Q8 decode after warmup with queue-aware guards."""
+ import argparse
++import fcntl
++import shutil
+ import hashlib
+ import os
+ import re
+@@ -33,11 +35,15 @@
+ parser.add_argument('--call-graph', choices=('dwarf,8192',))
+ options=parser.parse_args()
+ assert re.fullmatch(r"[A-Za-z0-9_-]+", options.label)
+-assert options.port == 18095 and options.alias == 'qwen-q6-trial' and options.allowed_idle_pids == ''
++assert options.port == 18131 and options.alias == 'glm-flash-q8-trial' and options.allowed_idle_pids == ''
+ assert options.sample_frequency == 199 and options.record_event == 'cycles:u'
+ assert not options.counter_events and not options.sample_addresses
+ assert 32 <= options.tokens <= 1024
+ base=Path(__file__).resolve().parent
++os.umask(0o077)
++lifecycle_lock = (base / 'results/qwen-q6-trial-0907/lifecycle.lock').open('a')
++fcntl.flock(lifecycle_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
++assert shutil.disk_usage(base).free > (5 << 30)
+ out=base/'results'/options.label
+ out.mkdir(exist_ok=False)
+ result=dict(config={**vars(options),'after':str(options.after)},started=time.time(),profiles=[],completed=False,checks=[])
+@@ -101,9 +107,11 @@
+ 
+ for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+     signal.signal(signum, signal_abort)
+-trial = json.loads((base / 'results/qwen-q6-trial-0907/state.json').read_text())
+-current = trial['current']
+-assert trial['full_stopped'] and not current['original']
++from glm_flash_q8_trial import Manager
++manager = Manager()
++current = manager.validate_current()
++assert manager.qwen.state['full_stopped'] and not manager.qwen.state.get('current')
++result['current'] = current
+ assert current['pid'] == options.pid and str(current['drafts']) == options.drafts
+ plan = dict(protected={str(options.pid): dict(start_ticks=current['info']['start'], exe=current['info']['exe'])},
+             original_command=current['command'], original_environment=current['runtime_env'])
+@@ -117,24 +125,27 @@
+ assert result['protected_before'][str(options.pid)]['info']['command'] == plan['original_command']
+ assert result['protected_before'][str(options.pid)]['environment'] == plan['original_environment']
+ source_paths = [Path(__file__).resolve(), base / 'model_measurement_guard.py', base / 'guarded_inference_request.py',
+-                base / 'qwen_split_trial.py', base / 'inference_contention_guard.py', plan_path]
++                base / 'qwen_split_trial.py', base / 'inference_contention_guard.py', base / 'glm_flash_q8_trial.py', plan_path]
+ result['source_sha256'] = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
+ for p in source_paths:
+     (out / p.name).write_bytes(p.read_bytes())
+-guard = ModelMeasurementGuard(options.pid, {str(options.pid): 18095}, snapshot)
+-result['note'] = 'Cycle profiles of the unchanged launched MTP configuration. Sampling can affect throughput; these are not independent bandwidth or completed-task speed benchmarks.'
++guard = ModelMeasurementGuard(options.pid, {str(options.pid): 18131}, snapshot)
++result['note'] = 'Cycle profiles of the unchanged launched Flash Q8 configuration, armed after 32 streamed events. Sampling can affect throughput; these are not independent bandwidth or completed-task speed benchmarks.'
+ save()
+ try:
+     prior = json.loads(options.after.read_text())
+     assert prior.get('finished') and not prior.get('error'), 'Required completed baseline is absent or invalid'
++    assert prior['input_integrity_verified'] and prior['target_pid'] == options.pid
++    assert prior['server_command'] == current['command'] and prior['runtime_env'] == current['runtime_env']
+     result['baseline_sha256'] = hashlib.sha256(options.after.read_bytes()).hexdigest()
+-    result['effective_numa_threads'] = int(Path(current['runtime_env']['GGML_CPU_NUMA_THREADS_FILE']).read_text())
++    result['effective_numa_threads'] = int(current['runtime_env']['GGML_CPU_NUMA_THREADS'])
++    assert result['effective_numa_threads'] == current['workers'] == 15
+     args=Path(f'/proc/{options.pid}/cmdline').read_bytes().split(b'\0')
+     ports=[int(args[i+1]) for i,x in enumerate(args[:-1]) if x==b'--port']
+     assert ports and ports[-1]==options.port and b'llama-server' in args[0]
+     result['server_command']=[x.decode() for x in args if x]
+     allowed=tuple(set(options.allowed_idle_pids.split(','))|{str(options.pid)})
+-    result['idle_gate'] = guard.wait_idle(out/'waiting-for-idle.json')
++    result['idle_gate'] = guard.wait_idle(out/'waiting-for-idle.json', quiet_seconds=15)
+     for prompt, expected in [('What is 17 * 23? Reply with only the number.', '391'),
+                              ('Name the capital city of France. Reply with one word.', 'Paris')]:
+         guard.assert_idle()
+@@ -142,7 +153,7 @@
+         check = dict(prompt=prompt, expected=expected, abort=[])
+         result['checks'].append(check)
+         body = dict(model=options.alias, messages=[dict(role='user', content=prompt)], temperature=0, seed=42,
+-                    max_tokens=512, cache_prompt=False, stream=True, chat_template_kwargs={'enable_thinking':False})
++                    max_tokens=512, cache_prompt=False, stream=True, chat_template_kwargs={'reasoning_effort':'max'}, reasoning_budget_tokens=0)
+         chunks = stream_completion(options.port, body, guard.abort_reason, check['abort'], interval=0.5)
+         content = ''.join(c.get('delta', {}).get('content') or '' for x in chunks for c in x.get('choices', []))
+         check.update(chunks=chunks, content=content, passed=content.strip().rstrip('.') == expected)
+@@ -160,9 +171,15 @@
+         entry=dict(kind=kind, draft_n=draft, started=time.time(), abort=[])
+         result['profiles'].append(entry)
+         previous=snapshot(); previous_time=time.monotonic()
++        def stop_owned_perf():
++            if perf is not None and perf.poll() is None:
++                subprocess.run(['sudo', '-n', 'kill', '-INT', '--', '-' + str(perf.pid)], check=True, timeout=5)
+         def check_abort():
+-            return guard.abort_reason()
+-        perf=None;first=None;last=None;chunks=[];perf_started=None;perf_ended=[];perf_waiter=None
++            reason = guard.abort_reason()
++            if reason:
++                stop_owned_perf()
++            return reason
++        perf=None;first=None;last=None;chunks=[];perf_started=None;perf_ended=[];perf_waiter=None;content_events=0
+         if options.counter_events:
+             command=['sudo','-n','perf','stat','--per-thread','--no-inherit','-x,','-e',options.counter_events,
+                      '-p',str(options.pid),'--','sleep','8']
+@@ -175,12 +192,15 @@
+             if options.sample_addresses:command.insert(command.index('--'),'-d')
+         with (directory/'record.log').open('w') as log:
+             def on_chunk(chunk):
+-                global perf,first,last,perf_started,perf_waiter
++                global perf,first,last,perf_started,perf_waiter,content_events
+                 chunks.append(chunk)
+                 if any(any(c.get('delta',{}).get(k) for k in ('content','reasoning','reasoning_content')) for c in chunk.get('choices',[])):
+                     last=time.monotonic()
+                     if first is None:
+                         first=last
++                    content_events += 1
++                    if perf is None and content_events >= 32:
++                        entry['armed_after_content_events'] = content_events
+                         perf_started=time.monotonic()
+                         entry['host_before'] = host_snapshot()
+                         entry['threads_before'] = thread_snapshot()
+@@ -196,15 +216,16 @@
+                             perf_ended.append((code,ended))
+                         perf_waiter=threading.Thread(target=collect_end,daemon=True)
+                         perf_waiter.start()
+-                        print('profiling', options.alias, kind, 'launched MTP', flush=True)
++                        print('profiling', options.alias, kind, 'after 32 streamed events', flush=True)
+             payload=dict(model=options.alias,messages=[dict(role='user',content=prompt)],
+                          temperature=0,seed=42,max_tokens=options.tokens,cache_prompt=False,stream=True,
+-                         chat_template_kwargs={'enable_thinking':False})
++                         chat_template_kwargs={'reasoning_effort':'max'})
+             entry['payload'] = payload
+             try:
+                 stream_completion(options.port,payload,check_abort,entry['abort'],on_chunk)
+             finally:
+                 if perf is not None:
++                    stop_owned_perf()
+                     perf_waiter.join(timeout=15)
+                     if perf_waiter.is_alive():
+                         # This process group belongs only to this capture.
+@@ -217,7 +238,7 @@
+                 entry.update(first_content_monotonic=first,last_content_monotonic=last,command=command)
+                 save()
+         assert not entry['abort'], entry['abort']
+-        assert first is not None and last-first>=10,'Profile was not enclosed by a sufficiently long decode window'
++        assert content_events >= 64 and first is not None and last-first>=10,'Profile was not enclosed by a sufficiently long decode window'
+         start, end = entry['collection_window_monotonic']
+         assert first <= start <= end <= last
+         duration = end - start

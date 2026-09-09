@@ -1,0 +1,32 @@
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -5413,7 +5413,13 @@
+                     }
+                     rows_ptr = row_tmp.data();
+                 }
+-                ggml_quantize_mat_t<INTER_SIZE, PARAM_TYPE>(rows_ptr, q_plane + row * src1_row_size, 4, k);
++                if constexpr (expanded_iq) {
++                    for (int r = 0; r < 4; ++r) {
++                        from_float(rows_ptr + r * k, q_plane + (row + r) * src1_row_size, k);
++                    }
++                } else {
++                    ggml_quantize_mat_t<INTER_SIZE, PARAM_TYPE>(rows_ptr, q_plane + row * src1_row_size, 4, k);
++                }
+             }
+ 
+             const int64_t rows4 = src1->ne[1] - src1->ne[1] % 4;
+@@ -6005,7 +6011,13 @@
+                     }
+                     rows_ptr = row_tmp.data();
+                 }
+-                ggml_quantize_mat_t<INTER_SIZE, PARAM_TYPE>(rows_ptr, (void *) (wdata_ptr + i11 * nbw1), 4, ne10);
++                if constexpr (expanded_iq) {
++                    for (int r = 0; r < 4; ++r) {
++                        from_float(rows_ptr + r * ne10, wdata_ptr + (i11 + r) * nbw1, ne10);
++                    }
++                } else {
++                    ggml_quantize_mat_t<INTER_SIZE, PARAM_TYPE>(rows_ptr, (void *) (wdata_ptr + i11 * nbw1), 4, ne10);
++                }
+             }
+ 
+             const int64_t i11_processed = ne11 - ne11 % 4;

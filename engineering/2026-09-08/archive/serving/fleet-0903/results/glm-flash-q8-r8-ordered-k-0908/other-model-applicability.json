@@ -1,0 +1,206 @@
+{
+  "passed": true,
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/bandwidth-roofline-inventory.json": "5c13761f42c75b952c2ca105270ec587af4e783ca5e940a42970e7262778d3f3",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-higher-quant-bandwidth-inventory-0907.json": "8a3e38df829dc89238bc602d1973601dae991f46372ba2774fd0d55430a1e56e"
+  },
+  "models": [
+    {
+      "model": "GLM-5.3-Full",
+      "narrow_tensors": 78,
+      "groups": [
+        {
+          "shape": [
+            6144,
+            32
+          ],
+          "type": "F32",
+          "count": 78
+        }
+      ],
+      "examples": [
+        {
+          "name": "blk.0.indexer.proj.weight",
+          "shape": [
+            6144,
+            32
+          ],
+          "type": "F32",
+          "active_bytes": 786432,
+          "layout_estimate_bytes": 786432,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.1.indexer.proj.weight",
+          "shape": [
+            6144,
+            32
+          ],
+          "type": "F32",
+          "active_bytes": 786432,
+          "layout_estimate_bytes": 786432,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.2.indexer.proj.weight",
+          "shape": [
+            6144,
+            32
+          ],
+          "type": "F32",
+          "active_bytes": 786432,
+          "layout_estimate_bytes": 786432,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.3.indexer.proj.weight",
+          "shape": [
+            6144,
+            32
+          ],
+          "type": "F32",
+          "active_bytes": 786432,
+          "layout_estimate_bytes": 786432,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.4.indexer.proj.weight",
+          "shape": [
+            6144,
+            32
+          ],
+          "type": "F32",
+          "active_bytes": 786432,
+          "layout_estimate_bytes": 786432,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.5.indexer.proj.weight",
+          "shape": [
+            6144,
+            32
+          ],
+          "type": "F32",
+          "active_bytes": 786432,
+          "layout_estimate_bytes": 786432,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "model": "Qwen3.8-Flash-Next UD-Q6_K_XL",
+      "narrow_tensors": 168,
+      "groups": [
+        {
+          "shape": [
+            10240,
+            4
+          ],
+          "type": "F32",
+          "count": 96
+        },
+        {
+          "shape": [
+            2560,
+            48
+          ],
+          "type": "F32",
+          "count": 72
+        }
+      ],
+      "examples": [
+        {
+          "name": "blk.0.hc_attn_inject.weight",
+          "shape": [
+            10240,
+            4
+          ],
+          "type": "F32",
+          "active_bytes": 163840,
+          "layout_estimate_bytes": 163840,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.0.hc_ffn_inject.weight",
+          "shape": [
+            10240,
+            4
+          ],
+          "type": "F32",
+          "active_bytes": 163840,
+          "layout_estimate_bytes": 163840,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.0.ssm_alpha.weight",
+          "shape": [
+            2560,
+            48
+          ],
+          "type": "F32",
+          "active_bytes": 491520,
+          "layout_estimate_bytes": 491520,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.0.ssm_beta.weight",
+          "shape": [
+            2560,
+            48
+          ],
+          "type": "F32",
+          "active_bytes": 491520,
+          "layout_estimate_bytes": 491520,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.1.hc_attn_inject.weight",
+          "shape": [
+            10240,
+            4
+          ],
+          "type": "F32",
+          "active_bytes": 163840,
+          "layout_estimate_bytes": 163840,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        },
+        {
+          "name": "blk.1.hc_ffn_inject.weight",
+          "shape": [
+            10240,
+            4
+          ],
+          "type": "F32",
+          "active_bytes": 163840,
+          "layout_estimate_bytes": 163840,
+          "layout": "F32",
+          "routed": false,
+          "indexed": false
+        }
+      ]
+    }
+  ],
+  "scope": "Saved tensor inventories, not a fresh loaded-runtime or performance check. These F32 paths need separate arithmetic and scheduling analysis; the Q8 implementation does not apply directly."
+}

@@ -1,0 +1,43 @@
+{
+  "one-chain": {
+    "symbol": "void cold_q5_batch::kernel<3>(int, float*, unsigned long, void const*, void const*, int)",
+    "bytes": 2907,
+    "static_instructions": 502,
+    "vector_stack_accesses": [],
+    "vnni_instructions": 24
+  },
+  "two-chain": {
+    "symbol": "void cold_q5_two_chains::kernel<3>(int, float*, unsigned long, void const*, void const*, int)",
+    "bytes": 4213,
+    "static_instructions": 681,
+    "vector_stack_accesses": [
+      "9ba8:\tvmovaps %zmm1,0xc8(%rsp)",
+      "9bb3:\tvmovaps %zmm1,0x48(%rsp)",
+      "9bbe:\tvmovaps %zmm1,0x88(%rsp)",
+      "9efc:\tvmovdqa32 %zmm12,0x8(%rsp)",
+      "9f13:\tvmovdqa32 %zmm8,-0x38(%rsp)",
+      "a168:\tvmovdqa32 -0x38(%rsp),%zmm8",
+      "a1b6:\tvmovdqa32 0x8(%rsp),%zmm12",
+      "a211:\tvmovdqa32 %zmm7,-0x38(%rsp)",
+      "a2a1:\tvmovdqa32 %zmm13,0x8(%rsp)",
+      "a4f7:\tvmovdqa32 -0x38(%rsp),%zmm7",
+      "a521:\tvmovdqa32 0x8(%rsp),%zmm13",
+      "a5a6:\tvmovdqa32 %zmm11,-0x38(%rsp)",
+      "a61e:\tvmovdqa32 %zmm13,0x8(%rsp)",
+      "a888:\tvmovdqa32 -0x38(%rsp),%zmm11",
+      "a8cb:\tvmovdqa32 0x8(%rsp),%zmm13",
+      "a972:\tvfmadd213ps 0x88(%rsp),%zmm10,%zmm6",
+      "aa0c:\tvmovaps %zmm10,0x88(%rsp)",
+      "aa17:\tvfmadd213ps 0x48(%rsp),%zmm7,%zmm5",
+      "aa6b:\tvmovaps %zmm7,0x48(%rsp)",
+      "aa76:\tvfmadd213ps 0xc8(%rsp),%zmm22,%zmm0",
+      "aa87:\tvmovaps %zmm1,0xc8(%rsp)",
+      "aabc:\tvmovaps 0x48(%rsp),%zmm1",
+      "aad7:\tvmovaps 0xc8(%rsp),%zmm1",
+      "ab12:\tvmovaps %zmm1,0xc8(%rsp)",
+      "ab1d:\tvmovaps %zmm1,0x48(%rsp)",
+      "ab28:\tvmovaps %zmm1,0x88(%rsp)"
+    ],
+    "vnni_instructions": 48
+  }
+}

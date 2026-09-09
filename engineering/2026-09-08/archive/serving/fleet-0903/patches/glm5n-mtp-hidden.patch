@@ -1,0 +1,10 @@
+--- a/src/models/glm5next.cpp
++++ b/src/models/glm5next.cpp
+@@ -993,6 +993,7 @@
+             nullptr, LLM_NORM_RMS, il);
+     cb(cur, "mtp_result_norm", il);
+     res->t_embd = cur;
++    res->t_h_nextn = cur;
+ 
+     ggml_tensor * head = layer.nextn.shared_head_head ? layer.nextn.shared_head_head : model.output;
+     cur = ggml_mul_mat(ctx0, head, cur);

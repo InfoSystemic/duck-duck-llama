@@ -1,0 +1,174 @@
+{
+  "started": 1788884729.4122128,
+  "passed": true,
+  "cpu_sha256": "f86a02d1d042bd2ed92b09af28983dd53a001f32d3624901599c26f7eb206191",
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_flash_dense_chunk_paths_0908.py": "d95175a94972354b5cb4a106d4c04e68190a37124c6aed4b88fb43fe50e844e1",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0.22.0": "f86a02d1d042bd2ed92b09af28983dd53a001f32d3624901599c26f7eb206191",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-attention3d-0908/glm-q8-attention3d-check.cpp": "d4bd043694620aeda981cc25cfed7003aa5b5cd8c207842e03fdce44634faa06",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-batch-0908/q8-check.cpp": "db3c6e1dc8c1eb2dbda6b7a4e347457da2ce4d100371e22432bab6bb62e5cc3f",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-dense-chunk-paths-0908/attention.cpp": "03f0fe87578f955d288a948a29a5c703eb71cf9cd2230a887186c7c8662c7961",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-dense-chunk-paths-0908/fused.cpp": "6a7a84cdd4e15e8f089f8618b82ea599c2f500749d5a48efd03cf3539e2da650"
+  },
+  "steps": [
+    {
+      "label": "compile-attention"
+    },
+    {
+      "label": "attention-t0-p0-chunk16"
+    },
+    {
+      "label": "attention-t0-p0-chunk128"
+    },
+    {
+      "label": "compile-fused"
+    },
+    {
+      "label": "fused-t1-p0-chunk16"
+    },
+    {
+      "label": "fused-t1-p0-chunk128"
+    },
+    {
+      "label": "fused-t1-p1-chunk16"
+    },
+    {
+      "label": "fused-t1-p1-chunk128"
+    },
+    {
+      "label": "fused-t15-p0-chunk16"
+    },
+    {
+      "label": "fused-t15-p0-chunk128"
+    },
+    {
+      "label": "fused-t15-p1-chunk16"
+    },
+    {
+      "label": "fused-t15-p1-chunk128"
+    }
+  ],
+  "runs": [
+    {
+      "label": "attention-t0-p0-chunk16",
+      "kind": "attention",
+      "chunk": 16,
+      "threads": 0,
+      "padded": false,
+      "cases": 168,
+      "output_bytes": 95158272,
+      "output_sha256": "ac22d51927c8096799442cb0f2fb89c0d36fcf5e8bc286fe6b6f80d3c3e7a545",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "attention-t0-p0-chunk128",
+      "kind": "attention",
+      "chunk": 128,
+      "threads": 0,
+      "padded": false,
+      "cases": 168,
+      "output_bytes": 95158272,
+      "output_sha256": "ac22d51927c8096799442cb0f2fb89c0d36fcf5e8bc286fe6b6f80d3c3e7a545",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "fused-t1-p0-chunk16",
+      "kind": "fused",
+      "chunk": 16,
+      "threads": 1,
+      "padded": false,
+      "cases": 6,
+      "output_bytes": 974848,
+      "output_sha256": "a3883fe827aae78a7ff689a28a81648ada5f98310c8bb37ecc149a605f1892b5",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "fused-t1-p0-chunk128",
+      "kind": "fused",
+      "chunk": 128,
+      "threads": 1,
+      "padded": false,
+      "cases": 6,
+      "output_bytes": 974848,
+      "output_sha256": "a3883fe827aae78a7ff689a28a81648ada5f98310c8bb37ecc149a605f1892b5",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "fused-t1-p1-chunk16",
+      "kind": "fused",
+      "chunk": 16,
+      "threads": 1,
+      "padded": true,
+      "cases": 6,
+      "output_bytes": 974848,
+      "output_sha256": "e3d19a48b70df14c167695b5b145f506f00c79cc10ec890211798eb7d713e6f9",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "fused-t1-p1-chunk128",
+      "kind": "fused",
+      "chunk": 128,
+      "threads": 1,
+      "padded": true,
+      "cases": 6,
+      "output_bytes": 974848,
+      "output_sha256": "e3d19a48b70df14c167695b5b145f506f00c79cc10ec890211798eb7d713e6f9",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "fused-t15-p0-chunk16",
+      "kind": "fused",
+      "chunk": 16,
+      "threads": 15,
+      "padded": false,
+      "cases": 6,
+      "output_bytes": 974848,
+      "output_sha256": "a3883fe827aae78a7ff689a28a81648ada5f98310c8bb37ecc149a605f1892b5",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "fused-t15-p0-chunk128",
+      "kind": "fused",
+      "chunk": 128,
+      "threads": 15,
+      "padded": false,
+      "cases": 6,
+      "output_bytes": 974848,
+      "output_sha256": "a3883fe827aae78a7ff689a28a81648ada5f98310c8bb37ecc149a605f1892b5",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "fused-t15-p1-chunk16",
+      "kind": "fused",
+      "chunk": 16,
+      "threads": 15,
+      "padded": true,
+      "cases": 6,
+      "output_bytes": 974848,
+      "output_sha256": "e3d19a48b70df14c167695b5b145f506f00c79cc10ec890211798eb7d713e6f9",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    },
+    {
+      "label": "fused-t15-p1-chunk128",
+      "kind": "fused",
+      "chunk": 128,
+      "threads": 15,
+      "padded": true,
+      "cases": 6,
+      "output_bytes": 974848,
+      "output_sha256": "e3d19a48b70df14c167695b5b145f506f00c79cc10ec890211798eb7d713e6f9",
+      "bit_exact": true,
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0"
+    }
+  ],
+  "finished": 1788884792.6162095
+}

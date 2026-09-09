@@ -1,0 +1,5089 @@
+{
+  "config": {
+    "label": "q4e-goal-nibble-sort-thread-sweep-1024",
+    "binary": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/Qwen3.8-Flash-Next/UD-Q2_K_XL/Qwen3.8-Flash-Next-UD-Q2_K_XL-00001-of-00003.gguf",
+    "alias": "qwen-goal",
+    "runtime": "llama",
+    "ctx_size": 4096,
+    "mtp": "/models/gguf/Qwen3.8-Flash-Next/MTP/mtp-Qwen3.8-Flash-Next-Q8_0.gguf",
+    "draft_n": 2,
+    "draft_p_min": 0.0,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 16,
+    "numa_poll": 100,
+    "thread_sweep": "16,15,12,8",
+    "fused": 1,
+    "merge": 1,
+    "repack": 1,
+    "huge_pages": 0,
+    "port": 18123,
+    "bench": true,
+    "bench_direct": false,
+    "bench_tokens": 1024,
+    "cache_check": true,
+    "profile_cpu": true,
+    "profile_phase": true,
+    "profile_answer_prefix": true
+  },
+  "started": 1788581492.8243513,
+  "checks": [
+    {
+      "expected": "391",
+      "reasoning_budget_tokens": null,
+      "started": 1788581718.414909,
+      "finished": 1788581719.5956695,
+      "wall_s": 1.180759712937288,
+      "pass": true,
+      "effective_numa_threads": 16,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": [],
+      "other_host_cpu_percent": [
+        {
+          "pid": 915455,
+          "name": "chrome",
+          "cpu_percent": 1304.63
+        },
+        {
+          "pid": 3364464,
+          "name": "ChatGPT",
+          "cpu_percent": 99.72
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 42.74
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 39.74
+        },
+        {
+          "pid": 915631,
+          "name": "chrome",
+          "cpu_percent": 32.24
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 15.0
+        },
+        {
+          "pid": 3364369,
+          "name": "ChatGPT",
+          "cpu_percent": 12.75
+        },
+        {
+          "pid": 1017693,
+          "name": "python3",
+          "cpu_percent": 11.25
+        },
+        {
+          "pid": 3364766,
+          "name": "codex",
+          "cpu_percent": 10.5
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 9.0
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 9.0
+        },
+        {
+          "pid": 3091911,
+          "name": "ChatGPT",
+          "cpu_percent": 7.5
+        },
+        {
+          "pid": 439920,
+          "name": "Paseo",
+          "cpu_percent": 6.0
+        },
+        {
+          "pid": 384423,
+          "name": "Paseo",
+          "cpu_percent": 5.25
+        },
+        {
+          "pid": 3364747,
+          "name": "ChatGPT",
+          "cpu_percent": 5.25
+        }
+      ],
+      "host_pressure": {
+        "before": {
+          "cpu": "some avg10=0.60 avg60=1.00 avg300=0.82 total=24792098819\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+          "io": "some avg10=0.51 avg60=0.29 avg300=0.30 total=8137543118\nfull avg10=0.51 avg60=0.29 avg300=0.30 total=7958445022\n"
+        },
+        "after": {
+          "cpu": "some avg10=0.60 avg60=1.00 avg300=0.82 total=24792112083\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+          "io": "some avg10=0.51 avg60=0.29 avg300=0.30 total=8137543948\nfull avg10=0.51 avg60=0.29 avg300=0.30 total=7958445717\n"
+        }
+      }
+    },
+    {
+      "expected": "Paris",
+      "reasoning_budget_tokens": null,
+      "started": 1788581719.8101087,
+      "finished": 1788581721.0829604,
+      "wall_s": 1.2728525400161743,
+      "pass": true,
+      "effective_numa_threads": 16,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": [],
+      "other_host_cpu_percent": [
+        {
+          "pid": 915455,
+          "name": "chrome",
+          "cpu_percent": 1317.51
+        },
+        {
+          "pid": 3364747,
+          "name": "ChatGPT",
+          "cpu_percent": 110.53
+        },
+        {
+          "pid": 3364464,
+          "name": "ChatGPT",
+          "cpu_percent": 100.3
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 60.72
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 60.72
+        },
+        {
+          "pid": 915631,
+          "name": "chrome",
+          "cpu_percent": 32.75
+        },
+        {
+          "pid": 3364369,
+          "name": "ChatGPT",
+          "cpu_percent": 32.07
+        },
+        {
+          "pid": 3364746,
+          "name": "ChatGPT",
+          "cpu_percent": 25.93
+        },
+        {
+          "pid": 3364766,
+          "name": "codex",
+          "cpu_percent": 17.74
+        },
+        {
+          "pid": 1017693,
+          "name": "python3",
+          "cpu_percent": 12.28
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 10.92
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 8.87
+        },
+        {
+          "pid": 439920,
+          "name": "Paseo",
+          "cpu_percent": 6.82
+        },
+        {
+          "pid": 3091911,
+          "name": "ChatGPT",
+          "cpu_percent": 6.82
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 6.14
+        },
+        {
+          "pid": 383832,
+          "name": "panel-6-systray",
+          "cpu_percent": 5.46
+        },
+        {
+          "pid": 384423,
+          "name": "Paseo",
+          "cpu_percent": 5.46
+        }
+      ],
+      "host_pressure": {
+        "before": {
+          "cpu": "some avg10=0.60 avg60=1.00 avg300=0.82 total=24792112366\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+          "io": "some avg10=0.51 avg60=0.29 avg300=0.30 total=8137544084\nfull avg10=0.51 avg60=0.29 avg300=0.30 total=7958445853\n"
+        },
+        "after": {
+          "cpu": "some avg10=0.67 avg60=1.00 avg300=0.82 total=24792131599\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+          "io": "some avg10=0.41 avg60=0.28 avg300=0.29 total=8137544752\nfull avg10=0.41 avg60=0.28 avg300=0.29 total=7958446465\n"
+        }
+      }
+    },
+    {
+      "expected": "14, 16, 18",
+      "reasoning_budget_tokens": null,
+      "started": 1788581721.3502274,
+      "finished": 1788581723.152578,
+      "wall_s": 1.802350327023305,
+      "pass": true,
+      "effective_numa_threads": 16,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": [],
+      "other_host_cpu_percent": [
+        {
+          "pid": 915455,
+          "name": "chrome",
+          "cpu_percent": 1329.9
+        },
+        {
+          "pid": 3364464,
+          "name": "ChatGPT",
+          "cpu_percent": 99.55
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 55.65
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 54.12
+        },
+        {
+          "pid": 915631,
+          "name": "chrome",
+          "cpu_percent": 47.48
+        },
+        {
+          "pid": 1155236,
+          "name": "codex",
+          "cpu_percent": 27.57
+        },
+        {
+          "pid": 1136588,
+          "name": "codex",
+          "cpu_percent": 15.83
+        },
+        {
+          "pid": 914795,
+          "name": "node",
+          "cpu_percent": 12.76
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 12.25
+        },
+        {
+          "pid": 439920,
+          "name": "Paseo",
+          "cpu_percent": 10.72
+        },
+        {
+          "pid": 384469,
+          "name": "Paseo",
+          "cpu_percent": 8.68
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 8.17
+        },
+        {
+          "pid": 1017693,
+          "name": "python3",
+          "cpu_percent": 8.17
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 7.66
+        },
+        {
+          "pid": 3091911,
+          "name": "ChatGPT",
+          "cpu_percent": 6.64
+        },
+        {
+          "pid": 384423,
+          "name": "Paseo",
+          "cpu_percent": 5.62
+        }
+      ],
+      "host_pressure": {
+        "before": {
+          "cpu": "some avg10=0.67 avg60=1.00 avg300=0.82 total=24792134774\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+          "io": "some avg10=0.41 avg60=0.28 avg300=0.29 total=8137544752\nfull avg10=0.41 avg60=0.28 avg300=0.29 total=7958446465\n"
+        },
+        "after": {
+          "cpu": "some avg10=0.73 avg60=1.00 avg300=0.82 total=24792159375\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+          "io": "some avg10=0.34 avg60=0.27 avg300=0.29 total=8137545607\nfull avg10=0.34 avg60=0.27 avg300=0.29 total=7958447148\n"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "reasoning_budget_tokens": null,
+      "started": 1788581723.3631997,
+      "finished": 1788581778.9729095,
+      "wall_s": 55.609709918964654,
+      "pass": null,
+      "effective_numa_threads": 16,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": [],
+      "other_host_cpu_percent": [
+        {
+          "pid": 915455,
+          "name": "chrome",
+          "cpu_percent": 1328.71
+        },
+        {
+          "pid": 3364464,
+          "name": "ChatGPT",
+          "cpu_percent": 75.15
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 60.31
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 60.01
+        },
+        {
+          "pid": 915631,
+          "name": "chrome",
+          "cpu_percent": 40.55
+        },
+        {
+          "pid": 3091911,
+          "name": "ChatGPT",
+          "cpu_percent": 15.84
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 15.69
+        },
+        {
+          "pid": 3364766,
+          "name": "codex",
+          "cpu_percent": 8.09
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 7.26
+        },
+        {
+          "pid": 439920,
+          "name": "Paseo",
+          "cpu_percent": 6.55
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 6.53
+        },
+        {
+          "pid": 384423,
+          "name": "Paseo",
+          "cpu_percent": 5.11
+        }
+      ],
+      "host_pressure": {
+        "before": {
+          "cpu": "some avg10=0.73 avg60=1.00 avg300=0.82 total=24792161464\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+          "io": "some avg10=0.34 avg60=0.27 avg300=0.29 total=8137545607\nfull avg10=0.34 avg60=0.27 avg300=0.29 total=7958447148\n"
+        },
+        "after": {
+          "cpu": "some avg10=0.81 avg60=0.96 avg300=0.85 total=24792961255\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+          "io": "some avg10=0.00 avg60=0.10 avg300=0.23 total=8137562738\nfull avg10=0.00 avg60=0.10 avg300=0.23 total=7958459642\n"
+        }
+      }
+    },
+    {
+      "expected": null,
+      "reasoning_budget_tokens": null,
+      "started": 1788581779.1833506,
+      "finished": 1788581796.1741006,
+      "wall_s": 16.990750087890774,
+      "pass": null,
+      "effective_numa_threads": 16,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": [],
+      "other_host_cpu_percent": [
+        {
+          "pid": 915455,
+          "name": "chrome",
+          "cpu_percent": 1316.41
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 59.96
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 59.32
+        },
+        {
+          "pid": 3091911,
+          "name": "ChatGPT",
+          "cpu_percent": 45.2
+        },
+        {
+          "pid": 915631,
+          "name": "chrome",
+          "cpu_percent": 33.6
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 14.99
+        },
+        {
+          "pid": 3364464,
+          "name": "ChatGPT",
+          "cpu_percent": 7.7
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 7.17
+        },
+        {
+          "pid": 439920,
+          "name": "Paseo",
+          "cpu_percent": 6.53
+        },
+        {
+          "pid": 3364747,
+          "name": "ChatGPT",
+          "cpu_percent": 6.07
+        },
+        {
+          "pid": 384423,
+          "name": "Paseo",
+          "cpu_percent": 5.19
+        }
+      ],
+      "host_pressure": {
+        "before": {
+          "cpu": "some avg10=0.81 avg60=0.96 avg300=0.85 total=24792964813\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+          "io": "some avg10=0.00 avg60=0.10 avg300=0.23 total=8137562738\nfull avg10=0.00 avg60=0.10 avg300=0.23 total=7958459642\n"
+        },
+        "after": {
+          "cpu": "some avg10=1.82 avg60=1.16 avg300=0.90 total=24793259441\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+          "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+          "io": "some avg10=0.00 avg60=0.07 avg300=0.22 total=8137569593\nfull avg10=0.00 avg60=0.07 avg300=0.22 total=7958464002\n"
+        }
+      }
+    }
+  ],
+  "runtime_env": {
+    "GGML_CPU_IQ2_XS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "16",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_Q4E_HC_TP": "1",
+    "GGML_CPU_PARALLEL_COPY": "1",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_Q8_0_REPACK_FORCE": "1",
+    "GGML_CPU_OP_PROFILE": "*",
+    "GGML_CPU_OP_PROFILE_ARM_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/q4e-goal-nibble-sort-thread-sweep-1024/cpu-profile.arm",
+    "GGML_CPU_OP_PROFILE_SKIP": "0",
+    "GGML_CPU_OP_PROFILE_COUNT": "96",
+    "LLAMA_GRAPH_PHASE_ARM_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/q4e-goal-nibble-sort-thread-sweep-1024/phase-profile.arm",
+    "GGML_Q4E_RS_ROLLBACK": "1",
+    "GGML_CPU_PARALLEL_SIGMOID": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE_SINGLE_MAX_ELEMENTS": "65536",
+    "GGML_CPU_IQ_R16_REPACK": "1",
+    "GGML_CPU_X16_Q5_BATCH2": "1",
+    "GGML_CPU_SINGLE_TASK_MAX_ELEMENTS": "4096",
+    "GGML_CPU_X16_Q5_BYTES": "0",
+    "GGML_CPU_IQ_R16_NIBBLE2": "1",
+    "GGML_CPU_ARGSORT_TOP_K": "1",
+    "GGML_CPU_X16_Q5_BYTES_BATCH3": "0",
+    "GGML_CPU_NUMA_THREADS_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/q4e-goal-nibble-sort-thread-sweep-1024/numa-threads"
+  },
+  "memory_after_load": {
+    "VmRSS": "74964184 kB",
+    "RssAnon": "74286792 kB",
+    "RssFile": "677392 kB",
+    "Pss": "74958706 kB",
+    "AnonHugePages": "0 kB",
+    "FilePmdMapped": "0 kB"
+  },
+  "thread_sweep": [
+    {
+      "threads": 16,
+      "checks": [
+        {
+          "expected": "391",
+          "reasoning_budget_tokens": null,
+          "started": 1788581718.414909,
+          "finished": 1788581719.5956695,
+          "wall_s": 1.180759712937288,
+          "pass": true,
+          "effective_numa_threads": 16,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1304.63
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 99.72
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 42.74
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 39.74
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 32.24
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 15.0
+            },
+            {
+              "pid": 3364369,
+              "name": "ChatGPT",
+              "cpu_percent": 12.75
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 11.25
+            },
+            {
+              "pid": 3364766,
+              "name": "codex",
+              "cpu_percent": 10.5
+            },
+            {
+              "pid": 383368,
+              "name": "Xorg",
+              "cpu_percent": 9.0
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 9.0
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 7.5
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.0
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.25
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 5.25
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=0.60 avg60=1.00 avg300=0.82 total=24792098819\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+              "io": "some avg10=0.51 avg60=0.29 avg300=0.30 total=8137543118\nfull avg10=0.51 avg60=0.29 avg300=0.30 total=7958445022\n"
+            },
+            "after": {
+              "cpu": "some avg10=0.60 avg60=1.00 avg300=0.82 total=24792112083\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+              "io": "some avg10=0.51 avg60=0.29 avg300=0.30 total=8137543948\nfull avg10=0.51 avg60=0.29 avg300=0.30 total=7958445717\n"
+            }
+          }
+        },
+        {
+          "expected": "Paris",
+          "reasoning_budget_tokens": null,
+          "started": 1788581719.8101087,
+          "finished": 1788581721.0829604,
+          "wall_s": 1.2728525400161743,
+          "pass": true,
+          "effective_numa_threads": 16,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1317.51
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 110.53
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 100.3
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 60.72
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 60.72
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 32.75
+            },
+            {
+              "pid": 3364369,
+              "name": "ChatGPT",
+              "cpu_percent": 32.07
+            },
+            {
+              "pid": 3364746,
+              "name": "ChatGPT",
+              "cpu_percent": 25.93
+            },
+            {
+              "pid": 3364766,
+              "name": "codex",
+              "cpu_percent": 17.74
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 12.28
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 10.92
+            },
+            {
+              "pid": 383368,
+              "name": "Xorg",
+              "cpu_percent": 8.87
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.82
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 6.82
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 6.14
+            },
+            {
+              "pid": 383832,
+              "name": "panel-6-systray",
+              "cpu_percent": 5.46
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.46
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=0.60 avg60=1.00 avg300=0.82 total=24792112366\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+              "io": "some avg10=0.51 avg60=0.29 avg300=0.30 total=8137544084\nfull avg10=0.51 avg60=0.29 avg300=0.30 total=7958445853\n"
+            },
+            "after": {
+              "cpu": "some avg10=0.67 avg60=1.00 avg300=0.82 total=24792131599\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+              "io": "some avg10=0.41 avg60=0.28 avg300=0.29 total=8137544752\nfull avg10=0.41 avg60=0.28 avg300=0.29 total=7958446465\n"
+            }
+          }
+        },
+        {
+          "expected": "14, 16, 18",
+          "reasoning_budget_tokens": null,
+          "started": 1788581721.3502274,
+          "finished": 1788581723.152578,
+          "wall_s": 1.802350327023305,
+          "pass": true,
+          "effective_numa_threads": 16,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1329.9
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 99.55
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 55.65
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 54.12
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 47.48
+            },
+            {
+              "pid": 1155236,
+              "name": "codex",
+              "cpu_percent": 27.57
+            },
+            {
+              "pid": 1136588,
+              "name": "codex",
+              "cpu_percent": 15.83
+            },
+            {
+              "pid": 914795,
+              "name": "node",
+              "cpu_percent": 12.76
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 12.25
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 10.72
+            },
+            {
+              "pid": 384469,
+              "name": "Paseo",
+              "cpu_percent": 8.68
+            },
+            {
+              "pid": 383368,
+              "name": "Xorg",
+              "cpu_percent": 8.17
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 8.17
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 7.66
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 6.64
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.62
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=0.67 avg60=1.00 avg300=0.82 total=24792134774\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+              "io": "some avg10=0.41 avg60=0.28 avg300=0.29 total=8137544752\nfull avg10=0.41 avg60=0.28 avg300=0.29 total=7958446465\n"
+            },
+            "after": {
+              "cpu": "some avg10=0.73 avg60=1.00 avg300=0.82 total=24792159375\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+              "io": "some avg10=0.34 avg60=0.27 avg300=0.29 total=8137545607\nfull avg10=0.34 avg60=0.27 avg300=0.29 total=7958447148\n"
+            }
+          }
+        },
+        {
+          "expected": null,
+          "reasoning_budget_tokens": null,
+          "started": 1788581723.3631997,
+          "finished": 1788581778.9729095,
+          "wall_s": 55.609709918964654,
+          "pass": null,
+          "effective_numa_threads": 16,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1328.71
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 75.15
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 60.31
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 60.01
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 40.55
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 15.84
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 15.69
+            },
+            {
+              "pid": 3364766,
+              "name": "codex",
+              "cpu_percent": 8.09
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 7.26
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.55
+            },
+            {
+              "pid": 383368,
+              "name": "Xorg",
+              "cpu_percent": 6.53
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.11
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=0.73 avg60=1.00 avg300=0.82 total=24792161464\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380470\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992765\n",
+              "io": "some avg10=0.34 avg60=0.27 avg300=0.29 total=8137545607\nfull avg10=0.34 avg60=0.27 avg300=0.29 total=7958447148\n"
+            },
+            "after": {
+              "cpu": "some avg10=0.81 avg60=0.96 avg300=0.85 total=24792961255\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.10 avg300=0.23 total=8137562738\nfull avg10=0.00 avg60=0.10 avg300=0.23 total=7958459642\n"
+            }
+          }
+        },
+        {
+          "expected": null,
+          "reasoning_budget_tokens": null,
+          "started": 1788581779.1833506,
+          "finished": 1788581796.1741006,
+          "wall_s": 16.990750087890774,
+          "pass": null,
+          "effective_numa_threads": 16,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1316.41
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 59.96
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 59.32
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 45.2
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 33.6
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 14.99
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 7.7
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 7.17
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.53
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 6.07
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.19
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=0.81 avg60=0.96 avg300=0.85 total=24792964813\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.10 avg300=0.23 total=8137562738\nfull avg10=0.00 avg60=0.10 avg300=0.23 total=7958459642\n"
+            },
+            "after": {
+              "cpu": "some avg10=1.82 avg60=1.16 avg300=0.90 total=24793259441\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.07 avg300=0.22 total=8137569593\nfull avg10=0.00 avg60=0.07 avg300=0.22 total=7958464002\n"
+            }
+          }
+        }
+      ],
+      "baseline": true
+    },
+    {
+      "threads": 15,
+      "checks": [
+        {
+          "expected": "391",
+          "reasoning_budget_tokens": null,
+          "started": 1788581796.390924,
+          "finished": 1788581797.6853113,
+          "wall_s": 1.29438709304668,
+          "pass": true,
+          "effective_numa_threads": 15,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1299.16
+            },
+            {
+              "pid": 1205838,
+              "name": "python3",
+              "cpu_percent": 100.15
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 44.89
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 40.06
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 39.37
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 35.92
+            },
+            {
+              "pid": 1180953,
+              "name": "codex",
+              "cpu_percent": 21.41
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 15.89
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 11.05
+            },
+            {
+              "pid": 3364766,
+              "name": "codex",
+              "cpu_percent": 11.05
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 9.67
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 8.29
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 7.6
+            },
+            {
+              "pid": 384469,
+              "name": "Paseo",
+              "cpu_percent": 6.91
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.53
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 5.53
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=1.82 avg60=1.16 avg300=0.90 total=24793261402\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.07 avg300=0.22 total=8137569593\nfull avg10=0.00 avg60=0.07 avg300=0.22 total=7958464002\n"
+            },
+            "after": {
+              "cpu": "some avg10=1.82 avg60=1.16 avg300=0.90 total=24793267980\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.07 avg300=0.22 total=8137569940\nfull avg10=0.00 avg60=0.07 avg300=0.22 total=7958464277\n"
+            }
+          }
+        },
+        {
+          "expected": "Paris",
+          "reasoning_budget_tokens": null,
+          "started": 1788581797.897051,
+          "finished": 1788581799.1375623,
+          "wall_s": 1.2405110989930108,
+          "pass": true,
+          "effective_numa_threads": 15,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1320.69
+            },
+            {
+              "pid": 1205838,
+              "name": "python3",
+              "cpu_percent": 99.21
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 65.42
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 63.99
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 40.26
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 17.25
+            },
+            {
+              "pid": 915307,
+              "name": "chrome",
+              "cpu_percent": 16.54
+            },
+            {
+              "pid": 3364766,
+              "name": "codex",
+              "cpu_percent": 15.82
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 10.07
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 10.07
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 10.07
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 8.63
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.47
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 5.75
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.03
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=1.82 avg60=1.16 avg300=0.90 total=24793268225\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.07 avg300=0.22 total=8137569940\nfull avg10=0.00 avg60=0.07 avg300=0.22 total=7958464277\n"
+            },
+            "after": {
+              "cpu": "some avg10=1.49 avg60=1.12 avg300=0.90 total=24793281487\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.07 avg300=0.21 total=8137570200\nfull avg10=0.00 avg60=0.07 avg300=0.21 total=7958464515\n"
+            }
+          }
+        },
+        {
+          "expected": "14, 16, 18",
+          "reasoning_budget_tokens": null,
+          "started": 1788581799.3466744,
+          "finished": 1788581801.2005076,
+          "wall_s": 1.8538336550118402,
+          "pass": true,
+          "effective_numa_threads": 15,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1295.64
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 58.94
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 55.94
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 43.95
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 37.46
+            },
+            {
+              "pid": 1136588,
+              "name": "codex",
+              "cpu_percent": 14.98
+            },
+            {
+              "pid": 3364766,
+              "name": "codex",
+              "cpu_percent": 12.99
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 10.49
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 7.49
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 7.49
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 7.49
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.49
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 5.99
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=1.49 avg60=1.12 avg300=0.90 total=24793283376\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.07 avg300=0.21 total=8137570200\nfull avg10=0.00 avg60=0.07 avg300=0.21 total=7958464515\n"
+            },
+            "after": {
+              "cpu": "some avg10=1.22 avg60=1.08 avg300=0.89 total=24793306811\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.07 avg300=0.21 total=8137570417\nfull avg10=0.00 avg60=0.07 avg300=0.21 total=7958464723\n"
+            }
+          }
+        },
+        {
+          "expected": null,
+          "reasoning_budget_tokens": null,
+          "started": 1788581801.4066103,
+          "finished": 1788581854.4115095,
+          "wall_s": 53.00489986804314,
+          "pass": null,
+          "effective_numa_threads": 15,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1316.26
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 57.98
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 57.93
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 46.19
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 32.55
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 17.1
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 12.4
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 8.18
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 8.03
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 7.83
+            },
+            {
+              "pid": 3364369,
+              "name": "ChatGPT",
+              "cpu_percent": 5.49
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.19
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=1.22 avg60=1.08 avg300=0.89 total=24793308498\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380525\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992819\n",
+              "io": "some avg10=0.00 avg60=0.07 avg300=0.21 total=8137570464\nfull avg10=0.00 avg60=0.07 avg300=0.21 total=7958464770\n"
+            },
+            "after": {
+              "cpu": "some avg10=3.27 avg60=2.44 avg300=1.31 total=24795373854\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.02 avg300=0.17 total=8137592570\nfull avg10=0.00 avg60=0.02 avg300=0.17 total=7958484961\n"
+            }
+          }
+        },
+        {
+          "expected": null,
+          "reasoning_budget_tokens": null,
+          "started": 1788581854.623197,
+          "finished": 1788581869.7129164,
+          "wall_s": 15.089718906092457,
+          "pass": null,
+          "effective_numa_threads": 15,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.07
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1308.09
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 99.97
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 57.0
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 56.21
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 46.11
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 34.83
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 12.53
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 8.53
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 8.07
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.49
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 5.9
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.25
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=3.27 avg60=2.44 avg300=1.31 total=24795374134\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.02 avg300=0.17 total=8137592570\nfull avg10=0.00 avg60=0.02 avg300=0.17 total=7958484961\n"
+            },
+            "after": {
+              "cpu": "some avg10=3.77 avg60=2.74 avg300=1.44 total=24796014701\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.01 avg300=0.16 total=8137593144\nfull avg10=0.00 avg60=0.01 avg300=0.16 total=7958485301\n"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "threads": 12,
+      "checks": [
+        {
+          "expected": "391",
+          "reasoning_budget_tokens": null,
+          "started": 1788581869.9325411,
+          "finished": 1788581871.0605624,
+          "wall_s": 1.1280211589764804,
+          "pass": true,
+          "effective_numa_threads": 12,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.89
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1336.44
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 100.27
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 65.8
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 57.97
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 43.87
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 33.69
+            },
+            {
+              "pid": 1155236,
+              "name": "codex",
+              "cpu_percent": 16.45
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 10.97
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 9.4
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 9.4
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 7.83
+            },
+            {
+              "pid": 384469,
+              "name": "Paseo",
+              "cpu_percent": 7.05
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 7.05
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 6.27
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.48
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=3.77 avg60=2.74 avg300=1.44 total=24796014796\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.01 avg300=0.16 total=8137593144\nfull avg10=0.00 avg60=0.01 avg300=0.16 total=7958485301\n"
+            },
+            "after": {
+              "cpu": "some avg10=3.45 avg60=2.72 avg300=1.44 total=24796021696\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.01 avg300=0.16 total=8137593160\nfull avg10=0.00 avg60=0.01 avg300=0.16 total=7958485317\n"
+            }
+          }
+        },
+        {
+          "expected": "Paris",
+          "reasoning_budget_tokens": null,
+          "started": 1788581871.268333,
+          "finished": 1788581872.507946,
+          "wall_s": 1.2396132888970897,
+          "pass": true,
+          "effective_numa_threads": 12,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1354.33
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 99.73
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 56.37
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 55.65
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 44.08
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 34.69
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 16.62
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 11.56
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 10.84
+            },
+            {
+              "pid": 1136588,
+              "name": "codex",
+              "cpu_percent": 9.4
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 8.67
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 7.95
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 7.23
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.78
+            },
+            {
+              "pid": 384469,
+              "name": "Paseo",
+              "cpu_percent": 5.78
+            },
+            {
+              "pid": 3364369,
+              "name": "ChatGPT",
+              "cpu_percent": 5.06
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=3.45 avg60=2.72 avg300=1.44 total=24796024681\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.01 avg300=0.16 total=8137593160\nfull avg10=0.00 avg60=0.01 avg300=0.16 total=7958485317\n"
+            },
+            "after": {
+              "cpu": "some avg10=2.83 avg60=2.63 avg300=1.43 total=24796037081\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.01 avg300=0.16 total=8137593525\nfull avg10=0.00 avg60=0.01 avg300=0.16 total=7958485633\n"
+            }
+          }
+        },
+        {
+          "expected": "14, 16, 18",
+          "reasoning_budget_tokens": null,
+          "started": 1788581872.7066007,
+          "finished": 1788581874.5898483,
+          "wall_s": 1.8832475040107965,
+          "pass": true,
+          "effective_numa_threads": 12,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1309.01
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 99.74
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 55.3
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 53.82
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 44.93
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 36.05
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 11.85
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 7.9
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 7.9
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.91
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 6.91
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 6.42
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.93
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=2.83 avg60=2.63 avg300=1.43 total=24796037164\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.01 avg300=0.16 total=8137593525\nfull avg10=0.00 avg60=0.01 avg300=0.16 total=7958485633\n"
+            },
+            "after": {
+              "cpu": "some avg10=2.49 avg60=2.57 avg300=1.43 total=24796058605\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.01 avg300=0.16 total=8137593567\nfull avg10=0.00 avg60=0.01 avg300=0.16 total=7958485663\n"
+            }
+          }
+        },
+        {
+          "expected": null,
+          "reasoning_budget_tokens": null,
+          "started": 1788581874.7893307,
+          "finished": 1788581928.897092,
+          "wall_s": 54.107762269093655,
+          "pass": null,
+          "effective_numa_threads": 12,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1268.57
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 97.95
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 57.27
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 57.07
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 49.03
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 29.1
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 12.11
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 8.7
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 7.94
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.95
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 6.64
+            },
+            {
+              "pid": 384469,
+              "name": "Paseo",
+              "cpu_percent": 6.3
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.71
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=2.49 avg60=2.57 avg300=1.43 total=24796058708\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380536\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992827\n",
+              "io": "some avg10=0.00 avg60=0.01 avg300=0.16 total=8137593567\nfull avg10=0.00 avg60=0.01 avg300=0.16 total=7958485663\n"
+            },
+            "after": {
+              "cpu": "some avg10=2.86 avg60=2.91 avg300=1.73 total=24798081095\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.12 total=8137597591\nfull avg10=0.00 avg60=0.00 avg300=0.12 total=7958488073\n"
+            }
+          }
+        },
+        {
+          "expected": null,
+          "reasoning_budget_tokens": null,
+          "started": 1788581929.1096923,
+          "finished": 1788581944.833134,
+          "wall_s": 15.723440840956755,
+          "pass": null,
+          "effective_numa_threads": 12,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1322.87
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 99.99
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 56.96
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 56.33
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 45.74
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 27.09
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 11.85
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 8.25
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 8.0
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.99
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 5.73
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.42
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=2.86 avg60=2.91 avg300=1.73 total=24798084813\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.12 total=8137597591\nfull avg10=0.00 avg60=0.00 avg300=0.12 total=7958488073\n"
+            },
+            "after": {
+              "cpu": "some avg10=3.08 avg60=2.96 avg300=1.80 total=24798656492\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.12 total=8137598739\nfull avg10=0.00 avg60=0.00 avg300=0.12 total=7958488839\n"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "threads": 8,
+      "checks": [
+        {
+          "expected": "391",
+          "reasoning_budget_tokens": null,
+          "started": 1788581945.0403802,
+          "finished": 1788581946.2677639,
+          "wall_s": 1.2273838670225814,
+          "pass": true,
+          "effective_numa_threads": 8,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1339.51
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 99.67
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 78.16
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 70.99
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 48.04
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 30.12
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 11.47
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 9.32
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 8.61
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 7.89
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 6.45
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.02
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 5.02
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=3.08 avg60=2.96 avg300=1.80 total=24798656703\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.12 total=8137598739\nfull avg10=0.00 avg60=0.00 avg300=0.12 total=7958488839\n"
+            },
+            "after": {
+              "cpu": "some avg10=2.70 avg60=2.90 avg300=1.80 total=24798675372\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.12 total=8137598883\nfull avg10=0.00 avg60=0.00 avg300=0.12 total=7958488969\n"
+            }
+          }
+        },
+        {
+          "expected": "Paris",
+          "reasoning_budget_tokens": null,
+          "started": 1788581946.500147,
+          "finished": 1788581947.834253,
+          "wall_s": 1.3341060089878738,
+          "pass": true,
+          "effective_numa_threads": 8,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1321.75
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 100.59
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 41.58
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 40.91
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 38.22
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 28.17
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 10.73
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 9.39
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 8.05
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 8.05
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 7.38
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.36
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 5.36
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=2.70 avg60=2.90 avg300=1.80 total=24798675808\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.12 total=8137598908\nfull avg10=0.00 avg60=0.00 avg300=0.12 total=7958488993\n"
+            },
+            "after": {
+              "cpu": "some avg10=2.70 avg60=2.90 avg300=1.80 total=24798682132\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.12 total=8137598986\nfull avg10=0.00 avg60=0.00 avg300=0.12 total=7958489030\n"
+            }
+          }
+        },
+        {
+          "expected": "14, 16, 18",
+          "reasoning_budget_tokens": null,
+          "started": 1788581948.0549676,
+          "finished": 1788581950.123217,
+          "wall_s": 2.0682500089751557,
+          "pass": true,
+          "effective_numa_threads": 8,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1323.72
+            },
+            {
+              "pid": 1208923,
+              "name": "python3",
+              "cpu_percent": 99.65
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 66.43
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 61.5
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 40.4
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 28.28
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 9.88
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 9.43
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 8.08
+            },
+            {
+              "pid": 1017693,
+              "name": "python3",
+              "cpu_percent": 7.18
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 6.73
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 6.28
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.39
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=2.70 avg60=2.90 avg300=1.80 total=24798682221\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.12 total=8137598986\nfull avg10=0.00 avg60=0.00 avg300=0.12 total=7958489030\n"
+            },
+            "after": {
+              "cpu": "some avg10=2.21 avg60=2.80 avg300=1.78 total=24798710695\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.11 total=8137599398\nfull avg10=0.00 avg60=0.00 avg300=0.11 total=7958489207\n"
+            }
+          }
+        },
+        {
+          "expected": null,
+          "reasoning_budget_tokens": null,
+          "started": 1788581950.350687,
+          "finished": 1788582012.1249392,
+          "wall_s": 61.774252186995,
+          "pass": null,
+          "effective_numa_threads": 8,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1339.55
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 57.35
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 56.52
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 56.01
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 30.63
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 28.43
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 12.08
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 8.25
+            },
+            {
+              "pid": 383368,
+              "name": "Xorg",
+              "cpu_percent": 8.22
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 7.62
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.73
+            },
+            {
+              "pid": 3364747,
+              "name": "ChatGPT",
+              "cpu_percent": 5.21
+            },
+            {
+              "pid": 2904236,
+              "name": "claude-desktop",
+              "cpu_percent": 5.18
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=2.21 avg60=2.80 avg300=1.78 total=24798713622\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380537\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992829\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.11 total=8137599398\nfull avg10=0.00 avg60=0.00 avg300=0.11 total=7958489207\n"
+            },
+            "after": {
+              "cpu": "some avg10=1.90 avg60=1.99 avg300=1.72 total=24799903074\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380578\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992853\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.08 total=8137604750\nfull avg10=0.00 avg60=0.00 avg300=0.08 total=7958492873\n"
+            }
+          }
+        },
+        {
+          "expected": null,
+          "reasoning_budget_tokens": null,
+          "started": 1788582012.3511324,
+          "finished": 1788582029.9423962,
+          "wall_s": 17.591263273963705,
+          "pass": null,
+          "effective_numa_threads": 8,
+          "other_inference_cpu_percent": [
+            {
+              "pid": 4005448,
+              "port": "18091",
+              "cpu_percent": 0.0
+            }
+          ],
+          "throughput_contended": false,
+          "other_inference_process_churn": [],
+          "other_host_cpu_percent": [
+            {
+              "pid": 915455,
+              "name": "chrome",
+              "cpu_percent": 1200.2
+            },
+            {
+              "pid": 3364464,
+              "name": "ChatGPT",
+              "cpu_percent": 99.66
+            },
+            {
+              "pid": 3508983,
+              "name": "dockerd",
+              "cpu_percent": 56.93
+            },
+            {
+              "pid": 3508784,
+              "name": "containerd",
+              "cpu_percent": 55.64
+            },
+            {
+              "pid": 915631,
+              "name": "chrome",
+              "cpu_percent": 53.44
+            },
+            {
+              "pid": 2190939,
+              "name": "apps.plugin",
+              "cpu_percent": 11.95
+            },
+            {
+              "pid": 383368,
+              "name": "Xorg",
+              "cpu_percent": 11.78
+            },
+            {
+              "pid": 439920,
+              "name": "Paseo",
+              "cpu_percent": 11.78
+            },
+            {
+              "pid": 3091911,
+              "name": "ChatGPT",
+              "cpu_percent": 9.36
+            },
+            {
+              "pid": 2189730,
+              "name": "netdata",
+              "cpu_percent": 8.34
+            },
+            {
+              "pid": 384423,
+              "name": "Paseo",
+              "cpu_percent": 5.36
+            },
+            {
+              "pid": 1136588,
+              "name": "codex",
+              "cpu_percent": 5.19
+            }
+          ],
+          "host_pressure": {
+            "before": {
+              "cpu": "some avg10=1.90 avg60=1.99 avg300=1.72 total=24799904800\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380578\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992853\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.08 total=8137604750\nfull avg10=0.00 avg60=0.00 avg300=0.08 total=7958492873\n"
+            },
+            "after": {
+              "cpu": "some avg10=1.90 avg60=1.94 avg300=1.72 total=24800330975\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+              "memory": "some avg10=0.00 avg60=0.00 avg300=0.00 total=1506380578\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=1468992853\n",
+              "io": "some avg10=0.00 avg60=0.00 avg300=0.08 total=8137605843\nfull avg10=0.00 avg60=0.00 avg300=0.08 total=7958493689\n"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "selected_numa_threads": 15,
+  "thread_sweep_scores": {
+    "16": 18.757272912545176,
+    "15": 19.680395380874614,
+    "12": 19.271784265430227,
+    "8": 16.868254676810178
+  },
+  "profile_responses": {
+    "phase": {
+      "index": 0,
+      "tokens": [],
+      "id_slot": 0,
+      "stop": true,
+      "model": "qwen-goal",
+      "tokens_predicted": 16,
+      "tokens_evaluated": 1020,
+      "generation_settings": {
+        "seed": 42,
+        "temperature": 0.0,
+        "dynatemp_range": 0.0,
+        "dynatemp_exponent": 1.0,
+        "top_k": 20,
+        "top_p": 0.949999988079071,
+        "min_p": 0.05000000074505806,
+        "top_n_sigma": -1.0,
+        "xtc_probability": 0.0,
+        "xtc_threshold": 0.10000000149011612,
+        "typical_p": 1.0,
+        "repeat_last_n": 64,
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "dry_multiplier": 0.0,
+        "dry_base": 1.75,
+        "dry_allowed_length": 2,
+        "dry_penalty_last_n": 64,
+        "dry_sequence_breakers": [
+          "\n",
+          ":",
+          "\"",
+          "*"
+        ],
+        "mirostat": 0,
+        "mirostat_tau": 5.0,
+        "mirostat_eta": 0.10000000149011612,
+        "adaptive_target": -1.0,
+        "adaptive_decay": 0.8999999761581421,
+        "stop": [],
+        "max_tokens": 16,
+        "n_predict": 16,
+        "n_keep": 0,
+        "n_discard": 0,
+        "ignore_eos": false,
+        "stream": false,
+        "logit_bias": [],
+        "n_probs": 0,
+        "min_keep": 0,
+        "grammar": "",
+        "grammar_lazy": false,
+        "grammar_triggers": [],
+        "preserved_tokens": [],
+        "chat_format": "Content-only",
+        "reasoning_format": "deepseek",
+        "reasoning_in_content": false,
+        "generation_prompt": "",
+        "samplers": [
+          "penalties",
+          "dry",
+          "top_n_sigma",
+          "top_k",
+          "typ_p",
+          "top_p",
+          "min_p",
+          "xtc",
+          "temperature"
+        ],
+        "speculative.types": "none,draft-mtp",
+        "timings_per_token": false,
+        "post_sampling_probs": false,
+        "backend_sampling": false,
+        "lora": []
+      },
+      "has_new_line": true,
+      "truncated": false,
+      "stop_type": "limit",
+      "stopping_word": "",
+      "tokens_cached": 1035,
+      "timings": {
+        "cache_n": 1016,
+        "prompt_n": 4,
+        "prompt_ms": 283.704,
+        "prompt_per_token_ms": 70.926,
+        "prompt_per_second": 14.099201985167639,
+        "predicted_n": 16,
+        "predicted_ms": 1548.341,
+        "predicted_per_token_ms": 103.22273333333332,
+        "predicted_per_second": 9.687788413534228,
+        "draft_n": 15,
+        "draft_n_accepted": 6
+      }
+    },
+    "cpu": {
+      "index": 0,
+      "tokens": [],
+      "id_slot": 0,
+      "stop": true,
+      "model": "qwen-goal",
+      "tokens_predicted": 16,
+      "tokens_evaluated": 1020,
+      "generation_settings": {
+        "seed": 42,
+        "temperature": 0.0,
+        "dynatemp_range": 0.0,
+        "dynatemp_exponent": 1.0,
+        "top_k": 20,
+        "top_p": 0.949999988079071,
+        "min_p": 0.05000000074505806,
+        "top_n_sigma": -1.0,
+        "xtc_probability": 0.0,
+        "xtc_threshold": 0.10000000149011612,
+        "typical_p": 1.0,
+        "repeat_last_n": 64,
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "dry_multiplier": 0.0,
+        "dry_base": 1.75,
+        "dry_allowed_length": 2,
+        "dry_penalty_last_n": 64,
+        "dry_sequence_breakers": [
+          "\n",
+          ":",
+          "\"",
+          "*"
+        ],
+        "mirostat": 0,
+        "mirostat_tau": 5.0,
+        "mirostat_eta": 0.10000000149011612,
+        "adaptive_target": -1.0,
+        "adaptive_decay": 0.8999999761581421,
+        "stop": [],
+        "max_tokens": 16,
+        "n_predict": 16,
+        "n_keep": 0,
+        "n_discard": 0,
+        "ignore_eos": false,
+        "stream": false,
+        "logit_bias": [],
+        "n_probs": 0,
+        "min_keep": 0,
+        "grammar": "",
+        "grammar_lazy": false,
+        "grammar_triggers": [],
+        "preserved_tokens": [],
+        "chat_format": "Content-only",
+        "reasoning_format": "deepseek",
+        "reasoning_in_content": false,
+        "generation_prompt": "",
+        "samplers": [
+          "penalties",
+          "dry",
+          "top_n_sigma",
+          "top_k",
+          "typ_p",
+          "top_p",
+          "min_p",
+          "xtc",
+          "temperature"
+        ],
+        "speculative.types": "none,draft-mtp",
+        "timings_per_token": false,
+        "post_sampling_probs": false,
+        "backend_sampling": false,
+        "lora": []
+      },
+      "has_new_line": true,
+      "truncated": false,
+      "stop_type": "limit",
+      "stopping_word": "",
+      "tokens_cached": 1035,
+      "timings": {
+        "cache_n": 1016,
+        "prompt_n": 4,
+        "prompt_ms": 302.018,
+        "prompt_per_token_ms": 75.5045,
+        "prompt_per_second": 13.244243720572948,
+        "predicted_n": 16,
+        "predicted_ms": 1635.037,
+        "predicted_per_token_ms": 109.00246666666666,
+        "predicted_per_second": 9.174104316905366,
+        "draft_n": 15,
+        "draft_n_accepted": 6
+      }
+    }
+  },
+  "profile_prefix": {
+    "tokens": [
+      248045,
+      846,
+      198,
+      814,
+      20139,
+      1204,
+      264,
+      43447,
+      10480,
+      8364,
+      13,
+      20052,
+      264,
+      11346,
+      15673,
+      303,
+      13983,
+      6163,
+      13,
+      248046,
+      198,
+      248045,
+      74455,
+      198,
+      248068,
+      271,
+      248069,
+      271,
+      1206,
+      3418,
+      1204,
+      264,
+      43447,
+      4138,
+      11,
+      424,
+      8346,
+      310,
+      1118,
+      4054,
+      264,
+      5373,
+      19441,
+      33021,
+      2029,
+      25,
+      2972,
+      32,
+      43447,
+      1503,
+      524,
+      3404,
+      328,
+      3081,
+      1,
+      8981,
+      159029,
+      271,
+      29781,
+      11,
+      424,
+      2972,
+      63851,
+      8364,
+      332,
+      494,
+      279,
+      4613,
+      314,
+      279,
+      36337,
+      310,
+      279,
+      4732,
+      314,
+      279,
+      36337,
+      13,
+      271,
+      37405,
+      314,
+      424,
+      1040,
+      264,
+      13438,
+      13,
+      357,
+      2919,
+      13438,
+      3070,
+      1357,
+      1791,
+      2919,
+      26,
+      424,
+      10480,
+      2919,
+      494,
+      799,
+      1925,
+      310,
+      2361,
+      13,
+      357,
+      43447,
+      369,
+      264,
+      2972,
+      19354,
+      13438,
+      159034,
+      1049,
+      4829,
+      8364,
+      4649,
+      494,
+      279,
+      3594,
+      4613,
+      678,
+      36337,
+      321,
+      41360,
+      424,
+      680,
+      1083,
+      678,
+      9488,
+      13,
+      271,
+      8160,
+      369,
+      279,
+      2923,
+      13909,
+      28253,
+      1817,
+      303,
+      13983,
+      6163,
+      25,
+      271,
+      13962,
+      220,
+      16,
+      13,
+      561,
+      5141,
+      7085,
+      25,
+      561,
+      71637,
+      505,
+      198,
+      23705,
+      279,
+      9041,
+      31890,
+      314,
+      678,
+      43447,
+      26565,
+      264,
+      3175,
+      11153,
+      2512,
+      264,
+      2972,
+      1062,
+      61787,
+      505,
+      159034,
+      1061,
+      11153,
+      682,
+      264,
+      4752,
+      3234,
+      25,
+      424,
+      628,
+      6497,
+      2222,
+      494,
+      264,
+      14058,
+      310,
+      264,
+      6605,
+      318,
+      429,
+      1142,
+      1495,
+      8,
+      506,
+      1546,
+      3238,
+      19274,
+      13,
+      1061,
+      9956,
+      2222,
+      369,
+      279,
+      6038,
+      310,
+      6992,
+      8364,
+      13,
+      271,
+      13962,
+      220,
+      17,
+      13,
+      14392,
+      3648,
+      25,
+      21398,
+      269,
+      6909,
+      25237,
+      318,
+      23705,
+      279,
+      426,
+      10858,
+      8,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      10114,
+      20088,
+      824,
+      3422,
+      8405,
+      64700,
+      26482,
+      279,
+      47916,
+      466,
+      1142,
+      6784,
+      314,
+      678,
+      36337,
+      11,
+      1017,
+      513,
+      68366,
+      9896,
+      440,
+      8981,
+      11,
+      3238,
+      85416,
+      14058,
+      28417,
+      505,
+      13,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      15030,
+      66880,
+      64700,
+      8938,
+      279,
+      7035,
+      369,
+      748,
+      3238,
+      11,
+      279,
+      14058,
+      28417,
+      505,
+      6587,
+      310,
+      2404,
+      1083,
+      264,
+      6605,
+      13,
+      1946,
+      635,
+      411,
+      11,
+      424,
+      3749,
+      4649,
+      13,
+      1049,
+      59392,
+      411,
+      4649,
+      303,
+      279,
+      1304,
+      314,
+      2972,
+      19354,
+      332,
+      494,
+      279,
+      3594,
+      4613,
+      678,
+      36337,
+      13,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      5536,
+      64700,
+      1577,
+      279,
+      28417,
+      505,
+      86914,
+      279,
+      8364,
+      11,
+      279,
+      3594,
+      4613,
+      279,
+      36337,
+      5055,
+      72555,
+      13,
+      561,
+      28417,
+      505,
+      10263,
+      1083,
+      264,
+      8981,
+      11,
+      3238,
+      85416,
+      6605,
+      13,
+      271,
+      13962,
+      220,
+      18,
+      13,
+      14392,
+      8771,
+      25,
+      1158,
+      1808,
+      286,
+      279,
+      20219,
+      318,
+      760,
+      1158,
+      54331,
+      8,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      1158,
+      54331,
+      64700,
+      1061,
+      369,
+      279,
+      16850,
+      8604,
+      5802,
+      1669,
+      506,
+      279,
+      5445,
+      466,
+      1142,
+      314,
+      279,
+      36337,
+      13,
+      1049,
+      37803,
+      303,
+      279,
+      8981,
+      11,
+      3238,
+      85416,
+      6605,
+      494,
+      279,
+      4613,
+      68366,
+      13,
+      198,
+      9,
+      256,
+      2972,
+      50,
+      576,
+      9825,
+      286,
+      64700,
+      561,
+      56885,
+      42296,
+      287,
+      318,
+      37088,
+      287,
+      8,
+      411,
+      6605,
+      37679,
+      13,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      5536,
+      64700,
+      3095,
+      488,
+      35355,
+      264,
+      6605,
+      11,
+      424,
+      5055,
+      3882,
+      13,
+      20500,
+      314,
+      1204,
+      264,
+      33828,
+      13438,
+      5055,
+      7948,
+      948,
+      488,
+      958,
+      424,
+      13,
+      561,
+      28417,
+      505,
+      369,
+      1381,
+      264,
+      2972,
+      10307,
+      11,
+      1496,
+      85416,
+      6605,
+      159034,
+      271,
+      13962,
+      220,
+      19,
+      13,
+      14392,
+      14095,
+      25,
+      997,
+      80671,
+      25237,
+      318,
+      39997,
+      279,
+      426,
+      10858,
+      8,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      43335,
+      57438,
+      3422,
+      8405,
+      64700,
+      4081,
+      513,
+      279,
+      3565,
+      11,
+      5646,
+      12317,
+      68366,
+      5802,
+      7172,
+      383,
+      279,
+      1142,
+      466,
+      5445,
+      314,
+      279,
+      36337,
+      13,
+      2302,
+      513,
+      14469,
+      310,
+      279,
+      2956,
+      3594,
+      13,
+      198,
+      9,
+      256,
+      2972,
+      54853,
+      286,
+      6087,
+      64700,
+      561,
+      3882,
+      11,
+      1496,
+      85416,
+      6605,
+      26565,
+      1472,
+      1439,
+      68366,
+      13,
+      8938,
+      279,
+      6605,
+      369,
+      76208,
+      1056,
+      279,
+      2956,
+      3594,
+      11,
+      8364,
+      17185,
+      26565,
+      680,
+      314,
+      279,
+      6605,
+      321,
+      1083,
+      279,
+      2956,
+      13,
+      1394,
+      628,
+      2579,
+      411,
+      8364,
+      413,
+      488,
+      5615,
+      279,
+      1142,
+      314,
+      678,
+      36337,
+      13,
+      198,
+      9,
+      256,
+      2972,
+      94474,
+      6627,
+      310,
+      39895,
+      64700,
+      1577,
+      279,
+      6605,
+      31130,
+      1141,
+      8364,
+      310,
+      279,
+      2956,
+      11,
+      424,
+      1027,
+      2971,
+      1441,
+      321,
+      10263,
+      1142,
+      1083,
+      264,
+      2972,
+      79750,
+      11,
+      1496,
+      85416,
+      14058,
+      159034,
+      271,
+      13962,
+      220,
+      20,
+      13,
+      14392,
+      12937,
+      25,
+      561,
+      37698,
+      15272,
+      318,
+      760,
+      52722,
+      42822,
+      8,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      52722,
+      42822,
+      64700,
+      1061,
+      369,
+      264,
+      13280,
+      8712,
+      29430,
+      466,
+      30396,
+      421,
+      59666,
+      279,
+      1496,
+      85416,
+      3008,
+      494,
+      279,
+      3238,
+      85416,
+      3008,
+      13,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      15272,
+      64700,
+      561,
+      7948,
+      11,
+      1496,
+      85416,
+      14058,
+      369,
+      9290,
+      1472,
+      411,
+      13280,
+      13772,
+      13,
+      198,
+      9,
+      256,
+      2972,
+      760,
+      5536,
+      64700,
+      3095,
+      279,
+      14058,
+      14413,
+      20382,
+      494,
+      1496,
+      7035,
+      310,
+      3238,
+      7035,
+      11,
+      424,
+      50110,
+      17958,
+      321,
+      1027,
+      2971,
+      1441,
+      27051,
+      13,
+      1049,
+      8772,
+      264,
+      2972,
+      84068,
+      11,
+      3238,
+      85416,
+      14058,
+      332,
+      1495,
+      13,
+      271,
+      13962,
+      220,
+      21,
+      13,
+      561,
+      39928,
+      997,
+      79596,
+      198,
+      1919,
+      8981,
+      14058,
+      26565,
+      1142,
+      1083,
+      279,
+      57054,
+      824,
+      68366,
+      4613,
+      279,
+      36337,
+      11,
+      321,
+      279,
+      10458,
+      8211,
+      660,
+      888,
+      1495,
+      13,
+      271,
+      4277,
+      271,
+      13962,
+      20858,
+      18862,
+      15202,
+      25,
+      561,
+      77956,
+      198,
+      49338,
+      279,
+      28417,
+      505,
+      369,
+      264,
+      66035,
+      13,
+      271,
+      16,
+      13,
+      220,
+      2972,
+      23705,
+      279,
+      426,
+      10858,
+      64700,
+      561,
+      66035,
+      369,
+      8785,
+      13,
+      1049,
+      748,
+      9518,
+      685,
+      2919,
+      318,
+      19354,
+      8,
+      494,
+      279,
+      6220,
+      318,
+      1719,
+      3594,
+      303,
+      678,
+      36337,
+      553,
+      561,
+      6220,
+      5055,
+      8785,
+      318,
+      84068,
+      553,
+      198,
+      17,
+      13,
+      220,
+      2972,
+      760,
+      1158,
+      54331,
+      64700,
+      1394,
+      1831,
+      279,
+      13988,
+      66035,
+      321,
+      35355,
+      424,
+      2503,
+      13,
+      561,
+      2919,
+      3905,
+      680,
+      11,
+      321,
+      279,
+      66035,
+      5055,
+      3882,
+      494,
+      279,
+      37296,
+      13,
+      198,
+      18,
+      13,
+      220,
+      2972,
+      39997,
+      279,
+      426,
+      10858,
+      64700,
+      1394,
+      3012,
+      286,
+      279,
+      66035,
+      888,
+      264,
+      15162,
+      318,
+      1719,
+      2956,
+      3594,
+      553,
+      561,
+      2919,
+      318,
+      19354,
+      8,
+      5601,
+      1083,
+      279,
+      15162,
+      13,
+      561,
+      66035,
+      369,
+      1381,
+      8785,
+      321,
+      6792,
+      13,
+      198,
+      19,
+      13,
+      220,
+      2972,
+      760,
+      52722,
+      42822,
+      64700,
+      1394,
+      25194,
+      279,
+      66035,
+      310,
+      1236,
+      424,
+      65283,
+      321,
+      5354,
+      310,
+      33170,
+      2919,
+      1495,
+      13,
+      198,
+      20,
+      13,
+      220,
+      2972,
+      3581,
+      26482,
+      64700,
+      1394,
+      2113,
+      279,
+      8785,
+      66035,
+      1142,
+      383,
+      279,
+      6220,
+      310,
+      58646,
+      685,
+      777,
+      2919,
+      13,
+      271,
+      13962,
+      8169,
+      12193,
+      1061,
+      5374,
+      30,
+      198,
+      2064,
+      4138,
+      1521,
+      314,
+      1330,
+      6557,
+      6657,
+      314,
+      20665,
+      25,
+      198,
+      16,
+      13,
+      220,
+      2972,
+      59236,
+      17185,
+      26565,
+      494,
+      3882,
+      310,
+      8981,
+      159029,
+      561,
+      36337,
+      5533,
+      4649,
+      318,
+      61226,
+      477,
+      8,
+      310,
+      5176,
+      8364,
+      310,
+      6195,
+      494,
+      8981,
+      318,
+      39983,
+      8,
+      310,
+      3882,
+      318,
+      64726,
+      553,
+      198,
+      17,
+      13,
+      220,
+      2972,
+      57051,
+      7035,
+      4203,
+      9039,
+      159029,
+      3113,
+      60408,
+      279,
+      7035,
+      314,
+      279,
+      28417,
+      505,
+      11,
+      279,
+      36337,
+      628,
+      1236,
+      424,
+      8981,
+      3213,
+      310,
+      33170,
+      8364,
+      4613,
+      11,
+      321,
+      3882,
+      3213,
+      310,
+      4722,
+      8364,
+      4732
+    ],
+    "token_count": 1020,
+    "removed_tail_tokens": 32,
+    "includes_reasoning": false
+  },
+  "profile_response": {
+    "index": 0,
+    "tokens": [],
+    "id_slot": 0,
+    "stop": true,
+    "model": "qwen-goal",
+    "tokens_predicted": 16,
+    "tokens_evaluated": 1020,
+    "generation_settings": {
+      "seed": 42,
+      "temperature": 0.0,
+      "dynatemp_range": 0.0,
+      "dynatemp_exponent": 1.0,
+      "top_k": 20,
+      "top_p": 0.949999988079071,
+      "min_p": 0.05000000074505806,
+      "top_n_sigma": -1.0,
+      "xtc_probability": 0.0,
+      "xtc_threshold": 0.10000000149011612,
+      "typical_p": 1.0,
+      "repeat_last_n": 64,
+      "repeat_penalty": 1.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0,
+      "dry_multiplier": 0.0,
+      "dry_base": 1.75,
+      "dry_allowed_length": 2,
+      "dry_penalty_last_n": 64,
+      "dry_sequence_breakers": [
+        "\n",
+        ":",
+        "\"",
+        "*"
+      ],
+      "mirostat": 0,
+      "mirostat_tau": 5.0,
+      "mirostat_eta": 0.10000000149011612,
+      "adaptive_target": -1.0,
+      "adaptive_decay": 0.8999999761581421,
+      "stop": [],
+      "max_tokens": 16,
+      "n_predict": 16,
+      "n_keep": 0,
+      "n_discard": 0,
+      "ignore_eos": false,
+      "stream": false,
+      "logit_bias": [],
+      "n_probs": 0,
+      "min_keep": 0,
+      "grammar": "",
+      "grammar_lazy": false,
+      "grammar_triggers": [],
+      "preserved_tokens": [],
+      "chat_format": "Content-only",
+      "reasoning_format": "deepseek",
+      "reasoning_in_content": false,
+      "generation_prompt": "",
+      "samplers": [
+        "penalties",
+        "dry",
+        "top_n_sigma",
+        "top_k",
+        "typ_p",
+        "top_p",
+        "min_p",
+        "xtc",
+        "temperature"
+      ],
+      "speculative.types": "none,draft-mtp",
+      "timings_per_token": false,
+      "post_sampling_probs": false,
+      "backend_sampling": false,
+      "lora": []
+    },
+    "has_new_line": true,
+    "truncated": false,
+    "stop_type": "limit",
+    "stopping_word": "",
+    "tokens_cached": 1035,
+    "timings": {
+      "cache_n": 1016,
+      "prompt_n": 4,
+      "prompt_ms": 302.018,
+      "prompt_per_token_ms": 75.5045,
+      "prompt_per_second": 13.244243720572948,
+      "predicted_n": 16,
+      "predicted_ms": 1635.037,
+      "predicted_per_token_ms": 109.00246666666666,
+      "predicted_per_second": 9.174104316905366,
+      "draft_n": 15,
+      "draft_n_accepted": 6
+    }
+  },
+  "cache_checks": [
+    {
+      "label": "repeat",
+      "pass": true,
+      "prompt_tokens": [
+        248045,
+        846,
+        198,
+        814,
+        20139,
+        1204,
+        264,
+        43447,
+        10480,
+        8364,
+        13,
+        20052,
+        264,
+        11346,
+        15673,
+        303,
+        13983,
+        6163,
+        13,
+        248046,
+        198,
+        248045,
+        74455,
+        198,
+        248068,
+        271,
+        248069,
+        271
+      ],
+      "reference": {
+        "index": 0,
+        "tokens": [
+          1206,
+          3418,
+          1204,
+          264,
+          43447,
+          4138,
+          11,
+          424,
+          8346,
+          310,
+          1118,
+          4054,
+          264,
+          5373,
+          19441,
+          33021,
+          2029,
+          25,
+          2972,
+          32,
+          43447,
+          1503,
+          524,
+          3404
+        ],
+        "id_slot": 0,
+        "stop": true,
+        "model": "qwen-goal",
+        "tokens_predicted": 24,
+        "tokens_evaluated": 28,
+        "generation_settings": {
+          "seed": 42,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "dry_sequence_breakers": [
+            "\n",
+            ":",
+            "\"",
+            "*"
+          ],
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "stop": [],
+          "max_tokens": 24,
+          "n_predict": 24,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "logit_bias": [],
+          "n_probs": 0,
+          "min_keep": 0,
+          "grammar": "",
+          "grammar_lazy": false,
+          "grammar_triggers": [],
+          "preserved_tokens": [],
+          "chat_format": "Content-only",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,draft-mtp",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "has_new_line": false,
+        "truncated": false,
+        "stop_type": "limit",
+        "stopping_word": "",
+        "tokens_cached": 51,
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 28,
+          "prompt_ms": 845.226,
+          "prompt_per_token_ms": 30.186642857142857,
+          "prompt_per_second": 33.127234609441736,
+          "predicted_n": 24,
+          "predicted_ms": 1239.332,
+          "predicted_per_token_ms": 53.88400000000001,
+          "predicted_per_second": 18.55838467819761,
+          "draft_n": 16,
+          "draft_n_accepted": 14
+        }
+      },
+      "cached": {
+        "index": 0,
+        "tokens": [
+          1206,
+          3418,
+          1204,
+          264,
+          43447,
+          4138,
+          11,
+          424,
+          8346,
+          310,
+          1118,
+          4054,
+          264,
+          5373,
+          19441,
+          33021,
+          2029,
+          25,
+          2972,
+          32,
+          43447,
+          1503,
+          524,
+          3404
+        ],
+        "id_slot": 0,
+        "stop": true,
+        "model": "qwen-goal",
+        "tokens_predicted": 24,
+        "tokens_evaluated": 28,
+        "generation_settings": {
+          "seed": 42,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "dry_sequence_breakers": [
+            "\n",
+            ":",
+            "\"",
+            "*"
+          ],
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "stop": [],
+          "max_tokens": 24,
+          "n_predict": 24,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "logit_bias": [],
+          "n_probs": 0,
+          "min_keep": 0,
+          "grammar": "",
+          "grammar_lazy": false,
+          "grammar_triggers": [],
+          "preserved_tokens": [],
+          "chat_format": "Content-only",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,draft-mtp",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "has_new_line": false,
+        "truncated": false,
+        "stop_type": "limit",
+        "stopping_word": "",
+        "tokens_cached": 51,
+        "timings": {
+          "cache_n": 24,
+          "prompt_n": 4,
+          "prompt_ms": 345.434,
+          "prompt_per_token_ms": 86.3585,
+          "prompt_per_second": 11.579636052038884,
+          "predicted_n": 24,
+          "predicted_ms": 1218.145,
+          "predicted_per_token_ms": 52.96282608695652,
+          "predicted_per_second": 18.88116767708278,
+          "draft_n": 16,
+          "draft_n_accepted": 14
+        }
+      }
+    },
+    {
+      "label": "extend",
+      "pass": true,
+      "prompt_tokens": [
+        248045,
+        846,
+        198,
+        814,
+        20139,
+        1204,
+        264,
+        43447,
+        10480,
+        8364,
+        13,
+        20052,
+        264,
+        11346,
+        15673,
+        303,
+        13983,
+        6163,
+        13,
+        248046,
+        198,
+        248045,
+        74455,
+        198,
+        248068,
+        271,
+        248069,
+        271,
+        1206,
+        3418,
+        1204,
+        264,
+        43447,
+        4138,
+        11,
+        424,
+        8346,
+        310,
+        1118,
+        4054,
+        264,
+        5373,
+        19441,
+        33021,
+        2029,
+        25,
+        2972,
+        32,
+        43447,
+        1503,
+        524,
+        3404
+      ],
+      "reference": {
+        "index": 0,
+        "tokens": [
+          328,
+          3081,
+          1,
+          8981,
+          159029,
+          271,
+          29781,
+          11,
+          424,
+          2972,
+          63851,
+          8364,
+          332,
+          494,
+          279,
+          4613,
+          314,
+          279,
+          36337,
+          310,
+          279,
+          4732,
+          314,
+          279
+        ],
+        "id_slot": 0,
+        "stop": true,
+        "model": "qwen-goal",
+        "tokens_predicted": 24,
+        "tokens_evaluated": 52,
+        "generation_settings": {
+          "seed": 42,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "dry_sequence_breakers": [
+            "\n",
+            ":",
+            "\"",
+            "*"
+          ],
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "stop": [],
+          "max_tokens": 24,
+          "n_predict": 24,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "logit_bias": [],
+          "n_probs": 0,
+          "min_keep": 0,
+          "grammar": "",
+          "grammar_lazy": false,
+          "grammar_triggers": [],
+          "preserved_tokens": [],
+          "chat_format": "Content-only",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,draft-mtp",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "has_new_line": true,
+        "truncated": false,
+        "stop_type": "limit",
+        "stopping_word": "",
+        "tokens_cached": 75,
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 52,
+          "prompt_ms": 1126.79,
+          "prompt_per_token_ms": 21.66903846153846,
+          "prompt_per_second": 46.148794362747275,
+          "predicted_n": 24,
+          "predicted_ms": 1407.662,
+          "predicted_per_token_ms": 61.202695652173915,
+          "predicted_per_second": 16.339149596991323,
+          "draft_n": 17,
+          "draft_n_accepted": 13
+        }
+      },
+      "cached": {
+        "index": 0,
+        "tokens": [
+          328,
+          3081,
+          1,
+          8981,
+          159029,
+          271,
+          29781,
+          11,
+          424,
+          2972,
+          63851,
+          8364,
+          332,
+          494,
+          279,
+          4613,
+          314,
+          279,
+          36337,
+          310,
+          279,
+          4732,
+          314,
+          279
+        ],
+        "id_slot": 0,
+        "stop": true,
+        "model": "qwen-goal",
+        "tokens_predicted": 24,
+        "tokens_evaluated": 52,
+        "generation_settings": {
+          "seed": 42,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "dry_sequence_breakers": [
+            "\n",
+            ":",
+            "\"",
+            "*"
+          ],
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "stop": [],
+          "max_tokens": 24,
+          "n_predict": 24,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "logit_bias": [],
+          "n_probs": 0,
+          "min_keep": 0,
+          "grammar": "",
+          "grammar_lazy": false,
+          "grammar_triggers": [],
+          "preserved_tokens": [],
+          "chat_format": "Content-only",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,draft-mtp",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "has_new_line": true,
+        "truncated": false,
+        "stop_type": "limit",
+        "stopping_word": "",
+        "tokens_cached": 75,
+        "timings": {
+          "cache_n": 51,
+          "prompt_n": 1,
+          "prompt_ms": 154.464,
+          "prompt_per_token_ms": 154.464,
+          "prompt_per_second": 6.474000414336026,
+          "predicted_n": 24,
+          "predicted_ms": 1401.069,
+          "predicted_per_token_ms": 60.91604347826087,
+          "predicted_per_second": 16.41603661204409,
+          "draft_n": 17,
+          "draft_n_accepted": 13
+        }
+      }
+    },
+    {
+      "label": "trim_one",
+      "pass": true,
+      "prompt_tokens": [
+        248045,
+        846,
+        198,
+        814,
+        20139,
+        1204,
+        264,
+        43447,
+        10480,
+        8364,
+        13,
+        20052,
+        264,
+        11346,
+        15673,
+        303,
+        13983,
+        6163,
+        13,
+        248046,
+        198,
+        248045,
+        74455,
+        198,
+        248068,
+        271,
+        248069,
+        271,
+        1206,
+        3418,
+        1204,
+        264,
+        43447,
+        4138,
+        11,
+        424,
+        8346,
+        310,
+        1118,
+        4054,
+        264,
+        5373,
+        19441,
+        33021,
+        2029,
+        25,
+        2972,
+        32,
+        43447,
+        1503,
+        524
+      ],
+      "reference": {
+        "index": 0,
+        "tokens": [
+          3404,
+          328,
+          3081,
+          1,
+          8981,
+          159029,
+          271,
+          29781,
+          11,
+          424,
+          2972,
+          63851,
+          8364,
+          332,
+          494,
+          279,
+          4613,
+          314,
+          279,
+          36337,
+          310,
+          279,
+          4732,
+          314
+        ],
+        "id_slot": 0,
+        "stop": true,
+        "model": "qwen-goal",
+        "tokens_predicted": 24,
+        "tokens_evaluated": 51,
+        "generation_settings": {
+          "seed": 42,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "dry_sequence_breakers": [
+            "\n",
+            ":",
+            "\"",
+            "*"
+          ],
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "stop": [],
+          "max_tokens": 24,
+          "n_predict": 24,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "logit_bias": [],
+          "n_probs": 0,
+          "min_keep": 0,
+          "grammar": "",
+          "grammar_lazy": false,
+          "grammar_triggers": [],
+          "preserved_tokens": [],
+          "chat_format": "Content-only",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,draft-mtp",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "has_new_line": true,
+        "truncated": false,
+        "stop_type": "limit",
+        "stopping_word": "",
+        "tokens_cached": 74,
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 51,
+          "prompt_ms": 1128.968,
+          "prompt_per_token_ms": 22.136627450980395,
+          "prompt_per_second": 45.17399961734965,
+          "predicted_n": 24,
+          "predicted_ms": 1328.098,
+          "predicted_per_token_ms": 57.743391304347824,
+          "predicted_per_second": 17.317999123558653,
+          "draft_n": 18,
+          "draft_n_accepted": 13
+        }
+      },
+      "cached": {
+        "index": 0,
+        "tokens": [
+          3404,
+          328,
+          3081,
+          1,
+          8981,
+          159029,
+          271,
+          29781,
+          11,
+          424,
+          2972,
+          63851,
+          8364,
+          332,
+          494,
+          279,
+          4613,
+          314,
+          279,
+          36337,
+          310,
+          279,
+          4732,
+          314
+        ],
+        "id_slot": 0,
+        "stop": true,
+        "model": "qwen-goal",
+        "tokens_predicted": 24,
+        "tokens_evaluated": 51,
+        "generation_settings": {
+          "seed": 42,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "dry_sequence_breakers": [
+            "\n",
+            ":",
+            "\"",
+            "*"
+          ],
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "stop": [],
+          "max_tokens": 24,
+          "n_predict": 24,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "logit_bias": [],
+          "n_probs": 0,
+          "min_keep": 0,
+          "grammar": "",
+          "grammar_lazy": false,
+          "grammar_triggers": [],
+          "preserved_tokens": [],
+          "chat_format": "Content-only",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,draft-mtp",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "has_new_line": true,
+        "truncated": false,
+        "stop_type": "limit",
+        "stopping_word": "",
+        "tokens_cached": 74,
+        "timings": {
+          "cache_n": 24,
+          "prompt_n": 27,
+          "prompt_ms": 909.063,
+          "prompt_per_token_ms": 33.669,
+          "prompt_per_second": 29.700911817992814,
+          "predicted_n": 24,
+          "predicted_ms": 1330.346,
+          "predicted_per_token_ms": 57.841130434782606,
+          "predicted_per_second": 17.288735411689892,
+          "draft_n": 18,
+          "draft_n_accepted": 13
+        }
+      }
+    },
+    {
+      "label": "trim_three",
+      "pass": true,
+      "prompt_tokens": [
+        248045,
+        846,
+        198,
+        814,
+        20139,
+        1204,
+        264,
+        43447,
+        10480,
+        8364,
+        13,
+        20052,
+        264,
+        11346,
+        15673,
+        303,
+        13983,
+        6163,
+        13,
+        248046,
+        198,
+        248045,
+        74455,
+        198,
+        248068,
+        271,
+        248069,
+        271,
+        1206,
+        3418,
+        1204,
+        264,
+        43447,
+        4138,
+        11,
+        424,
+        8346,
+        310,
+        1118,
+        4054,
+        264,
+        5373,
+        19441,
+        33021,
+        2029,
+        25,
+        2972,
+        32,
+        43447
+      ],
+      "reference": {
+        "index": 0,
+        "tokens": [
+          1503,
+          524,
+          3404,
+          328,
+          3081,
+          1,
+          8981,
+          159029,
+          271,
+          29781,
+          11,
+          424,
+          2972,
+          63851,
+          8364,
+          332,
+          494,
+          279,
+          4613,
+          314,
+          279,
+          36337,
+          310,
+          279
+        ],
+        "id_slot": 0,
+        "stop": true,
+        "model": "qwen-goal",
+        "tokens_predicted": 24,
+        "tokens_evaluated": 49,
+        "generation_settings": {
+          "seed": 42,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "dry_sequence_breakers": [
+            "\n",
+            ":",
+            "\"",
+            "*"
+          ],
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "stop": [],
+          "max_tokens": 24,
+          "n_predict": 24,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "logit_bias": [],
+          "n_probs": 0,
+          "min_keep": 0,
+          "grammar": "",
+          "grammar_lazy": false,
+          "grammar_triggers": [],
+          "preserved_tokens": [],
+          "chat_format": "Content-only",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,draft-mtp",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "has_new_line": true,
+        "truncated": false,
+        "stop_type": "limit",
+        "stopping_word": "",
+        "tokens_cached": 72,
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 49,
+          "prompt_ms": 1100.241,
+          "prompt_per_token_ms": 22.453897959183674,
+          "prompt_per_second": 44.535697179072585,
+          "predicted_n": 24,
+          "predicted_ms": 1242.869,
+          "predicted_per_token_ms": 54.03778260869565,
+          "predicted_per_second": 18.505570579039304,
+          "draft_n": 17,
+          "draft_n_accepted": 14
+        }
+      },
+      "cached": {
+        "index": 0,
+        "tokens": [
+          1503,
+          524,
+          3404,
+          328,
+          3081,
+          1,
+          8981,
+          159029,
+          271,
+          29781,
+          11,
+          424,
+          2972,
+          63851,
+          8364,
+          332,
+          494,
+          279,
+          4613,
+          314,
+          279,
+          36337,
+          310,
+          279
+        ],
+        "id_slot": 0,
+        "stop": true,
+        "model": "qwen-goal",
+        "tokens_predicted": 24,
+        "tokens_evaluated": 49,
+        "generation_settings": {
+          "seed": 42,
+          "temperature": 0.0,
+          "dynatemp_range": 0.0,
+          "dynatemp_exponent": 1.0,
+          "top_k": 20,
+          "top_p": 0.949999988079071,
+          "min_p": 0.05000000074505806,
+          "top_n_sigma": -1.0,
+          "xtc_probability": 0.0,
+          "xtc_threshold": 0.10000000149011612,
+          "typical_p": 1.0,
+          "repeat_last_n": 64,
+          "repeat_penalty": 1.0,
+          "presence_penalty": 0.0,
+          "frequency_penalty": 0.0,
+          "dry_multiplier": 0.0,
+          "dry_base": 1.75,
+          "dry_allowed_length": 2,
+          "dry_penalty_last_n": 64,
+          "dry_sequence_breakers": [
+            "\n",
+            ":",
+            "\"",
+            "*"
+          ],
+          "mirostat": 0,
+          "mirostat_tau": 5.0,
+          "mirostat_eta": 0.10000000149011612,
+          "adaptive_target": -1.0,
+          "adaptive_decay": 0.8999999761581421,
+          "stop": [],
+          "max_tokens": 24,
+          "n_predict": 24,
+          "n_keep": 0,
+          "n_discard": 0,
+          "ignore_eos": false,
+          "stream": false,
+          "logit_bias": [],
+          "n_probs": 0,
+          "min_keep": 0,
+          "grammar": "",
+          "grammar_lazy": false,
+          "grammar_triggers": [],
+          "preserved_tokens": [],
+          "chat_format": "Content-only",
+          "reasoning_format": "deepseek",
+          "reasoning_in_content": false,
+          "generation_prompt": "",
+          "samplers": [
+            "penalties",
+            "dry",
+            "top_n_sigma",
+            "top_k",
+            "typ_p",
+            "top_p",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "speculative.types": "none,draft-mtp",
+          "timings_per_token": false,
+          "post_sampling_probs": false,
+          "backend_sampling": false,
+          "lora": []
+        },
+        "has_new_line": true,
+        "truncated": false,
+        "stop_type": "limit",
+        "stopping_word": "",
+        "tokens_cached": 72,
+        "timings": {
+          "cache_n": 24,
+          "prompt_n": 25,
+          "prompt_ms": 871.16,
+          "prompt_per_token_ms": 34.846399999999996,
+          "prompt_per_second": 28.69736902520777,
+          "predicted_n": 24,
+          "predicted_ms": 1233.836,
+          "predicted_per_token_ms": 53.64504347826087,
+          "predicted_per_second": 18.64105116077015,
+          "draft_n": 17,
+          "draft_n_accepted": 14
+        }
+      }
+    }
+  ],
+  "finished": 1788582084.0187354,
+  "server_exit": 0
+}

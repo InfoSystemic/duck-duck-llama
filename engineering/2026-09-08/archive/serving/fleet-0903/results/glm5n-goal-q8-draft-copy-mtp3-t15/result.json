@@ -1,0 +1,225 @@
+{
+  "config": {
+    "label": "glm5n-goal-q8-draft-copy-mtp3-t15",
+    "binary": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/GLM-5.3-Flash/UD-IQ2_XXS/GLM-5.3-Flash-UD-IQ2_XXS-00001-of-00004.gguf",
+    "alias": "glm-flash-goal",
+    "runtime": "llama",
+    "ctx_size": 4096,
+    "mtp": "/dev/shm/flash-goal-0904-mtp-q8/GLM-5.3-Flash-MTP-Q8_0.gguf",
+    "draft_n": 3,
+    "draft_p_min": 0,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 15,
+    "fused": 1,
+    "merge": 1,
+    "repack": 1,
+    "huge_pages": 0,
+    "port": 18106,
+    "bench": true,
+    "bench_tokens": 512,
+    "profile_cpu": false,
+    "profile_phase": true
+  },
+  "started": 1788570071.6333506,
+  "checks": [
+    {
+      "expected": "391",
+      "started": 1788570378.392218,
+      "finished": 1788570383.2564545,
+      "wall_s": 4.864233995904215,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "Paris",
+      "started": 1788570383.3452213,
+      "finished": 1788570388.4083984,
+      "wall_s": 5.063176276977174,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": "14, 16, 18",
+      "started": 1788570388.5118637,
+      "finished": 1788570394.3908677,
+      "wall_s": 5.879003098001704,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788570394.4801362,
+      "finished": 1788570444.7079005,
+      "wall_s": 50.227763714967296,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    },
+    {
+      "expected": null,
+      "started": 1788570444.795842,
+      "finished": 1788570494.7252262,
+      "wall_s": 49.92938421003055,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false,
+      "other_inference_process_churn": []
+    }
+  ],
+  "runtime_env": {
+    "GGML_GLM5N_MLA_TP": "1",
+    "GGML_GLM5N_ATTN_TP": "1",
+    "GGML_GLM5N_SHEXP_TP": "1",
+    "GGML_CPU_IQ2_XXS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_GLM5N_KPOOL_REUSE": "1",
+    "LLAMA_GRAPH_PHASE_ARM_FILE": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm5n-goal-q8-draft-copy-mtp3-t15/phase-profile.arm",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_Q8_0_REPACK_FORCE": "1",
+    "GGML_CPU_PARALLEL_COPY": "1"
+  },
+  "memory_after_load": {
+    "VmRSS": "178015236 kB",
+    "RssAnon": "177629804 kB",
+    "RssFile": "36944 kB",
+    "Pss": "178009780 kB",
+    "AnonHugePages": "0 kB",
+    "FilePmdMapped": "0 kB"
+  },
+  "profile_responses": {
+    "phase": {
+      "choices": [
+        {
+          "finish_reason": "length",
+          "index": 0,
+          "message": {
+            "role": "assistant"
+          }
+        }
+      ],
+      "created": 1788570497,
+      "model": "glm-flash-goal",
+      "system_fingerprint": "b0-unknown",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 16,
+        "prompt_tokens": 30,
+        "total_tokens": 46,
+        "prompt_tokens_details": {
+          "cached_tokens": 26
+        }
+      },
+      "id": "chatcmpl-cIvacSwY7MOTFDJe1PzqEDswCmqtJPMK",
+      "timings": {
+        "cache_n": 26,
+        "prompt_n": 4,
+        "prompt_ms": 386.444,
+        "prompt_per_token_ms": 96.611,
+        "prompt_per_second": 10.350788212522383,
+        "predicted_n": 16,
+        "predicted_ms": 1352.086,
+        "predicted_per_token_ms": 90.13906666666666,
+        "predicted_per_second": 11.093968874760925,
+        "draft_n": 14,
+        "draft_n_accepted": 10
+      }
+    }
+  },
+  "profile_response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "role": "assistant"
+        }
+      }
+    ],
+    "created": 1788570497,
+    "model": "glm-flash-goal",
+    "system_fingerprint": "b0-unknown",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 16,
+      "prompt_tokens": 30,
+      "total_tokens": 46,
+      "prompt_tokens_details": {
+        "cached_tokens": 26
+      }
+    },
+    "id": "chatcmpl-cIvacSwY7MOTFDJe1PzqEDswCmqtJPMK",
+    "timings": {
+      "cache_n": 26,
+      "prompt_n": 4,
+      "prompt_ms": 386.444,
+      "prompt_per_token_ms": 96.611,
+      "prompt_per_second": 10.350788212522383,
+      "predicted_n": 16,
+      "predicted_ms": 1352.086,
+      "predicted_per_token_ms": 90.13906666666666,
+      "predicted_per_second": 11.093968874760925,
+      "draft_n": 14,
+      "draft_n_accepted": 10
+    }
+  },
+  "finished": 1788570513.6517801,
+  "server_exit": 0
+}

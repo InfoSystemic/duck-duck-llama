@@ -1,0 +1,83 @@
+{
+  "started": 1788884132.1755276,
+  "passed": false,
+  "cpu_sha256": "f86a02d1d042bd2ed92b09af28983dd53a001f32d3624901599c26f7eb206191",
+  "shapes": [
+    [
+      4096,
+      2048,
+      "attn_q"
+    ],
+    [
+      2048,
+      4096,
+      "attn_output"
+    ],
+    [
+      4096,
+      512,
+      "attn_kv_a_mqa"
+    ],
+    [
+      4096,
+      4096,
+      "attn_output"
+    ],
+    [
+      4096,
+      38720,
+      "output"
+    ],
+    [
+      1536,
+      4096,
+      "attn_q_b"
+    ],
+    [
+      4096,
+      128,
+      "ssm_f_a"
+    ],
+    [
+      512,
+      4096,
+      "ffn_down_shexp"
+    ],
+    [
+      4096,
+      3072,
+      "ffn_gate"
+    ],
+    [
+      4096,
+      1536,
+      "attn_q_a"
+    ],
+    [
+      128,
+      2048,
+      "ssm_f_b"
+    ],
+    [
+      3072,
+      4096,
+      "ffn_down"
+    ],
+    [
+      4096,
+      16,
+      "ssm_beta"
+    ]
+  ],
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/probe_flash_dense_chunks_0908.py": "6a5b86253bf3af1797796969deac54569bb78ff809e1ca96a769a731173fb9bc",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-batch-0908/q8-check.cpp": "db3c6e1dc8c1eb2dbda6b7a4e347457da2ce4d100371e22432bab6bb62e5cc3f",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-dense-chunks-0908/dense-chunk-check.cpp": "9ab3720e4bebd7bd53dd9d32f67758e99455cd679e1329da994ede17d861e073",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0.22.0": "f86a02d1d042bd2ed92b09af28983dd53a001f32d3624901599c26f7eb206191"
+  },
+  "steps": [],
+  "runs": [],
+  "scope": "Component timings and output comparisons only; no full-model or memory-bandwidth result.",
+  "error": "AssertionError(('compile', 1))",
+  "finished": 1788884134.8749394
+}

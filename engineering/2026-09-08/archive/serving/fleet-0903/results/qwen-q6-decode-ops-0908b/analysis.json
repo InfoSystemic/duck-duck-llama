@@ -1,0 +1,1473 @@
+{
+  "scope": "Two decode-only traces; operation times include a following worker barrier and are summed over overlapping socket graphs.",
+  "cases": {
+    "prose": {
+      "target": {
+        "graphs": 8,
+        "sum_stage_ms": 903.518,
+        "top_sources": [
+          {
+            "op": "MUL_MAT_ID",
+            "source": "blk.#.ffn_gate_exps.weight",
+            "type": "q6_K",
+            "shape": [
+              2560,
+              160,
+              512
+            ],
+            "sum_ms": 119.69,
+            "fraction": 0.13247107417893167
+          },
+          {
+            "op": "CUSTOM",
+            "source": "",
+            "type": "none",
+            "shape": [
+              0,
+              0,
+              0
+            ],
+            "sum_ms": 112.42500000000031,
+            "fraction": 0.12443028251789151
+          },
+          {
+            "op": "MUL_MAT_ID",
+            "source": "blk.#.ffn_down_exps.weight",
+            "type": "q8_0",
+            "shape": [
+              160,
+              2560,
+              512
+            ],
+            "sum_ms": 71.84100000000002,
+            "fraction": 0.07951252769728995
+          },
+          {
+            "op": "GET_ROWS",
+            "source": "cache_s_l# (reshaped)",
+            "type": "f32",
+            "shape": [
+              196608,
+              5,
+              1
+            ],
+            "sum_ms": 33.72899999999997,
+            "fraction": 0.0373307449325857
+          },
+          {
+            "op": "GATED_DELTA_NET",
+            "source": "q_conv_predelta-#",
+            "type": "f32",
+            "shape": [
+              128,
+              4,
+              5
+            ],
+            "sum_ms": 31.209000000000035,
+            "fraction": 0.034541647205700424
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_gate_shexp.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              640,
+              1
+            ],
+            "sum_ms": 30.22900000000008,
+            "fraction": 0.0334569980896895
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ssm_out.weight",
+            "type": "q8_0",
+            "shape": [
+              1536,
+              2560,
+              1
+            ],
+            "sum_ms": 28.248000000000047,
+            "fraction": 0.03126445737661015
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_gate_inp.weight",
+            "type": "f32",
+            "shape": [
+              2560,
+              512,
+              1
+            ],
+            "sum_ms": 27.76700000000005,
+            "fraction": 0.030732093881914967
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_qkv.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              2560,
+              1
+            ],
+            "sum_ms": 25.853999999999985,
+            "fraction": 0.028614814536068994
+          },
+          {
+            "op": "UNARY",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              10240,
+              5,
+              1
+            ],
+            "sum_ms": 21.684999999999985,
+            "fraction": 0.024000628653773344
+          },
+          {
+            "op": "CPY",
+            "source": " (view)",
+            "type": "f32",
+            "shape": [
+              196608,
+              1,
+              5
+            ],
+            "sum_ms": 20.284000000000013,
+            "fraction": 0.02245002313180259
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_gate.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              1536,
+              1
+            ],
+            "sum_ms": 17.21999999999998,
+            "fraction": 0.01905883446704989
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "output.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              62080,
+              1
+            ],
+            "sum_ms": 14.717,
+            "fraction": 0.01628855208197291
+          },
+          {
+            "op": "MUL",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              5
+            ],
+            "sum_ms": 13.335000000000042,
+            "fraction": 0.014758975471435036
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 12.841999999999992,
+            "fraction": 0.014213330558992727
+          },
+          {
+            "op": "RMS_NORM",
+            "source": "hc_combine-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              5
+            ],
+            "sum_ms": 12.706999999999997,
+            "fraction": 0.014063914609338162
+          },
+          {
+            "op": "MUL",
+            "source": "ffn_moe_down-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              10,
+              5
+            ],
+            "sum_ms": 12.40599999999997,
+            "fraction": 0.013730772380849047
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 11.901000000000016,
+            "fraction": 0.01317184605065977
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 11.723999999999988,
+            "fraction": 0.012975945138890412
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 11.506999999999989,
+            "fraction": 0.012735772834630841
+          },
+          {
+            "op": "RMS_NORM",
+            "source": "l_last-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              5
+            ],
+            "sum_ms": 11.39399999999999,
+            "fraction": 0.012610706150845903
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_down_shexp.weight",
+            "type": "q8_0",
+            "shape": [
+              640,
+              2560,
+              1
+            ],
+            "sum_ms": 10.702999999999962,
+            "fraction": 0.011845917845576913
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_q.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              6144,
+              1
+            ],
+            "sum_ms": 9.582,
+            "fraction": 0.010605212071037876
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_inject.weight",
+            "type": "f32",
+            "shape": [
+              10240,
+              4,
+              1
+            ],
+            "sum_ms": 9.57499999999999,
+            "fraction": 0.010597464577352073
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_inject.weight",
+            "type": "f32",
+            "shape": [
+              10240,
+              4,
+              1
+            ],
+            "sum_ms": 9.494999999999976,
+            "fraction": 0.01050892179237157
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.indexer.q_proj.weight",
+            "type": "bf16",
+            "shape": [
+              2560,
+              512,
+              1
+            ],
+            "sum_ms": 8.747000000000002,
+            "fraction": 0.00968104675280404
+          },
+          {
+            "op": "REPEAT",
+            "source": "ffn_out-# (reshaped)",
+            "type": "f32",
+            "shape": [
+              2560,
+              1,
+              5
+            ],
+            "sum_ms": 8.303999999999984,
+            "fraction": 0.009190741080974573
+          },
+          {
+            "op": "MUL",
+            "source": " (reshaped)",
+            "type": "f32",
+            "shape": [
+              10240,
+              5,
+              1
+            ],
+            "sum_ms": 7.831000000000011,
+            "fraction": 0.008667231864777471
+          },
+          {
+            "op": "TOP_K",
+            "source": "indexer_score_tokens-#",
+            "type": "f32",
+            "shape": [
+              256,
+              5,
+              1
+            ],
+            "sum_ms": 7.763999999999996,
+            "fraction": 0.008593077282356296
+          },
+          {
+            "op": "ARGSORT",
+            "source": "ffn_moe_probs-#",
+            "type": "f32",
+            "shape": [
+              512,
+              5,
+              1
+            ],
+            "sum_ms": 7.190999999999998,
+            "fraction": 0.007958889584933557
+          }
+        ]
+      },
+      "draft": {
+        "graphs": 56,
+        "sum_stage_ms": 201.83,
+        "top_sources": [
+          {
+            "op": "MUL_MAT",
+            "source": "output.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              62080,
+              1
+            ],
+            "sum_ms": 83.30800000000004,
+            "fraction": 0.4127632165683993
+          },
+          {
+            "op": "CUSTOM",
+            "source": "",
+            "type": "none",
+            "shape": [
+              0,
+              0,
+              0
+            ],
+            "sum_ms": 40.15200000000003,
+            "fraction": 0.19893970172917816
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.nextn.eh_proj.weight",
+            "type": "q8_0",
+            "shape": [
+              5120,
+              2560,
+              1
+            ],
+            "sum_ms": 23.304000000000006,
+            "fraction": 0.11546350889362336
+          },
+          {
+            "op": "MUL_MAT_ID",
+            "source": "blk.#.ffn_gate_exps.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              160,
+              512
+            ],
+            "sum_ms": 6.348999999999999,
+            "fraction": 0.031457166922657674
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_q.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              6144,
+              1
+            ],
+            "sum_ms": 5.169000000000001,
+            "fraction": 0.025610662438686028
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_gate_inp.weight",
+            "type": "f32",
+            "shape": [
+              2560,
+              512,
+              1
+            ],
+            "sum_ms": 4.825000000000002,
+            "fraction": 0.023906257741663786
+          },
+          {
+            "op": "UNARY",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              10240,
+              5,
+              1
+            ],
+            "sum_ms": 4.62,
+            "fraction": 0.022890551454194122
+          },
+          {
+            "op": "MUL_MAT_ID",
+            "source": "blk.#.ffn_down_exps.weight",
+            "type": "q8_0",
+            "shape": [
+              160,
+              2560,
+              512
+            ],
+            "sum_ms": 2.7450000000000006,
+            "fraction": 0.013600554922459497
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_gate_shexp.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              640,
+              1
+            ],
+            "sum_ms": 2.42,
+            "fraction": 0.011990288856958825
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_output.weight",
+            "type": "q8_0",
+            "shape": [
+              3072,
+              2560,
+              1
+            ],
+            "sum_ms": 2.3499999999999996,
+            "fraction": 0.011643462319774065
+          },
+          {
+            "op": "MUL",
+            "source": " (reshaped)",
+            "type": "f32",
+            "shape": [
+              10240,
+              1,
+              1
+            ],
+            "sum_ms": 1.780999999999998,
+            "fraction": 0.008824258038943655
+          },
+          {
+            "op": "UNARY",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              10240,
+              1,
+              1
+            ],
+            "sum_ms": 1.2019999999999993,
+            "fraction": 0.005955507109944008
+          },
+          {
+            "op": "REPEAT",
+            "source": " (reshaped)",
+            "type": "f32",
+            "shape": [
+              2560,
+              1,
+              0
+            ],
+            "sum_ms": 1.2,
+            "fraction": 0.0059455977803101615
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_down_shexp.weight",
+            "type": "q8_0",
+            "shape": [
+              640,
+              2560,
+              1
+            ],
+            "sum_ms": 1.1560000000000006,
+            "fraction": 0.005727592528365458
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 0.9850000000000003,
+            "fraction": 0.004880344844671259
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 0.8600000000000003,
+            "fraction": 0.004261011742555617
+          },
+          {
+            "op": "MUL",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              1
+            ],
+            "sum_ms": 0.8450000000000006,
+            "fraction": 0.004186691770301742
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_inject.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              4,
+              1
+            ],
+            "sum_ms": 0.6530000000000004,
+            "fraction": 0.0032353961254521146
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.nextn.hc_head_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 0.6190000000000002,
+            "fraction": 0.0030669375216766594
+          },
+          {
+            "op": "REPEAT",
+            "source": " (reshaped)",
+            "type": "f32",
+            "shape": [
+              2560,
+              1,
+              1
+            ],
+            "sum_ms": 0.5740000000000004,
+            "fraction": 0.0028439776049150292
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 0.5560000000000003,
+            "fraction": 0.002754793638210376
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_v.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              256,
+              1
+            ],
+            "sum_ms": 0.5380000000000001,
+            "fraction": 0.002665609671505723
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_up.weight",
+            "type": "q8_0",
+            "shape": [
+              96,
+              10240,
+              1
+            ],
+            "sum_ms": 0.5330000000000003,
+            "fraction": 0.002640836347421098
+          },
+          {
+            "op": "UNARY",
+            "source": "mtp_gate-#",
+            "type": "f32",
+            "shape": [
+              3072,
+              1,
+              1
+            ],
+            "sum_ms": 0.5140000000000001,
+            "fraction": 0.00254669771589952
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.nextn.hc_head_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 0.48600000000000015,
+            "fraction": 0.0024079671010256163
+          },
+          {
+            "op": "RMS_NORM",
+            "source": "Meta(CPU-NUMA#,CPU-NUMA#,CPU-NUMA#,CPU-NUMA#)#mtp_h_state-###",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              5
+            ],
+            "sum_ms": 0.485,
+            "fraction": 0.00240301243620869
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 0.47500000000000014,
+            "fraction": 0.0023534657880394396
+          },
+          {
+            "op": "CONCAT",
+            "source": "mtp_enorm-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              1
+            ],
+            "sum_ms": 0.47000000000000025,
+            "fraction": 0.0023286924639548145
+          },
+          {
+            "op": "MUL",
+            "source": "ffn_moe_down-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              10,
+              1
+            ],
+            "sum_ms": 0.42300000000000026,
+            "fraction": 0.002095823217559333
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.nextn.hc_head_up.weight",
+            "type": "q8_0",
+            "shape": [
+              96,
+              10240,
+              1
+            ],
+            "sum_ms": 0.4180000000000002,
+            "fraction": 0.002071049893474707
+          }
+        ]
+      }
+    },
+    "code": {
+      "target": {
+        "graphs": 8,
+        "sum_stage_ms": 892.717,
+        "top_sources": [
+          {
+            "op": "MUL_MAT_ID",
+            "source": "blk.#.ffn_gate_exps.weight",
+            "type": "q6_K",
+            "shape": [
+              2560,
+              160,
+              512
+            ],
+            "sum_ms": 114.953,
+            "fraction": 0.12876757135800035
+          },
+          {
+            "op": "CUSTOM",
+            "source": "",
+            "type": "none",
+            "shape": [
+              0,
+              0,
+              0
+            ],
+            "sum_ms": 106.29900000000036,
+            "fraction": 0.11907356978751425
+          },
+          {
+            "op": "MUL_MAT_ID",
+            "source": "blk.#.ffn_down_exps.weight",
+            "type": "q8_0",
+            "shape": [
+              160,
+              2560,
+              512
+            ],
+            "sum_ms": 68.66999999999996,
+            "fraction": 0.07692247375148
+          },
+          {
+            "op": "GET_ROWS",
+            "source": "cache_s_l# (reshaped)",
+            "type": "f32",
+            "shape": [
+              196608,
+              5,
+              1
+            ],
+            "sum_ms": 32.76799999999996,
+            "fraction": 0.03670592136141684
+          },
+          {
+            "op": "GATED_DELTA_NET",
+            "source": "q_conv_predelta-#",
+            "type": "f32",
+            "shape": [
+              128,
+              4,
+              5
+            ],
+            "sum_ms": 32.30100000000003,
+            "fraction": 0.036182799252170654
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_gate_shexp.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              640,
+              1
+            ],
+            "sum_ms": 30.639000000000067,
+            "fraction": 0.03432106703468184
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_gate_inp.weight",
+            "type": "f32",
+            "shape": [
+              2560,
+              512,
+              1
+            ],
+            "sum_ms": 29.765000000000022,
+            "fraction": 0.033342033365557085
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ssm_out.weight",
+            "type": "q8_0",
+            "shape": [
+              1536,
+              2560,
+              1
+            ],
+            "sum_ms": 28.50800000000002,
+            "fraction": 0.03193397235630107
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_qkv.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              2560,
+              1
+            ],
+            "sum_ms": 25.72299999999999,
+            "fraction": 0.02881428268981098
+          },
+          {
+            "op": "UNARY",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              10240,
+              5,
+              1
+            ],
+            "sum_ms": 23.561000000000025,
+            "fraction": 0.02639246256092359
+          },
+          {
+            "op": "CPY",
+            "source": " (view)",
+            "type": "f32",
+            "shape": [
+              196608,
+              1,
+              5
+            ],
+            "sum_ms": 20.630000000000013,
+            "fraction": 0.023109227224305143
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_gate.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              1536,
+              1
+            ],
+            "sum_ms": 17.233999999999995,
+            "fraction": 0.01930511013008601
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "output.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              62080,
+              1
+            ],
+            "sum_ms": 14.940000000000001,
+            "fraction": 0.016735426792589367
+          },
+          {
+            "op": "MUL",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              5
+            ],
+            "sum_ms": 13.87800000000002,
+            "fraction": 0.015545800068778818
+          },
+          {
+            "op": "RMS_NORM",
+            "source": "hc_combine-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              5
+            ],
+            "sum_ms": 13.002999999999991,
+            "fraction": 0.014565646223831283
+          },
+          {
+            "op": "MUL",
+            "source": "ffn_moe_down-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              10,
+              5
+            ],
+            "sum_ms": 12.647999999999977,
+            "fraction": 0.014167983806738279
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 12.38599999999999,
+            "fraction": 0.013874497741165443
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 11.966999999999997,
+            "fraction": 0.013405144071413445
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 11.513000000000002,
+            "fraction": 0.012896584247863547
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 11.412999999999997,
+            "fraction": 0.012784566665583827
+          },
+          {
+            "op": "RMS_NORM",
+            "source": "l_last-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              5
+            ],
+            "sum_ms": 11.345999999999988,
+            "fraction": 0.012709514885456408
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_down_shexp.weight",
+            "type": "q8_0",
+            "shape": [
+              640,
+              2560,
+              1
+            ],
+            "sum_ms": 10.850999999999978,
+            "fraction": 0.01215502785317181
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_q.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              6144,
+              1
+            ],
+            "sum_ms": 9.672000000000004,
+            "fraction": 0.010834340558094003
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_inject.weight",
+            "type": "f32",
+            "shape": [
+              10240,
+              4,
+              1
+            ],
+            "sum_ms": 9.456999999999974,
+            "fraction": 0.010593502756192584
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_inject.weight",
+            "type": "f32",
+            "shape": [
+              10240,
+              4,
+              1
+            ],
+            "sum_ms": 9.349999999999964,
+            "fraction": 0.010473643943153277
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.indexer.q_proj.weight",
+            "type": "bf16",
+            "shape": [
+              2560,
+              512,
+              1
+            ],
+            "sum_ms": 8.806000000000001,
+            "fraction": 0.00986426829555167
+          },
+          {
+            "op": "REPEAT",
+            "source": "ffn_out-# (reshaped)",
+            "type": "f32",
+            "shape": [
+              2560,
+              1,
+              5
+            ],
+            "sum_ms": 8.301999999999984,
+            "fraction": 0.00929969968086189
+          },
+          {
+            "op": "MUL",
+            "source": " (reshaped)",
+            "type": "f32",
+            "shape": [
+              10240,
+              5,
+              1
+            ],
+            "sum_ms": 7.93500000000003,
+            "fraction": 0.008888595153895389
+          },
+          {
+            "op": "TOP_K",
+            "source": "indexer_score_tokens-#",
+            "type": "f32",
+            "shape": [
+              256,
+              5,
+              1
+            ],
+            "sum_ms": 7.541000000000001,
+            "fraction": 0.008447245879713282
+          },
+          {
+            "op": "ARGSORT",
+            "source": "ffn_moe_probs-#",
+            "type": "f32",
+            "shape": [
+              512,
+              5,
+              1
+            ],
+            "sum_ms": 6.878999999999994,
+            "fraction": 0.007705689485021563
+          }
+        ]
+      },
+      "draft": {
+        "graphs": 56,
+        "sum_stage_ms": 190.105,
+        "top_sources": [
+          {
+            "op": "MUL_MAT",
+            "source": "output.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              62080,
+              1
+            ],
+            "sum_ms": 83.05499999999996,
+            "fraction": 0.4368901396596616
+          },
+          {
+            "op": "CUSTOM",
+            "source": "",
+            "type": "none",
+            "shape": [
+              0,
+              0,
+              0
+            ],
+            "sum_ms": 30.701000000000008,
+            "fraction": 0.1614949633097499
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.nextn.eh_proj.weight",
+            "type": "q8_0",
+            "shape": [
+              5120,
+              2560,
+              1
+            ],
+            "sum_ms": 23.891000000000002,
+            "fraction": 0.12567265458562374
+          },
+          {
+            "op": "MUL_MAT_ID",
+            "source": "blk.#.ffn_gate_exps.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              160,
+              512
+            ],
+            "sum_ms": 6.179000000000001,
+            "fraction": 0.03250309039741196
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_q.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              6144,
+              1
+            ],
+            "sum_ms": 5.161999999999999,
+            "fraction": 0.02715341521790589
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_gate_inp.weight",
+            "type": "f32",
+            "shape": [
+              2560,
+              512,
+              1
+            ],
+            "sum_ms": 4.892000000000002,
+            "fraction": 0.025733147471134386
+          },
+          {
+            "op": "MUL_MAT_ID",
+            "source": "blk.#.ffn_down_exps.weight",
+            "type": "q8_0",
+            "shape": [
+              160,
+              2560,
+              512
+            ],
+            "sum_ms": 2.7129999999999996,
+            "fraction": 0.0142710607295968
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_output.weight",
+            "type": "q8_0",
+            "shape": [
+              3072,
+              2560,
+              1
+            ],
+            "sum_ms": 2.43,
+            "fraction": 0.01278240972094369
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_gate_shexp.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              640,
+              1
+            ],
+            "sum_ms": 2.4269999999999996,
+            "fraction": 0.012766628968201781
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_v.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              256,
+              1
+            ],
+            "sum_ms": 2.214999999999999,
+            "fraction": 0.011651455774440435
+          },
+          {
+            "op": "MUL",
+            "source": " (reshaped)",
+            "type": "f32",
+            "shape": [
+              10240,
+              1,
+              1
+            ],
+            "sum_ms": 1.8469999999999969,
+            "fraction": 0.009715683438099981
+          },
+          {
+            "op": "RMS_NORM",
+            "source": "mtp_Qcur_full-# (view)",
+            "type": "f32",
+            "shape": [
+              256,
+              12,
+              5
+            ],
+            "sum_ms": 1.605,
+            "fraction": 0.008442702716919598
+          },
+          {
+            "op": "UNARY",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              10240,
+              1,
+              1
+            ],
+            "sum_ms": 1.3439999999999988,
+            "fraction": 0.007069777228373787
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.ffn_down_shexp.weight",
+            "type": "q8_0",
+            "shape": [
+              640,
+              2560,
+              1
+            ],
+            "sum_ms": 1.0620000000000005,
+            "fraction": 0.005586386470634652
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 0.9810000000000003,
+            "fraction": 0.005160306146603195
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 0.9030000000000004,
+            "fraction": 0.004750006575313645
+          },
+          {
+            "op": "MUL",
+            "source": "node_#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              1
+            ],
+            "sum_ms": 0.8060000000000006,
+            "fraction": 0.004239762236658692
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.nextn.hc_head_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 0.6640000000000001,
+            "fraction": 0.003492806606875149
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_inject.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              4,
+              1
+            ],
+            "sum_ms": 0.5970000000000003,
+            "fraction": 0.0031403697956392538
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              96,
+              1
+            ],
+            "sum_ms": 0.5920000000000003,
+            "fraction": 0.003114068541069411
+          },
+          {
+            "op": "REPEAT",
+            "source": " (reshaped)",
+            "type": "f32",
+            "shape": [
+              2560,
+              1,
+              1
+            ],
+            "sum_ms": 0.5550000000000004,
+            "fraction": 0.002919439257252573
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_attn_up.weight",
+            "type": "q8_0",
+            "shape": [
+              96,
+              10240,
+              1
+            ],
+            "sum_ms": 0.5260000000000002,
+            "fraction": 0.0027668919807474833
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.hc_ffn_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 0.5150000000000002,
+            "fraction": 0.0027090292206938286
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.nextn.hc_head_down.weight",
+            "type": "q8_0",
+            "shape": [
+              10240,
+              64,
+              1
+            ],
+            "sum_ms": 0.49200000000000016,
+            "fraction": 0.0025880434496725504
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.nextn.hc_head_up.weight",
+            "type": "q8_0",
+            "shape": [
+              96,
+              10240,
+              1
+            ],
+            "sum_ms": 0.4670000000000002,
+            "fraction": 0.0024565371768233354
+          },
+          {
+            "op": "RMS_NORM",
+            "source": "Meta(CPU-NUMA#,CPU-NUMA#,CPU-NUMA#,CPU-NUMA#)#mtp_h_state-###",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              5
+            ],
+            "sum_ms": 0.438,
+            "fraction": 0.0023039899003182455
+          },
+          {
+            "op": "CONCAT",
+            "source": "mtp_enorm-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              4,
+              1
+            ],
+            "sum_ms": 0.42900000000000027,
+            "fraction": 0.0022566476420925294
+          },
+          {
+            "op": "MUL",
+            "source": "ffn_moe_down-#",
+            "type": "f32",
+            "shape": [
+              2560,
+              10,
+              1
+            ],
+            "sum_ms": 0.42400000000000027,
+            "fraction": 0.0022303463875226865
+          },
+          {
+            "op": "UNARY",
+            "source": "mtp_gate-#",
+            "type": "f32",
+            "shape": [
+              3072,
+              1,
+              1
+            ],
+            "sum_ms": 0.41500000000000015,
+            "fraction": 0.002183004129296968
+          },
+          {
+            "op": "MUL_MAT",
+            "source": "blk.#.attn_k.weight",
+            "type": "q8_0",
+            "shape": [
+              2560,
+              256,
+              1
+            ],
+            "sum_ms": 0.4100000000000002,
+            "fraction": 0.0021567028747271257
+          }
+        ]
+      }
+    }
+  }
+}

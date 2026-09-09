@@ -1,0 +1,111 @@
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -14,8 +14,10 @@
+ #include "llama.h"
+ 
+ #include <cinttypes>
++#include <cstdlib>
+ #include <cmath>
+ #include <cstring>
++#include <fstream>
+ #include <limits>
+ #include <stdexcept>
+ #include <string>
+@@ -1333,12 +1335,16 @@
+ }
+ 
+ llm_graph_result * llama_context::process_ubatch(const llama_ubatch & ubatch, llm_graph_type gtype, llama_memory_context_i * mctx, ggml_status & ret) {
++    static const char * phase_arm = std::getenv("LLAMA_GRAPH_PHASE_ARM_FILE");
++    const bool phase_profile = phase_arm != nullptr && std::ifstream(phase_arm).good();
++    const int64_t phase_start = phase_profile ? ggml_time_us() : 0;
+     if (mctx && !mctx->apply()) {
+         LLAMA_LOG_ERROR("%s: failed to apply memory context\n", __func__);
+         ret = GGML_STATUS_FAILED;
+         return nullptr;
+     }
+ 
++    const int64_t phase_applied = phase_profile ? ggml_time_us() : 0;
+     auto * res = gf_res_prev.get();
+     auto * gf  = res->get_gf();
+ 
+@@ -1346,7 +1352,8 @@
+     // in order to correctly reuse a graph, it's full topology has to be uniquely determined by these parameters
+     const auto gparams = graph_params(res, ubatch, mctx, gtype);
+ 
+-    if (!graph_reuse_disable && res->can_reuse(gparams)) {
++    const bool reused = !graph_reuse_disable && res->can_reuse(gparams);
++    if (reused) {
+         //LLAMA_LOG_DEBUG("%s: reusing previous graph\n", __func__);
+ 
+         // with pipeline parallelism, the previous graph_compute_async may still be running
+@@ -1382,6 +1389,8 @@
+         }
+     }
+ 
++    const int64_t phase_prepared = phase_profile ? ggml_time_us() : 0;
++
+     // set the input data for the input tensors
+     {
+         //const auto t_start_us = ggml_time_us();
+@@ -1392,6 +1401,7 @@
+         //LLAMA_LOG_INFO("graph set inputs time: %.3f ms\n", (ggml_time_us() - t_start_us)/1000.0);
+     }
+ 
++    const int64_t phase_inputs = phase_profile ? ggml_time_us() : 0;
+     const auto status = graph_compute(res->get_gf(), ubatch.n_tokens > 1);
+     if (status != GGML_STATUS_SUCCESS) {
+         LLAMA_LOG_ERROR("%s: failed to compute graph, compute status: %d\n", __func__, status);
+@@ -1399,6 +1409,15 @@
+         return nullptr;
+     }
+ 
++    if (phase_profile) {
++        ggml_backend_sched_synchronize(sched.get());
++        const int64_t finished = ggml_time_us();
++        LLAMA_LOG_WARN("GRAPH_PHASE tokens=%u nodes=%d reused=%d apply=%.3f prepare=%.3f inputs=%.3f compute=%.3f total=%.3f ms\n",
++            ubatch.n_tokens, ggml_graph_n_nodes(gf), reused,
++            (phase_applied - phase_start) / 1000.0, (phase_prepared - phase_applied) / 1000.0,
++            (phase_inputs - phase_prepared) / 1000.0, (finished - phase_inputs) / 1000.0,
++            (finished - phase_start) / 1000.0);
++    }
+     ret = GGML_STATUS_SUCCESS;
+ 
+     return res;
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -15,6 +15,7 @@
+ #include <cstring>
+ #include <condition_variable>
+ #include <map>
++#include <fstream>
+ #include <memory>
+ #include <atomic>
+ #include <mutex>
+@@ -2685,6 +2686,9 @@
+ }
+ 
+ static enum ggml_status ggml_backend_meta_graph_compute(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
++    static const char * phase_arm = std::getenv("LLAMA_GRAPH_PHASE_ARM_FILE");
++    const bool phase_profile = phase_arm != nullptr && std::ifstream(phase_arm).good();
++    const int64_t phase_start = phase_profile ? ggml_time_us() : 0;
+     GGML_ASSERT(cgraph->grads == nullptr);
+     const size_t n_backends = ggml_backend_meta_n_backends(backend);
+     ggml_backend_meta_context * backend_ctx = (ggml_backend_meta_context *) backend->context;
+@@ -3237,7 +3241,16 @@
+         for (auto & d : backend_ctx->fused_descs) {
+             d->reset();
+         }
+-        return dispatch_graph_group(backend_ctx->fused_graphs);
++        const int64_t phase_prepared = phase_profile ? ggml_time_us() : 0;
++        const ggml_status status = dispatch_graph_group(backend_ctx->fused_graphs);
++        if (phase_profile) {
++            ggml_backend_meta_synchronize(backend);
++            const int64_t finished = ggml_time_us();
++            GGML_LOG_WARN("META_PHASE nodes=%d rebuild=%d prepare=%.3f execute=%.3f total=%.3f ms\n",
++                cgraph->n_nodes, needs_rebuild, (phase_prepared - phase_start) / 1000.0,
++                (finished - phase_prepared) / 1000.0, (finished - phase_start) / 1000.0);
++        }
++        return status;
+     }
+ 
+     size_t iga = 0; // i graph aux

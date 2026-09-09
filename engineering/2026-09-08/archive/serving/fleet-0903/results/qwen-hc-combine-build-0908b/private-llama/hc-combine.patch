@@ -1,0 +1,29 @@
+--- /home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/src/models/qwen4exp.cpp
++++ private/qwen4exp.cpp
+@@ -1,4 +1,5 @@
+ #include "models.h"
++#include "qwen-hc-combine-0908.h"
+ #include "llama-impl.h"
+ #include "llama-memory-hybrid-idx.h"
+ #include "llama-memory-recurrent.h"
+@@ -310,9 +311,17 @@
+     w = ggml_reshape_3d(ctx0, w, 1, hc, nt);
+ 
+     ggml_tensor * b = ggml_reshape_3d(ctx0, block_out, n_embd, 1, nt);
+-    b = ggml_repeat_4d(ctx0, b, n_embd, hc, nt, 1);
+-
+-    ggml_tensor * cur = ggml_add(ctx0, residual, ggml_mul(ctx0, b, w));
++    static const bool fused = [] {
++        const char * value = getenv("GGML_QWEN_HC_COMBINE_FUSED");
++        return value && atoi(value) == 1;
++    }();
++    ggml_tensor * cur;
++    if (fused) {
++        cur = ggml_map_custom3(ctx0, residual, b, w, qwen_hc_combine_f32, GGML_N_TASKS_MAX, nullptr);
++    } else {
++        b = ggml_repeat_4d(ctx0, b, n_embd, hc, nt, 1);
++        cur = ggml_add(ctx0, residual, ggml_mul(ctx0, b, w));
++    }
+     cb(cur, "hc_combine", il);
+ 
+     return cur;

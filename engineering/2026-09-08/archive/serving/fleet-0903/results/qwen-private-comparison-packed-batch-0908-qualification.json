@@ -1,0 +1,67 @@
+{
+  "created": 1788912354.263816,
+  "source_sha256": {
+    "results/qwen-private-packed-batch-off-0908-decode/result.json": "fcc0b2cc64fea6a10b0e66d3d01c35e6abb6ba620c1606b7e92d703fec159060",
+    "results/qwen-private-packed-batch-on-0908-decode/result.json": "9597c626a6d201ff531768c93e3c8e844d5fdb4fe828f2cd34693c922737062c",
+    "results/qwen-private-comparison-packed-batch-0908.json": "1408cbdffcea2d7a67202be38a4e10266c2f0d17fb2c7e264d802e6d27bf7cca"
+  },
+  "measurements": [
+    {
+      "mode": "off",
+      "workload": "prose",
+      "tok_s": 20.861768209180095,
+      "idle_before_gb_s": 5.02718394682063,
+      "idle_after_gb_s": 5.945219097143585,
+      "total_decode_gb_s": 128.39971889499625,
+      "raw_adjusted_gb_s": 122.45449979785266,
+      "traffic_attribution_qualified": true,
+      "reason": null,
+      "speed_threshold_met": false,
+      "even_total_decode_below_190": true
+    },
+    {
+      "mode": "off",
+      "workload": "code",
+      "tok_s": 26.664463974458638,
+      "idle_before_gb_s": 6.006459709064629,
+      "idle_after_gb_s": 7.25971692442263,
+      "total_decode_gb_s": 137.2548826439746,
+      "raw_adjusted_gb_s": 129.99516571955198,
+      "traffic_attribution_qualified": true,
+      "reason": null,
+      "speed_threshold_met": false,
+      "even_total_decode_below_190": true
+    },
+    {
+      "mode": "on",
+      "workload": "prose",
+      "tok_s": 20.4386763913169,
+      "idle_before_gb_s": 110.39176440254141,
+      "idle_after_gb_s": 12.292323569966666,
+      "total_decode_gb_s": 130.847161858884,
+      "raw_adjusted_gb_s": 20.45539745634258,
+      "traffic_attribution_qualified": false,
+      "reason": "Pre-request idle traffic is inconsistent with the post-request window; cause unknown. Do not use the adjusted value as model attribution.",
+      "speed_threshold_met": false,
+      "even_total_decode_below_190": true
+    },
+    {
+      "mode": "on",
+      "workload": "code",
+      "tok_s": 27.341535103857296,
+      "idle_before_gb_s": 7.90626980558963,
+      "idle_after_gb_s": 6.805362213184418,
+      "total_decode_gb_s": 136.7382596303586,
+      "raw_adjusted_gb_s": 128.83198982476898,
+      "traffic_attribution_qualified": true,
+      "reason": null,
+      "speed_threshold_met": false,
+      "even_total_decode_below_190": true
+    }
+  ],
+  "output_parity_preserved": true,
+  "model_speed_gain_established": false,
+  "promoted": false,
+  "goal_achieved": false,
+  "raw_evidence_modified": false
+}

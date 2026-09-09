@@ -1,0 +1,45 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/ggml-cpu.c
++++ /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-rms-matmul-0908/private-cpu/ggml-cpu.c
+@@ -574,6 +574,7 @@
+ };
+ 
+ static struct ggml_state g_state = {0};
++static bool ggml_cpu_rms_matmul_fusion = false;
+ static bool ggml_cpu_softmax_pool_fusion = false;
+ 
+ #ifdef GGML_USE_OPENMP
+@@ -3823,6 +3824,23 @@
+         }
+     }
+ 
++    if (ggml_cpu_rms_matmul_fusion && node->op == GGML_OP_RMS_NORM) {
++        const enum ggml_op weighted_ops[] = { GGML_OP_RMS_NORM, GGML_OP_MUL, GGML_OP_MUL_MAT };
++        const enum ggml_op plain_ops[] = { GGML_OP_RMS_NORM, GGML_OP_MUL_MAT };
++        for (int count = 3; count >= 2; --count) {
++            if (node_n + count > cgraph->n_nodes) continue;
++            const int outputs[] = { node_n + count - 1 };
++            if (ggml_can_fuse_subgraph(cgraph, node_n, count,
++                    count == 3 ? weighted_ops : plain_ops, outputs, 1)) {
++                struct ggml_tensor * activation = cgraph->nodes[node_n + count - 2];
++                struct ggml_tensor * dst = cgraph->nodes[node_n + count - 1];
++                if (ggml_cpu_repack_compute_forward_rms_norm_matmul(params, node, activation, dst)) {
++                    return count - 1;
++                }
++            }
++        }
++    }
++
+     if (node->op == GGML_OP_RMS_NORM) {
+         // RMS_NORM + MUL fusion
+         const enum ggml_op fuse_ops[] = { GGML_OP_RMS_NORM, GGML_OP_MUL };
+@@ -4842,6 +4860,10 @@
+             ggml_cpu_softmax_pool_fusion = env != NULL && atoi(env) == 1;
+         }
+         {
++            const char * env = getenv("GGML_CPU_RMS_MATMUL_FUSION");
++            ggml_cpu_rms_matmul_fusion = env != NULL && atoi(env) == 1;
++        }
++        {
+             const char * env = getenv("GGML_CPU_DISABLE_FUSION");
+             ggml_cpu_disable_fusion = (env != NULL && atoi(env) == 1);
+         }

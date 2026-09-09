@@ -1,0 +1,102 @@
+{
+  "config": {
+    "label": "q4e-goal-scheduler-t4",
+    "binary": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/build-goal/bin/llama-server",
+    "model": "/models/gguf/Qwen3.8-Flash-Next/UD-Q2_K_XL/Qwen3.8-Flash-Next-UD-Q2_K_XL-00001-of-00003.gguf",
+    "alias": "qwen-goal",
+    "ctx_size": 4096,
+    "mtp": null,
+    "draft_n": 1,
+    "devices": "CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3",
+    "stage": 13,
+    "direct": 1,
+    "threads": 4,
+    "fused": 1,
+    "merge": 1,
+    "repack": 0,
+    "port": 18105,
+    "bench": true
+  },
+  "started": 1788560020.2316208,
+  "checks": [
+    {
+      "expected": "391",
+      "wall_s": 2.725988727994263,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    },
+    {
+      "expected": "Paris",
+      "wall_s": 2.3488746909424663,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    },
+    {
+      "expected": "14, 16, 18",
+      "wall_s": 4.724212401080877,
+      "pass": true,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    },
+    {
+      "expected": null,
+      "wall_s": 25.139739764039405,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    },
+    {
+      "expected": null,
+      "wall_s": 24.543169857002795,
+      "pass": null,
+      "other_inference_cpu_percent": [
+        {
+          "pid": 4005448,
+          "port": "18091",
+          "cpu_percent": 0.0
+        }
+      ],
+      "throughput_contended": false
+    }
+  ],
+  "runtime_env": {
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "4",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "0",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0"
+  },
+  "finished": 1788560147.5875874,
+  "server_exit": 0
+}

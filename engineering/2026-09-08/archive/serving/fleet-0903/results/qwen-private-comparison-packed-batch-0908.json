@@ -1,0 +1,80 @@
+{
+  "time": 1788911890.7699099,
+  "control": "qwen-private-packed-batch-off-0908",
+  "control_rows": {
+    "prose": {
+      "tok_s": 20.861768209180095,
+      "adjusted_gb_s": 122.45449979785266,
+      "utilization": 0.32224868367855963,
+      "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+      "generated_tokens": 512,
+      "draft_tokens": 589,
+      "accepted_draft_tokens": 360,
+      "observed_other_host_cores": 3.360025193567757
+    },
+    "code": {
+      "tok_s": 26.664463974458638,
+      "adjusted_gb_s": 129.99516571955198,
+      "utilization": 0.34209254136724204,
+      "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+      "generated_tokens": 318,
+      "draft_tokens": 292,
+      "accepted_draft_tokens": 244,
+      "observed_other_host_cores": 3.7126210744319184
+    }
+  },
+  "comparisons": [
+    {
+      "label": "qwen-private-packed-batch-on-0908",
+      "workloads": [
+        {
+          "workload": "prose",
+          "tok_s": 20.4386763913169,
+          "adjusted_gb_s": 20.45539745634258,
+          "utilization": 0.05382999330616469,
+          "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+          "generated_tokens": 512,
+          "draft_tokens": 589,
+          "accepted_draft_tokens": 360,
+          "observed_other_host_cores": 3.8252641142676116,
+          "output_matches_control": true,
+          "speed_change_percent": -2.028072662014413,
+          "bandwidth_change_percent": -83.29551181041917,
+          "both_thresholds_met": false
+        },
+        {
+          "workload": "code",
+          "tok_s": 27.341535103857296,
+          "adjusted_gb_s": 128.83198982476898,
+          "utilization": 0.33903155217044467,
+          "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+          "generated_tokens": 318,
+          "draft_tokens": 292,
+          "accepted_draft_tokens": 244,
+          "observed_other_host_cores": 3.712529580815769,
+          "output_matches_control": true,
+          "speed_change_percent": 2.5392264777841067,
+          "bandwidth_change_percent": -0.8947839624224185,
+          "both_thresholds_met": false
+        }
+      ]
+    }
+  ],
+  "all_outputs_match": true,
+  "all_candidate_thresholds_met": false,
+  "candidate_repeat_available": false,
+  "evidence": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-off-0908/result.json": "9eee38d4b6c9e68225e558021f1c9f5ca0a69a5f066c0f3787bc89de85ea6109",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-off-0908/plan.json": "4bcedbfe6c5f524db9c5573651404ef18f647d136722274d9e7040d6333c6c18",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-off-0908-decode/result.json": "fcc0b2cc64fea6a10b0e66d3d01c35e6abb6ba620c1606b7e92d703fec159060",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-off-0908-decode/prose-draft4/chunks.json": "8bb8b41b568fc5c1f7dc25ffe3c3f15cae17babb67099f1445b8e2de4914b7d4",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-off-0908-decode/code-draft4/chunks.json": "1d197e06f528722412c1e229855b27f923ed4b30b1809de36f6829a2e578e269",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-on-0908/result.json": "8a369d0e2e9773470c3ff49b5a93f712daf911261bb5216843d4e25222ee6679",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-on-0908/plan.json": "d730160d9aee7ee9b0a474f4f35ceb88b1d98f28988fbbd121703c226e80f1da",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-on-0908-decode/result.json": "9597c626a6d201ff531768c93e3c8e844d5fdb4fe828f2cd34693c922737062c",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-on-0908-decode/prose-draft4/chunks.json": "ba72b4dcb909fe85b41684316e3128e2b91d163651837daf9a51167874754222",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-packed-batch-on-0908-decode/code-draft4/chunks.json": "8d3d4190ec083f827a9c3c85e7f70981f9f1d318b5368cb16e0728f3330af2a5"
+  },
+  "analyzer_sha256": "9e074ccf03631add55877539205f3a6af941cc7daca300167bd2fb288a8a64a8",
+  "scope": "Fresh single-conversation decode. IMC attribution uses adjacent idle subtraction. This comparison does not itself certify broad quality or mark a goal complete."
+}

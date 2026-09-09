@@ -1,0 +1,12 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/ops.h
++++ /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-rms-matmul-0908/private-cpu/ops.h
+@@ -26,6 +26,9 @@
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
++
++bool ggml_cpu_repack_compute_forward_rms_norm_matmul(const struct ggml_compute_params * params, struct ggml_tensor * norm, struct ggml_tensor * activation, struct ggml_tensor * dst);
++uint64_t ggml_cpu_rms_matmul_fusion_count(int weighted);
+ 
+ bool ggml_cpu_parallel_copy_enabled(void);
+ 

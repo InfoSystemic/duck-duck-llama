@@ -1,0 +1,684 @@
+{
+  "config": {
+    "label": "glm-flash-q8-clamp-t15-restored-raw-0908",
+    "port": 18131,
+    "pid": 834292,
+    "alias": "glm-flash-q8-trial",
+    "drafts": "0",
+    "tokens": 512,
+    "request_timeout_seconds": 180.0,
+    "bandwidth_capacity_gb_s": 380.0,
+    "bandwidth_target_gb_s": 285.0,
+    "chat_template_kwargs": {
+      "reasoning_effort": "max"
+    },
+    "reasoning_budget_tokens": null,
+    "check_reasoning_budget_tokens": 0,
+    "allowed_idle_pids": "",
+    "skip_idle_gate": true
+  },
+  "target_pid": 834292,
+  "started": 1788875555.8219454,
+  "checks": [
+    {
+      "expected": "391",
+      "abort": [],
+      "chunks": [
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {
+                "role": "assistant"
+              }
+            }
+          ],
+          "created": 1788875557,
+          "id": "chatcmpl-Q79hX5JE8xR5iwp7z3TLfHWCFXbuoSHI",
+          "model": "glm-flash-goal",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788875557,
+          "id": "chatcmpl-Q79hX5JE8xR5iwp7z3TLfHWCFXbuoSHI",
+          "model": "glm-flash-goal",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788875557,
+          "id": "chatcmpl-Q79hX5JE8xR5iwp7z3TLfHWCFXbuoSHI",
+          "model": "glm-flash-goal",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788875557,
+          "id": "chatcmpl-Q79hX5JE8xR5iwp7z3TLfHWCFXbuoSHI",
+          "model": "glm-flash-goal",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk",
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 26,
+            "prompt_ms": 1248.013,
+            "prompt_per_token_ms": 48.000499999999995,
+            "prompt_per_second": 20.833116321704985,
+            "predicted_n": 4,
+            "predicted_ms": 352.413,
+            "predicted_per_token_ms": 117.471,
+            "predicted_per_second": 8.512739314383976
+          }
+        }
+      ],
+      "pass_check": true
+    },
+    {
+      "expected": "Paris",
+      "abort": [],
+      "chunks": [
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {
+                "role": "assistant"
+              }
+            }
+          ],
+          "created": 1788875559,
+          "id": "chatcmpl-926lcyyhoaubz7BTfCOA7LMdjdcWVqdv",
+          "model": "glm-flash-goal",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788875559,
+          "id": "chatcmpl-926lcyyhoaubz7BTfCOA7LMdjdcWVqdv",
+          "model": "glm-flash-goal",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788875559,
+          "id": "chatcmpl-926lcyyhoaubz7BTfCOA7LMdjdcWVqdv",
+          "model": "glm-flash-goal",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk",
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 24,
+            "prompt_ms": 1234.138,
+            "prompt_per_token_ms": 51.42241666666666,
+            "prompt_per_second": 19.446771754860478,
+            "predicted_n": 3,
+            "predicted_ms": 262.497,
+            "predicted_per_token_ms": 131.2485,
+            "predicted_per_second": 7.619134694872703
+          }
+        }
+      ],
+      "pass_check": true
+    }
+  ],
+  "measurements": [
+    {
+      "kind": "prose",
+      "draft_n": 0,
+      "started": 1788875560.4014702,
+      "counter_metadata": {
+        "valid": true,
+        "errors": [],
+        "required_counters_per_interval": 48,
+        "anchor_monotonic": 1017853.687509264,
+        "anchor_spread_seconds": 0.013027689070440829,
+        "timing_note": "Align perf elapsed time to reception of each interval; exclude boundary intervals.",
+        "exit_code": 0,
+        "pmus": [
+          "uncore_imc_0",
+          "uncore_imc_1",
+          "uncore_imc_2",
+          "uncore_imc_3",
+          "uncore_imc_4",
+          "uncore_imc_5"
+        ],
+        "cpus": [
+          0,
+          16,
+          32,
+          48
+        ],
+        "socket_ids": {
+          "0": 0,
+          "16": 1,
+          "32": 2,
+          "48": 3
+        },
+        "scope": "System-wide physical DRAM traffic; includes unrelated host work."
+      },
+      "abort": [],
+      "first_content_monotonic": 1017861.406815337,
+      "last_content_monotonic": 1017909.434147921,
+      "baseline_before": {
+        "valid": true,
+        "samples": 9,
+        "sampled_seconds": 4.523271841,
+        "read_gb_s": 2.7952039383078064,
+        "write_gb_s": 1.7735540301080925,
+        "total_gb_s": 4.568757968415899,
+        "utilization_of_380": 0.012023047285304999,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 0.5323956224633195,
+            "write_gb_s": 0.3487795097212686,
+            "total_gb_s": 0.8811751321845881
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 0.6262517911931972,
+            "write_gb_s": 0.5070834109791016,
+            "total_gb_s": 1.1333352021722987
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 0.7171847344737112,
+            "write_gb_s": 0.3214852540188066,
+            "total_gb_s": 1.038669988492518
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 0.9193717901775783,
+            "write_gb_s": 0.5962058553889157,
+            "total_gb_s": 1.515577645566494
+          }
+        ],
+        "interval_min_gb_s": 3.060238582499534,
+        "interval_median_gb_s": 4.4628188136259395,
+        "interval_max_gb_s": 5.999593050612318
+      },
+      "baseline_after": {
+        "valid": true,
+        "samples": 9,
+        "sampled_seconds": 4.527824609,
+        "read_gb_s": 2.5390046714152663,
+        "write_gb_s": 1.5831192960239509,
+        "total_gb_s": 4.122123967439217,
+        "utilization_of_380": 0.010847694651155834,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 0.48885728601772355,
+            "write_gb_s": 0.3161389203359931,
+            "total_gb_s": 0.8049962063537166
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 0.4945426963467437,
+            "write_gb_s": 0.38899322727719204,
+            "total_gb_s": 0.8835359236239357
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 0.6742317687862542,
+            "write_gb_s": 0.2882445140577662,
+            "total_gb_s": 0.9624762828440204
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 0.8813729202645447,
+            "write_gb_s": 0.5897426343529996,
+            "total_gb_s": 1.4711155546175443
+          }
+        ],
+        "interval_min_gb_s": 3.2525943561645545,
+        "interval_median_gb_s": 3.799952351258914,
+        "interval_max_gb_s": 4.966996120565139
+      },
+      "decode": {
+        "valid": true,
+        "samples": 92,
+        "sampled_seconds": 46.2762558,
+        "read_gb_s": 217.42663307822755,
+        "write_gb_s": 7.024462794101851,
+        "total_gb_s": 224.4510958723294,
+        "utilization_of_380": 0.5906607786113932,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 54.39403233343178,
+            "write_gb_s": 1.7415358460145773,
+            "total_gb_s": 56.13556817944636
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 54.059911270425644,
+            "write_gb_s": 1.7301460478762416,
+            "total_gb_s": 55.79005731830188
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 54.15999425553525,
+            "write_gb_s": 1.5816415790008662,
+            "total_gb_s": 55.74163583453612
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 54.81269521883488,
+            "write_gb_s": 1.9711393212101658,
+            "total_gb_s": 56.78383454004505
+          }
+        ],
+        "interval_min_gb_s": 178.29980455585954,
+        "interval_median_gb_s": 223.15010094708254,
+        "interval_max_gb_s": 236.98442068158747
+      },
+      "background_subtracted_gb_s": 219.8823379039135,
+      "background_subtracted_utilization": 0.5786377313260882,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 28,
+        "prompt_ms": 1298.519,
+        "prompt_per_token_ms": 46.37567857142857,
+        "prompt_per_second": 21.56302680207221,
+        "predicted_n": 512,
+        "predicted_ms": 48025.522,
+        "predicted_per_token_ms": 93.98340900195694,
+        "predicted_per_second": 10.64017586315876
+      },
+      "other_host_cpu": [
+        {
+          "pid": 2769410,
+          "name": "Paseo",
+          "cpu_percent": 89.59855724224082
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 68.51849653500743
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 66.36069504529063
+        },
+        {
+          "pid": 4104574,
+          "name": "thunderbird-bin",
+          "cpu_percent": 46.01096714996139
+        },
+        {
+          "pid": 4063094,
+          "name": "Paseo",
+          "cpu_percent": 18.889062271520945
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 17.37860122871918
+        },
+        {
+          "pid": 1131879,
+          "name": "python3",
+          "cpu_percent": 16.0839203348891
+        },
+        {
+          "pid": 4063072,
+          "name": "Paseo",
+          "cpu_percent": 11.851309720444599
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 8.913379999830182
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 5.577086927268047
+        }
+      ],
+      "inference_churn": [],
+      "finish_reasons": [
+        "length"
+      ],
+      "answer_characters": 0,
+      "reasoning_characters": 2324,
+      "completed_answer": false,
+      "reasoning_budget_tokens": null,
+      "finished": 1788875620.9113884
+    },
+    {
+      "kind": "code",
+      "draft_n": 0,
+      "started": 1788875621.5134966,
+      "counter_metadata": {
+        "valid": true,
+        "errors": [],
+        "required_counters_per_interval": 48,
+        "anchor_monotonic": 1017914.79688548,
+        "anchor_spread_seconds": 0.011646753991954029,
+        "timing_note": "Align perf elapsed time to reception of each interval; exclude boundary intervals.",
+        "exit_code": 0,
+        "pmus": [
+          "uncore_imc_0",
+          "uncore_imc_1",
+          "uncore_imc_2",
+          "uncore_imc_3",
+          "uncore_imc_4",
+          "uncore_imc_5"
+        ],
+        "cpus": [
+          0,
+          16,
+          32,
+          48
+        ],
+        "socket_ids": {
+          "0": 0,
+          "16": 1,
+          "32": 2,
+          "48": 3
+        },
+        "scope": "System-wide physical DRAM traffic; includes unrelated host work."
+      },
+      "abort": [],
+      "first_content_monotonic": 1017922.396838977,
+      "last_content_monotonic": 1017970.604423202,
+      "baseline_before": {
+        "valid": true,
+        "samples": 9,
+        "sampled_seconds": 4.524971559000001,
+        "read_gb_s": 2.940232536140013,
+        "write_gb_s": 1.8265173247600512,
+        "total_gb_s": 4.766749860900064,
+        "utilization_of_380": 0.012544078581315957,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 0.5590532565289874,
+            "write_gb_s": 0.3551995316662718,
+            "total_gb_s": 0.9142527881952591
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 0.6473103096734844,
+            "write_gb_s": 0.48056598062697337,
+            "total_gb_s": 1.1278762903004578
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 0.7697384100707447,
+            "write_gb_s": 0.34967970021665273,
+            "total_gb_s": 1.1194181102873975
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 0.9641305598667963,
+            "write_gb_s": 0.6410721122501533,
+            "total_gb_s": 1.6052026721169494
+          }
+        ],
+        "interval_min_gb_s": 2.3565487453509064,
+        "interval_median_gb_s": 4.981977994020534,
+        "interval_max_gb_s": 6.324449666249552
+      },
+      "baseline_after": {
+        "valid": true,
+        "samples": 10,
+        "sampled_seconds": 5.030013029000003,
+        "read_gb_s": 2.906278246620421,
+        "write_gb_s": 1.9094707117745708,
+        "total_gb_s": 4.815748958394992,
+        "utilization_of_380": 0.012673023574723663,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 0.5438593150491019,
+            "write_gb_s": 0.34815343056639214,
+            "total_gb_s": 0.892012745615494
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 0.6488041982684094,
+            "write_gb_s": 0.545055897683242,
+            "total_gb_s": 1.1938600959516514
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 0.7611349565273657,
+            "write_gb_s": 0.3769110219217285,
+            "total_gb_s": 1.1380459784490942
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 0.952479776775544,
+            "write_gb_s": 0.6393503616032082,
+            "total_gb_s": 1.5918301383787523
+          }
+        ],
+        "interval_min_gb_s": 3.2239164442389074,
+        "interval_median_gb_s": 4.609169903671122,
+        "interval_max_gb_s": 6.964095586163477
+      },
+      "decode": {
+        "valid": true,
+        "samples": 92,
+        "sampled_seconds": 46.267962947,
+        "read_gb_s": 216.58528994731972,
+        "write_gb_s": 6.972706689237075,
+        "total_gb_s": 223.5579966365568,
+        "utilization_of_380": 0.5883105174646232,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 54.12470380488826,
+            "write_gb_s": 1.6927209374615046,
+            "total_gb_s": 55.817424742349765
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 53.8249775838976,
+            "write_gb_s": 1.6923764581677383,
+            "total_gb_s": 55.517354042065335
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 53.99825973390676,
+            "write_gb_s": 1.5902129648811487,
+            "total_gb_s": 55.5884726987879
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 54.63734882462709,
+            "write_gb_s": 1.997396328726683,
+            "total_gb_s": 56.63474515335377
+          }
+        ],
+        "interval_min_gb_s": 183.88605320985178,
+        "interval_median_gb_s": 222.8062096689047,
+        "interval_max_gb_s": 235.13672527476967
+      },
+      "background_subtracted_gb_s": 218.7422476781618,
+      "background_subtracted_utilization": 0.5756374938898995,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 30,
+        "prompt_ms": 1408.373,
+        "prompt_per_token_ms": 46.94576666666667,
+        "prompt_per_second": 21.301175185835,
+        "predicted_n": 512,
+        "predicted_ms": 48207.449,
+        "predicted_per_token_ms": 94.33943052837573,
+        "predicted_per_second": 10.60002158587566
+      },
+      "other_host_cpu": [
+        {
+          "pid": 2769410,
+          "name": "Paseo",
+          "cpu_percent": 89.97900568370999
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 67.91556955551414
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 66.05759598682396
+        },
+        {
+          "pid": 4104574,
+          "name": "thunderbird-bin",
+          "cpu_percent": 46.23368157088859
+        },
+        {
+          "pid": 4063094,
+          "name": "Paseo",
+          "cpu_percent": 18.762215233826694
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 16.589049720448006
+        },
+        {
+          "pid": 1131879,
+          "name": "python3",
+          "cpu_percent": 15.709830085264262
+        },
+        {
+          "pid": 4063072,
+          "name": "Paseo",
+          "cpu_percent": 11.612334804313605
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 8.759018252396547
+        },
+        {
+          "pid": 3364747,
+          "name": "ChatGPT",
+          "cpu_percent": 6.668797987620098
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 5.590509755790978
+        }
+      ],
+      "inference_churn": [],
+      "finish_reasons": [
+        "length"
+      ],
+      "answer_characters": 0,
+      "reasoning_characters": 2262,
+      "completed_answer": false,
+      "reasoning_budget_tokens": null,
+      "finished": 1788875682.070614
+    }
+  ],
+  "bandwidth_target_gb_s": 285.0,
+  "bandwidth_capacity_gb_s": 380.0,
+  "runtime_env": {
+    "GGML_GLM5N_MLA_TP": "1",
+    "GGML_GLM5N_ATTN_TP": "1",
+    "GGML_GLM5N_SHEXP_TP": "1",
+    "GGML_CPU_IQ2_XXS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_GLM5N_KPOOL_REUSE": "1",
+    "GGML_CPU_PARALLEL_COPY": "1",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_Q8_0_REPACK_FORCE": "1",
+    "GGML_CPU_IQ_R16_REPACK": "1",
+    "GGML_CPU_HC_POST_VECTOR": "1",
+    "GGML_CPU_X16_Q5_BATCH2": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE_SINGLE_MAX_ELEMENTS": "65536",
+    "GGML_CPU_X16_Q5_BYTES": "0",
+    "GGML_CPU_SINGLE_TASK_MAX_ELEMENTS": "4096",
+    "GGML_CPU_IQ_R16_NIBBLE2": "1",
+    "GGML_CPU_ARGSORT_TOP_K": "1",
+    "GGML_CPU_X16_Q5_BYTES_BATCH3": "1",
+    "GGML_CPU_IQ_R16_BATCH3": "1",
+    "GGML_CPU_MOE_CLAMP_FUSION": "1",
+    "GGML_CPU_X16_Q5_COMPACT_P4": "1",
+    "GGML_CPU_IQ_R16_DYNAMIC_TILES": "1",
+    "GGML_CPU_X16_CHUNK_MAX": "16",
+    "LD_LIBRARY_PATH": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-clamp-0908/private-cpu:/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin",
+    "GGML_CPU_X16_Q8_BATCH": "1",
+    "GGML_CPU_X16_Q8_EXPERTS": "1",
+    "GGML_CPU_X16_Q8_CLAMP_FUSION": "1"
+  },
+  "note": "System-wide IMC traffic; background-subtracted values are attribution estimates.",
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/measure-model-bandwidth.py": "227be7c13e6941baf574e2e0bda74a28f0e11af30da7f35acd7ac8b70890958a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/guarded_inference_request.py": "4633e6369cdeb93a3de9861c288b80edb01d14e17d0d2ec74e466a5e06b25e85",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/dram_bandwidth.py": "011ad0dfde74277c36f3f526380de20da0dd2b0ce1aee5e0c89618b247483e85",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/inference_contention_guard.py": "d78b0e557b17e553c7fabb071b093a27d5d2eab2249fa8d344ebca8fc0493a23"
+  },
+  "idle_gate": null,
+  "guarded_ports": {
+    "834292": 18131
+  },
+  "input_integrity_verified": true,
+  "finished": 1788875682.0718386
+}

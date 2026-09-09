@@ -1,0 +1,154 @@
+--- build_glm_flash_q8_experts_0908.py
++++ build_glm_flash_q8_clamp_0908.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Compare a private x16 Q8 expert selector on Flash's 288-expert geometry."""
++"""Validate a private clamped Q8 expert fusion on Flash's actual graph shapes."""
+ import array
+ import difflib
+ import fcntl
+@@ -11,14 +11,15 @@
+ import subprocess
+ import time
+ 
+-from build_qwen_q6_expert_capacity import transform
++from flash_q8_clamp_transform_0908 import transform
++from glm_flash_q8_trial import Manager, PORT
+ from model_measurement_guard import ModelMeasurementGuard
+ from qwen_split_trial import inference_snapshot, sha256
+ 
+ BASE = Path(__file__).resolve().parent
+ ENGINE = BASE.parents[1] / 'engines/llama.cpp-glm5n-goal-0904'
+ PINNED = ENGINE / 'validated-chunk16-bin'
+-OUT = BASE / 'results/glm-flash-q8-experts-0908'
++OUT = BASE / 'results/glm-flash-q8-clamp-0908'
+ PRIVATE = OUT / 'private-cpu'
+ 
+ 
+@@ -30,33 +31,26 @@
+ def main():
+     OUT.mkdir()
+     PRIVATE.mkdir()
+-    state = json.loads((BASE / 'results/qwen-q6-trial-0907/state.json').read_text())
+-    pid = state['current']['pid']
+-    guard = ModelMeasurementGuard(pid, {pid: 18095}, inference_snapshot)
++    manager = Manager()
++    current = manager.validate_current()
++    assert not current.get('op_profile_count') and current['q8_experts']
++    pid = current['pid']
++    guard = ModelMeasurementGuard(pid, {pid: PORT}, inference_snapshot)
++    guard.wait_idle(OUT / 'waiting-for-idle.json', quiet_seconds=15)
+     guard.assert_idle()
+-    parent_path = BASE / 'results/glm-flash-q8-batch-0908/private-cpu/manifest.json'
++    parent_path = BASE / 'results/glm-flash-q8-experts-0908/private-cpu/manifest.json'
+     parent = json.loads(parent_path.read_text())
+     parent_library = Path(parent['library'])
+-    assert sha256(parent_library) == parent['library_sha256'] == '3601757e1c77e92dea67e5cc28ab242a69de5f106c5fac34b210ab7e4f7cb3f8'
++    assert sha256(parent_library) == parent['library_sha256'] == 'b9b7a2e4f9ddc7d1938fe6d69e0f05c1880642282dfd1594dc44b03afc9b19b6'
+     for path, digest in parent['private_source_sha256'].items():
+         assert sha256(path) == digest, path
+-    compile_command = list(parent['compile_commands'][0])
++    compile_command = list(parent['compile_command'])
+     source_path = Path(compile_command[-1])
+     source = source_path.read_text()
+     changed = transform(source)
+-    marker = '    const bool is_attn  = nd == 2 && strstr(cur->name, ".attn_") != nullptr;'
+-    changed = replace_once(changed, marker, '''    static const bool q8_experts = [] {
+-        const char * value = getenv("GGML_CPU_X16_Q8_EXPERTS");
+-        return value && atoi(value) == 1;
+-    }();
+-    if (q8_experts && nd == 3 && cur->type == GGML_TYPE_Q8_0 && cur->ne[2] <= 512 &&
+-            strstr(cur->name, "_exps.weight") != nullptr && cur->ne[0] % QK8_0 == 0) {
+-        return &t_q8_0;
+-    }
+-''' + marker)
+     private_source = PRIVATE / 'repack.cpp'
+     private_source.write_text(changed)
+-    (PRIVATE / 'q8-experts.patch').write_text(''.join(difflib.unified_diff(
++    (PRIVATE / 'q8-clamp.patch').write_text(''.join(difflib.unified_diff(
+         source.splitlines(True), changed.splitlines(True), fromfile=str(source_path), tofile=str(private_source))))
+     old_object = compile_command[compile_command.index('-o') + 1]
+     new_object = str(PRIVATE / 'repack.cpp.o')
+@@ -65,7 +59,7 @@
+     parent_link = list(parent['link_command'])
+     link_dir = ENGINE / 'build-goal/ggml/src'
+     inputs = {str(parent_path), str(parent_library), str(source_path), str(BASE / 'iq2-repack-check.cpp'),
+-              str(BASE / 'build_qwen_q6_expert_capacity.py'), str(Path(__file__))}
++              str(BASE / 'flash_q8_clamp_transform_0908.py'), str(Path(__file__))}
+     inputs.update(x for x in parent_link if x.endswith(('.o', '.so.0.22.0', '.a')))
+     inputs.update(parent['private_source_sha256'])
+     original_hashes = {p: sha256(p) for p in inputs}
+@@ -120,7 +114,7 @@
+                         parent_manifest=str(parent_path), parent_sha256=sha256(parent_library),
+                         input_sha256=original_hashes, compile_command=compile_command, link_command=link,
+                         private_source_sha256={str(private_source): sha256(private_source)},
+-                        experts=True, capacity=512, scope='Same-precision opt-in Q8 expert repacking; no requantization.')
++                        experts=True, capacity=512, clamp_fusion=True, scope='Same-precision opt-in clamped Q8 expert fusion; no requantization.')
+         (PRIVATE / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+         result.update(library=str(library), library_sha256=sha256(library))
+ 
+@@ -166,16 +160,25 @@
+         run(flags, 'fixture-compile')
+         env = {k: v for k, v in os.environ.items() if not k.startswith(('GGML_', 'LLAMA_', 'OMP_', 'GOMP_', 'REPACK_TEST_'))}
+         env.update(GGML_CPU_X16_Q8_0='1', GGML_CPU_X16_Q8_BATCH='1', GGML_CPU_X16_CHUNK_MAX='16',
++                   GGML_CPU_X16_Q8_EXPERTS='1', GGML_CPU_MOE_CLAMP_FUSION='1',
+                    REPACK_TEST_DOWN='1', REPACK_TEST_THREADS='15', REPACK_TEST_REPEATS='20',
+                    REPACK_TEST_TIMING_MEDIAN='1', REPACK_TEST_PERSISTENT_POOL='1', REPACK_TEST_PIN_POOL='1')
+-        for index, (mode, padded) in enumerate([('reference', False), ('off', False), ('on', False),
+-                                               ('on', False), ('off', False), ('reference', True), ('on', True)]):
++        modes = [('reference', False, True, False), ('off', False, True, False),
++                 ('on', False, True, False), ('on', False, True, False), ('off', False, True, False),
++                 ('reference', True, True, False), ('on', True, True, False),
++                 ('reference', False, False, False), ('on', False, False, False),
++                 ('reference', True, True, True), ('on', True, True, True)]
++        for index, (mode, padded, clamped, consumer) in enumerate(modes):
+             label = f'run-{index}-{mode}'
+             values_dir = OUT / label
+             values_dir.mkdir()
+             env['REPACK_TEST_OUTPUT_DIR'] = str(values_dir)
+             env['LD_LIBRARY_PATH'] = str(parent_library.parent if mode == 'reference' else PRIVATE) + ':' + str(PINNED)
+-            env['GGML_CPU_X16_Q8_EXPERTS'] = '1' if mode == 'on' else '0'
++            env['GGML_CPU_X16_Q8_CLAMP_FUSION'] = '1' if mode == 'on' else '0'
++            for key, value in [('REPACK_TEST_CLAMP', clamped), ('REPACK_TEST_CLAMP_CONSUMER', consumer)]:
++                env.pop(key, None)
++                if value:
++                    env[key] = '1'
+             env.pop('REPACK_TEST_PADDED', None)
+             if padded:
+                 env['REPACK_TEST_PADDED'] = '1'
+@@ -185,13 +188,16 @@
+             rows = [dict(item.split('=', 1) for item in line.split()[1:])
+                     for line in log.splitlines() if line.startswith('PASS ')]
+             assert len(rows) == 9, (label, len(rows))
+-            result['runs'].append(dict(label=label, mode=mode, padded=padded, rows=rows, values=str(values_dir)))
++            active = 'Q8_X16_CLAMP_FUSION_ACTIVE' in log
++            assert active == (mode == 'on' and clamped and not consumer), (label, active)
++            result['runs'].append(dict(label=label, mode=mode, padded=padded, clamped=clamped,
++                                       consumer=consumer, fusion_active=active, rows=rows, values=str(values_dir)))
+             save()
+-        references = {x['padded']: x for x in result['runs'] if x['mode'] == 'reference'}
++        references = {(x['padded'], x['clamped'], x['consumer']): x for x in result['runs'] if x['mode'] == 'reference'}
+         for item in result['runs'][1:]:
+             if item['mode'] == 'reference':
+                 continue
+-            reference = references[item['padded']]
++            reference = references[(item['padded'], item['clamped'], item['consumer'])]
+             for path in sorted(Path(item['values']).glob('*.f32')):
+                 baseline = Path(reference['values']) / path.name
+                 a, b = array.array('f'), array.array('f')
+@@ -202,12 +208,14 @@
+                 maximum = max(scaled)
+                 assert all(math.isfinite(x) for x in scaled) and maximum <= 2e-4, (item['label'], path.name, maximum)
+                 exact = baseline.read_bytes() == path.read_bytes()
+-                if item['mode'] == 'off' and not item['padded']:
++                if item['mode'] == 'off' or not item['clamped'] or item['consumer']:
+                     assert exact, (item['label'], path.name)
+                 result['comparisons'].append(dict(run=item['label'], case=path.stem, values=len(a),
+                                                   bit_exact=exact, max_scaled_error=maximum))
+         assert all(sha256(path) == digest for path, digest in original_hashes.items())
+         guard.assert_idle()
++        manager.validate_current()
++        assert len(result['comparisons']) == 63
+         result['passed'] = True
+     except BaseException as error:
+         result['error'] = repr(error)

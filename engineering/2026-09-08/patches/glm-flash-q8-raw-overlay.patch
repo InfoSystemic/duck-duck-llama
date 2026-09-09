@@ -1,0 +1,695 @@
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -29,6 +29,28 @@
+ 
+ #include "repack.h"
+ #include "ggml-quants.h"
++
++#include "flash-q8-r8-ordered-k-0908.h"
++
++static bool flash_q8_r8_ordered_k_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_Q8_R8_ORDERED_K");
++        return value && std::strcmp(value,"1") == 0;
++    }();
++    return enabled;
++}
++static bool flash_q8_r8_ordered_k_audit() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_Q8_R8_ORDERED_K_AUDIT");
++        return value && std::strcmp(value,"1") == 0;
++    }();
++    return enabled;
++}
++static std::atomic<uint64_t> flash_q8_r8_ordered_k_calls{0};
++extern "C" uint64_t ggml_cpu_q8_r8_ordered_k_count(int);
++extern "C" uint64_t ggml_cpu_q8_r8_ordered_k_count(int) {
++    return flash_q8_r8_ordered_k_calls.load(std::memory_order_relaxed);
++}
+ 
+ #if defined(__GNUC__)
+ #pragma GCC diagnostic ignored "-Woverlength-strings"
+@@ -5801,12 +5823,31 @@
+         return ggml_nbytes(t);
+     }
+ 
++    static bool ordered_k_eligible(int n_threads, const ggml_tensor * op) {
++        if constexpr (!std::is_same_v<BLOC_TYPE, block_q8_0> || INTER_SIZE != 8 || NB_COLS != 8 || PARAM_TYPE != GGML_TYPE_Q8_0) {
++            return false;
++        }
++        if (!flash_q8_r8_ordered_k_enabled() || n_threads <= 1 || op->op != GGML_OP_MUL_MAT) return false;
++        const ggml_tensor * a = op->src[0], * b = op->src[1];
++        return a->type == GGML_TYPE_Q8_0 && b->type == GGML_TYPE_F32 && op->type == GGML_TYPE_F32 &&
++            a->ne[0] >= 4096 && a->ne[0] <= 32768 && a->ne[0] % QK8_0 == 0 && a->ne[1] == 24 &&
++            a->ne[2] == 1 && a->ne[3] == 1 && b->ne[0] == a->ne[0] &&
++            b->ne[1] >= 1 && b->ne[1] <= 3 && b->ne[2] == 1 && b->ne[3] == 1 &&
++            op->ne[0] == 24 && op->ne[1] == b->ne[1] && op->ne[2] == 1 && op->ne[3] == 1 &&
++            b->nb[0] == sizeof(float) && op->nb[0] == sizeof(float) && op->nb[1] % sizeof(float) == 0;
++    }
++
+     bool work_size(int n_threads, const struct ggml_tensor * op, size_t & size) override {
+         // not realy a GGML_TYPE_Q8_0 but same size.
+         switch (op->op) {
+             case GGML_OP_MUL_MAT:
+                 {
+                     size = ggml_row_size(PARAM_TYPE, ggml_nelements(op->src[1]));
++                    if (ordered_k_eligible(n_threads, op)) {
++                        const size_t blocks = op->src[0]->ne[0] / QK8_0;
++                        size += alignof(flash_q8_r8_partial) - 1 +
++                            sizeof(flash_q8_r8_partial) * blocks * 3 * op->src[1]->ne[1];
++                    }
+                     return true;
+                 }
+             case GGML_OP_MUL_MAT_ID:
+@@ -6593,6 +6634,27 @@
+         assert(params->wsize >= nbw2 * ne12);
+ 
+         const ggml_from_float_t from_float = ggml_get_type_traits_cpu(PARAM_TYPE)->from_float;
++
++        if (!params->use_ref && ordered_k_eligible(nth, op)) {
++            const int blocks = ne00 / QK8_0;
++            const int first = ith * blocks / nth, last = (ith + 1) * blocks / nth;
++            const uintptr_t begin = GGML_PAD((uintptr_t) wdata + nbw2, alignof(flash_q8_r8_partial));
++            auto * partial = (flash_q8_r8_partial *) begin;
++            GGML_ASSERT(begin + sizeof(*partial) * blocks * 3 * ne11 <= (uintptr_t) wdata + params->wsize);
++            for (int row = 0; row < ne11; ++row) {
++                if (last > first) from_float(
++                    (const float *) ((const char *) src1->data + row * nb11 + first * QK8_0 * sizeof(float)),
++                    wdata + row * nbw1 + first * sizeof(block_q8_0), (last - first) * QK8_0);
++            }
++            flash_q8_r8_prepare(ne00, 24, ne11, (const block_q8_0x8 *) src0->data,
++                                (const block_q8_0 *) wdata, first, last, partial);
++            ggml_barrier(params->threadpool);
++            flash_q8_r8_finish(ne00, 24, ne11, partial, (float *) dst->data, nb1 / sizeof(float), ith, nth);
++            if (ith == 0 && flash_q8_r8_ordered_k_audit()) {
++                flash_q8_r8_ordered_k_calls.fetch_add(1, std::memory_order_relaxed);
++            }
++            return;
++        }
+ 
+         // INFO: Quantization is done in planes to avoid extra complexity in chunking.
+         // Flattening dimensions not multiple of INTER_SIZE would require extra handling depending on how
+@@ -7387,10 +7449,14 @@
+                     const char * value = getenv("GGML_CPU_X16_Q5_BYTES_BATCH3");
+                     return value != nullptr && atoi(value) != 0;
+                 }();
++                static const bool q8_batch = [] {
++                    const char * value = getenv("GGML_CPU_X16_Q8_BATCH");
++                    return value && atoi(value) == 1;
++                }();
+                 for (int64_t i11 = 0; i11 < ne11;) {
+                     const bool compact_batch = sp.gemv == ggml_gemv_q5_K_x16_compact_p4_q8_K;
+                     const bool triple = (compact_batch || (triple_enabled && sp.gemv == ggml_gemv_q5_K_x16_bytes_q8_K)) && i11 + 2 < ne11;
+-                    const int nr = triple ? 3 : (pair_enabled || compact_batch) && sp.dst_type == GGML_TYPE_Q5_K && i11 + 1 < ne11 ? 2 : 1;
++                    const int nr = q8_batch && sp.dst_type == GGML_TYPE_Q8_0 ? (int) std::min<int64_t>(4, ne11 - i11) : triple ? 3 : (pair_enabled || compact_batch) && sp.dst_type == GGML_TYPE_Q5_K && i11 + 1 < ne11 ? 2 : 1;
+                     const int64_t i = i12 * ne11 + i11;
+                     float * out = (float *) ((char *) dst->data + i11 * dst->nb[1] + i12 * dst->nb[2]) + r0;
+                     sp.gemv((int) k, out, dst->nb[1] / sizeof(float), w, wdata + (size_t) i * row_bytes, nr, (int) (r1 - r0));
+@@ -7446,8 +7512,8 @@
+         ggml_barrier(params->threadpool);
+         constexpr int64_t tile = 64;
+         const int64_t n_tiles = (nr0 + tile - 1) / tile;
+-        int active[256]; int n_active = 0;
+-        GGML_ASSERT(n_as <= 256);
++        int active[512]; int n_active = 0;
++        GGML_ASSERT(n_as <= 512);
+         for (int e = 0; e < n_as; ++e) {
+             if (counts[e] > 0) active[n_active++] = e;
+         }
+@@ -7472,6 +7538,33 @@
+     }
+ 
+     bool compute_forward_mul_mat_id_swiglu(struct ggml_compute_params * params, struct ggml_tensor * gate, struct ggml_tensor * up, struct ggml_tensor * dst) override {
++        return forward_x16_moe_swiglu(params, gate, up, dst);
++    }
++
++    bool compute_forward_mul_mat_id_swiglu_clamped(
++            ggml_compute_params * params, ggml_tensor * gate_clamp,
++            ggml_tensor * up_clamp, ggml_tensor * dst) override {
++        static const bool enabled = [] {
++            const char * value = getenv("GGML_CPU_X16_Q8_CLAMP_FUSION");
++            return value && atoi(value) == 1;
++        }();
++        if (!enabled || sp.dst_type != GGML_TYPE_Q8_0 ||
++                gate_clamp->op != GGML_OP_CLAMP || up_clamp->op != GGML_OP_CLAMP) {
++            return false;
++        }
++        const bool okay = forward_x16_moe_swiglu(
++            params, gate_clamp->src[0], up_clamp->src[0], dst, gate_clamp, up_clamp);
++        static std::atomic<bool> logged{false};
++        if (okay && params->ith == 0 && !logged.exchange(true, std::memory_order_relaxed)) {
++            GGML_LOG_INFO("Q8_X16_CLAMP_FUSION_ACTIVE\n");
++        }
++        return okay;
++    }
++
++    bool forward_x16_moe_swiglu(
++            ggml_compute_params * params, ggml_tensor * gate, ggml_tensor * up,
++            ggml_tensor * dst, const ggml_tensor * gate_clamp = nullptr,
++            const ggml_tensor * up_clamp = nullptr) {
+         if (gate->op != GGML_OP_MUL_MAT_ID || up->op != GGML_OP_MUL_MAT_ID || gate->src[0]->extra != this || up->src[0]->extra != this) {
+             return false;
+         }
+@@ -7521,14 +7614,21 @@
+         // shared with another process does not stall the whole socket at the next barrier.
+         constexpr int64_t tile = 64;
+         const int64_t n_tiles = (n_out + tile - 1) / tile;
+-        int active[256]; int n_active = 0;
+-        GGML_ASSERT(n_experts <= 256);
++        int active[512]; int n_active = 0;
++        GGML_ASSERT(n_experts <= 512);
+         for (int64_t e = 0; e < n_experts; ++e) {
+             if (counts[e] > 0) active[n_active++] = (int) e;
+         }
+         const int64_t n_items = (int64_t) n_active * n_tiles;
+         static const bool dual_env = [] { const char * v = getenv("GGML_CPU_X16_DUAL"); return v && atoi(v) != 0; }();
+         const bool dual_q4 = dual_env && sp.dst_type == GGML_TYPE_Q4_K && gate_w->type == up_w->type;
++        float gate_bounds[2] = {}, up_bounds[2] = {};
++        GGML_ASSERT((gate_clamp == nullptr) == (up_clamp == nullptr));
++        if (gate_clamp) {
++            GGML_ASSERT(ggml_are_same_shape(gate, gate_clamp) && ggml_are_same_shape(up, up_clamp));
++            memcpy(gate_bounds, gate_clamp->op_params, sizeof(gate_bounds));
++            memcpy(up_bounds, up_clamp->op_params, sizeof(up_bounds));
++        }
+         float gate_tmp[tile]; float up_tmp[tile];
+         int64_t item = ith;
+         while (item < n_items) {
+@@ -7548,6 +7648,12 @@
+                     sp.gemv((int) k, gate_tmp, 0, gw, q, 1, (int) tr);
+                     sp.gemv((int) k, up_tmp,   0, uw, q, 1, (int) tr);
+                 }
++                if (gate_clamp) {
++                    for (int64_t i = 0; i < tr; ++i) {
++                        gate_tmp[i] = MAX(MIN(gate_tmp[i], gate_bounds[1]), gate_bounds[0]);
++                        up_tmp[i] = MAX(MIN(up_tmp[i], up_bounds[1]), up_bounds[0]);
++                    }
++                }
+                 ggml_vec_swiglu_f32(tr, out + t0, gate_tmp, up_tmp);
+             }
+             item = ggml_threadpool_chunk_add(params->threadpool, 1);
+@@ -7585,18 +7691,27 @@
+         if (chunk < chunk_min) chunk = chunk_min;
+         if (chunk > chunk_max) chunk = chunk_max;
+         const int64_t nchunk = (nr0 + chunk - 1) / chunk;
+-        std::vector<float> gtmp(chunk), utmp(chunk);
++        static const bool q8_batch = [] {
++            const char * value = getenv("GGML_CPU_X16_Q8_BATCH");
++            return value && atoi(value) == 1;
++        }();
++        const int max_batch = q8_batch && sp.dst_type == GGML_TYPE_Q8_0 ? 4 : 1;
++        std::vector<float> gtmp(chunk * max_batch), utmp(chunk * max_batch);
+         int cur = ith;
+         while (cur < nchunk) {
+             const int64_t r0 = cur * chunk;
+             const int64_t r1 = std::min(r0 + chunk, nr0);
+             const char * gw = (const char *) gate_w->data + row_offset(gate_w, r0);
+             const char * uw = (const char *) up_w->data + row_offset(up_w, r0);
+-            for (int64_t i = 0; i < n1; i++) {
+-                float * out = (float *) ((char *) dst->data + i * dst->nb[1]) + r0;
+-                sp.gemv((int) k, gtmp.data(), 0, gw, wdata + (size_t) i * row_bytes, 1, (int) (r1 - r0));
+-                sp.gemv((int) k, utmp.data(), 0, uw, wdata + (size_t) i * row_bytes, 1, (int) (r1 - r0));
+-                ggml_vec_swiglu_f32(r1 - r0, out, gtmp.data(), utmp.data());
++            for (int64_t i = 0; i < n1;) {
++                const int nr = (int) std::min<int64_t>(max_batch, n1 - i);
++                sp.gemv((int) k, gtmp.data(), chunk, gw, wdata + (size_t) i * row_bytes, nr, (int) (r1 - r0));
++                sp.gemv((int) k, utmp.data(), chunk, uw, wdata + (size_t) i * row_bytes, nr, (int) (r1 - r0));
++                for (int t = 0; t < nr; ++t) {
++                    float * out = (float *) ((char *) dst->data + (i + t) * dst->nb[1]) + r0;
++                    ggml_vec_swiglu_f32(r1 - r0, out, gtmp.data() + t * chunk, utmp.data() + t * chunk);
++                }
++                i += nr;
+             }
+             cur = ggml_threadpool_chunk_add(params->threadpool, 1);
+         }
+@@ -7664,6 +7779,14 @@
+     }
+     const int nd = ggml_n_dims(cur);
+     if (x16_attn3d && nd == 3 && cur->type == GGML_TYPE_Q8_0 && strstr(cur->name, ".attn_") != nullptr && cur->ne[0] % QK8_0 == 0) {
++        return &t_q8_0;
++    }
++    static const bool q8_experts = [] {
++        const char * value = getenv("GGML_CPU_X16_Q8_EXPERTS");
++        return value && atoi(value) == 1;
++    }();
++    if (q8_experts && nd == 3 && cur->type == GGML_TYPE_Q8_0 && cur->ne[2] <= 512 &&
++            strstr(cur->name, "_exps.weight") != nullptr && cur->ne[0] % QK8_0 == 0) {
+         return &t_q8_0;
+     }
+     const bool is_attn  = nd == 2 && strstr(cur->name, ".attn_") != nullptr;
+--- /dev/null
++++ b/ggml/src/ggml-cpu/flash-q8-r8-ordered-k-0908.h
+@@ -0,0 +1,71 @@
++#pragma once
++#include <immintrin.h>
++
++struct alignas(64) flash_q8_r8_partial {
++    int32_t dot[8];
++    float scale[8];
++};
++
++static inline __m128i flash_q8_r8_dot4(__m512i weights, __m128i activation) {
++    __m512i dots = _mm512_dpbusd_epi32(_mm512_setzero_si512(), weights,
++                                      _mm512_broadcast_i32x4(activation));
++    dots = _mm512_add_epi32(dots, _mm512_shuffle_epi32(dots, (_MM_PERM_ENUM) _MM_SHUFFLE(2,3,0,1)));
++    dots = _mm512_add_epi32(dots, _mm512_shuffle_epi32(dots, (_MM_PERM_ENUM) _MM_SHUFFLE(1,0,3,2)));
++    return _mm512_castsi512_si128(_mm512_maskz_compress_epi32((__mmask16) 0x1111, dots));
++}
++
++static inline int flash_q8_r8_sum16(__m128i values) {
++    const __m128i pairs = _mm_maddubs_epi16(_mm_set1_epi8(1), values);
++    __m128i sums = _mm_madd_epi16(pairs, _mm_set1_epi16(1));
++    sums = _mm_hadd_epi32(sums, sums);
++    sums = _mm_hadd_epi32(sums, sums);
++    return _mm_cvtsi128_si32(sums);
++}
++
++static void flash_q8_r8_prepare(int k, int nc, int nr, const block_q8_0x8 * weights,
++                               const block_q8_0 * activation, int first, int last,
++                               flash_q8_r8_partial * partial) {
++    const int nb = k / QK8_0, groups = nc / 8;
++    for (int b = first; b < last; ++b) {
++        __m128i aq[3][2];
++        int sums[3];
++        float scales[3];
++        for (int row = 0; row < nr; ++row) {
++            const block_q8_0 & a = activation[row * nb + b];
++            aq[row][0] = _mm_loadu_si128((const __m128i *) a.qs);
++            aq[row][1] = _mm_loadu_si128((const __m128i *) (a.qs + 16));
++            sums[row] = flash_q8_r8_sum16(aq[row][0]) + flash_q8_r8_sum16(aq[row][1]);
++            scales[row] = GGML_CPU_FP16_TO_FP32(a.d);
++        }
++        for (int g = 0; g < groups; ++g) {
++            const block_q8_0x8 & w = weights[g * nb + b];
++            const __m512i w0 = _mm512_loadu_si512((const void *) (w.qs + 0));
++            const __m512i w1 = _mm512_loadu_si512((const void *) (w.qs + 64));
++            const __m512i w2 = _mm512_loadu_si512((const void *) (w.qs + 128));
++            const __m512i w3 = _mm512_loadu_si512((const void *) (w.qs + 192));
++            const __m256 wd = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i *) w.d));
++            for (int row = 0; row < nr; ++row) {
++                const __m128i low = _mm_add_epi32(flash_q8_r8_dot4(w0, aq[row][0]), flash_q8_r8_dot4(w2, aq[row][1]));
++                const __m128i high = _mm_add_epi32(flash_q8_r8_dot4(w1, aq[row][0]), flash_q8_r8_dot4(w3, aq[row][1]));
++                const __m256i dot = _mm256_sub_epi32(_mm256_set_m128i(high, low), _mm256_set1_epi32(128 * sums[row]));
++                flash_q8_r8_partial & out = partial[(row * groups + g) * nb + b];
++                _mm256_storeu_si256((__m256i *) out.dot, dot);
++                _mm256_storeu_ps(out.scale, _mm256_mul_ps(wd, _mm256_set1_ps(scales[row])));
++            }
++        }
++    }
++}
++
++static void flash_q8_r8_finish(int k, int nc, int nr, const flash_q8_r8_partial * partial,
++                              float * output, size_t stride, int ith, int nth) {
++    const int nb = k / QK8_0, groups = nc / 8;
++    for (int task = ith; task < nr * groups; task += nth) {
++        __m256 sum = _mm256_setzero_ps();
++        const flash_q8_r8_partial * p = partial + task * nb;
++        for (int b = 0; b < nb; ++b) {
++            sum = _mm256_fmadd_ps(_mm256_cvtepi32_ps(_mm256_loadu_si256((const __m256i *) p[b].dot)),
++                                 _mm256_loadu_ps(p[b].scale), sum);
++        }
++        _mm256_storeu_ps(output + (task / groups) * stride + (task % groups) * 8, sum);
++    }
++}
+--- a/ggml/src/ggml-cpu/arch/x86/repack.cpp
++++ b/ggml/src/ggml-cpu/arch/x86/repack.cpp
+@@ -7756,9 +7756,23 @@
+     ggml_gemv_q6_K_x16_q8_K_generic(n, s, bs, vx, vy, nr, nc);
+ }
+ 
++#if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++#include "qwen-q8-batch.h"
++#endif
++
++#if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++#include "flash-q8-sum16.h"
++#endif
++
+ void ggml_gemv_q8_0_x16_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+ #if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++    if (nr > 1) return qwen_q8_batch_dispatch(n, s, bs, vx, vy, nr, nc);
+     GGML_ASSERT(nr == 1 && n % QK8_0 == 0 && nc % 16 == 0);
++    static const bool fast_sum = [] {
++        const char * value = std::getenv("GGML_CPU_Q8_FAST_SUM");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    if (fast_sum && nc == 16) return flash_q8_sum_candidate<2>(n, s, bs, vx, vy, nr, 16);
+     GGML_UNUSED(bs);
+     const int nb = n / QK8_0;
+     const block_q8_0_x16 * vxb = (const block_q8_0_x16 *) vx; const block_q8_0 * vy8 = (const block_q8_0 *) vy;
+--- /dev/null
++++ b/ggml/src/ggml-cpu/arch/x86/flash-q8-sum16.h
+@@ -0,0 +1,52 @@
++#pragma once
++#include <immintrin.h>
++static inline int32_t flash_q8_activation_sum(const int8_t * values) {
++    const __m256i q = _mm256_loadu_si256((const __m256i *) values);
++    const __m256i biased = _mm256_xor_si256(q, _mm256_set1_epi8(char(0x80)));
++    const __m256i sums = _mm256_sad_epu8(biased, _mm256_setzero_si256());
++    const __m128i pairs = _mm_add_epi64(_mm256_castsi256_si128(sums), _mm256_extracti128_si256(sums, 1));
++    return int32_t(_mm_cvtsi128_si64(pairs) + _mm_extract_epi64(pairs, 1)) - 4096;
++}
++template<int MODE> __attribute__((noinline)) static void flash_q8_sum_candidate(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
++#if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++    static_assert(MODE >= 0 && MODE <= 2);
++    GGML_ASSERT(nr == 1 && n % QK8_0 == 0 && nc % 16 == 0);
++    GGML_UNUSED(bs);
++    const int nb = n / QK8_0;
++    const block_q8_0_x16 * vxb = (const block_q8_0_x16 *) vx; const block_q8_0 * vy8 = (const block_q8_0 *) vy;
++    // per-block activation sums (for the +128 bias correction) and scales
++    int32_t ysum_stack[512]; float yd_stack[512];
++    int32_t * ysum = ysum_stack; float * yd = yd_stack;
++    std::vector<int32_t> ysum_heap; std::vector<float> yd_heap;
++    if (nb > 512 && !(MODE == 2 && nc == 16)) { ysum_heap.resize(nb); yd_heap.resize(nb); ysum = ysum_heap.data(); yd = yd_heap.data(); }
++    if constexpr (MODE == 0) {
++    for (int b = 0; b < nb; b++) {
++        const __m256i q = _mm256_loadu_si256((const __m256i *) vy8[b].qs);
++        const __m512i w = _mm512_cvtepi8_epi16(q);
++        const __m256i lo = _mm512_castsi512_si256(w), hi = _mm512_extracti64x4_epi64(w, 1);
++        const __m256i s16 = _mm256_add_epi16(lo, hi);
++        ysum[b] = _mm512_reduce_add_epi32(_mm512_cvtepi16_epi32(s16));
++        yd[b] = GGML_CPU_FP16_TO_FP32(vy8[b].d);
++    }
++    } else if (MODE != 2 || nc != 16) {
++        for (int b = 0; b < nb; b++) {
++            ysum[b] = flash_q8_activation_sum(vy8[b].qs);
++        yd[b] = GGML_CPU_FP16_TO_FP32(vy8[b].d);
++    }
++    }
++    for (int g = 0; g < nc / 16; g++) { const block_q8_0_x16 * bp = vxb + (size_t) g * nb; __m512 accf = _mm512_setzero_ps();
++        for (int b = 0; b < nb; b++) {
++            __m512i acc = _mm512_setzero_si512();
++            const uint8_t * q0 = bp[b].qs; const int8_t * y0 = vy8[b].qs;
++            for (int i0 = 0; i0 < 8; i0++) acc = _mm512_dpbusd_epi32(acc, _mm512_loadu_si512((const void *)(q0 + i0 * 64)), GGML_X16_BC32(y0 + 4*i0));
++            const int32_t sum = MODE == 2 && nc == 16 ? flash_q8_activation_sum(vy8[b].qs) : ysum[b];
++            const float scale = MODE == 2 && nc == 16 ? GGML_CPU_FP16_TO_FP32(vy8[b].d) : yd[b];
++            acc = _mm512_sub_epi32(acc, _mm512_set1_epi32(128 * sum));
++            accf = _mm512_fmadd_ps(_mm512_cvtepi32_ps(acc), _mm512_mul_ps(_mm512_cvtph_ps(_mm256_loadu_si256((const __m256i *) bp[b].d)), _mm512_set1_ps(scale)), accf);
++        }
++        _mm512_storeu_ps(s + g * 16, accf); }
++    return;
++#endif
++    ggml_gemv_q8_0_x16_q8_0_generic(n, s, bs, vx, vy, nr, nc);
++}
++
+--- /dev/null
++++ b/ggml/src/ggml-cpu/arch/x86/qwen-q8-batch.h
+@@ -0,0 +1,62 @@
++// Private Q8 row batching. Each output retains the original integer and FP32 order.
++#pragma once
++template<int NR>
++static void qwen_q8_batch(int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
++    GGML_ASSERT(nr == NR && n % QK8_0 == 0 && nc % 16 == 0);
++    const int nb = n / QK8_0;
++    const auto * weights = (const block_q8_0_x16 *) vx;
++    const auto * activations = (const block_q8_0 *) vy;
++    int32_t sums_stack[NR * 512];
++    float scales_stack[NR * 512];
++    int32_t * sums = sums_stack;
++    float * scales = scales_stack;
++    std::vector<int32_t> sums_heap;
++    std::vector<float> scales_heap;
++    if (nb > 512) {
++        sums_heap.resize(NR * nb); scales_heap.resize(NR * nb);
++        sums = sums_heap.data(); scales = scales_heap.data();
++    }
++    for (int t = 0; t < NR; ++t) {
++        for (int b = 0; b < nb; ++b) {
++            const auto & a = activations[t * nb + b];
++            const __m512i wide = _mm512_cvtepi8_epi16(_mm256_loadu_si256((const __m256i *) a.qs));
++            const __m256i s16 = _mm256_add_epi16(_mm512_castsi512_si256(wide), _mm512_extracti64x4_epi64(wide, 1));
++            sums[t * nb + b] = _mm512_reduce_add_epi32(_mm512_cvtepi16_epi32(s16));
++            scales[t * nb + b] = GGML_CPU_FP16_TO_FP32(a.d);
++        }
++    }
++    for (int g = 0; g < nc / 16; ++g) {
++        const auto * wp = weights + size_t(g) * nb;
++        __m512 result[NR];
++        for (int t = 0; t < NR; ++t) result[t] = _mm512_setzero_ps();
++        for (int b = 0; b < nb; ++b) {
++            __m512i accum[NR];
++            for (int t = 0; t < NR; ++t) accum[t] = _mm512_setzero_si512();
++            for (int j = 0; j < 8; ++j) {
++                const __m512i w = _mm512_loadu_si512((const void *) (wp[b].qs + j * 64));
++                for (int t = 0; t < NR; ++t) {
++                    const int8_t * q = activations[t * nb + b].qs + 4 * j;
++                    accum[t] = _mm512_dpbusd_epi32(accum[t], w, _mm512_set1_epi32(*(const int32_t *) q));
++                }
++            }
++            const __m512 wd = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i *) wp[b].d));
++            for (int t = 0; t < NR; ++t) {
++                const __m512i corrected = _mm512_sub_epi32(accum[t], _mm512_set1_epi32(128 * sums[t * nb + b]));
++                result[t] = _mm512_fmadd_ps(_mm512_cvtepi32_ps(corrected),
++                    _mm512_mul_ps(wd, _mm512_set1_ps(scales[t * nb + b])), result[t]);
++            }
++        }
++        for (int t = 0; t < NR; ++t) _mm512_storeu_ps(s + t * bs + g * 16, result[t]);
++    }
++}
++
++static void qwen_q8_batch_dispatch(int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
++    switch (nr) {
++        case 2: return qwen_q8_batch<2>(n, s, bs, vx, vy, nr, nc);
++        case 3: return qwen_q8_batch<3>(n, s, bs, vx, vy, nr, nc);
++        case 4: return qwen_q8_batch<4>(n, s, bs, vx, vy, nr, nc);
++        default: GGML_ASSERT(nr == 1); return ggml_gemv_q8_0_x16_q8_0(n, s, bs, vx, vy, nr, nc);
++    }
++}
+--- a/ggml/src/ggml-cpu/ops.cpp
++++ b/ggml/src/ggml-cpu/ops.cpp
+@@ -13,6 +13,29 @@
+ #include <cmath>
+ #include <cstdlib>
+ #include <cstring>
++
++#include <atomic>
++#include "flash-rms-guarded-0908.h"
++
++static std::atomic<uint64_t> flash_rms_guard_counts[FLASH_RMS_GUARD_STATUS_COUNT];
++extern "C" uint64_t ggml_cpu_rms_guard_count(int status);
++extern "C" uint64_t ggml_cpu_rms_guard_count(int status) {
++    return status >= 0 && status < FLASH_RMS_GUARD_STATUS_COUNT ? flash_rms_guard_counts[status].load(std::memory_order_relaxed) : 0;
++}
++static bool flash_rms_try_guarded(const ggml_compute_params * params, const float * x, int64_t n, float * mean) {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_RMS_F64_SIMD");
++        return value && std::strcmp(value,"1") == 0;
++    }();
++    static const bool audit = [] {
++        const char * value = std::getenv("GGML_CPU_RMS_F64_AUDIT");
++        return value && std::strcmp(value,"1") == 0;
++    }();
++    if (!enabled || params->use_ref) return false;
++    const auto status = flash_rms_guarded_mean(x,n,mean);
++    if (audit) flash_rms_guard_counts[status].fetch_add(1,std::memory_order_relaxed);
++    return status == FLASH_RMS_GUARD_OK;
++}
+ 
+ bool ggml_cpu_parallel_copy_enabled(void) {
+     static const bool enabled = []() {
+@@ -3864,13 +3887,14 @@
+             for (int64_t i01 = ith; i01 < ne01; i01 += nth) {
+                 const float * x = (float *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+ 
+-                ggml_float sum = 0.0;
+-                // worth switching to explicit SIMD?
+-                for (int64_t i00 = 0; i00 < ne00; i00++) {
+-                    sum += (ggml_float)(x[i00] * x[i00]);
+-                }
+-
+-                const float mean  = sum/ne00;
++                float mean;
++                if (!flash_rms_try_guarded(params,x,ne00,&mean)) {
++                    ggml_float sum = 0.0;
++                    for (int64_t i00 = 0; i00 < ne00; i00++) {
++                        sum += (ggml_float)(x[i00] * x[i00]);
++                    }
++                    mean = sum/ne00;
++                }
+                 const float scale = 1.0f/sqrtf(mean + eps);
+ 
+                 // if you hit this, likely you got an inf somewhere earlier
+@@ -5510,6 +5534,35 @@
+     }
+ }
+ 
++void ggml_compute_forward_softmax_pool_fused(
++        const ggml_compute_params * params,
++        const ggml_tensor * probs,
++        const ggml_tensor * mul,
++        ggml_tensor * dst) {
++    const ggml_tensor * gate = probs->src[0];
++    const bool probs_first = mul->src[0] == probs;
++    const ggml_tensor * keys = mul->src[probs_first ? 1 : 0];
++    const int64_t rows = ggml_nrows(gate);
++    const int64_t begin = rows * params->ith / params->nth;
++    const int64_t end = rows * (params->ith + 1) / params->nth;
++    float scale;
++    memcpy(&scale, (const float *) probs->op_params, sizeof(float));
++    for (int64_t row = begin; row < end; ++row) {
++        float work[4], probability[4], product[4];
++        const float * gp = (const float *) gate->data + row * 4;
++        const float * kp = (const float *) keys->data + row * 4;
++        ggml_vec_cpy_f32(4, work, gp);
++        ggml_vec_scale_f32(4, work, scale);
++        float max = -INFINITY;
++        ggml_vec_max_f32(4, &max, work);
++        ggml_float sum = ggml_vec_soft_max_f32(4, probability, work, max);
++        sum = 1.0 / sum;
++        ggml_vec_scale_f32(4, probability, sum);
++        ggml_vec_mul_f32(4, product, probs_first ? probability : kp, probs_first ? kp : probability);
++        ggml_vec_sum_f32(4, (float *) dst->data + row, product);
++    }
++}
++
+ // ggml_compute_forward_soft_max
+ 
+ static void ggml_compute_forward_soft_max_f32(
+--- /dev/null
++++ b/ggml/src/ggml-cpu/flash-rms-guarded-0908.h
+@@ -0,0 +1,65 @@
++#pragma once
++#include <cfloat>
++#include <cmath>
++#include <cstdint>
++#include <cstring>
++#if defined(__AVX512F__) && defined(__AVX512DQ__)
++#include <immintrin.h>
++#endif
++
++enum flash_rms_guard_status {
++    FLASH_RMS_GUARD_OK,
++    FLASH_RMS_GUARD_LENGTH,
++    FLASH_RMS_GUARD_ENVIRONMENT,
++    FLASH_RMS_GUARD_NONFINITE,
++    FLASH_RMS_GUARD_BOUNDARY,
++    FLASH_RMS_GUARD_UNSUPPORTED,
++    FLASH_RMS_GUARD_STATUS_COUNT
++};
++
++static inline flash_rms_guard_status flash_rms_guarded_mean(const float * x, int64_t n, float * mean) {
++#if defined(__AVX512F__) && defined(__AVX512DQ__)
++    if (n < 1024 || n > (int64_t(1) << 24)) return FLASH_RMS_GUARD_LENGTH;
++    const unsigned csr = _mm_getcsr();
++    if ((csr & _MM_ROUND_MASK) != _MM_ROUND_NEAREST || (csr & 0x1f80) != 0x1f80) return FLASH_RMS_GUARD_ENVIRONMENT;
++    __m512d lo = _mm512_setzero_pd(), hi = lo;
++    const __m512 infinity = _mm512_set1_ps(INFINITY);
++    int64_t i = 0;
++    for (; i + 15 < n; i += 16) {
++        const __m512 value = _mm512_loadu_ps(x + i);
++        const __m512 square = _mm512_mul_ps(value, value);
++        if (_mm512_cmp_ps_mask(square, infinity, _CMP_LT_OQ) != 0xffff) return FLASH_RMS_GUARD_NONFINITE;
++        lo = _mm512_add_pd(lo, _mm512_cvtps_pd(_mm512_castps512_ps256(square)));
++        hi = _mm512_add_pd(hi, _mm512_cvtps_pd(_mm512_extractf32x8_ps(square, 1)));
++    }
++    alignas(64) double lanes[16];
++    _mm512_store_pd(lanes, lo); _mm512_store_pd(lanes + 8, hi);
++    double sum = 0.0;
++    for (double lane : lanes) sum += lane;
++    for (; i < n; ++i) {
++        const float square = x[i] * x[i];
++        if (!std::isfinite(square)) return FLASH_RMS_GUARD_NONFINITE;
++        sum += double(square);
++    }
++    if (sum == 0.0) {
++        *mean = 0.0f;
++        return FLASH_RMS_GUARD_OK;
++    }
++    // Both positive summation trees have relative error below gamma_n.
++    // This wider interval includes the serial sum and outward-rounded division.
++    const double bound = std::nextafter((4.0 * double(n) * DBL_EPSILON) * sum, INFINITY);
++    const double lower_sum = std::nextafter(sum - bound, -INFINITY);
++    const double upper_sum = std::nextafter(sum + bound, INFINITY);
++    const float lower = float(std::nextafter(lower_sum / double(n), -INFINITY));
++    const float upper = float(std::nextafter(upper_sum / double(n), INFINITY));
++    uint32_t lower_bits, upper_bits;
++    std::memcpy(&lower_bits, &lower, sizeof(lower));
++    std::memcpy(&upper_bits, &upper, sizeof(upper));
++    if (lower_bits != upper_bits) return FLASH_RMS_GUARD_BOUNDARY;
++    *mean = lower;
++    return FLASH_RMS_GUARD_OK;
++#else
++    (void) x; (void) n; (void) mean;
++    return FLASH_RMS_GUARD_UNSUPPORTED;
++#endif
++}
+--- a/ggml/src/ggml-cpu/ops.h
++++ b/ggml/src/ggml-cpu/ops.h
+@@ -61,6 +61,7 @@
+ void ggml_compute_forward_diag(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_diag_mask_inf(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_diag_mask_zero(const struct ggml_compute_params * params, struct ggml_tensor * dst);
++void ggml_compute_forward_softmax_pool_fused(const struct ggml_compute_params * params, const struct ggml_tensor * probs, const struct ggml_tensor * mul, struct ggml_tensor * dst);
+ void ggml_compute_forward_soft_max(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_soft_max_ext_back(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_rope(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+--- a/ggml/src/ggml-cpu/ggml-cpu.c
++++ b/ggml/src/ggml-cpu/ggml-cpu.c
+@@ -574,6 +574,7 @@
+ };
+ 
+ static struct ggml_state g_state = {0};
++static bool ggml_cpu_softmax_pool_fusion = false;
+ 
+ #ifdef GGML_USE_OPENMP
+ static bool ggml_cpu_omp_simple_barrier = false;
+@@ -3583,6 +3584,12 @@
+     return atomic_load_explicit(&ggml_cpu_op_profile_arm_state, memory_order_acquire) == 1;
+ }
+ 
++static bool ggml_cpu_pool_overlaps(const struct ggml_tensor * dst, const struct ggml_tensor * src) {
++    const uintptr_t d = (uintptr_t) dst->data;
++    const uintptr_t s = (uintptr_t) src->data;
++    return d <= s ? s - d < ggml_nbytes(dst) : d - s < ggml_nbytes(src);
++}
++
+ static int ggml_cpu_try_fuse_ops(
+         const struct ggml_cgraph * cgraph,
+         const int node_n,
+@@ -3784,6 +3791,34 @@
+                         params, glu->src[0], glu->src[1], glu)) {
+                     return 2;
+                 }
++            }
++        }
++    }
++
++    if (ggml_cpu_softmax_pool_fusion && node->op == GGML_OP_SOFT_MAX && node_n + 2 < cgraph->n_nodes) {
++        const enum ggml_op ops[] = { GGML_OP_SOFT_MAX, GGML_OP_MUL, GGML_OP_SUM_ROWS };
++        const int outputs[] = { node_n + 2 };
++        if (ggml_can_fuse_subgraph(cgraph, node_n, 3, ops, outputs, 1)) {
++            struct ggml_tensor * mul = cgraph->nodes[node_n + 1];
++            struct ggml_tensor * dst = cgraph->nodes[node_n + 2];
++            const struct ggml_tensor * gate = node->src[0];
++            const struct ggml_tensor * keys = mul->src[0] == node ? mul->src[1] : mul->src[1] == node ? mul->src[0] : NULL;
++            float scale, max_bias;
++            memcpy(&scale, (float *) node->op_params, sizeof(float));
++            memcpy(&max_bias, (float *) node->op_params + 1, sizeof(float));
++            if (keys && keys != node && gate && !node->src[1] && !node->src[2] &&
++                    scale == 1.0f && max_bias == 0.0f && node->ne[0] == 4 &&
++                    node->type == GGML_TYPE_F32 && gate->type == GGML_TYPE_F32 &&
++                    keys->type == GGML_TYPE_F32 && mul->type == GGML_TYPE_F32 && dst->type == GGML_TYPE_F32 &&
++                    dst->src[0] == mul && dst->ne[0] == 1 &&
++                    dst->ne[1] == node->ne[1] && dst->ne[2] == node->ne[2] && dst->ne[3] == node->ne[3] &&
++                    ggml_are_same_shape(gate, node) && ggml_are_same_shape(keys, node) && ggml_are_same_shape(mul, node) &&
++                    ggml_is_contiguous(gate) && ggml_is_contiguous(keys) && ggml_is_contiguous(node) &&
++                    ggml_is_contiguous(mul) && ggml_is_contiguous(dst) &&
++                    !node->view_src && !mul->view_src && !dst->view_src &&
++                    !ggml_cpu_pool_overlaps(dst, gate) && !ggml_cpu_pool_overlaps(dst, keys)) {
++                ggml_compute_forward_softmax_pool_fused(params, node, mul, dst);
++                return 2;
+             }
+         }
+     }
+@@ -4803,6 +4838,10 @@
+         }
+ #endif
+         {
++            const char * env = getenv("GGML_CPU_SOFTMAX_POOL_FUSION");
++            ggml_cpu_softmax_pool_fusion = env != NULL && atoi(env) == 1;
++        }
++        {
+             const char * env = getenv("GGML_CPU_DISABLE_FUSION");
+             ggml_cpu_disable_fusion = (env != NULL && atoi(env) == 1);
+         }

@@ -1,0 +1,112 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-dissemination-control-0908/glm_flash_q8_trial.before-dissemination.py
++++ /home/user/InfoSystemic/AI-Server/serving/fleet-0903/glm_flash_q8_trial.py
+@@ -64,7 +64,7 @@
+         atomic_json(STATE, self.state)
+         print(json.dumps(row), flush=True)
+ 
+-    def candidate(self, batching, drafts, workers, q8_experts=False, op_profile_count=0, q8_clamp=False, pooling=False, expert_tile_rows=0, dense_chunk=16, sum16=False, rms_guard=False, ordered_k=False):
++    def candidate(self, batching, drafts, workers, q8_experts=False, op_profile_count=0, q8_clamp=False, pooling=False, expert_tile_rows=0, dense_chunk=16, sum16=False, rms_guard=False, ordered_k=False, dissemination=False):
+         assert not q8_experts or batching
+         assert not q8_clamp or q8_experts
+         assert not pooling or q8_clamp
+@@ -73,6 +73,7 @@
+         assert not sum16 or (pooling and not expert_tile_rows and dense_chunk == 16)
+         assert not rms_guard or sum16
+         assert not ordered_k or rms_guard
++        assert not dissemination or ordered_k
+         assert 0 <= op_profile_count <= 256
+         download = verified_sources()
+         mtp = json.loads((BASE / 'results/glm-flash-q8-mtp-0908/result.json').read_text())
+@@ -329,6 +330,50 @@
+             assert all(f'CPU-NUMA{i}' in loader['devices'] for i in range(4))
+             assert all(Path(path).is_symlink() and str(Path(path).resolve()) == target for path, target in bundle['symlinks'].items())
+             command[0] = bundle['server']
++        if dissemination:
++            root = BASE / 'results/glm-flash-dissemination-0908b'
++            component_root = BASE / 'results/glm-flash-dissemination-component-0908'
++            build = json.loads((root / 'result.json').read_text())
++            manifest = json.loads((root / 'private-cpu/manifest.json').read_text())
++            validation = json.loads((component_root / 'result.json').read_text())
++            probe = json.loads((BASE / 'results/glm-flash-local-barrier-probe-0908b/result.json').read_text())
++            assert build['build_completed'] and not build.get('error')
++            assert build['baseline_link_identical'] and build['unpatched_text_identical']
++            assert build['parent_sha256'] == manifest['parent_sha256'] == probe['cpu_sha256'] == cpu_sha
++            assert validation['passed'] and validation['bit_exact'] and probe['passed']
++            assert {x['label'] for x in validation['checks']} == {'parent', 'off', 'on', 'no-fusion'}
++            assert len(validation['checks']) == 4
++            assert all(x['cases'] == 98 and x['samples_per_case'] == 3 and x['output_bytes'] == 4037568
++                       for x in validation['checks'])
++            assert len({x['output_sha256'] for x in validation['checks']}) == 1
++            for check in validation['checks']:
++                assert sha256(component_root / (check['label'] + '.bin')) == check['output_sha256']
++                assert check['barrier_calls'] == {'parent': 0, 'off': 0, 'on': 717, 'no-fusion': 804}[check['label']]
++            assert len(validation['numa_checks']) == 6
++            for name, count, calls in [('threads', 40, 180), ('reduce', 32, 2760)]:
++                cases = [x for x in validation['numa_checks'] if x['name'] == name]
++                assert {x['label'] for x in cases} == {'parent', 'off', 'on'} and len(cases) == 3
++                assert all(x['passed'] and len(x['hashes']) == count and x['hashes'] == cases[0]['hashes'] for x in cases)
++                assert all(x['barrier_calls'] == (calls if x['label'] == 'on' else 0) for x in cases)
++            for result in (build, manifest, probe):
++                assert all(sha256(path) == digest for path, digest in result['input_sha256'].items())
++            assert all(sha256(path) == digest for path, digest in validation['source_sha256'].items())
++            assert all(sha256(path) == digest for path, digest in manifest['private_source_sha256'].items())
++            assert all(sha256(root / (name + '-check')) == digest for name, digest in build['binary_sha256'].items())
++            assert build['library_sha256'] == manifest['library_sha256'] == validation['cpu_sha256'] == sha256(build['library'])
++            cpu, cpu_sha = Path(build['library']), build['library_sha256']
++            env['LD_LIBRARY_PATH'] = str(cpu.parent) + ':' + str(pinned)
++            env['GGML_CPU_DISSEMINATION_BARRIER'] = '1'
++            bundle = json.loads((BASE / 'results/glm-flash-dissemination-runtime-0908/result.json').read_text())
++            assert bundle['passed'] and bundle['cpu_sha256'] == cpu_sha
++            assert bundle['runtime_env'] == runtime_environment(env)
++            assert 'GGML_CPU_DISSEMINATION_AUDIT' not in bundle['runtime_env']
++            assert bundle['server_sha256'] == preset['binary_sha256']['llama-server'] == sha256(bundle['server'])
++            loader, = bundle['runs']
++            assert loader['mode'] == 'private' and loader['cpu_maps'] == [str(cpu.resolve())]
++            assert all(f'CPU-NUMA{i}' in loader['devices'] for i in range(4))
++            assert all(Path(path).is_symlink() and str(Path(path).resolve()) == target for path, target in bundle['symlinks'].items())
++            command[0] = bundle['server']
+         assert not any('REQUANT' in key or key == 'GGML_CPU_ROUTER_F16' for key in runtime_environment(env))
+         assert not any('PROFILE' in key for key in runtime_environment(env))
+         if op_profile_count:
+@@ -342,7 +387,7 @@
+         assert affinity == list(range(128))
+         configuration = dict(command=command, runtime_env=runtime_environment(env),
+             batching=batching, q8_experts=q8_experts, drafts=drafts, workers=workers, affinity=affinity,
+-            op_profile_count=op_profile_count, q8_clamp=q8_clamp, pooling=pooling, expert_tile_rows=expert_tile_rows, dense_chunk=dense_chunk, sum16=sum16, rms_guard=rms_guard, ordered_k=ordered_k,
++            op_profile_count=op_profile_count, q8_clamp=q8_clamp, pooling=pooling, expert_tile_rows=expert_tile_rows, dense_chunk=dense_chunk, sum16=sum16, rms_guard=rms_guard, ordered_k=ordered_k, dissemination=dissemination,
+             cpu_library=str(cpu), cpu_sha256=cpu_sha, pinned_directory=str(pinned),
+             runtime_directory=str(Path(command[0]).parent),
+             model_revision=download['revision'], model_manifest_sha256=download['manifest_sha256'],
+@@ -474,8 +519,8 @@
+         self.qwen.start_process(configuration, env, 'post-flash-q8')
+         self.record('selected_qwen_restored', pid=self.qwen.state['current']['pid'])
+ 
+-    def launch(self, batching, drafts, workers, q8_experts=False, op_profile_count=0, q8_clamp=False, pooling=False, expert_tile_rows=0, dense_chunk=16, sum16=False, rms_guard=False, ordered_k=False):
+-        configuration, environment = self.candidate(batching, drafts, workers, q8_experts, op_profile_count, q8_clamp, pooling, expert_tile_rows, dense_chunk, sum16, rms_guard, ordered_k)
++    def launch(self, batching, drafts, workers, q8_experts=False, op_profile_count=0, q8_clamp=False, pooling=False, expert_tile_rows=0, dense_chunk=16, sum16=False, rms_guard=False, ordered_k=False, dissemination=False):
++        configuration, environment = self.candidate(batching, drafts, workers, q8_experts, op_profile_count, q8_clamp, pooling, expert_tile_rows, dense_chunk, sum16, rms_guard, ordered_k, dissemination)
+         self.quiet()
+         if self.qwen.state.get('current'):
+             previous = copy.deepcopy(self.qwen.state['current'])
+@@ -516,6 +561,7 @@
+     parser.add_argument('--sum16', action='store_true', help='Use the checked Q8 activation sum for single-token 16-row calls; requires pooling and chunk 16')
+     parser.add_argument('--rms-guard', action='store_true', help='Use the checked SIMD RMS mean with serial fallback; requires --sum16')
+     parser.add_argument('--ordered-k', action='store_true', help='Parallelize narrow Q8 input work with original accumulation order; requires --rms-guard')
++    parser.add_argument('--dissemination', action='store_true', help='Use the validated load/store graph barrier; requires --ordered-k')
+     parser.add_argument('--drafts', type=int, choices=range(0, 9), default=2)
+     parser.add_argument('--workers', type=int, choices=range(1, 17), default=15)
+     parser.add_argument('--op-profile-count', type=int, choices=range(257), default=0,
+@@ -529,11 +575,11 @@
+         for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+             signal.signal(signum, lambda *_: setattr(manager, 'cancelled', True))
+         if args.action == 'launch':
+-            manager.launch(args.batching, args.drafts, args.workers, args.q8_experts, args.op_profile_count, args.q8_clamp, args.pooling, args.expert_tile_rows, args.dense_chunk, args.sum16, args.rms_guard, args.ordered_k)
++            manager.launch(args.batching, args.drafts, args.workers, args.q8_experts, args.op_profile_count, args.q8_clamp, args.pooling, args.expert_tile_rows, args.dense_chunk, args.sum16, args.rms_guard, args.ordered_k, args.dissemination)
+         elif args.action == 'restore-qwen':
+             manager.restore_qwen()
+         elif args.action == 'check':
+-            configuration, _ = manager.candidate(args.batching, args.drafts, args.workers, args.q8_experts, args.op_profile_count, args.q8_clamp, args.pooling, args.expert_tile_rows, args.dense_chunk, args.sum16, args.rms_guard, args.ordered_k)
++            configuration, _ = manager.candidate(args.batching, args.drafts, args.workers, args.q8_experts, args.op_profile_count, args.q8_clamp, args.pooling, args.expert_tile_rows, args.dense_chunk, args.sum16, args.rms_guard, args.ordered_k, args.dissemination)
+             print(json.dumps(dict(configuration=configuration, memory=memory_status()), indent=2))
+         else:
+             print(json.dumps(dict(current=manager.state.get('current'), inference=inference_snapshot(), memory=memory_status()), indent=2))

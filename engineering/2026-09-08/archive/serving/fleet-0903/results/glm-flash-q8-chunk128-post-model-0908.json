@@ -1,0 +1,81 @@
+{
+  "time": 1788885772.9805522,
+  "passed": true,
+  "service": {
+    "processing": 0,
+    "queued": 0.0
+  },
+  "memory": {
+    "MemTotal": 811215671296,
+    "MemAvailable": 128964837376,
+    "SwapTotal": 8589930496,
+    "SwapFree": 188416,
+    "Shmem": 279294984192
+  },
+  "node_memory": {
+    "node0": {
+      "MemFree": 2121125888,
+      "FilePages": 95071072256,
+      "AnonPages": 101678350336,
+      "Shmem": 70532259840,
+      "SReclaimable": 1614548992,
+      "estimated_available": 28274487296
+    },
+    "node1": {
+      "MemFree": 688717824,
+      "FilePages": 102836875264,
+      "AnonPages": 95947866112,
+      "Shmem": 60023226368,
+      "SReclaimable": 1783422976,
+      "estimated_available": 45285789696
+    },
+    "node2": {
+      "MemFree": 724811776,
+      "FilePages": 102270484480,
+      "AnonPages": 96135487488,
+      "Shmem": 71418327040,
+      "SReclaimable": 2097295360,
+      "estimated_available": 33674264576
+    },
+    "node3": {
+      "MemFree": 543715328,
+      "FilePages": 104433860608,
+      "AnonPages": 95380361216,
+      "Shmem": 77321170944,
+      "SReclaimable": 1054515200,
+      "estimated_available": 28710920192
+    }
+  },
+  "mapped_libraries": {
+    "libggml-cpu.so.": {
+      "path": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu/libggml-cpu.so.0.22.0",
+      "sha256": "f86a02d1d042bd2ed92b09af28983dd53a001f32d3624901599c26f7eb206191"
+    },
+    "libllama.so.": {
+      "path": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libllama.so.0.3.0",
+      "sha256": "8c794722eccdcc27aac88def7f1a1d549926a0d6aa3dd00586d6fdca5c8eb08a"
+    },
+    "libggml-base.so.": {
+      "path": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libggml-base.so.0.22.0",
+      "sha256": "01e54cdb7764b31968c533933ad96ac363fd215132e6fa8ce3e56a9f557ee28d"
+    }
+  },
+  "full": {
+    "MainPID": "0",
+    "ActiveState": "inactive",
+    "SubState": "dead",
+    "FragmentPath": "/home/user/.config/systemd/user/glm53-sr950.service",
+    "DropInPaths": "/home/user/.config/systemd/user/glm53-sr950.service.d/10-numa-tensor.conf"
+  },
+  "qwen_loaded": false,
+  "comparison_passed": true,
+  "all_streams_equal": true,
+  "retained": false,
+  "reason": "Both measured workloads are slower than both saved chunk-16 pooling controls; no demonstrated model gain.",
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-dense-chunk-control-0908/preflight128.json": "3dedaccade80ee9653fea1e39e8f59bace97fe60ea47c9dd034333daf357aff2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-chunk128-raw-0908-comparison.json": "9c377eeecff878d81263051e28899f34942b6dd420ec5b01e246fe1816cb07a3",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-post-tiles-0908.json": "242bef61273ee2035e6ec176980dd1da8539600624ba2ca821991d3f617eca74",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/glm_flash_q8_trial.py": "e020d30dc3417958d3bd00b52595f2ffc723c3e7924621dfe1d83f8c0eb27656"
+  }
+}

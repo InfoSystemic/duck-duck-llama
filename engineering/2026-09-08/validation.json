@@ -1,0 +1,191 @@
+{
+  "date": "2026-09-08",
+  "scope": "Publication checks; no new model throughput or quality certification.",
+  "base_patches": {
+    "count": 8,
+    "all_apply_checks_passed": true,
+    "all_reconstructed_trees_match": true
+  },
+  "archive": {
+    "archive_files": 2910,
+    "patches": 10,
+    "python_files": 761,
+    "shell_files": 29,
+    "errors": [],
+    "passed": true
+  },
+  "functional_checks": {
+    "overlay_checks": [
+      {
+        "overlay": "qwen-q6-selected-overlay",
+        "base_patch": "qwen-flash-next-goal-source",
+        "apply_check": true,
+        "reconstructed_files_match": true,
+        "git_tree": "fb397e9074c56d180a83a8750f372381b773b2a0"
+      },
+      {
+        "overlay": "glm-flash-q8-raw-overlay",
+        "base_patch": "glm-flash-goal-source",
+        "apply_check": true,
+        "reconstructed_files_match": true,
+        "git_tree": "9f3725c2baeb1169282ebf0b6278ab76cddba039"
+      }
+    ],
+    "historical_patch_checks": [
+      {
+        "patch": "llama.cpp-a302733-glm-sr950-20260901-session-start.patch",
+        "apply_check": true
+      },
+      {
+        "patch": "llama.cpp-a302733-glm-sr950-20260902-fast-stack.patch",
+        "apply_check": true
+      }
+    ],
+    "rendered_profiles": [
+      "glm-flash-q8-raw.json",
+      "glm-full-q4-mixed-mtp2.json",
+      "qwen-flash-next-q6-mtp4.json"
+    ],
+    "profile_quote_and_missing_parameter_checks": true,
+    "benchmark_output_validator_checks": true
+  },
+  "builds": {
+    "started": 1788916221.562065,
+    "builds": [
+      {
+        "name": "qwen-selected",
+        "steps": [
+          {
+            "command": [
+              "cmake",
+              "-S",
+              "qwen-selected",
+              "-B",
+              "qwen-selected/build-publication",
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DGGML_NATIVE=ON",
+              "-DGGML_OPENMP=ON",
+              "-DLLAMA_BUILD_SERVER=ON",
+              "-DLLAMA_BUILD_TESTS=OFF",
+              "-DLLAMA_BUILD_EXAMPLES=OFF"
+            ],
+            "exit_code": 0
+          },
+          {
+            "command": [
+              "cmake",
+              "--build",
+              "qwen-selected/build-publication",
+              "--target",
+              "llama-server",
+              "-j",
+              "4"
+            ],
+            "exit_code": 0
+          },
+          {
+            "command": [
+              "qwen-selected/build-publication/bin/llama-server",
+              "--version"
+            ],
+            "exit_code": 0
+          }
+        ]
+      },
+      {
+        "name": "glm-flash-raw",
+        "steps": [
+          {
+            "command": [
+              "cmake",
+              "-S",
+              "glm-flash-raw",
+              "-B",
+              "glm-flash-raw/build-publication",
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DGGML_NATIVE=ON",
+              "-DGGML_OPENMP=ON",
+              "-DLLAMA_BUILD_SERVER=ON",
+              "-DLLAMA_BUILD_TESTS=OFF",
+              "-DLLAMA_BUILD_EXAMPLES=OFF"
+            ],
+            "exit_code": 0
+          },
+          {
+            "command": [
+              "cmake",
+              "--build",
+              "glm-flash-raw/build-publication",
+              "--target",
+              "llama-server",
+              "-j",
+              "4"
+            ],
+            "exit_code": 0
+          },
+          {
+            "command": [
+              "glm-flash-raw/build-publication/bin/llama-server",
+              "--version"
+            ],
+            "exit_code": 0
+          }
+        ]
+      }
+    ],
+    "passed": true,
+    "finished": 1788916613.7141569
+  },
+  "runtime_device_checks": {
+    "passed": true,
+    "rows": [
+      {
+        "name": "qwen-selected",
+        "device_check_exit_code": 0,
+        "devices": [
+          "CPU-NUMA0",
+          "CPU-NUMA1",
+          "CPU-NUMA2",
+          "CPU-NUMA3"
+        ],
+        "binary_sha256": {
+          "llama-server": "9ff9f0fd5806753933e5ed4f89f35d95216e9f94fe827ba31eae8c60594fdb57",
+          "libggml-cpu.so.0": "ec3e1e8c4f43c9275e6bdad3743fb0c9cd35df1822202045e9f6b22dd1fa9e0e",
+          "libllama.so.0": "ac92588b560b2c6a699834c48a9dd274e0acd3878fffcacea5135a027da9cff3",
+          "libggml-base.so.0": "5d830b4c92695dc86eb85b255771d1dc9516dd5a8cfc75b4667255d050204b9b"
+        },
+        "no_model_loaded": true
+      },
+      {
+        "name": "glm-flash-raw",
+        "device_check_exit_code": 0,
+        "devices": [
+          "CPU-NUMA0",
+          "CPU-NUMA1",
+          "CPU-NUMA2",
+          "CPU-NUMA3"
+        ],
+        "binary_sha256": {
+          "llama-server": "4230e660cb01583b47f10dbd88a2cfdbf2e67f98dfd29818f6a091b43b233d2e",
+          "libggml-cpu.so.0": "7483f35d5cfd46f4b2bd64628596a62b97357d03babf36a1d72e50835bd79e27",
+          "libllama.so.0": "3b66e8090de0488b9fb8c22c2b05a16d37cb65d41ac15c7e894389bae1c70600",
+          "libggml-base.so.0": "07de8b69d7c8ec2a96ee658bdf2a31b2f94e799d01a48ad549f1fdffb2ed511d"
+        },
+        "no_model_loaded": true
+      }
+    ]
+  },
+  "content_scan": {
+    "staged_files_scanned": 2941,
+    "credential_or_binary_findings": [],
+    "manifest_files_not_staged": []
+  },
+  "publication_fix": "The first clean Qwen build exposed duplicate definitions from an absolute private repack.h include. Both x86 overlays now use ../../repack.h. Original archived sources remain unchanged; original and relocated hashes are recorded.",
+  "limits": [
+    "Historical candidate validation is not a test of every candidate combined.",
+    "The two new servers built, returned --version successfully, and exposed all four NUMA devices without model weights.",
+    "These new binaries have not received fresh model quality or throughput validation.",
+    "Filtered evidence has separate original and published hashes.",
+    "No current model or service was replaced during publication."
+  ]
+}
