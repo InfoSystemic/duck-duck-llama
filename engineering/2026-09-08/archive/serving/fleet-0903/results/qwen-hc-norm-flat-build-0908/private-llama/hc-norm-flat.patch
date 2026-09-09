@@ -1,0 +1,30 @@
+--- /home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-hc-mix-build-0908/private-llama/qwen4exp.cpp
++++ private/qwen4exp.cpp
+@@ -1,4 +1,5 @@
+ #include "models.h"
++#include "qwen-hc-norm-flat-0908.h"
+ #include "qwen-hc-mix-0908.h"
+ #include "qwen-hc-combine-0908.h"
+ #include "llama-impl.h"
+@@ -264,9 +265,18 @@
+ 
+     // grouped RMSNorm: reduce over one stream, then scale all streams with the [hc_dim] gamma
+     // the converter folded each gamma to (1 + w)
+-    ggml_tensor * xn = ggml_rms_norm(ctx0, x, hparams.f_norm_rms_eps);
+-    xn = ggml_reshape_2d(ctx0, xn, hc_dim, nt);
+-    xn = ggml_mul(ctx0, xn, w_norm);
++    static const bool norm_flat = [] {
++        const char * value = getenv("GGML_QWEN_HC_NORM_FLAT");
++        return value && atoi(value) == 1;
++    }();
++    ggml_tensor * xn;
++    if (norm_flat) {
++        xn = qwen_hc_norm_flat(ctx0, gf, x, w_norm, hparams.f_norm_rms_eps);
++    } else {
++        xn = ggml_rms_norm(ctx0, x, hparams.f_norm_rms_eps);
++        xn = ggml_reshape_2d(ctx0, xn, hc_dim, nt);
++        xn = ggml_mul(ctx0, xn, w_norm);
++    }
+     cb(xn, "hc_norm", il);
+ 
+     ggml_tensor * lo = build_lora_mm(w_down, xn);

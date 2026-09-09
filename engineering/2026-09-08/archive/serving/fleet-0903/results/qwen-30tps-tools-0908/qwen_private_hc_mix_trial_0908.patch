@@ -1,0 +1,55 @@
+--- qwen_private_hc_combine_trial_0908.py
++++ qwen_private_hc_mix_trial_0908.py
+@@ -71,12 +71,12 @@
+     peer = process_info(args.peer_pid)
+     assert peer['start'] == args.start_ticks
+     preset_path = BASE / 'qwen-flash-20tps.json'
+-    bundle_path = BASE / 'results/qwen-hc-combine-runtime-0908/result.json'
+-    check_path = BASE / 'results/qwen-hc-combine-proof-0908/result.json'
+-    build_path = BASE / 'results/qwen-hc-combine-build-0908b/result.json'
++    bundle_path = BASE / 'results/qwen-hc-mix-runtime-0908/result.json'
++    check_path = BASE / 'results/qwen-hc-mix-proof-0908/result.json'
++    build_path = BASE / 'results/qwen-hc-mix-build-0908/result.json'
+     preset, bundle, checks, build = [json.loads(path.read_text()) for path in (preset_path, bundle_path, check_path, build_path)]
+     assert bundle['passed'] and checks['passed'] and build['build_completed']
+-    assert len(checks['checks']) == 2 and sum(row['cases'] for row in checks['checks']) == 384
++    assert len(checks['checks']) == 2 and sum(row['cases'] for row in checks['checks']) == 768
+     assert all(row['bit_exact'] and row['scalar_exact'] for row in checks['checks'])
+     assert bundle['cpu_sha256'] == sha256(bundle['cpu']) == 'c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf'
+     assert bundle['llama_sha256'] == build['library_sha256'] == sha256(bundle['llama'])
+@@ -95,7 +95,7 @@
+     if args.drafts == 0:
+         for flag in [value for value in command if value.startswith('--spec-')]:
+             command = set_option(command, flag, None)
+-    env = dict(bundle['runtime_env'], GGML_QWEN_HC_COMBINE_FUSED=str(int(args.combine == 'on')))
++    env = dict(bundle['runtime_env'], GGML_QWEN_HC_MIX_FUSED=str(int(args.mix == 'on')))
+     assert not any('AUDIT' in key or 'PROFILE' in key or 'REQUANT' in key for key in env)
+     records, source_paths = model_records(preset)
+     source_paths += [Path(__file__).resolve(), preset_path, bundle_path, check_path, build_path,
+@@ -105,7 +105,7 @@
+                      BASE / 'benchmark_qwen_resident_0908.py',
+                      Path(bundle['cpu']), Path(bundle['llama']), Path(bundle['server'])]
+     plan = dict(prepared=time.time(), label=args.label, peer_pid=args.peer_pid, peer=peer, peer_runtime_env=peer_env,
+-                port=PORT, command=command, runtime_env=env, drafts=args.drafts, combine=args.combine,
++                port=PORT, command=command, runtime_env=env, drafts=args.drafts, mix=args.mix,
+                 cpu=bundle['cpu'], cpu_sha256=bundle['cpu_sha256'], llama=bundle['llama'],
+                 server_sha256=bundle['server_sha256'], model_records=records,
+                 source_sha256={str(path):sha256(path) for path in source_paths},
+@@ -115,7 +115,7 @@
+     verify_plan(plan)
+     out.mkdir(exist_ok=False)
+     (out / 'plan.json').write_text(json.dumps(plan, indent=2) + '\n')
+-    print(json.dumps(dict(prepared=True, path=str(out / 'plan.json'), combine=args.combine,
++    print(json.dumps(dict(prepared=True, path=str(out / 'plan.json'), mix=args.mix,
+                           drafts=args.drafts, private_port=PORT, peer_preserved=args.peer_pid)), flush=True)
+ 
+ 
+@@ -253,7 +253,7 @@
+     parser.add_argument('label')
+     parser.add_argument('--peer-pid', type=int, default=1219506)
+     parser.add_argument('--start-ticks', default='103969952')
+-    parser.add_argument('--combine', choices=('off', 'on'), default='on')
++    parser.add_argument('--mix', choices=('off', 'on'), default='on')
+     parser.add_argument('--drafts', type=int, choices=range(5), default=4)
+     args = parser.parse_args()
+     assert re.fullmatch(r'qwen-private-[A-Za-z0-9_-]+', args.label)

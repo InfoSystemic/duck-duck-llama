@@ -1,0 +1,727 @@
+{
+  "config": {
+    "label": "qwen-private-hc-mix-off-0908-decode",
+    "port": 18155,
+    "pid": 1031335,
+    "alias": "qwen-q6-private",
+    "drafts": "4",
+    "tokens": 512,
+    "request_timeout_seconds": 180.0,
+    "bandwidth_capacity_gb_s": 380.0,
+    "bandwidth_target_gb_s": 190.0,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    },
+    "reasoning_budget_tokens": null,
+    "check_reasoning_budget_tokens": null,
+    "allowed_idle_pids": "1219506",
+    "skip_idle_gate": true
+  },
+  "target_pid": 1031335,
+  "started": 1788920440.6406922,
+  "checks": [
+    {
+      "expected": "391",
+      "abort": [],
+      "chunks": [
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {
+                "role": "assistant"
+              }
+            }
+          ],
+          "created": 1788920441,
+          "id": "chatcmpl-WBtZRJRb2hisfDDryszyZKLwZq0Mplrs",
+          "model": "qwen-q6-private",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788920441,
+          "id": "chatcmpl-WBtZRJRb2hisfDDryszyZKLwZq0Mplrs",
+          "model": "qwen-q6-private",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788920441,
+          "id": "chatcmpl-WBtZRJRb2hisfDDryszyZKLwZq0Mplrs",
+          "model": "qwen-q6-private",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788920441,
+          "id": "chatcmpl-WBtZRJRb2hisfDDryszyZKLwZq0Mplrs",
+          "model": "qwen-q6-private",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788920441,
+          "id": "chatcmpl-WBtZRJRb2hisfDDryszyZKLwZq0Mplrs",
+          "model": "qwen-q6-private",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk",
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 28,
+            "prompt_ms": 704.574,
+            "prompt_per_token_ms": 25.16335714285714,
+            "prompt_per_second": 39.74032535972091,
+            "predicted_n": 4,
+            "predicted_ms": 241.084,
+            "predicted_per_token_ms": 80.36133333333333,
+            "predicted_per_second": 12.443795523551955,
+            "draft_n": 4,
+            "draft_n_accepted": 4
+          }
+        }
+      ],
+      "pass_check": true
+    },
+    {
+      "expected": "Paris",
+      "abort": [],
+      "chunks": [
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {
+                "role": "assistant"
+              }
+            }
+          ],
+          "created": 1788920442,
+          "id": "chatcmpl-jMiqp5uQKwzNmO6SOxrj5sNRtVMOZt3X",
+          "model": "qwen-q6-private",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": null,
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788920442,
+          "id": "chatcmpl-jMiqp5uQKwzNmO6SOxrj5sNRtVMOZt3X",
+          "model": "qwen-q6-private",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk"
+        },
+        {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "delta": {}
+            }
+          ],
+          "created": 1788920442,
+          "id": "chatcmpl-jMiqp5uQKwzNmO6SOxrj5sNRtVMOZt3X",
+          "model": "qwen-q6-private",
+          "system_fingerprint": "b0-unknown",
+          "object": "chat.completion.chunk",
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 24,
+            "prompt_ms": 646.529,
+            "prompt_per_token_ms": 26.938708333333334,
+            "prompt_per_second": 37.12130469012217,
+            "predicted_n": 2,
+            "predicted_ms": 232.608,
+            "predicted_per_token_ms": 232.608,
+            "predicted_per_second": 4.299078277617279,
+            "draft_n": 4,
+            "draft_n_accepted": 4
+          }
+        }
+      ],
+      "pass_check": true
+    }
+  ],
+  "measurements": [
+    {
+      "kind": "prose",
+      "draft_n": 4,
+      "started": 1788920443.5616586,
+      "counter_metadata": {
+        "valid": true,
+        "errors": [],
+        "required_counters_per_interval": 48,
+        "anchor_monotonic": 1062736.8410493727,
+        "anchor_spread_seconds": 0.020407089963555336,
+        "timing_note": "Align perf elapsed time to reception of each interval; exclude boundary intervals.",
+        "exit_code": 0,
+        "pmus": [
+          "uncore_imc_0",
+          "uncore_imc_1",
+          "uncore_imc_2",
+          "uncore_imc_3",
+          "uncore_imc_4",
+          "uncore_imc_5"
+        ],
+        "cpus": [
+          0,
+          16,
+          32,
+          48
+        ],
+        "socket_ids": {
+          "0": 0,
+          "16": 1,
+          "32": 2,
+          "48": 3
+        },
+        "scope": "System-wide physical DRAM traffic; includes unrelated host work."
+      },
+      "abort": [],
+      "first_content_monotonic": 1062743.634115843,
+      "last_content_monotonic": 1062767.546971163,
+      "baseline_before": {
+        "valid": true,
+        "samples": 9,
+        "sampled_seconds": 4.530691702,
+        "read_gb_s": 3.794238020779812,
+        "write_gb_s": 2.2270830395689543,
+        "total_gb_s": 6.021321060348766,
+        "utilization_of_380": 0.015845581737759913,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 0.8678592524546045,
+            "write_gb_s": 0.44814572942663666,
+            "total_gb_s": 1.3160049818812412
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 0.8998926402253797,
+            "write_gb_s": 0.6790101537392137,
+            "total_gb_s": 1.5789027939645934
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 0.8061369478191874,
+            "write_gb_s": 0.3513605084754009,
+            "total_gb_s": 1.1574974562945883
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 1.2203491802806405,
+            "write_gb_s": 0.748566647927703,
+            "total_gb_s": 1.9689158282083437
+          }
+        ],
+        "interval_min_gb_s": 3.9002636838922538,
+        "interval_median_gb_s": 5.87794321445864,
+        "interval_max_gb_s": 8.194889784343621
+      },
+      "baseline_after": {
+        "valid": true,
+        "samples": 9,
+        "sampled_seconds": 4.5314446629999985,
+        "read_gb_s": 3.02110664200778,
+        "write_gb_s": 1.8325717844035831,
+        "total_gb_s": 4.8536784264113635,
+        "utilization_of_380": 0.012772837964240431,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 0.6870865706873139,
+            "write_gb_s": 0.5084018549604874,
+            "total_gb_s": 1.1954884256478013
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 0.7808984182932305,
+            "write_gb_s": 0.6443099787225629,
+            "total_gb_s": 1.4252083970157934
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 0.5971761259837327,
+            "write_gb_s": 0.26268983409187896,
+            "total_gb_s": 0.8598659600756117
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 0.9559455270435026,
+            "write_gb_s": 0.4171701166286538,
+            "total_gb_s": 1.3731156436721563
+          }
+        ],
+        "interval_min_gb_s": 3.554464761725746,
+        "interval_median_gb_s": 4.3841221183645205,
+        "interval_max_gb_s": 6.4304455079329115
+      },
+      "decode": {
+        "valid": true,
+        "samples": 45,
+        "sampled_seconds": 22.654210917,
+        "read_gb_s": 119.65881637535034,
+        "write_gb_s": 11.0182283983191,
+        "total_gb_s": 130.67704477366945,
+        "utilization_of_380": 0.34388695993070906,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 29.1333038920554,
+            "write_gb_s": 2.6491419178270554,
+            "total_gb_s": 31.782445809882457
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 30.080563652786967,
+            "write_gb_s": 2.7160601061300693,
+            "total_gb_s": 32.796623758917036
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 29.180046414372313,
+            "write_gb_s": 2.365720305150984,
+            "total_gb_s": 31.545766719523296
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 31.26490241613565,
+            "write_gb_s": 3.287306069210991,
+            "total_gb_s": 34.55220848534664
+          }
+        ],
+        "interval_min_gb_s": 83.67131647707093,
+        "interval_median_gb_s": 135.68082113451436,
+        "interval_max_gb_s": 144.21202036635074
+      },
+      "background_subtracted_gb_s": 124.65572371332068,
+      "background_subtracted_utilization": 0.32804137819294915,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 28,
+        "prompt_ms": 728.986,
+        "prompt_per_token_ms": 26.035214285714286,
+        "prompt_per_second": 38.409516780843525,
+        "predicted_n": 512,
+        "predicted_ms": 23914.511,
+        "predicted_per_token_ms": 46.799434442270055,
+        "predicted_per_second": 21.367779587882854,
+        "draft_n": 589,
+        "draft_n_accepted": 360
+      },
+      "other_host_cpu": [
+        {
+          "pid": 2769410,
+          "name": "Paseo",
+          "cpu_percent": 63.6422981282734
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 61.939114413868225
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 61.484932090026845
+        },
+        {
+          "pid": 4104574,
+          "name": "thunderbird-bin",
+          "cpu_percent": 37.78229206455482
+        },
+        {
+          "pid": 4063094,
+          "name": "Paseo",
+          "cpu_percent": 22.85104816826944
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 18.025360977454778
+        },
+        {
+          "pid": 1224390,
+          "name": "python3",
+          "cpu_percent": 16.63442761069055
+        },
+        {
+          "pid": 1028809,
+          "name": "python3",
+          "cpu_percent": 14.988016686765546
+        },
+        {
+          "pid": 4063072,
+          "name": "Paseo",
+          "cpu_percent": 11.638422048435368
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 9.02687368634743
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 7.97657706246424
+        },
+        {
+          "pid": 1959073,
+          "name": "claude",
+          "cpu_percent": 6.415325324259495
+        }
+      ],
+      "inference_churn": [],
+      "finish_reasons": [
+        "length"
+      ],
+      "answer_characters": 2221,
+      "reasoning_characters": 0,
+      "completed_answer": false,
+      "reasoning_budget_tokens": null,
+      "finished": 1788920479.1016524
+    },
+    {
+      "kind": "code",
+      "draft_n": 4,
+      "started": 1788920479.7232459,
+      "counter_metadata": {
+        "valid": true,
+        "errors": [],
+        "required_counters_per_interval": 48,
+        "anchor_monotonic": 1062773.0085377635,
+        "anchor_spread_seconds": 0.009427471784874797,
+        "timing_note": "Align perf elapsed time to reception of each interval; exclude boundary intervals.",
+        "exit_code": 0,
+        "pmus": [
+          "uncore_imc_0",
+          "uncore_imc_1",
+          "uncore_imc_2",
+          "uncore_imc_3",
+          "uncore_imc_4",
+          "uncore_imc_5"
+        ],
+        "cpus": [
+          0,
+          16,
+          32,
+          48
+        ],
+        "socket_ids": {
+          "0": 0,
+          "16": 1,
+          "32": 2,
+          "48": 3
+        },
+        "scope": "System-wide physical DRAM traffic; includes unrelated host work."
+      },
+      "abort": [],
+      "first_content_monotonic": 1062779.828609575,
+      "last_content_monotonic": 1062790.926112908,
+      "baseline_before": {
+        "valid": true,
+        "samples": 9,
+        "sampled_seconds": 4.528414215,
+        "read_gb_s": 3.3840898877754277,
+        "write_gb_s": 2.013072503951585,
+        "total_gb_s": 5.397162391727013,
+        "utilization_of_380": 0.014203058925597404,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 0.7991534670156052,
+            "write_gb_s": 0.57542522946965,
+            "total_gb_s": 1.3745786964852553
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 0.8216443837128093,
+            "write_gb_s": 0.659870945626382,
+            "total_gb_s": 1.4815153293391914
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 0.7286126159640632,
+            "write_gb_s": 0.3273721612942159,
+            "total_gb_s": 1.055984777258279
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 1.03467942108295,
+            "write_gb_s": 0.45040416756133694,
+            "total_gb_s": 1.485083588644287
+          }
+        ],
+        "interval_min_gb_s": 3.48574803914468,
+        "interval_median_gb_s": 5.376747499034523,
+        "interval_max_gb_s": 8.48769801438633
+      },
+      "baseline_after": {
+        "valid": true,
+        "samples": 9,
+        "sampled_seconds": 4.531693042999997,
+        "read_gb_s": 3.6858022447483787,
+        "write_gb_s": 2.2607112985785713,
+        "total_gb_s": 5.94651354332695,
+        "utilization_of_380": 0.015648719850860394,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 0.7669237911708228,
+            "write_gb_s": 0.5915924148616264,
+            "total_gb_s": 1.3585162060324492
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 0.9817853656069006,
+            "write_gb_s": 0.780464573156219,
+            "total_gb_s": 1.7622499387631194
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 0.848064358819813,
+            "write_gb_s": 0.4094374284917782,
+            "total_gb_s": 1.2575017873115912
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 1.0890287291508425,
+            "write_gb_s": 0.47921688206894764,
+            "total_gb_s": 1.56824561121979
+          }
+        ],
+        "interval_min_gb_s": 3.575660233124778,
+        "interval_median_gb_s": 5.722139694299194,
+        "interval_max_gb_s": 10.248976965605497
+      },
+      "decode": {
+        "valid": true,
+        "samples": 19,
+        "sampled_seconds": 9.565568488,
+        "read_gb_s": 130.3238840077102,
+        "write_gb_s": 11.290845870035863,
+        "total_gb_s": 141.61472987774607,
+        "utilization_of_380": 0.3726703417835423,
+        "sockets": [
+          {
+            "socket": 0,
+            "read_gb_s": 31.612490209917986,
+            "write_gb_s": 2.8278540078254886,
+            "total_gb_s": 34.44034421774347
+          },
+          {
+            "socket": 1,
+            "read_gb_s": 32.76805533060964,
+            "write_gb_s": 2.8375005529436126,
+            "total_gb_s": 35.60555588355325
+          },
+          {
+            "socket": 2,
+            "read_gb_s": 31.850731373179624,
+            "write_gb_s": 2.5984767040894345,
+            "total_gb_s": 34.449208077269056
+          },
+          {
+            "socket": 3,
+            "read_gb_s": 34.092607094002965,
+            "write_gb_s": 3.027014605177327,
+            "total_gb_s": 37.11962169918029
+          }
+        ],
+        "interval_min_gb_s": 122.46082980520175,
+        "interval_median_gb_s": 142.59805324887574,
+        "interval_max_gb_s": 146.08889681063542
+      },
+      "background_subtracted_gb_s": 135.66821633441913,
+      "background_subtracted_utilization": 0.35702162193268194,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 30,
+        "prompt_ms": 698.3,
+        "prompt_per_token_ms": 23.276666666666664,
+        "prompt_per_second": 42.9614778748389,
+        "predicted_n": 318,
+        "predicted_ms": 11098.492,
+        "predicted_per_token_ms": 35.011015772870664,
+        "predicted_per_second": 28.562438933145152,
+        "draft_n": 292,
+        "draft_n_accepted": 244
+      },
+      "other_host_cpu": [
+        {
+          "pid": 2769410,
+          "name": "Paseo",
+          "cpu_percent": 68.47620296119757
+        },
+        {
+          "pid": 3508983,
+          "name": "dockerd",
+          "cpu_percent": 63.78605207344432
+        },
+        {
+          "pid": 3508784,
+          "name": "containerd",
+          "cpu_percent": 63.56271155497987
+        },
+        {
+          "pid": 4104574,
+          "name": "thunderbird-bin",
+          "cpu_percent": 33.72441828813057
+        },
+        {
+          "pid": 4063094,
+          "name": "Paseo",
+          "cpu_percent": 26.086172556646694
+        },
+        {
+          "pid": 2190939,
+          "name": "apps.plugin",
+          "cpu_percent": 17.42056044022639
+        },
+        {
+          "pid": 1224390,
+          "name": "python3",
+          "cpu_percent": 17.286556129147723
+        },
+        {
+          "pid": 1028809,
+          "name": "python3",
+          "cpu_percent": 14.561801803881545
+        },
+        {
+          "pid": 4063072,
+          "name": "Paseo",
+          "cpu_percent": 11.25636213060782
+        },
+        {
+          "pid": 383368,
+          "name": "Xorg",
+          "cpu_percent": 9.29096556812074
+        },
+        {
+          "pid": 4064481,
+          "name": "Paseo Daemon",
+          "cpu_percent": 8.57627590903453
+        },
+        {
+          "pid": 2189730,
+          "name": "netdata",
+          "cpu_percent": 8.040258664719872
+        },
+        {
+          "pid": 95727,
+          "name": "codex",
+          "cpu_percent": 6.968224176090556
+        },
+        {
+          "pid": 1959073,
+          "name": "claude",
+          "cpu_percent": 6.700215553933226
+        }
+      ],
+      "inference_churn": [],
+      "finish_reasons": [
+        "stop"
+      ],
+      "answer_characters": 1220,
+      "reasoning_characters": 0,
+      "completed_answer": true,
+      "reasoning_budget_tokens": null,
+      "finished": 1788920502.4185162
+    }
+  ],
+  "bandwidth_target_gb_s": 190.0,
+  "bandwidth_capacity_gb_s": 380.0,
+  "runtime_env": {
+    "LD_LIBRARY_PATH": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-hc-mix-runtime-0908/bin",
+    "GGML_CPU_IQ2_XS_REPACK": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q8_0": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_NUMA_POLL": "100",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_Q4E_SPLIT": "13",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_Q4E_HC_TP": "1",
+    "GGML_CPU_PARALLEL_COPY": "1",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_Q8_0_REPACK_FORCE": "1",
+    "GGML_Q4E_RS_ROLLBACK": "1",
+    "GGML_CPU_PARALLEL_SIGMOID": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE_SINGLE_MAX_ELEMENTS": "65536",
+    "GGML_CPU_IQ_R16_REPACK": "1",
+    "GGML_CPU_X16_Q5_BATCH2": "1",
+    "GGML_CPU_SINGLE_TASK_MAX_ELEMENTS": "4096",
+    "GGML_CPU_X16_Q5_BYTES": "0",
+    "GGML_CPU_IQ_R16_NIBBLE2": "1",
+    "GGML_CPU_ARGSORT_TOP_K": "1",
+    "GGML_CPU_X16_Q5_BYTES_BATCH3": "0",
+    "GGML_CPU_IQ_R16_BATCH3": "1",
+    "GGML_CPU_X16_Q8_BATCH": "1",
+    "GGML_Q4E_EXPERT_EVEN_SPLIT": "1",
+    "GGML_QWEN_HC_COMBINE_FUSED": "1",
+    "GGML_QWEN_HC_MIX_FUSED": "0"
+  },
+  "note": "System-wide IMC traffic; background-subtracted values are attribution estimates.",
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/measure-model-bandwidth.py": "227be7c13e6941baf574e2e0bda74a28f0e11af30da7f35acd7ac8b70890958a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/guarded_inference_request.py": "4633e6369cdeb93a3de9861c288b80edb01d14e17d0d2ec74e466a5e06b25e85",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/dram_bandwidth.py": "011ad0dfde74277c36f3f526380de20da0dd2b0ce1aee5e0c89618b247483e85",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/inference_contention_guard.py": "d78b0e557b17e553c7fabb071b093a27d5d2eab2249fa8d344ebca8fc0493a23"
+  },
+  "idle_gate": null,
+  "guarded_ports": {
+    "1031335": 18155,
+    "1219506": 18095
+  },
+  "input_integrity_verified": true,
+  "finished": 1788920502.4198587
+}

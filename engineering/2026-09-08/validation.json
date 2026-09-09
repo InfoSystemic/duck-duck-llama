@@ -7,9 +7,9 @@
     "all_reconstructed_trees_match": true
   },
   "archive": {
-    "archive_files": 2996,
+    "archive_files": 3131,
     "patches": 10,
-    "python_files": 780,
+    "python_files": 817,
     "shell_files": 29,
     "errors": [],
     "passed": true
@@ -176,9 +176,11 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 90,
+    "staged_files_scanned": 155,
     "credential_or_binary_findings": [],
-    "manifest_files_not_staged": []
+    "manifest_files_not_tracked": [],
+    "host_snapshot_filter_check_passed": true,
+    "passed": true
   },
   "publication_fix": "The first clean Qwen build exposed duplicate definitions from an absolute private repack.h include. Both x86 overlays now use ../../repack.h. Original archived sources remain unchanged; original and relocated hashes are recorded.",
   "limits": [
@@ -234,5 +236,121 @@
       "archived_patch_context_preserved": "preview.patch lines 5, 9, and 94 contain the required unified-diff space prefix on blank context lines."
     },
     "scope": "New private experiment results are archived separately from the earlier reconstructed publication builds. Those builds have not received new model benchmarks or quality certification."
+  },
+  "previous_content_scan": {
+    "staged_files_scanned": 90,
+    "credential_or_binary_findings": [],
+    "manifest_files_not_staged": []
+  },
+  "latest_follow_up": {
+    "updated_utc": "2026-09-09T02:55:24.135110+00:00",
+    "archive_files_added": 135,
+    "archive_files_updated": 17,
+    "source_bundles_and_selected_overlays_unchanged": true,
+    "source_audit": {
+      "source_bundles": [
+        {
+          "name": "qwen-flash-next-goal-source",
+          "recorded_files": 32,
+          "new_paths": [],
+          "removed_changes": [],
+          "changed_contents": []
+        },
+        {
+          "name": "glm-flash-goal-source",
+          "recorded_files": 28,
+          "new_paths": [],
+          "removed_changes": [],
+          "changed_contents": []
+        },
+        {
+          "name": "glm-full-sr950-source",
+          "recorded_files": 35,
+          "new_paths": [],
+          "removed_changes": [],
+          "changed_contents": []
+        },
+        {
+          "name": "qwen-flash-next-numa-source",
+          "recorded_files": 19,
+          "new_paths": [],
+          "removed_changes": [],
+          "changed_contents": []
+        },
+        {
+          "name": "qwen-flash-next-bringup-source",
+          "recorded_files": 6,
+          "new_paths": [],
+          "removed_changes": [],
+          "changed_contents": []
+        },
+        {
+          "name": "glm-flash-bringup-source",
+          "recorded_files": 19,
+          "new_paths": [],
+          "removed_changes": [],
+          "changed_contents": []
+        },
+        {
+          "name": "qwen-dense-server-source",
+          "recorded_files": 2,
+          "new_paths": [],
+          "removed_changes": [],
+          "changed_contents": []
+        },
+        {
+          "name": "sr950-numa-source",
+          "recorded_files": 6,
+          "new_paths": [],
+          "removed_changes": [],
+          "changed_contents": []
+        }
+      ],
+      "earlier_serving_files": 51,
+      "issues": [],
+      "passed": true
+    },
+    "hc_mix_private_comparison": {
+      "off_on_pairs_completed": 1,
+      "all_outputs_match": true,
+      "both_model_targets_met": false,
+      "runtime_integrated": true,
+      "runtime_promoted": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-private-comparison-hc-mix-0908.json"
+    },
+    "hc_norm_flat": {
+      "cpu_cases": 576,
+      "numa_cases": 192,
+      "bit_exact_outputs": 35892640,
+      "graph_proof_passed": true,
+      "private_build_and_loader_passed": true,
+      "control_completed": true,
+      "enabled_unprofiled_measurements_completed": true,
+      "enabled_full_controller_passed": false,
+      "diagnostic_profile_completed": false,
+      "diagnostic_failure": "Code collection window was not wholly within the observed decode interval.",
+      "completed_run_comparison_produced": false,
+      "runtime_promoted": false,
+      "private_model_released": true,
+      "peer_preserved": true,
+      "evidence": "archive/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-profile-0908/result.json"
+    },
+    "export_policy": {
+      "additional_omitted_fields": [
+        "host_before",
+        "host_after",
+        "inference_before",
+        "inference_after"
+      ],
+      "original_sources_and_raw_evidence_unchanged": true,
+      "published_evidence_hashes_updated": true
+    },
+    "scope": "Latest private experimental sources and evidence; the earlier reconstructed publication builds and selected profiles are unchanged. No new runtime promotion or model-quality certification.",
+    "whitespace_check": {
+      "non_patch_files_passed": true,
+      "archived_patch_warnings": 24,
+      "all_warnings_are_required_blank_context_prefixes": true,
+      "original_patch_bytes_preserved": true
+    }
   }
 }
