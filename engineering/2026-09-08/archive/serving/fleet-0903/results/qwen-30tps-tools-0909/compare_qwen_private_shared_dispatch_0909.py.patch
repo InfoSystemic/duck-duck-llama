@@ -1,0 +1,33 @@
+--- compare_qwen_private_quantize_blocks_0909.py
++++ compare_qwen_private_shared_dispatch_0909.py
+@@ -20,7 +20,7 @@
+     result_path, plan_path = out / 'result.json', out / 'plan.json'
+     result, plan = [json.loads(path.read_text()) for path in (result_path, plan_path)]
+     assert result['passed'] and result['finished'] and result['peer_preserved']
+-    assert result['model_started'] and result['owned_model_exit'] is not None
++    assert result['model_started'] and result['owned_model_exit'] == 0 and result['dispatch_cleanup_valid']
+     assert result['plan_sha256'] == digest(plan_path)
+     assert all(digest(path) == value for path, value in plan['source_sha256'].items())
+     measurement_path = Path(result['measurement'])
+@@ -70,16 +70,16 @@
+ 
+ 
+ def compare(control, candidates):
+-    assert control['plan']['quantize_blocks'] == 'off'
++    assert control['plan']['quantize_blocks'] == 'off' and control['plan']['shared_dispatch'] == 'off'
+     comparisons = []
+     for candidate in candidates:
+         cp, pp = control['plan'], candidate['plan']
+-        assert pp['quantize_blocks'] == 'on'
+-        for key in ('command', 'drafts', 'model_records', 'cpu_sha256', 'server_sha256', 'llama'):
++        assert pp['quantize_blocks'] == 'off' and pp['shared_dispatch'] == 'on'
++        for key in ('command', 'drafts', 'model_records', 'cpu_sha256', 'base_sha256', 'base', 'server_sha256', 'llama'):
+             assert cp[key] == pp[key], key
+         ce, pe = dict(cp['runtime_env']), dict(pp['runtime_env'])
+-        assert ce.pop('GGML_CPU_X16_QUANTIZE_BLOCKS') == '0'
+-        assert pe.pop('GGML_CPU_X16_QUANTIZE_BLOCKS') == '1'
++        assert ce.pop('GGML_CPU_NUMA_SHARED_DISPATCH') == '0'
++        assert pe.pop('GGML_CPU_NUMA_SHARED_DISPATCH') == '1'
+         assert ce == pe
+         workloads = []
+         for kind in ('prose', 'code'):

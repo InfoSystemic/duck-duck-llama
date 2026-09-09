@@ -1,0 +1,19 @@
+--- recover_qwen_pinned_base_0909.py
++++ recover_qwen_pinned_base_0909b.py
+@@ -15,7 +15,7 @@
+ 
+ BASE = Path(__file__).resolve().parent
+ ENGINE = BASE.parents[1] / 'engines/llama.cpp-q4e-goal-0904'
+-OUT = BASE / 'results/qwen-pinned-base-recovery-0909'
++OUT = BASE / 'results/qwen-pinned-base-recovery-0909b'
+ 
+ 
+ def recover(text):
+@@ -79,6 +79,7 @@
+         compile_command[compile_command.index('-o') + 1] = str(obj)
+         compile_command[compile_command.index('-c') + 1] = str(source)
+         compile_command.insert(1, '-fmacro-prefix-map=' + str(source) + '=' + str(original_path))
++        compile_command.insert(1, '-fmacro-prefix-map=' + str(ENGINE) + '/ggml/src/./ggml-impl.h=' + str(ENGINE / 'ggml/src/ggml-impl.h'))
+         link = [str(obj) if value == str(original_object) else value for value in link]
+         link[link.index('-o') + 1] = str(library)
+         inputs = dict(prior['input_sha256'])

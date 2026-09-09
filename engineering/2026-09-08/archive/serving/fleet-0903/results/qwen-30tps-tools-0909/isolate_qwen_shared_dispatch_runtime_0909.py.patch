@@ -1,0 +1,113 @@
+--- isolate_qwen_quantize_blocks_runtime_0909.py
++++ isolate_qwen_shared_dispatch_runtime_0909.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Package the validated Qwen activation-block runtime without loading weights."""
++"""Package the validated shared-dispatch CPU/base runtime without loading weights."""
+ import argparse
+ import fcntl
+ import json
+@@ -16,7 +16,7 @@
+ BASE = Path(__file__).resolve().parent
+ ENGINE = BASE.parents[1] / 'engines/llama.cpp-q4e-goal-0904'
+ PINNED = ENGINE / 'validated-iq-batch3-bin'
+-OUT = BASE / 'results/qwen-quantize-blocks-runtime-0909'
++OUT = BASE / 'results/qwen-shared-dispatch-runtime-0909'
+ 
+ 
+ def main():
+@@ -31,29 +31,33 @@
+         assert info['start'] == args.start_ticks
+         guard = ModelMeasurementGuard(args.guard_pid, {args.guard_pid:18095}, inference_snapshot)
+         guard.assert_idle()
+-        validation_path = BASE / 'results/qwen-quantize-blocks-validation-0909/result.json'
+-        build_path = BASE / 'results/qwen-quantize-blocks-build-0909/result.json'
++        validation_path = BASE / 'results/qwen-shared-dispatch-numa-0909/result.json'
++        lifecycle_path = BASE / 'results/qwen-shared-dispatch-lifecycle-0909/result.json'
++        build_path = BASE / 'results/qwen-shared-dispatch-build-0909b/result.json'
+         preset_path = BASE / 'qwen-flash-20tps.json'
+-        validation, build, preset = [json.loads(path.read_text()) for path in (validation_path, build_path, preset_path)]
+-        assert validation['passed'] and validation['bit_exact']
+-        assert validation['graph_case_executions'] == 1728 and len(validation['checks']) == 12
+-        assert len(validation['numa_checks']) == 14
+-        assert build['passed'] and build['build_completed'] and build['baseline_link_identical'] and build['baseline_object_identical']
++        validation, lifecycle, build, preset = [json.loads(path.read_text()) for path in (validation_path, lifecycle_path, build_path, preset_path)]
++        assert validation['passed'] and validation['bit_exact'] and validation['arms'] == 24
++        assert lifecycle['passed'] and lifecycle['bit_exact'] and len(lifecycle['checks']) == 3
++        assert build['passed'] and build['build_completed']
++        assert all(build['baseline_objects'].values()) and all(build['baseline_libraries'].values())
+         assert all(sha256(p) == h for p,h in build['private_source_sha256'].items())
+-        assert all(sha256(p) == h for p,h in validation['fixture_sha256'].items())
+-        assert all(sha256(p) == h for p,h in validation['input_sha256'].items())
+-        assert all(sha256(p) == h for p,h in build['input_sha256'].items())
+-        cpu = Path(build['library'])
+-        assert sha256(cpu) == build['library_sha256'] == validation['cpu_sha256']
+-        assert build['parent_sha256'] == 'c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf'
++        assert sha256(validation_path.parent / 'numa-check.cpp') == validation['fixture_sha256']
++        for record in (validation, lifecycle, build):
++            assert all(sha256(p) == h for p,h in record['input_sha256'].items())
++        cpu = Path(build['libraries']['cpu']['path'])
++        base_library = Path(build['libraries']['base']['path'])
++        assert sha256(cpu) == build['libraries']['cpu']['sha256']
++        assert sha256(base_library) == build['libraries']['base']['sha256']
++        assert build['parent_cpu_sha256'] == 'c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf'
++        assert build['parent_base_sha256'] == 'a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36'
+         llama_build_path = BASE / 'results/qwen-hc-norm-flat-build-0908/result.json'
+         llama_build = json.loads(llama_build_path.read_text())
+         assert llama_build['build_completed'] and llama_build['baseline_link_identical']
+         assert all(sha256(p) == h for p,h in llama_build['input_sha256'].items())
+         llama = Path(llama_build['library'])
+         assert sha256(llama) == llama_build['library_sha256'] == 'd0b2321eae443255dd84a5ad98cda8d3d9bf5540a31891bdc5c03be91061d647'
+-        sources = {str(path):sha256(path) for path in [Path(__file__).resolve(), validation_path, build_path,
+-                   preset_path, llama_build_path, BASE / 'isolate_flash_q8_clamp_runtime_0908.py', cpu, llama]}
++        sources = {str(path):sha256(path) for path in [Path(__file__).resolve(), validation_path, lifecycle_path, build_path,
++                   preset_path, llama_build_path, BASE / 'isolate_flash_q8_clamp_runtime_0908.py', cpu, base_library, llama]}
+         for path in sorted(PINNED.glob('lib*.so*')):
+             assert sha256(path) == preset['binary_sha256'][str(path)]
+             sources[str(path.resolve())] = sha256(path)
+@@ -64,15 +68,21 @@
+         shutil.copy2(PINNED / 'llama-server', server)
+         assert sha256(server) == preset['binary_sha256'][str(PINNED / 'llama-server')]
+         for path in sorted(PINNED.glob('lib*.so*')):
+-            target = cpu if path.name.startswith('libggml-cpu.so') else llama if path.name.startswith('libllama.so') else path
++            target = cpu if path.name.startswith('libggml-cpu.so') else base_library if path.name.startswith('libggml-base.so') else llama if path.name.startswith('libllama.so') else path
+             (binary_dir / path.name).symlink_to(target.resolve())
+         source = SOURCE.replace('#include "ggml.h"', '#include "ggml.h"\n#include "llama.h"')
+         source = source.replace('    Dl_info info{};', '''    llama_backend_init();
+     Dl_info llama_info{};
+     if (!dladdr(reinterpret_cast<void *>(llama_backend_init), &llama_info)) return 4;
+     std::printf("LLAMA_SYMBOL %s\\n", llama_info.dli_fname);
++    Dl_info base_info{};
++    if (!dladdr(reinterpret_cast<void *>(ggml_backend_graph_compute), &base_info)) return 5;
++    std::printf("BASE_SYMBOL %s\\n", base_info.dli_fname);
+     Dl_info info{};''')
+-        source = source.replace('        if (line.find("/libggml-cpu.so.")', '''        if (line.find("/libllama.so.") != std::string::npos) {
++        source = source.replace('        if (line.find("/libggml-cpu.so.")', '''        if (line.find("/libggml-base.so.") != std::string::npos) {
++            std::printf("BASE_MAP %s\\n", line.c_str());
++        }
++        if (line.find("/libllama.so.") != std::string::npos) {
+             std::printf("LLAMA_MAP %s\\n", line.c_str());
+         }
+         if (line.find("/libggml-cpu.so.")''')
+@@ -84,9 +94,10 @@
+                    '-lllama', '-lggml', '-lggml-cpu', '-lggml-base', '-ldl', '-o', str(binary)]
+         environment = {k:v for k,v in os.environ.items() if k not in runtime_environment(os.environ)}
+         environment.update(preset['runtime_env'])
+-        environment.update(LD_LIBRARY_PATH=str(binary_dir), GGML_QWEN_HC_COMBINE_FUSED='1', GGML_QWEN_HC_MIX_FUSED='1', GGML_QWEN_HC_NORM_FLAT='1', GGML_CPU_X16_QUANTIZE_BLOCKS='1')
++        environment.update(LD_LIBRARY_PATH=str(binary_dir), GGML_QWEN_HC_COMBINE_FUSED='1', GGML_QWEN_HC_MIX_FUSED='1', GGML_QWEN_HC_NORM_FLAT='1', GGML_CPU_X16_QUANTIZE_BLOCKS='0', GGML_CPU_NUMA_HUGEPAGES='0', GGML_CPU_NUMA_SHARED_DISPATCH='1')
+         result = dict(started=time.time(), passed=False, sources=sources, server=str(server), server_sha256=sha256(server),
+-                      cpu=str(cpu), cpu_sha256=sha256(cpu), llama=str(llama), llama_sha256=sha256(llama),
++                      cpu=str(cpu), cpu_sha256=sha256(cpu), base=str(base_library), base_sha256=sha256(base_library),
++                      llama=str(llama), llama_sha256=sha256(llama),
+                       runtime_directory=str(binary_dir), runtime_env=runtime_environment(environment),
+                       fixture_sha256=sha256(fixture), compile_command=command,
+                       symlinks={str(path):str(path.resolve()) for path in binary_dir.iterdir() if path.is_symlink()},
+@@ -104,7 +115,7 @@
+             (OUT / 'private.log').write_text(probe.stdout + probe.stderr)
+             assert probe.returncode == 0
+             maps = {}
+-            for name, expected in [('CPU', cpu), ('LLAMA', llama)]:
++            for name, expected in [('CPU', cpu), ('BASE', base_library), ('LLAMA', llama)]:
+                 actual = sorted({line.split()[-1] for line in probe.stdout.splitlines() if line.startswith(name + '_MAP ')})
+                 symbols = [line.removeprefix(name + '_SYMBOL ') for line in probe.stdout.splitlines() if line.startswith(name + '_SYMBOL ')]
+                 assert actual == [str(expected.resolve())] and len(symbols) == 1 and Path(symbols[0]).resolve() == expected.resolve()

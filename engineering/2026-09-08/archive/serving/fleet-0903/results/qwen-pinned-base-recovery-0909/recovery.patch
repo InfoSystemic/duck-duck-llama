@@ -1,0 +1,23 @@
+--- /home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-backend-meta.cpp
++++ /home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-pinned-base-recovery-0909/ggml-backend-meta.cpp
+@@ -3105,19 +3105,8 @@
+                             auto ud = std::make_unique<ggml_backend_meta_fused_reduce_userdata>();
+                             ud->desc = backend_ctx->fused_descs[i].get();
+                             ud->dev  = (int) j;
+-                            int n_tasks = GGML_N_TASKS_MAX;
+-                            const char * task_hint = getenv("GGML_CPU_NUMA_FUSED_REDUCE_TASK_HINT");
+-                            if (task_hint && atoi(task_hint) == 1 && ud->desc->single_task_max_elements > 0) {
+-                                n_tasks = 1;
+-                                for (int r = 0; r < ud->desc->n_red; ++r) {
+-                                    if (ggml_nelements(ud->desc->nodes[r][j]) > ud->desc->single_task_max_elements) {
+-                                        n_tasks = GGML_N_TASKS_MAX;
+-                                        break;
+-                                    }
+-                                }
+-                            }
+                             ggml_tensor * red = ggml_custom_4d(backend_ctx->fused_ctx.get(), GGML_TYPE_F32, 1, 1, 1, 1,
+-                                nullptr, 0, ggml_backend_meta_fused_reduce_op, n_tasks, ud.get());
++                                nullptr, 0, ggml_backend_meta_fused_reduce_op, GGML_N_TASKS_MAX, ud.get());
+                             red->flags |= GGML_TENSOR_FLAG_COMPUTE;
+                             ggml_format_name(red, "meta_fused_reduce_%zu", i);
+                             backend_ctx->fused_userdata.push_back(std::move(ud));
