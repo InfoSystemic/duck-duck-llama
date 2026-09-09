@@ -1,0 +1,100 @@
+--- build_qwen_hc_mix_0908.py
++++ build_qwen_hc_norm_flat_0908.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Build an opt-in HC stream-mean fusion on the private HC-combine runtime."""
++"""Build flattened HC normalization on the private HC stream-mean runtime."""
+ import difflib
+ import fcntl
+ import json
+@@ -13,16 +13,16 @@
+ 
+ BASE = Path(__file__).resolve().parent
+ ENGINE = BASE.parents[1] / 'engines/llama.cpp-q4e-goal-0904'
+-OUT = BASE / 'results/qwen-hc-mix-build-0908'
++OUT = BASE / 'results/qwen-hc-norm-flat-build-0908'
+ 
+ 
+ def main():
+     assert os.sched_getaffinity(0) == {127}
+     assert process_info(1219506)['start'] == '103969952'
+-    parent_path = BASE / 'results/qwen-hc-combine-build-0908b/private-llama/manifest.json'
+-    proof_path = BASE / 'results/qwen-hc-mix-proof-0908/result.json'
++    parent_path = BASE / 'results/qwen-hc-mix-build-0908/private-llama/manifest.json'
++    proof_path = BASE / 'results/qwen-hc-norm-flat-proof-0908/result.json'
+     parent, proof = [json.loads(path.read_text()) for path in (parent_path, proof_path)]
+-    assert sha256(parent['library']) == parent['library_sha256'] == 'd18b76ee1ef30556e25a362bb2d4ca305e162ee1cb8f90a2f89c975822fd65be'
++    assert sha256(parent['library']) == parent['library_sha256'] == '63ff8e9bad975e2c42efd26d890611ee0c915ab87ed3434a7eaef2a2d02f6c90'
+     assert all(sha256(path) == value for path, value in parent['input_sha256'].items())
+     assert all(sha256(path) == value for path, value in parent['private_source_sha256'].items())
+     assert proof['passed'] and len(proof['checks']) == 2
+@@ -31,27 +31,25 @@
+     assert all(sha256(path) == value for path, value in proof['input_sha256'].items())
+     original_path = Path(parent['compile_command'][-1])
+     original_object = Path(parent['compile_command'][parent['compile_command'].index('-o') + 1])
+-    header = BASE / 'qwen-hc-mix-0908.h'
++    header = BASE / 'qwen-hc-norm-flat-0908.h'
+     original = original_path.read_text()
+     assert original.count('#include "models.h"') == 1
+-    changed = original.replace('#include "models.h"', '#include "models.h"\n#include "qwen-hc-mix-0908.h"')
+-    start = changed.index('    ggml_tensor * gated = ggml_mul(ctx0, xn, gate);')
+-    end = changed.index('    cb(mixed, "hc_mixed", il);', start)
++    changed = original.replace('#include "models.h"', '#include "models.h"\n#include "qwen-hc-norm-flat-0908.h"')
++    start = changed.index('    ggml_tensor * xn = ggml_rms_norm(ctx0, x, hparams.f_norm_rms_eps);')
++    end = changed.index('    cb(xn, "hc_norm", il);', start)
+     old = changed[start:end]
+-    assert old.count('ggml_tensor * mixed =') == 1
+-    fallback = old.replace('ggml_tensor * mixed =', 'mixed =')
++    assert old.count('ggml_tensor * xn =') == 1
++    fallback = old.replace('ggml_tensor * xn =', 'xn =')
+     fallback = ''.join('    ' + line if line.strip() else line for line in fallback.splitlines(True))
+-    new = '''    static const bool fused_mix = [] {
+-        const char * value = getenv("GGML_QWEN_HC_MIX_FUSED");
++    new = """    static const bool norm_flat = [] {
++        const char * value = getenv("GGML_QWEN_HC_NORM_FLAT");
+         return value && atoi(value) == 1;
+     }();
+-    ggml_tensor * mixed;
+-    if (fused_mix) {
+-        ggml_tensor * args[] = {xn, gate};
+-        mixed = ggml_custom_4d(ctx0, GGML_TYPE_F32, n_embd, nt, 1, 1,
+-                args, 2, qwen_hc_mix_f32, GGML_N_TASKS_MAX, nullptr);
++    ggml_tensor * xn;
++    if (norm_flat) {
++        xn = qwen_hc_norm_flat(ctx0, gf, x, w_norm, hparams.f_norm_rms_eps);
+     } else {
+-''' + fallback + '    }\n'
++""" + fallback + '    }\n'
+     assert changed.count(old) == 1
+     changed = changed.replace(old, new)
+     guard = ModelMeasurementGuard(1219506, {1219506:18095}, inference_snapshot)
+@@ -62,9 +60,9 @@
+         private = OUT / 'private-llama'
+         private.mkdir()
+         (private / original_path.name).write_text(changed)
+-        for path in [header, original_path.parent / 'qwen-hc-combine-0908.h']:
++        for path in [header] + [Path(path) for path in parent['private_source_sha256'] if Path(path).suffix == '.h']:
+             (private / path.name).write_bytes(path.read_bytes())
+-        (private / 'hc-mix.patch').write_text(''.join(difflib.unified_diff(
++        (private / 'hc-norm-flat.patch').write_text(''.join(difflib.unified_diff(
+             original.splitlines(True), changed.splitlines(True), fromfile=str(original_path), tofile='private/qwen4exp.cpp')))
+         inputs = {str(path):sha256(path) for path in [Path(__file__).resolve(), parent_path, proof_path,
+                   original_path, original_object, header, Path(parent['library'])]}
+@@ -72,7 +70,7 @@
+         inputs.update(parent['private_source_sha256'])
+         result = dict(started=time.time(), build_completed=False, model_loaded=False, steps=[],
+                       input_sha256=inputs, parent_sha256=parent['library_sha256'],
+-                      scope='Only qwen4exp.cpp.o changes from HC-combine. CPU kernels, quantization, and other model objects stay unchanged.')
++                      scope='Only qwen4exp.cpp.o changes from HC-mix. CPU kernels, quantization, and other model objects stay unchanged.')
+ 
+         def save():
+             (OUT / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
+@@ -112,7 +110,7 @@
+             (private / 'libllama.so.0').symlink_to(library.name)
+             (private / 'libllama.so').symlink_to('libllama.so.0')
+             assert all(sha256(path) == value for path, value in inputs.items())
+-            source_files = [private / original_path.name, private / header.name, private / 'qwen-hc-combine-0908.h']
++            source_files = [private / original_path.name] + sorted(private.glob('*.h'))
+             manifest = dict(input_sha256=inputs, parent_manifest=str(parent_path), parent_sha256=parent['library_sha256'],
+                             library=str(library), library_sha256=sha256(library), compile_command=command, link_command=link,
+                             private_source_sha256={str(path):sha256(path) for path in source_files}, scope=result['scope'])

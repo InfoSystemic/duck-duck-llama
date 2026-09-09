@@ -1,0 +1,104 @@
+{
+  "started": 1788921000.4823606,
+  "controller_pid": 1430889,
+  "passed": true,
+  "steps": [
+    {
+      "mode": "cpu",
+      "exit_code": 0
+    },
+    {
+      "mode": "numa",
+      "exit_code": 0
+    }
+  ],
+  "checks": [
+    {
+      "passed": true,
+      "bit_exact": true,
+      "scalar_exact": true,
+      "inputs_preserved": true,
+      "mode": "cpu",
+      "cases": 576,
+      "outputs": 26919480,
+      "fusion_eligible_cases": 288,
+      "padded_fallback_cases": 288,
+      "hash": "80dd7bae8557628b",
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0",
+      "base_library": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0"
+    },
+    {
+      "passed": true,
+      "bit_exact": true,
+      "scalar_exact": true,
+      "inputs_preserved": true,
+      "mode": "numa",
+      "cases": 192,
+      "outputs": 8973160,
+      "fusion_eligible_cases": 96,
+      "padded_fallback_cases": 96,
+      "hash": "cf7ab3d7b2fac985",
+      "cpu_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0",
+      "base_library": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0"
+    }
+  ],
+  "compile_command": [
+    "g++",
+    "-O3",
+    "-std=c++17",
+    "-march=native",
+    "-ffp-contract=off",
+    "-fopenmp",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src",
+    "-I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-hc-norm-flat-0908.cpp",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0",
+    "-L/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin",
+    "-lggml",
+    "-lggml-base",
+    "-ldl",
+    "-pthread",
+    "-o",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-hc-norm-flat-proof-0908/check"
+  ],
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/run_qwen_hc_norm_flat_check_0908.py": "1e5a30b6dd6dacf3f6795b38e60f9160f32988a955ee0d3fa0f35c7d6750b092",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-hc-norm-flat-0908.cpp": "6dcaf709f82320c1a2ac30bd2bfc61e00802361133c4a95a875601c1eb3046cf",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-hc-norm-flat-0908.h": "79b9f962a9be5ccd54a1f0adbe6f340adae2f03632cae27edcc1420e0747904a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen-flash-20tps.json": "884e0de653e6eae6651ef6135aea2f76c40a355c31c32b093f385d46181cf4c3",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/validated-iq-batch3-bin/libggml-base.so.0": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36"
+  },
+  "scope": "Graph correctness only. No runtime integration or performance claim.",
+  "idle_gate": {
+    "time": 1788921020.9758956,
+    "quiet_seconds": 15.240426170872524,
+    "required_quiet_seconds": 15,
+    "state": {
+      "servers": {
+        "1219506": {
+          "processing": 0,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "compile_exit": 0,
+  "owned": {
+    "pid": 1431414,
+    "mode": "numa"
+  },
+  "binary_sha256": "2ce2130d4e6d909dbc8dcfc8bb78363ca895320905ce5cc9f8344fcf728d7d4e",
+  "finished": 1788921023.1717744,
+  "peer_preserved": true,
+  "peer_after": {
+    "processing": 0,
+    "queued": 0.0
+  }
+}

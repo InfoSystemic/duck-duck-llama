@@ -1,0 +1,23 @@
+--- compare_qwen_private_hc_mix_0908.py
++++ compare_qwen_private_hc_norm_flat_0908.py
+@@ -70,16 +70,16 @@
+ 
+ 
+ def compare(control, candidates):
+-    assert control['plan']['mix'] == 'off'
++    assert control['plan']['norm_flat'] == 'off'
+     comparisons = []
+     for candidate in candidates:
+         cp, pp = control['plan'], candidate['plan']
+-        assert pp['mix'] == 'on'
++        assert pp['norm_flat'] == 'on'
+         for key in ('command', 'drafts', 'model_records', 'cpu_sha256', 'server_sha256', 'llama'):
+             assert cp[key] == pp[key], key
+         ce, pe = dict(cp['runtime_env']), dict(pp['runtime_env'])
+-        assert ce.pop('GGML_QWEN_HC_MIX_FUSED') == '0'
+-        assert pe.pop('GGML_QWEN_HC_MIX_FUSED') == '1'
++        assert ce.pop('GGML_QWEN_HC_NORM_FLAT') == '0'
++        assert pe.pop('GGML_QWEN_HC_NORM_FLAT') == '1'
+         assert ce == pe
+         workloads = []
+         for kind in ('prose', 'code'):
