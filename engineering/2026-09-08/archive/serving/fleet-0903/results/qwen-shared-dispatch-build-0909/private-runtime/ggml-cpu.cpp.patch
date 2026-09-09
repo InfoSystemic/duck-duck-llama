@@ -1,0 +1,41 @@
+--- /home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu.cpp
++++ private/ggml-cpu.cpp
+@@ -104,6 +104,14 @@
+         }
+     }
+     return false;
++}
++
++static bool qwen_shared_numa_dispatch_enabled() {
++    static const bool enabled = []() {
++        const char * value = getenv("GGML_CPU_NUMA_SHARED_DISPATCH");
++        return value != nullptr && atoi(value) != 0;
++    }();
++    return enabled;
+ }
+ 
+ // CPU backend - backend (stream)
+@@ -662,7 +670,7 @@
+     props->type        = ggml_backend_cpu_device_get_type(dev);
+     ggml_backend_cpu_device_get_memory(dev, &props->memory_free, &props->memory_total);
+     props->caps = {
+-        /* .async                 = */ ctx->numa_node >= 0,
++        /* .async                 = */ ctx->numa_node >= 0 && !qwen_shared_numa_dispatch_enabled(),
+         /* .host_buffer           = */ false,
+         /* .buffer_from_host_ptr  = */ ctx->numa_node < 0,
+         /* .events                = */ false,
+@@ -696,6 +704,14 @@
+     if (!cpu_ctx->threadpool) {
+         ggml_backend_free(backend);
+         return nullptr;
++    }
++
++    if (qwen_shared_numa_dispatch_enabled()) {
++        cpu_ctx->async_enabled = false;
++        GGML_LOG_INFO("%s: initialized %s with %d threads (caller dispatch)\n",
++            __func__, dev_ctx->name.c_str(), dev_ctx->n_threads);
++        GGML_UNUSED(params);
++        return backend;
+     }
+ 
+     const std::vector<int> cpus = dev_ctx->cpus;
