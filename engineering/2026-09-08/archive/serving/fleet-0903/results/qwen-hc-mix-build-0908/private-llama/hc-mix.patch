@@ -1,0 +1,54 @@
+--- /home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-hc-combine-build-0908b/private-llama/qwen4exp.cpp
++++ private/qwen4exp.cpp
+@@ -1,4 +1,5 @@
+ #include "models.h"
++#include "qwen-hc-mix-0908.h"
+ #include "qwen-hc-combine-0908.h"
+ #include "llama-impl.h"
+ #include "llama-memory-hybrid-idx.h"
+@@ -273,20 +274,31 @@
+     ggml_tensor * gate = ggml_sigmoid(ctx0, build_lora_mm(w_up, lo));
+     cb(gate, "hc_gate", il);
+ 
+-    ggml_tensor * gated = ggml_mul(ctx0, xn, gate);
+-    gated = ggml_reshape_3d(ctx0, gated, n_embd, hc, nt);
+-
+-    // collapse the streams by their mean
+-    ggml_tensor * mixed = ggml_view_2d(ctx0, gated, n_embd, nt,
+-            ggml_row_size(gated->type, n_embd) * hc, 0);
+-    mixed = ggml_cont(ctx0, mixed);
+-    for (int64_t c = 1; c < hc; ++c) {
+-        ggml_tensor * s = ggml_view_2d(ctx0, gated, n_embd, nt,
+-                ggml_row_size(gated->type, n_embd) * hc,
+-                ggml_row_size(gated->type, n_embd) * c);
+-        mixed = ggml_add(ctx0, mixed, s);
+-    }
+-    mixed = ggml_scale(ctx0, mixed, 1.0f / (float) hc);
++    static const bool fused_mix = [] {
++        const char * value = getenv("GGML_QWEN_HC_MIX_FUSED");
++        return value && atoi(value) == 1;
++    }();
++    ggml_tensor * mixed;
++    if (fused_mix) {
++        ggml_tensor * args[] = {xn, gate};
++        mixed = ggml_custom_4d(ctx0, GGML_TYPE_F32, n_embd, nt, 1, 1,
++                args, 2, qwen_hc_mix_f32, GGML_N_TASKS_MAX, nullptr);
++    } else {
++        ggml_tensor * gated = ggml_mul(ctx0, xn, gate);
++        gated = ggml_reshape_3d(ctx0, gated, n_embd, hc, nt);
++
++        // collapse the streams by their mean
++        mixed = ggml_view_2d(ctx0, gated, n_embd, nt,
++                ggml_row_size(gated->type, n_embd) * hc, 0);
++        mixed = ggml_cont(ctx0, mixed);
++        for (int64_t c = 1; c < hc; ++c) {
++            ggml_tensor * s = ggml_view_2d(ctx0, gated, n_embd, nt,
++                    ggml_row_size(gated->type, n_embd) * hc,
++                    ggml_row_size(gated->type, n_embd) * c);
++            mixed = ggml_add(ctx0, mixed, s);
++        }
++        mixed = ggml_scale(ctx0, mixed, 1.0f / (float) hc);
++    }
+     cb(mixed, "hc_mixed", il);
+ 
+     if (inject) {
