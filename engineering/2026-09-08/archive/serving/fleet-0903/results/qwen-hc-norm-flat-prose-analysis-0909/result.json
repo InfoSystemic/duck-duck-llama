@@ -1,0 +1,157 @@
+{
+  "time": 1788923059.1292787,
+  "validated_prose_arm": true,
+  "full_profile_completed": false,
+  "samples": 69211,
+  "sampled_periods": 883737181526,
+  "category_percent": {
+    "OpenMP-runtime": 49.891496672874595,
+    "Q8-x16": 13.953205692678234,
+    "other": 13.372090987157732,
+    "Q8-8x8": 12.619791743335046,
+    "Q6-x16": 7.325912734734842,
+    "tinyBLAS": 2.837502169219554
+  },
+  "cohorts": [
+    {
+      "cohort": "other-threads",
+      "fraction_of_all_periods": 0.006157289365831566,
+      "within_cohort_percent": {
+        "other": 100.0
+      }
+    },
+    {
+      "cohort": "higher-activity",
+      "fraction_of_all_periods": 0.7650051830303237,
+      "within_cohort_percent": {
+        "OpenMP-runtime": 46.61667130961577,
+        "other": 15.718503192936016,
+        "Q8-8x8": 13.760517142050105,
+        "Q8-x16": 10.61888868844203,
+        "Q6-x16": 9.576291634673087,
+        "tinyBLAS": 3.7091280322829916
+      }
+    },
+    {
+      "cohort": "lower-activity",
+      "fraction_of_all_periods": 0.22883752760384476,
+      "within_cohort_percent": {
+        "OpenMP-runtime": 62.18167821683138,
+        "Q8-x16": 25.475283136646055,
+        "Q8-8x8": 9.145898535105198,
+        "other": 3.197140111417363
+      }
+    }
+  ],
+  "top_symbols": [
+    {
+      "dso": "libgomp.so.1.0.0",
+      "symbol": "[unknown]",
+      "percent": 49.87081851959327
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_gemv_q8_0_x16_q8_0",
+      "percent": 13.953205692678234
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_gemv_q6_K_x16_q8_K",
+      "percent": 7.325912734734842
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_gemv_q8_0_8x8_q8_0",
+      "percent": 6.7780310239484605
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_gemm_q8_0_8x8_q8_0",
+      "percent": 5.841760719386587
+    },
+    {
+      "dso": "libc.so.6",
+      "symbol": "[unknown]",
+      "percent": 3.322985770870389
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "void (anonymous namespace)::tinyBLAS<16, float __vector(16), float __vector(16), float, float, float>::gemm_bloc<4, 5>(long, long)",
+      "percent": 1.9275202790026376
+    },
+    {
+      "dso": "libm.so.6",
+      "symbol": "[unknown]",
+      "percent": 0.8819056968432764
+    },
+    {
+      "dso": "libggml-base.so.0.22.0",
+      "symbol": "ggml_backend_meta_fused_reduce_op(ggml_tensor*, int, int, void*)",
+      "percent": 0.8710376952464493
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "void (anonymous namespace)::tinyBLAS<16, float __vector(16), float __vector(16), ggml_bf16_t, ggml_bf16_t, float>::gemm_bloc<4, 5>(long, long)",
+      "percent": 0.8281345454270315
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_compute_forward_mul",
+      "percent": 0.8186622682896757
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_compute_forward_sigmoid",
+      "percent": 0.6665256591138123
+    },
+    {
+      "dso": "libllama.so.0.3.0",
+      "symbol": "qwen_hc_combine_f32(ggml_tensor*, ggml_tensor const*, ggml_tensor const*, ggml_tensor const*, int, int, void*)",
+      "percent": 0.5795535894683091
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_compute_forward_rms_norm_mul_fused",
+      "percent": 0.5785766235580266
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_compute_forward_gated_delta_net",
+      "percent": 0.571653140165108
+    },
+    {
+      "dso": "libllama.so.0.3.0",
+      "symbol": "qwen_hc_mix_f32(ggml_tensor*, int, int, void*)",
+      "percent": 0.5655362286975317
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_vec_dot_f32",
+      "percent": 0.46430079686301867
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_graph_compute_thread.isra.0",
+      "percent": 0.26203610387890763
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml::cpu::repack::tensor_traits<block_q8_0, 8l, 8l, (ggml_type)8>::compute_forward(ggml_compute_params*, ggml_tensor*)",
+      "percent": 0.2497812536514915
+    },
+    {
+      "dso": "libggml-cpu.so.0.22.0",
+      "symbol": "ggml_compute_forward_concat",
+      "percent": 0.22738191444317776
+    }
+  ],
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-profile-0908-profile/result.json": "be05f0bc21dc9f678a493f00f7a7c7427b882ba7c2084e5f7e5efe54dfdf477e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0": "c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/analyze_qwen_hc_prose_profile_0909.py": "774a4229f10cba7109fdaf5d4c713714f2eb44c5f35cd34f5896fb4e0f4d211a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-profile-0908-profile/prose-draft4/report.txt": "fe850b9bc6778886b30f8b969e211264a87eda7410bc1bd66105de046fb9dd75",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-profile-0908-profile/prose-draft4/samples-by-thread.txt": "f6769e1252f558466ad4065d677165ad82fb192455c2378f3f77525e538b5f2e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-hc-norm-flat-on-profile-0908-profile/prose-draft4/callchains.txt": "5ffc660cb2af62316acb9f5967007f19809411af44e58520aefc7efd7351f372"
+  },
+  "scope": "Only the completed prose capture is qualified. Code profiling failed. Period-weighted CPU samples are not removable wall-time fractions. Thread cohorts use observed activity, not assumed target/draft roles. OpenMP entries are not classified as wait loops without disassembly."
+}

@@ -1,0 +1,92 @@
+{
+  "time": 1788924936.246054,
+  "control": "qwen-private-q8-sums-off-0909",
+  "control_rows": {
+    "prose": {
+      "tok_s": 22.685497671873055,
+      "attribution_valid": true,
+      "idle_before_gb_s": 5.165273205909688,
+      "idle_after_gb_s": 4.902168559925602,
+      "adjusted_gb_s": 131.79296169272217,
+      "utilization": 0.34682358340190045,
+      "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+      "generated_tokens": 512,
+      "draft_tokens": 589,
+      "accepted_draft_tokens": 360,
+      "observed_other_host_cores": 3.474236633114901
+    },
+    "code": {
+      "tok_s": 29.781043567224128,
+      "attribution_valid": true,
+      "idle_before_gb_s": 4.801237266702603,
+      "idle_after_gb_s": 4.407000876921142,
+      "adjusted_gb_s": 141.86340768645977,
+      "utilization": 0.373324757069631,
+      "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+      "generated_tokens": 318,
+      "draft_tokens": 292,
+      "accepted_draft_tokens": 244,
+      "observed_other_host_cores": 3.394200528783648
+    }
+  },
+  "comparisons": [
+    {
+      "label": "qwen-private-q8-sums-on-0909",
+      "workloads": [
+        {
+          "workload": "prose",
+          "tok_s": 22.453620969344346,
+          "attribution_valid": true,
+          "idle_before_gb_s": 4.814573450876445,
+          "idle_after_gb_s": 4.541943317122097,
+          "adjusted_gb_s": 131.11487811448342,
+          "utilization": 0.3450391529328511,
+          "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+          "generated_tokens": 512,
+          "draft_tokens": 589,
+          "accepted_draft_tokens": 360,
+          "observed_other_host_cores": 3.4098308369601678,
+          "output_matches_control": true,
+          "speed_change_percent": -1.0221362823183977,
+          "bandwidth_change_percent": -0.5145066698020839,
+          "both_thresholds_met": false
+        },
+        {
+          "workload": "code",
+          "tok_s": 29.68118938237377,
+          "attribution_valid": true,
+          "idle_before_gb_s": 5.212094823286483,
+          "idle_after_gb_s": 5.711228531058509,
+          "adjusted_gb_s": 143.0448464315044,
+          "utilization": 0.3764338063986958,
+          "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+          "generated_tokens": 318,
+          "draft_tokens": 292,
+          "accepted_draft_tokens": 244,
+          "observed_other_host_cores": 4.178670682305242,
+          "output_matches_control": true,
+          "speed_change_percent": -0.3352944453573592,
+          "bandwidth_change_percent": 0.8328002014837965,
+          "both_thresholds_met": false
+        }
+      ]
+    }
+  ],
+  "all_outputs_match": true,
+  "all_candidate_thresholds_met": false,
+  "candidate_repeat_available": false,
+  "evidence": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-off-0909/result.json": "a0271f1c97ce2ed5a964952f5814e98ca7c7740af2afd16bc5a4fee39ab44537",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-off-0909/plan.json": "2323ebc166ba8f1b80d81c8a5ef847a171748e0808032523e4b4028f907e1eaa",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-off-0909-decode/result.json": "2625e8e9ffea6dfa3afc9d1b8d20d3fa0a2defc4073d656e6ca8b059ca0d071b",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-off-0909-decode/prose-draft4/chunks.json": "1e2bcc0d8f0cf66ef993d640488e67c0db0077f98ad35814e9d61c89ac8a1ffe",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-off-0909-decode/code-draft4/chunks.json": "8ecaca37dec0b226904715e91ef9dcb35e53caea20a8f1b6ee81cb368502d733",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-on-0909/result.json": "93d98de4a16446e942e27626bb346a6d774d4a817677660cc9504358e01ed254",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-on-0909/plan.json": "2e17654d6e194c63597a373f59de2e2c1b5919b5db3613b7c7e63ac50e84efb7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-on-0909-decode/result.json": "d18b59e1eca9ef9e3955455a7b2cea103ec5ab10ded41a9790ab5f39e562c093",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-on-0909-decode/prose-draft4/chunks.json": "40291d2b0fc753d7649bee901e6d762d95c0d84e830564ff8dd9900b4f0912c2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-q8-sums-on-0909-decode/code-draft4/chunks.json": "f669fbe829fd6989aa09011ca1433bc3cb67d916a6f129cb49e3cee4e3865970"
+  },
+  "analyzer_sha256": "752d366c3126751ec1dbf8da256ef9974e1fcff569717c3a22deeb2e23e857f0",
+  "scope": "Fresh single-conversation decode. IMC attribution uses adjacent idle subtraction. This comparison does not itself certify broad quality or mark a goal complete."
+}
