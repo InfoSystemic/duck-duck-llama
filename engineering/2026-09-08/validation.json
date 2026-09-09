@@ -7,9 +7,9 @@
     "all_reconstructed_trees_match": true
   },
   "archive": {
-    "archive_files": 3410,
-    "patches": 10,
-    "python_files": 887,
+    "archive_files": 3646,
+    "patches": 11,
+    "python_files": 958,
     "shell_files": 29,
     "errors": [],
     "passed": true
@@ -176,7 +176,7 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 61,
+    "staged_files_scanned": 248,
     "credential_or_binary_findings": [],
     "manifest_files_not_tracked": [],
     "host_snapshot_filter_check_passed": true,
@@ -243,9 +243,9 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "updated_utc": "2026-09-09T06:45:09.701293+00:00",
-    "archive_files_added": 56,
-    "archive_files_updated": 1,
+    "updated_utc": "2026-09-09T22:00:56.498902+00:00",
+    "archive_files_added": 236,
+    "archive_files_updated": 5,
     "source_bundles_and_selected_overlays_unchanged": true,
     "source_audit": {
       "source_bundles": [
@@ -310,143 +310,125 @@
       "issues": [],
       "passed": true
     },
-    "pinned_base_recovery": {
-      "passed": true,
-      "byte_identical": true,
-      "library_sha256": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
-      "evidence": "archive/serving/fleet-0903/results/qwen-pinned-base-recovery-0909b/result.json"
+    "correctness_overlay": {
+      "name": "qwen-get-rows-columns-correction",
+      "patch": "patches/qwen-get-rows-columns-correction.patch",
+      "patch_sha256": "a88b3a997ee72817958a55803352056e9a522e1502f1cc155d41bffec71cbf5d",
+      "source_path": "ggml/src/ggml-cpu/ops.cpp",
+      "before_sha256": "d7c5d60b88b0377e2a9dc9e69bcae928272b31adb9d1ec2e93572cf8f1b37110",
+      "after_sha256": "78981e3be02814477055cc9045d26d128514feb031701b4459eecc4ecfc7af4f",
+      "parent": "qwen-flash-next-goal-source.patch, optionally followed by qwen-q6-selected-overlay.patch; neither selected overlay changes ops.cpp",
+      "archived_source": "archive/serving/fleet-0903/results/qwen-get-rows-columns-build-0909/private-cpu/ops.cpp",
+      "validation": "archive/serving/fleet-0903/results/qwen-get-rows-columns-validation-0909/result.json",
+      "apply_check": true,
+      "reconstructed_file_identical": true,
+      "scope": "Correct the misplaced FP32 memcpy branch and restore canonical quantized dequantization. No model-weight change. Source application verified; reconstructed model performance requires separate validation.",
+      "selected_overlay_composition": {
+        "passed": true,
+        "base_commit": "daef7b6874397a5a7c3d7e38b55e2ee0adf7da38",
+        "patch_order": [
+          "patches/qwen-flash-next-goal-source.patch",
+          "patches/qwen-q6-selected-overlay.patch",
+          "patches/qwen-get-rows-columns-correction.patch"
+        ],
+        "corrected_ops_sha256": "78981e3be02814477055cc9045d26d128514feb031701b4459eecc4ecfc7af4f",
+        "reconstructed_tree": "7d8dc3ce888867008de8d2e74277c4676b4dce89",
+        "reconstructed_corrected_file_identical": true,
+        "temporary_index_only": true,
+        "no_model_loaded": true
+      }
     },
-    "shared_dispatch_build": {
-      "passed": true,
-      "parent_libraries_byte_identical": {
-        "cpu": true,
-        "base": true
-      },
-      "candidate_library_sha256": {
-        "base": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
-        "cpu": "e68c0c543aa3334a1f1ed732c11f8f4fe8ecf097ea816eb89f82fe9ae1ed6a0a"
-      },
-      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/result.json"
+    "shared_dispatch_model_comparison": {
+      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-model-summary-0909.json",
+      "off_on_pairs": 2,
+      "enabled_runtime_configuration_matches": true,
+      "runtime_promoted": false,
+      "all_owned_models_exited_zero": true,
+      "independent_peer_preserved": true
     },
-    "shared_dispatch_numa": {
+    "gather_validation": {
       "passed": true,
-      "arms": 24,
-      "all_outputs_match_parent": true,
-      "total_output_bytes": 328089600,
-      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-numa-0909/result.json"
+      "corrected_direct_cases": 228,
+      "graph_cases": 184,
+      "parent_known_bug_cases": 24,
+      "evidence": "archive/serving/fleet-0903/results/qwen-get-rows-columns-validation-0909/result.json"
     },
-    "shared_dispatch_lifecycle": {
+    "gather_loader": {
       "passed": true,
-      "arms": [
-        {
-          "arm": "parent",
-          "passed": true,
-          "runs": 24,
-          "exact_values": 209920,
-          "shared_workers": false,
-          "workers_per_context": 60,
-          "baseline_threads": 1,
-          "active_threads_two_contexts": 129,
-          "final_threads": 1,
-          "concurrent_rounds": 8,
-          "destroyed_context_while_peer_workers_held": true
-        },
-        {
-          "arm": "off",
-          "passed": true,
-          "runs": 24,
-          "exact_values": 209920,
-          "shared_workers": false,
-          "workers_per_context": 60,
-          "baseline_threads": 1,
-          "active_threads_two_contexts": 129,
-          "final_threads": 1,
-          "concurrent_rounds": 8,
-          "destroyed_context_while_peer_workers_held": true
-        },
-        {
-          "arm": "on",
-          "passed": true,
-          "runs": 24,
-          "exact_values": 209920,
-          "shared_workers": true,
-          "workers_per_context": 60,
-          "baseline_threads": 1,
-          "active_threads_two_contexts": 61,
-          "final_threads": 1,
-          "concurrent_rounds": 8,
-          "destroyed_context_while_peer_workers_held": true
-        }
+      "cpu_sha256": "12c61b337736ca9210433f57c64ce7fffbf7e4b66920aba9a03f97eaef3fd9b7",
+      "devices": [
+        "CPU",
+        "CPU-NUMA0",
+        "CPU-NUMA1",
+        "CPU-NUMA2",
+        "CPU-NUMA3"
       ],
-      "all_outputs_match_parent": true,
-      "scope": "Independent context buffers; does not establish arbitrary shared-buffer concurrency.",
-      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-lifecycle-0909/result.json"
+      "evidence": "archive/serving/fleet-0903/results/qwen-get-rows-runtime-0909/result.json"
     },
-    "shared_dispatch_loader": {
+    "flash_handoff": {
+      "fault_cases": 7,
       "passed": true,
-      "model_loaded": false,
-      "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-runtime-0909/result.json"
+      "executed": false,
+      "target_gb_s": 250,
+      "evidence": "archive/serving/fleet-0903/results/flash-bandwidth250-lifecycle-0909.json"
     },
-    "shared_dispatch_model_control": {
+    "scope": "Publish completed shared-dispatch and gather model comparisons, profiles, component evidence, a portable gather correctness patch, and the prepared Flash 250 GB/s handoff. All new Qwen counter windows qualify and outputs agree. No service promotion, broad quality certification, or 250 GB/s claim. The portable patch reconstructs the tested ops.cpp exactly; the earlier clean selected-overlay server builds were not repeated.",
+    "gather_model_comparison": {
       "passed": true,
-      "rows": [
+      "all_outputs_match": true,
+      "summaries": [
         {
           "workload": "prose",
-          "tok_s": 22.232090582673507,
-          "adjusted_gb_s": 129.29581243910113,
-          "idle_before_gb_s": 6.0658753019828815,
-          "idle_after_gb_s": 5.760977420804238,
-          "attribution_valid": true,
-          "both_targets_met": false
+          "parent_mean_tok_s": 23.2807587379126,
+          "corrected_mean_tok_s": 24.19703941035747,
+          "speed_change_percent": 3.935785266966896,
+          "all_attribution_valid": true,
+          "parent_mean_gb_s": 134.66688904487208,
+          "corrected_mean_gb_s": 139.4972632742892,
+          "bandwidth_change_percent": 3.586905633356996,
+          "repeated_bandwidth_target_met": false
         },
         {
           "workload": "code",
-          "tok_s": 28.99466973699182,
-          "adjusted_gb_s": 138.10023584214267,
-          "idle_before_gb_s": 5.149966040907076,
-          "idle_after_gb_s": 5.362250237621821,
-          "attribution_valid": true,
-          "both_targets_met": false
+          "parent_mean_tok_s": 30.446764147446984,
+          "corrected_mean_tok_s": 31.2093581372403,
+          "speed_change_percent": 2.5046799262484543,
+          "all_attribution_valid": true,
+          "parent_mean_gb_s": 144.8026291049053,
+          "corrected_mean_gb_s": 147.1313326962174,
+          "bandwidth_change_percent": 1.6081915126175295,
+          "repeated_bandwidth_target_met": false
         }
       ],
-      "owned_model_exit": 0,
-      "peer_preserved": true,
-      "evidence": "archive/serving/fleet-0903/results/qwen-private-shared-dispatch-off-0909/result.json"
-    },
-    "shared_dispatch_enabled_model_trial": {
-      "passed": false,
-      "model_loaded": true,
-      "benchmark_requests_sent": false,
-      "error": "AssertionError('No shared four-socket context group observed')",
-      "dispatch_after_release": {
-        "created": [],
-        "attached": [],
-        "destroyed": []
-      },
-      "owned_model_exit": 0,
-      "peer_preserved": true,
-      "missing_log_messages_cause_resolved": false,
-      "off_on_comparison_completed": false,
-      "model_speed_gain_established": false,
+      "candidate_repeated": true,
+      "all_eight_attribution_windows_valid": true,
+      "all_owned_models_exited_zero": true,
+      "independent_peer_preserved": true,
       "runtime_promoted": false,
-      "evidence": "archive/serving/fleet-0903/results/qwen-private-shared-dispatch-on-0909/result.json"
+      "evidence": "archive/serving/fleet-0903/results/qwen-get-rows-model-comparison-0909/comparison.json"
+    },
+    "post_run_audit": {
+      "passed": true,
+      "evidence": "archive/serving/fleet-0903/results/qwen-get-rows-model-comparison-0909/post-run-audit.json"
     },
     "readme_links": {
-      "readme_links_checked": 75,
-      "errors": [],
-      "passed": true
-    },
-    "scope": "Archive refresh only. Shared-dispatch component checks pass, but the enabled model trial failed before requests. Selected source overlays, profiles, and earlier reconstructed publication builds are unchanged. No model benchmark or runtime promotion during publication.",
-    "whitespace_check": {
-      "git_diff_check_exit_code": 2,
-      "preserved_blank_patch_prefixes": 23,
-      "unexpected_findings": [],
+      "checked": 93,
+      "files": {
+        "README.md": 27,
+        "engineering/2026-09-08/README.md": 59,
+        "profiles/20260908/README.md": 7
+      },
+      "missing": [],
       "passed": true
     },
     "archive_source_freshness": {
-      "added_since_export": 0,
-      "updated_since_export": 0,
-      "all_eligible_current_sources_match": true
+      "added": 0,
+      "updated": 0,
+      "passed": true
+    },
+    "whitespace_check": {
+      "passed": true,
+      "scope": "Repository-owned documentation, metadata, and verifier; archived sources and unified patches retain exact historical whitespace."
     }
   },
   "previous_follow_ups": [
@@ -1222,6 +1204,213 @@
         "passed": true
       },
       "scope": "Archive refresh only. Prepared shared-dispatch sources have not compiled or undergone runtime validation. Selected source overlays, profiles, and earlier reconstructed publication builds are unchanged. No new model benchmark or runtime promotion during publication."
+    },
+    {
+      "updated_utc": "2026-09-09T06:45:09.701293+00:00",
+      "archive_files_added": 56,
+      "archive_files_updated": 1,
+      "source_bundles_and_selected_overlays_unchanged": true,
+      "source_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "pinned_base_recovery": {
+        "passed": true,
+        "byte_identical": true,
+        "library_sha256": "a8d6ff25ffab12b993c98f11c6d5b4146fc1dd5bd7bebb8c43303842cd959d36",
+        "evidence": "archive/serving/fleet-0903/results/qwen-pinned-base-recovery-0909b/result.json"
+      },
+      "shared_dispatch_build": {
+        "passed": true,
+        "parent_libraries_byte_identical": {
+          "cpu": true,
+          "base": true
+        },
+        "candidate_library_sha256": {
+          "base": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
+          "cpu": "e68c0c543aa3334a1f1ed732c11f8f4fe8ecf097ea816eb89f82fe9ae1ed6a0a"
+        },
+        "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/result.json"
+      },
+      "shared_dispatch_numa": {
+        "passed": true,
+        "arms": 24,
+        "all_outputs_match_parent": true,
+        "total_output_bytes": 328089600,
+        "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-numa-0909/result.json"
+      },
+      "shared_dispatch_lifecycle": {
+        "passed": true,
+        "arms": [
+          {
+            "arm": "parent",
+            "passed": true,
+            "runs": 24,
+            "exact_values": 209920,
+            "shared_workers": false,
+            "workers_per_context": 60,
+            "baseline_threads": 1,
+            "active_threads_two_contexts": 129,
+            "final_threads": 1,
+            "concurrent_rounds": 8,
+            "destroyed_context_while_peer_workers_held": true
+          },
+          {
+            "arm": "off",
+            "passed": true,
+            "runs": 24,
+            "exact_values": 209920,
+            "shared_workers": false,
+            "workers_per_context": 60,
+            "baseline_threads": 1,
+            "active_threads_two_contexts": 129,
+            "final_threads": 1,
+            "concurrent_rounds": 8,
+            "destroyed_context_while_peer_workers_held": true
+          },
+          {
+            "arm": "on",
+            "passed": true,
+            "runs": 24,
+            "exact_values": 209920,
+            "shared_workers": true,
+            "workers_per_context": 60,
+            "baseline_threads": 1,
+            "active_threads_two_contexts": 61,
+            "final_threads": 1,
+            "concurrent_rounds": 8,
+            "destroyed_context_while_peer_workers_held": true
+          }
+        ],
+        "all_outputs_match_parent": true,
+        "scope": "Independent context buffers; does not establish arbitrary shared-buffer concurrency.",
+        "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-lifecycle-0909/result.json"
+      },
+      "shared_dispatch_loader": {
+        "passed": true,
+        "model_loaded": false,
+        "evidence": "archive/serving/fleet-0903/results/qwen-shared-dispatch-runtime-0909/result.json"
+      },
+      "shared_dispatch_model_control": {
+        "passed": true,
+        "rows": [
+          {
+            "workload": "prose",
+            "tok_s": 22.232090582673507,
+            "adjusted_gb_s": 129.29581243910113,
+            "idle_before_gb_s": 6.0658753019828815,
+            "idle_after_gb_s": 5.760977420804238,
+            "attribution_valid": true,
+            "both_targets_met": false
+          },
+          {
+            "workload": "code",
+            "tok_s": 28.99466973699182,
+            "adjusted_gb_s": 138.10023584214267,
+            "idle_before_gb_s": 5.149966040907076,
+            "idle_after_gb_s": 5.362250237621821,
+            "attribution_valid": true,
+            "both_targets_met": false
+          }
+        ],
+        "owned_model_exit": 0,
+        "peer_preserved": true,
+        "evidence": "archive/serving/fleet-0903/results/qwen-private-shared-dispatch-off-0909/result.json"
+      },
+      "shared_dispatch_enabled_model_trial": {
+        "passed": false,
+        "model_loaded": true,
+        "benchmark_requests_sent": false,
+        "error": "AssertionError('No shared four-socket context group observed')",
+        "dispatch_after_release": {
+          "created": [],
+          "attached": [],
+          "destroyed": []
+        },
+        "owned_model_exit": 0,
+        "peer_preserved": true,
+        "missing_log_messages_cause_resolved": false,
+        "off_on_comparison_completed": false,
+        "model_speed_gain_established": false,
+        "runtime_promoted": false,
+        "evidence": "archive/serving/fleet-0903/results/qwen-private-shared-dispatch-on-0909/result.json"
+      },
+      "readme_links": {
+        "readme_links_checked": 75,
+        "errors": [],
+        "passed": true
+      },
+      "scope": "Archive refresh only. Shared-dispatch component checks pass, but the enabled model trial failed before requests. Selected source overlays, profiles, and earlier reconstructed publication builds are unchanged. No model benchmark or runtime promotion during publication.",
+      "whitespace_check": {
+        "git_diff_check_exit_code": 2,
+        "preserved_blank_patch_prefixes": 23,
+        "unexpected_findings": [],
+        "passed": true
+      },
+      "archive_source_freshness": {
+        "added_since_export": 0,
+        "updated_since_export": 0,
+        "all_eligible_current_sources_match": true
+      }
     }
   ],
   "previous_content_scans": [
@@ -1248,6 +1437,13 @@
     },
     {
       "staged_files_scanned": 66,
+      "credential_or_binary_findings": [],
+      "manifest_files_not_tracked": [],
+      "host_snapshot_filter_check_passed": true,
+      "passed": true
+    },
+    {
+      "staged_files_scanned": 61,
       "credential_or_binary_findings": [],
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,

@@ -1,0 +1,75 @@
+--- qwen_private_shared_dispatch_trial_0909b.py
++++ qwen_private_shared_dispatch_trial_0909c.py
+@@ -113,7 +113,9 @@
+     env = dict(bundle['runtime_env'], GGML_CPU_NUMA_SHARED_DISPATCH=str(int(args.shared_dispatch == 'on')))
+     assert env['GGML_CPU_X16_QUANTIZE_BLOCKS'] == env['GGML_CPU_NUMA_HUGEPAGES'] == '0'
+     assert not any('AUDIT' in key or 'PROFILE' in key or 'REQUANT' in key for key in env)
++    assert not args.profile or args.drafts in (3, 4)
+     records, source_paths = model_records(preset)
++    source_paths.append(BASE / 'profile_qwen_shared_dispatch_0909.py')
+     source_paths += [Path(__file__).resolve(), preset_path, bundle_path, check_path, lifecycle_path, build_path,
+                      BASE / 'measure-model-bandwidth.py', BASE / 'model_measurement_guard.py',
+                      BASE / 'guarded_inference_request.py', BASE / 'dram_bandwidth.py',
+@@ -121,7 +123,7 @@
+                      BASE / 'benchmark_qwen_resident_0908.py',
+                      Path(bundle['cpu']), Path(bundle['base']), Path(bundle['llama']), Path(bundle['server'])]
+     plan = dict(prepared=time.time(), label=args.label, peer_pid=args.peer_pid, peer=peer, peer_runtime_env=peer_env,
+-                port=PORT, command=command, runtime_env=env, drafts=args.drafts, quantize_blocks='off', shared_dispatch=args.shared_dispatch,
++                port=PORT, command=command, runtime_env=env, drafts=args.drafts, quantize_blocks='off', shared_dispatch=args.shared_dispatch, profile=args.profile,
+                 cpu=bundle['cpu'], cpu_sha256=bundle['cpu_sha256'], base=bundle['base'], base_sha256=bundle['base_sha256'], llama=bundle['llama'],
+                 server_sha256=bundle['server_sha256'], model_records=records,
+                 source_sha256={str(path):sha256(path) for path in source_paths},
+@@ -135,7 +137,7 @@
+                           drafts=args.drafts, private_port=PORT, peer_preserved=args.peer_pid)), flush=True)
+ 
+ 
+-def execute(out):
++def execute(out, lifecycle_lock_fd=None):
+     plan = json.loads((out / 'plan.json').read_text())
+     assert not (out / 'result.json').exists(), 'Preserve the previous trial result'
+     verify_plan(plan)
+@@ -239,8 +241,31 @@
+         verify_plan(plan)
+         result.update(passed=True, rows=rows, measurement=str(path), measurement_sha256=sha256(path),
+                       target_reached=all(row['both_targets_met'] for row in rows))
++        if plan['profile']:
++            assert lifecycle_lock_fd is not None
++            save('profiling private Qwen')
++            profile_label = plan['label'] + '-profile'
++            command = [sys.executable, '-u', str(BASE / 'profile_qwen_shared_dispatch_0909.py'), profile_label,
++                       '--pid', str(model.pid), '--port', str(PORT), '--alias', 'qwen-q6-private',
++                       '--drafts', str(plan['drafts']), '--allowed-idle-pids', str(plan['peer_pid']),
++                       '--trial-plan', str(out / 'plan.json'), '--trial-result', str(out / 'result.json'),
++                       '--after', str(path), '--lifecycle-lock-fd', str(lifecycle_lock_fd)]
++            measurement = subprocess.Popen(command, cwd=BASE, start_new_session=True, pass_fds=(lifecycle_lock_fd,))
++            while measurement.poll() is None:
++                peer_guard.assert_idle()
++                memory_gate(loading=True)
++                assert model.poll() is None, 'Private model exited during profiling'
++                time.sleep(.5)
++            assert measurement.returncode == 0, 'Diagnostic profile did not complete'
++            profile_path = BASE / 'results' / profile_label / 'result.json'
++            profiled = json.loads(profile_path.read_text())
++            assert profiled['completed'] and not profiled.get('error')
++            assert len(profiled['profiles']) == 2 and all(not row['abort'] for row in profiled['profiles'])
++            result.update(profile=str(profile_path), profile_sha256=sha256(profile_path))
++            verify_plan(plan)
+         print(json.dumps(dict(passed=True, rows=rows, target_reached=result['target_reached'])), flush=True)
+     except BaseException as error:
++        result['passed'] = False
+         result['error'] = repr(error)
+         raise
+     finally:
+@@ -282,10 +307,11 @@
+     parser.add_argument('--start-ticks', default='103969952')
+     parser.add_argument('--shared-dispatch', choices=('off', 'on'), default='on')
+     parser.add_argument('--drafts', type=int, choices=range(5), default=4)
++    parser.add_argument('--profile', action='store_true')
+     args = parser.parse_args()
+     assert re.fullmatch(r'qwen-private-[A-Za-z0-9_-]+', args.label)
+     os.umask(0o077)
+     with (BASE / 'results/qwen-q6-trial-0907/lifecycle.lock').open('a') as lock:
+         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+         out = BASE / 'results' / args.label
+-        prepare(args, out) if args.action == 'prepare' else execute(out)
++        prepare(args, out) if args.action == 'prepare' else execute(out, lock.fileno())

@@ -1,0 +1,38 @@
+--- profile_qwen_private_0908.py
++++ profile_qwen_shared_dispatch_0909.py
+@@ -41,7 +41,7 @@
+ assert options.port == 18155 and options.alias == 'qwen-q6-private'
+ assert int(options.drafts) in (3, 4)
+ assert options.sample_frequency == 199 and options.record_event == 'cycles:u'
+-assert not options.counter_events and not options.sample_addresses
++assert not options.counter_events and not options.sample_addresses and options.call_graph is None
+ assert 32 <= options.tokens <= 1024
+ base=Path(__file__).resolve().parent
+ os.umask(0o077)
+@@ -113,7 +113,7 @@
+ 
+ for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+     signal.signal(signum, signal_abort)
+-from qwen_private_profile_trial_0908 import verify_plan, memory_gate
++from qwen_private_shared_dispatch_trial_0909c import verify_plan, memory_gate
+ trial = json.loads(options.trial_result.read_text())
+ trial_plan = json.loads(options.trial_plan.read_text())
+ assert trial['controller_pid'] == os.getppid() and trial['model_pid'] == options.pid
+@@ -125,7 +125,7 @@
+ memory_gate(loading=True)
+ assert options.allowed_idle_pids == str(trial_plan['peer_pid'])
+ assert int(options.drafts) == trial_plan['drafts']
+-assert trial_plan['profile']
++assert trial_plan['profile'] and trial_plan['logging_verbosity'] == 4
+ current = dict(pid=options.pid, info=trial['current'], command=trial_plan['command'],
+                runtime_env=trial_plan['runtime_env'], workers=15, drafts=trial_plan['drafts'])
+ result['current'] = current
+@@ -145,7 +145,7 @@
+ assert result['protected_before'][str(options.pid)]['environment'] == plan['original_environment']
+ source_paths = [Path(__file__).resolve(), base / 'model_measurement_guard.py', base / 'guarded_inference_request.py',
+                 base / 'qwen_split_trial.py', base / 'inference_contention_guard.py',
+-                base / 'qwen_private_profile_trial_0908.py', options.trial_plan, trial_snapshot, plan_path]
++                base / 'qwen_private_shared_dispatch_trial_0909c.py', options.trial_plan, trial_snapshot, plan_path]
+ result['source_sha256'] = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
+ for p in source_paths:
+     destination = out / p.name

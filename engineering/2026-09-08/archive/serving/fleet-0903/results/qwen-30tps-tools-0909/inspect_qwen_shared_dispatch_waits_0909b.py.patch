@@ -1,0 +1,41 @@
+--- inspect_qwen_shared_dispatch_waits_0909.py
++++ inspect_qwen_shared_dispatch_waits_0909b.py
+@@ -15,12 +15,19 @@
+ from qwen_split_trial import inference_snapshot
+ 
+ BASE = Path(__file__).resolve().parent
+-OUT = BASE / 'results/qwen-shared-dispatch-wait-addresses-0909'
++OUT = BASE / 'results/qwen-shared-dispatch-wait-addresses-0909b'
+ MAPPING = re.compile(r'PERF_RECORD_MMAP2 (\d+)/(\d+): \[(0x[0-9a-f]+)\((0x[0-9a-f]+)\) @ (0x[0-9a-f]+|0) .*?\]: (....) (.*)$')
+ 
+ 
+ def sha(path):
+     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
++
++
++def perf_sha(path):
++    output = subprocess.check_output(['sudo', '-n', 'sha256sum', '--', str(path)], text=True).rstrip('\n')
++    digest, name = output.split('  ', 1)
++    assert name == str(path) and re.fullmatch(r'[0-9a-f]{64}', digest)
++    return digest
+ 
+ 
+ def main():
+@@ -41,7 +48,7 @@
+             for item in profile['profiles']:
+                 kind = item['kind']
+                 data = root / (kind + '-draft4') / 'perf.data'
+-                evidence[str(data)] = sha(data)
++                evidence[str(data)] = perf_sha(data)
+                 mappings = set()
+                 errors = OUT / (arm + '-' + kind + '-perf-errors.txt')
+                 saved_maps = OUT / (arm + '-' + kind + '-mappings.txt')
+@@ -100,7 +107,7 @@
+                     assert len(segment) == 1
+                     offset, _, vaddr = segment[0]
+                     counts[file_offset - offset + vaddr] += int(period)
+-                assert counts and sha(data) == evidence[str(data)]
++                assert counts and perf_sha(data) == evidence[str(data)]
+                 top = [dict(address=hex(address), sampled_periods=period, percent_of_all_cycles=100 * period / all_periods)
+                        for address, period in counts.most_common(30)]
+                 rows.append(dict(arm=arm, workload=kind, library=str(library), all_sampled_periods=all_periods,

@@ -1,0 +1,92 @@
+{
+  "time": 1788937425.767812,
+  "control": "qwen-private-shared-dispatch-off-0909b",
+  "control_rows": {
+    "prose": {
+      "tok_s": 22.810909346410753,
+      "attribution_valid": true,
+      "idle_before_gb_s": 4.92681183909286,
+      "idle_after_gb_s": 5.100162156353251,
+      "adjusted_gb_s": 132.32761964087985,
+      "utilization": 0.3482305780023154,
+      "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+      "generated_tokens": 512,
+      "draft_tokens": 589,
+      "accepted_draft_tokens": 360,
+      "observed_other_host_cores": 3.3128155657541516
+    },
+    "code": {
+      "tok_s": 29.635961940319714,
+      "attribution_valid": true,
+      "idle_before_gb_s": 5.0606115135966725,
+      "idle_after_gb_s": 5.319090069307055,
+      "adjusted_gb_s": 140.48964646314232,
+      "utilization": 0.3697095959556377,
+      "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+      "generated_tokens": 318,
+      "draft_tokens": 292,
+      "accepted_draft_tokens": 244,
+      "observed_other_host_cores": 3.280271782761568
+    }
+  },
+  "comparisons": [
+    {
+      "label": "qwen-private-shared-dispatch-on-0909b",
+      "workloads": [
+        {
+          "workload": "prose",
+          "tok_s": 23.274051454874165,
+          "attribution_valid": true,
+          "idle_before_gb_s": 5.770057527345953,
+          "idle_after_gb_s": 5.52587359469075,
+          "adjusted_gb_s": 134.9937058697637,
+          "utilization": 0.355246594394115,
+          "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+          "generated_tokens": 512,
+          "draft_tokens": 589,
+          "accepted_draft_tokens": 360,
+          "observed_other_host_cores": 3.5183226241591155,
+          "output_matches_control": true,
+          "speed_change_percent": 2.0303535533373385,
+          "bandwidth_change_percent": 2.014761722548375,
+          "both_thresholds_met": false
+        },
+        {
+          "workload": "code",
+          "tok_s": 29.671560165265912,
+          "attribution_valid": true,
+          "idle_before_gb_s": 5.340119403458405,
+          "idle_after_gb_s": 5.223586774956796,
+          "adjusted_gb_s": 140.92290401487426,
+          "utilization": 0.3708497474075638,
+          "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+          "generated_tokens": 318,
+          "draft_tokens": 292,
+          "accepted_draft_tokens": 244,
+          "observed_other_host_cores": 3.4261598824420623,
+          "output_matches_control": true,
+          "speed_change_percent": 0.12011833804446148,
+          "bandwidth_change_percent": 0.3083910897630604,
+          "both_thresholds_met": false
+        }
+      ]
+    }
+  ],
+  "all_outputs_match": true,
+  "all_candidate_thresholds_met": false,
+  "candidate_repeat_available": false,
+  "evidence": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-off-0909b/result.json": "4f542eca2add1201d0f658c04f43aceb76f3da1411559f0392d2ca390b4ee96a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-off-0909b/plan.json": "64ea87c216a41b57e726f60ecbf678b06a9757732372eb9761e4a2d33a1e2d5e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-off-0909b-decode/result.json": "0e99fbe9dedf7e9977868e83c6a585b9345008ed439e24e6efe2324887a47ab6",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-off-0909b-decode/prose-draft4/chunks.json": "672fa6f0c0fcf91181786b6809bc84a3c3d00294d82810bd5679ed3534e3353a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-off-0909b-decode/code-draft4/chunks.json": "4ea141312f95e42e9f88aca44f206db7e2f3fda435df4c1cc9a268d9ae35be41",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-on-0909b/result.json": "485b9b3122cb039673db852905c66dd7b236041802451e1451982bdb0e624657",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-on-0909b/plan.json": "9213c2495d7f261e30f27b6dfe427f4b646b037b4852990b9a449d5962a2127f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-on-0909b-decode/result.json": "44d095ea4e15778d494c1d54bc1091953c3ecff92854a99f791b5d065b395780",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-on-0909b-decode/prose-draft4/chunks.json": "f2412618190a8d23b2f993b1a93527e340c4334819e1c44a40ad8361808326d9",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-shared-dispatch-on-0909b-decode/code-draft4/chunks.json": "030ede2523f793994b4dfb012c26bc2257124066b4e173b1cf6f643778760494"
+  },
+  "analyzer_sha256": "91f36c215d323788e94cd02ddfa6a6394c1464fbf2144a881f621e2416ba1d31",
+  "scope": "Fresh single-conversation decode. IMC attribution uses adjacent idle subtraction. This comparison does not itself certify broad quality or mark a goal complete."
+}
