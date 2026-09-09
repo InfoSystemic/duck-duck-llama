@@ -1,0 +1,65 @@
+--- qwen_private_q8_sums_trial_0909.py
++++ qwen_private_quantize_blocks_trial_0909.py
+@@ -71,17 +71,19 @@
+     peer = process_info(args.peer_pid)
+     assert peer['start'] == args.start_ticks
+     preset_path = BASE / 'qwen-flash-20tps.json'
+-    bundle_path = BASE / 'results/qwen-q8-sums-runtime-0909/result.json'
+-    check_path = BASE / 'results/qwen-q8-sums-proof-0909/result.json'
+-    build_path = BASE / 'results/qwen-q8-sums-build-0909/result.json'
++    bundle_path = BASE / 'results/qwen-quantize-blocks-runtime-0909/result.json'
++    check_path = BASE / 'results/qwen-quantize-blocks-validation-0909/result.json'
++    build_path = BASE / 'results/qwen-quantize-blocks-build-0909/result.json'
+     preset, bundle, checks, build = [json.loads(path.read_text()) for path in (preset_path, bundle_path, check_path, build_path)]
+     assert bundle['passed'] and checks['passed'] and build['passed'] and build['build_completed']
+-    assert checks['correctness']['sum_cases'] == 18448 and checks['correctness']['matrix_cases'] == 240
+-    assert build['graph_case_executions'] == 2592 and len(build['checks']) == 10
++    assert checks['bit_exact'] and checks['graph_case_executions'] == 1728 and len(checks['checks']) == 12
++    assert len(checks['numa_checks']) == 14
++    assert all(sha256(path) == digest for path,digest in checks['fixture_sha256'].items())
++    assert all(sha256(path) == digest for path,digest in build['private_source_sha256'].items())
+     assert build['parent_sha256'] == 'c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf'
+-    assert bundle['cpu_sha256'] == sha256(bundle['cpu']) == build['library_sha256']
++    assert bundle['cpu_sha256'] == sha256(bundle['cpu']) == build['library_sha256'] == checks['cpu_sha256']
+     assert bundle['llama_sha256'] == sha256(bundle['llama']) == 'd0b2321eae443255dd84a5ad98cda8d3d9bf5540a31891bdc5c03be91061d647'
+-    assert build['baseline_link_identical']
++    assert build['baseline_link_identical'] and build['baseline_object_identical']
+     assert all(sha256(path) == digest for path, digest in build['input_sha256'].items())
+     assert all(sha256(path) == digest for path, digest in checks['input_sha256'].items())
+     assert all(sha256(path) == digest for path, digest in bundle['sources'].items())
+@@ -96,7 +98,7 @@
+     if args.drafts == 0:
+         for flag in [value for value in command if value.startswith('--spec-')]:
+             command = set_option(command, flag, None)
+-    env = dict(bundle['runtime_env'], GGML_CPU_Q8_FAST_SUM=str(int(args.fast_sum == 'on')))
++    env = dict(bundle['runtime_env'], GGML_CPU_X16_QUANTIZE_BLOCKS=str(int(args.quantize_blocks == 'on')))
+     assert not any('AUDIT' in key or 'PROFILE' in key or 'REQUANT' in key for key in env)
+     records, source_paths = model_records(preset)
+     source_paths += [Path(__file__).resolve(), preset_path, bundle_path, check_path, build_path,
+@@ -106,7 +108,7 @@
+                      BASE / 'benchmark_qwen_resident_0908.py',
+                      Path(bundle['cpu']), Path(bundle['llama']), Path(bundle['server'])]
+     plan = dict(prepared=time.time(), label=args.label, peer_pid=args.peer_pid, peer=peer, peer_runtime_env=peer_env,
+-                port=PORT, command=command, runtime_env=env, drafts=args.drafts, fast_sum=args.fast_sum,
++                port=PORT, command=command, runtime_env=env, drafts=args.drafts, quantize_blocks=args.quantize_blocks,
+                 cpu=bundle['cpu'], cpu_sha256=bundle['cpu_sha256'], llama=bundle['llama'],
+                 server_sha256=bundle['server_sha256'], model_records=records,
+                 source_sha256={str(path):sha256(path) for path in source_paths},
+@@ -116,7 +118,7 @@
+     verify_plan(plan)
+     out.mkdir(exist_ok=False)
+     (out / 'plan.json').write_text(json.dumps(plan, indent=2) + '\n')
+-    print(json.dumps(dict(prepared=True, path=str(out / 'plan.json'), fast_sum=args.fast_sum,
++    print(json.dumps(dict(prepared=True, path=str(out / 'plan.json'), quantize_blocks=args.quantize_blocks,
+                           drafts=args.drafts, private_port=PORT, peer_preserved=args.peer_pid)), flush=True)
+ 
+ 
+@@ -254,7 +256,7 @@
+     parser.add_argument('label')
+     parser.add_argument('--peer-pid', type=int, default=1219506)
+     parser.add_argument('--start-ticks', default='103969952')
+-    parser.add_argument('--fast-sum', choices=('off', 'on'), default='on')
++    parser.add_argument('--quantize-blocks', choices=('off', 'on'), default='on')
+     parser.add_argument('--drafts', type=int, choices=range(5), default=4)
+     args = parser.parse_args()
+     assert re.fullmatch(r'qwen-private-[A-Za-z0-9_-]+', args.label)

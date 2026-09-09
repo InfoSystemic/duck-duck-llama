@@ -1,0 +1,23 @@
+--- compare_qwen_private_q8_sums_0909.py
++++ compare_qwen_private_quantize_blocks_0909.py
+@@ -70,16 +70,16 @@
+ 
+ 
+ def compare(control, candidates):
+-    assert control['plan']['fast_sum'] == 'off'
++    assert control['plan']['quantize_blocks'] == 'off'
+     comparisons = []
+     for candidate in candidates:
+         cp, pp = control['plan'], candidate['plan']
+-        assert pp['fast_sum'] == 'on'
++        assert pp['quantize_blocks'] == 'on'
+         for key in ('command', 'drafts', 'model_records', 'cpu_sha256', 'server_sha256', 'llama'):
+             assert cp[key] == pp[key], key
+         ce, pe = dict(cp['runtime_env']), dict(pp['runtime_env'])
+-        assert ce.pop('GGML_CPU_Q8_FAST_SUM') == '0'
+-        assert pe.pop('GGML_CPU_Q8_FAST_SUM') == '1'
++        assert ce.pop('GGML_CPU_X16_QUANTIZE_BLOCKS') == '0'
++        assert pe.pop('GGML_CPU_X16_QUANTIZE_BLOCKS') == '1'
+         assert ce == pe
+         workloads = []
+         for kind in ('prose', 'code'):
