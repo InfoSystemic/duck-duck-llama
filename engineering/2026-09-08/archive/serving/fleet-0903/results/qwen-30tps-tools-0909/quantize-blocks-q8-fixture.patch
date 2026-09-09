@@ -1,0 +1,57 @@
+--- results/qwen-q6-q8-wide-batch-0907/graph-check.cpp
++++ q8-check.cpp
+@@ -227,6 +227,20 @@
+ }
+ 
+ int main(int argc, char ** argv) {
++
++    Dl_info runtime{};
++    if (!dladdr(reinterpret_cast<void *>(ggml_backend_cpu_init), &runtime)) std::abort();
++    std::printf("QUANT_CPU_LIBRARY %s\n", runtime.dli_fname);
++    std::atexit([] {
++        using counter_fn = uint64_t (*)(int);
++        const auto counter = reinterpret_cast<counter_fn>(dlsym(RTLD_DEFAULT, "ggml_cpu_qwen_quantize_blocks_count"));
++        std::printf("QUANT_BLOCK_CALLS %llu %llu %llu\n", (unsigned long long) (counter ? counter(0) : 0),
++                    (unsigned long long) (counter ? counter(1) : 0), (unsigned long long) (counter ? counter(2) : 0));
++    });
++
++    const char * output_path = std::getenv("REPACK_TEST_OUTPUT_PATH");
++    FILE * output_file = output_path ? std::fopen(output_path, "wb") : nullptr;
++    if (!output_file) return 2;
+     setenv("GGML_CPU_IQ2_XXS_REPACK", "1", 1);
+     setenv("GGML_CPU_IQ2_XS_REPACK", "1", 1);
+     setenv("GGML_CPU_IQ3_XXS_REPACK", "1", 1);
+@@ -259,15 +273,14 @@
+         : q5_real_shapes ? std::vector<std::pair<int, int>>{{4096, 4096}, {1536, 4096}, {3072, 4096}, {4096, 512}}
+         : iq_real_shapes ? std::vector<std::pair<int, int>>{{4096, 512}, {512, 4096}}
+         : iq_pair_tails ? std::vector<std::pair<int, int>>{{256, 48}, {768, 80}, {1536, 112}}
+-        : q8 ? std::vector<std::pair<int, int>>{{320, 64}, {640, 160}, {1536, 256}, {2560, 320}, {6144, 64}, {10240, 64}}
++        : q8 ? std::vector<std::pair<int, int>>{{256, 64}, {2560, 160}, {10240, 64}}
+         : iqk_compare ? std::vector<std::pair<int,int>>{{4096,512}}
+         : q5_pair && !work_sharing ? std::vector<std::pair<int, int>>{{4096, 128}, {768, 80}, {256, 24}}
+         : work_sharing ? std::vector<std::pair<int, int>>{{4096, 512}, {768, 80}, {256, 24}}
+         : iq_r16 ? std::vector<std::pair<int, int>>{{4096, 128}, {768, 80}, {256, 24}}
+         : std::vector<std::pair<int, int>>{{4096, 128}};
+-    const std::vector<int> token_counts = full_glm_q5 ? std::vector<int>{1, 2, 3} : q5_real_shapes ? std::vector<int>{3} : iq_real_shapes || iq_pair_tails ? std::vector<int>{1, 2, 3} : std::getenv("REPACK_TEST_SMALL_BATCHES")
+-        ? std::vector<int>{1, 2, 3, 4, 5, 6, 7, 8, 9} : std::vector<int>{1, 4, 9};
+-    std::vector<int> thread_counts = work_sharing || q5_real_shapes ? std::vector<int>{1, 4, 15} : std::vector<int>{1, 4};
++    const std::vector<int> token_counts = {1, 3, 5, 9};
++    std::vector<int> thread_counts = {1, 4, 15};
+     if (const char * value = std::getenv("REPACK_TEST_THREADS")) {
+         char * end = nullptr;
+         const long parsed = std::strtol(value, &end, 10);
+@@ -291,6 +304,7 @@
+         const int k = shape.first, rows = shape.second;
+         auto ref = run(false, k, rows, tokens, threads, moe, fused, type);
+         auto got = run(true, k, rows, tokens, threads, moe, fused, type);
++        if (std::fwrite(got.values.data(), sizeof(float), got.values.size(), output_file) != got.values.size()) std::abort();
+         run_result ik;
+         if (iqk_compare) ik = run(false,k,rows,tokens,threads,moe,fused,type,true);
+         bool okay = ref.values.size() == got.values.size() && ref.weight_digest == got.weight_digest;
+@@ -323,5 +337,6 @@
+     }
+     std::printf("Repacking: %d cases, %d failures\n", cases, failures);
+     if (selected_full_case >= 0 && cases != 1) return 1;
++    if (std::fclose(output_file)) return 2;
+     return failures ? 1 : 0;
+ }

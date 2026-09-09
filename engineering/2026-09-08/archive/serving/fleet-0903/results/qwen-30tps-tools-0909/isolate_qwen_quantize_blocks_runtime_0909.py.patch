@@ -1,0 +1,56 @@
+--- isolate_qwen_q8_sums_runtime_0909.py
++++ isolate_qwen_quantize_blocks_runtime_0909.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Package and inspect the Qwen HC-fusion runtime without loading weights."""
++"""Package the validated Qwen activation-block runtime without loading weights."""
+ import argparse
+ import fcntl
+ import json
+@@ -16,7 +16,7 @@
+ BASE = Path(__file__).resolve().parent
+ ENGINE = BASE.parents[1] / 'engines/llama.cpp-q4e-goal-0904'
+ PINNED = ENGINE / 'validated-iq-batch3-bin'
+-OUT = BASE / 'results/qwen-q8-sums-runtime-0909'
++OUT = BASE / 'results/qwen-quantize-blocks-runtime-0909'
+ 
+ 
+ def main():
+@@ -31,19 +31,20 @@
+         assert info['start'] == args.start_ticks
+         guard = ModelMeasurementGuard(args.guard_pid, {args.guard_pid:18095}, inference_snapshot)
+         guard.assert_idle()
+-        validation_path = BASE / 'results/qwen-q8-sums-proof-0909/result.json'
+-        build_path = BASE / 'results/qwen-q8-sums-build-0909/result.json'
++        validation_path = BASE / 'results/qwen-quantize-blocks-validation-0909/result.json'
++        build_path = BASE / 'results/qwen-quantize-blocks-build-0909/result.json'
+         preset_path = BASE / 'qwen-flash-20tps.json'
+         validation, build, preset = [json.loads(path.read_text()) for path in (validation_path, build_path, preset_path)]
+-        assert validation['passed'] and validation['correctness']['sum_cases'] == 18448
+-        assert validation['correctness']['matrix_cases'] == 240
+-        assert validation['correctness']['compared_values'] == 57600
+-        assert build['passed'] and build['build_completed'] and build['baseline_link_identical']
+-        assert build['graph_case_executions'] == 2592 and len(build['checks']) == 10
++        assert validation['passed'] and validation['bit_exact']
++        assert validation['graph_case_executions'] == 1728 and len(validation['checks']) == 12
++        assert len(validation['numa_checks']) == 14
++        assert build['passed'] and build['build_completed'] and build['baseline_link_identical'] and build['baseline_object_identical']
++        assert all(sha256(p) == h for p,h in build['private_source_sha256'].items())
++        assert all(sha256(p) == h for p,h in validation['fixture_sha256'].items())
+         assert all(sha256(p) == h for p,h in validation['input_sha256'].items())
+         assert all(sha256(p) == h for p,h in build['input_sha256'].items())
+         cpu = Path(build['library'])
+-        assert sha256(cpu) == build['library_sha256']
++        assert sha256(cpu) == build['library_sha256'] == validation['cpu_sha256']
+         assert build['parent_sha256'] == 'c79e19e38acfd6ada3f0637c136cf9cb10253127778cb214528b2f966fb6dfcf'
+         llama_build_path = BASE / 'results/qwen-hc-norm-flat-build-0908/result.json'
+         llama_build = json.loads(llama_build_path.read_text())
+@@ -83,7 +84,7 @@
+                    '-lllama', '-lggml', '-lggml-cpu', '-lggml-base', '-ldl', '-o', str(binary)]
+         environment = {k:v for k,v in os.environ.items() if k not in runtime_environment(os.environ)}
+         environment.update(preset['runtime_env'])
+-        environment.update(LD_LIBRARY_PATH=str(binary_dir), GGML_QWEN_HC_COMBINE_FUSED='1', GGML_QWEN_HC_MIX_FUSED='1', GGML_QWEN_HC_NORM_FLAT='1', GGML_CPU_Q8_FAST_SUM='1')
++        environment.update(LD_LIBRARY_PATH=str(binary_dir), GGML_QWEN_HC_COMBINE_FUSED='1', GGML_QWEN_HC_MIX_FUSED='1', GGML_QWEN_HC_NORM_FLAT='1', GGML_CPU_X16_QUANTIZE_BLOCKS='1')
+         result = dict(started=time.time(), passed=False, sources=sources, server=str(server), server_sha256=sha256(server),
+                       cpu=str(cpu), cpu_sha256=sha256(cpu), llama=str(llama), llama_sha256=sha256(llama),
+                       runtime_directory=str(binary_dir), runtime_env=runtime_environment(environment),
