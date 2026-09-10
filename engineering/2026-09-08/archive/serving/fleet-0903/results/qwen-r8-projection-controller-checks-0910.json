@@ -1,0 +1,204 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "case": "changed-identity",
+      "passed": true,
+      "restored": false,
+      "launches": {
+        "qwen": 0,
+        "measure": 0
+      },
+      "events": []
+    },
+    {
+      "case": "cancel-after-stop",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 0,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "memory-after-stop",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 0,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "qwen-load-exits",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 1,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "restore-reserve-fails",
+      "passed": true,
+      "restored": false,
+      "launches": {
+        "qwen": 0,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash"
+      ]
+    },
+    {
+      "case": "second-load-exits",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 2,
+        "measure": 1
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "second-measurement-exits",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 2,
+        "measure": 2
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "cancel-after-first-arm",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 1,
+        "measure": 1
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "outputs-change",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 2,
+        "measure": 2
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "dispatch-cleanup-missing",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 1,
+        "measure": 1
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "success",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 4,
+        "measure": 4
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "unqualified-background",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "qwen": 4,
+        "measure": 4
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-qwen",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    }
+  ],
+  "sources": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_qwen_r8_projection_controller_0910.py": "fa066e39bb61ffa15145e32e3251bb4958d53da3b3a593323ddcf399b1e638b4",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/run_qwen_r8_projection_0910.py": "88ba840529ea200fad9bb7bbe1625d244ec17fa15c44e52af624678b5cdf2227"
+  },
+  "scope": "Fake processes and synthetic state exercise actual multi-arm success, failure, cancellation, and exact restoration paths. No real inference or service mutation."
+}

@@ -1,0 +1,1645 @@
+{
+  "passed": true,
+  "finished": 1789028035.2149098,
+  "official_reference_executed_on": "CPU",
+  "sources": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_engram_hash_0910.py": "5600c7bc9b6c51a3a20ffb9686696643cfccd2614bbe12197d882447b8ce2ac2",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-intake-0910/official/inference/engram.py": "11f35ecbead8150c35aa002b3d180ef290b05a25afe883a11884f94d476d3897",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-intake-0910/official/inference/config.json": "2e84f45cf1dac8c7fcbb200e96667d4b913275690668ed496f24c7747207a809",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-hash-reference-setup-0910/result.json": "a17679b0a3d6ba47036590ba088ef2c559639a90c0930ed26966d8b0968edd5c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-hash-reference-setup-0910/tokenizer.json": "c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-hash-reference-setup-0910/tokenizer_config.json": "6ac8c8dc065ed118161d02dd532749ae3f52c243deac27872134fae2f50d8547",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-hash-0910/libdeepseek-v41-engram-hash.so": "4b3beea04acde36f8a17cf30ce66372a5e40e8b28ffdb740bf710cad8ec0f8b0"
+  },
+  "versions": {
+    "numpy": "2.3.3",
+    "sympy": "1.14.0",
+    "tokenizers": "0.22.2",
+    "torch": "2.10.0+cpu"
+  },
+  "original_vocabulary": 129280,
+  "compressed_vocabulary": 99092,
+  "compressed_pad_id": 2,
+  "token_map_bytes": 517120,
+  "token_map_sha256": "c60a86322ec17b4142bfef3c57a8d81fb428550cdf487f88a4320cb59fe46481",
+  "config_bytes": 517596,
+  "config_sha256": "d38b4655179a8ef0f1664c082433008ace68559f97284c4dafabae1b4acdeee6",
+  "layer_ids": [
+    1,
+    14
+  ],
+  "moduli": [
+    [
+      [
+        16000057,
+        16000079,
+        16000081,
+        16000097,
+        16000121,
+        16000129,
+        16000133,
+        16000183
+      ],
+      [
+        16000189,
+        16000207,
+        16000211,
+        16000253,
+        16000277,
+        16000289,
+        16000307,
+        16000321
+      ],
+      [
+        16000339,
+        16000381,
+        16000393,
+        16000399,
+        16000403,
+        16000409,
+        16000447,
+        16000463
+      ]
+    ],
+    [
+      [
+        16000477,
+        16000487,
+        16000499,
+        16000507,
+        16000511,
+        16000573,
+        16000609,
+        16000627
+      ],
+      [
+        16000667,
+        16000669,
+        16000693,
+        16000697,
+        16000711,
+        16000729,
+        16000759,
+        16000769
+      ],
+      [
+        16000781,
+        16000799,
+        16000813,
+        16000819,
+        16000841,
+        16000877,
+        16000879,
+        16000889
+      ]
+    ]
+  ],
+  "multipliers": [
+    [
+      76632096046245,
+      4839876093313,
+      35959672319349,
+      73987337458391
+    ],
+    [
+      67716810739261,
+      51510806800915,
+      30921347202721,
+      82619226485591
+    ]
+  ],
+  "table_rows": [
+    384006168,
+    384016682
+  ],
+  "exact_hash_values_compared": 16091808,
+  "cases": [
+    {
+      "label": "entire-vocabulary-in-sequence",
+      "batch": 1,
+      "tokens": 129280,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "14aa36cc77ba3bdf00ba1224e03070c1bc934ccf01c9d5371f811198169fff27",
+      "exact": true
+    },
+    {
+      "label": "random-1x1-unmasked",
+      "batch": 1,
+      "tokens": 1,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "130f5cad0f93ae95a50cddbbfb788a05603e4fe065435435d1059ae1b2bf7412",
+      "exact": true
+    },
+    {
+      "label": "random-1x1-image-boundaries",
+      "batch": 1,
+      "tokens": 1,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "130f5cad0f93ae95a50cddbbfb788a05603e4fe065435435d1059ae1b2bf7412",
+      "exact": true
+    },
+    {
+      "label": "random-3x1-unmasked",
+      "batch": 3,
+      "tokens": 1,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "aced5788bd574a061e7d7d1d01b717e3f6aa1ddf478a47997a0322606e00da13",
+      "exact": true
+    },
+    {
+      "label": "random-3x1-image-boundaries",
+      "batch": 3,
+      "tokens": 1,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "c90c68a0aa62d91986bb73c0a086a695c8c286145bd15a8fa10169337ecdd901",
+      "exact": true
+    },
+    {
+      "label": "random-1x2-unmasked",
+      "batch": 1,
+      "tokens": 2,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "e638ca4834e91eb077c004080fdb53786118611ddbfb28d255e712996c1b229f",
+      "exact": true
+    },
+    {
+      "label": "random-1x2-image-boundaries",
+      "batch": 1,
+      "tokens": 2,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "4a34c38c6288a2fe37f00afd2c8e5f887d6a88c39ac7b83c7977b61a30dc539e",
+      "exact": true
+    },
+    {
+      "label": "random-3x2-unmasked",
+      "batch": 3,
+      "tokens": 2,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "4e2cfcdad8dc58b07cdfa45e9e8213b036cf367a6f267d38a45e27d633def666",
+      "exact": true
+    },
+    {
+      "label": "random-3x2-image-boundaries",
+      "batch": 3,
+      "tokens": 2,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "b88e61b6862b256497a675fe6adae54752a664a2f7fa2eea09b0b17c67d5af0a",
+      "exact": true
+    },
+    {
+      "label": "random-1x3-unmasked",
+      "batch": 1,
+      "tokens": 3,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "d86a4fafdb6c25c76d58267cca5b6527eb2533ef9d37657987337ad30855111a",
+      "exact": true
+    },
+    {
+      "label": "random-1x3-image-boundaries",
+      "batch": 1,
+      "tokens": 3,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "624a3cd441b3802a9c28f6b271d02562ba0f628a4e93d14bb5cb00316eb9c5c1",
+      "exact": true
+    },
+    {
+      "label": "random-3x3-unmasked",
+      "batch": 3,
+      "tokens": 3,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "da1309900e316e7df1bbc305bdfeda8357ea5e017d13986f0a5a3aa465cfe55f",
+      "exact": true
+    },
+    {
+      "label": "random-3x3-image-boundaries",
+      "batch": 3,
+      "tokens": 3,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "9477508bd4e52863075374722c11593cbc24daa4fcfe4025c5d4d6f5b9c6ad4e",
+      "exact": true
+    },
+    {
+      "label": "random-1x4-unmasked",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "b0d0676f58ce0571a8aef7d6f0470906d9ace2d43bce4238ecc1ae6dea615d1e",
+      "exact": true
+    },
+    {
+      "label": "random-1x4-image-boundaries",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "c9528286c46cf00e3a4e9377321041810f56ab230167f47a2d47fdcb46943553",
+      "exact": true
+    },
+    {
+      "label": "random-3x4-unmasked",
+      "batch": 3,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "fe0218e5974031b600b3cc0f4a5ca121054049e2ea9b58d42386c02f2984f6f7",
+      "exact": true
+    },
+    {
+      "label": "random-3x4-image-boundaries",
+      "batch": 3,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "51a64b2fb7e73213a32bb47628d76bc516616ba6b57d77958e3b5c787de6154c",
+      "exact": true
+    },
+    {
+      "label": "random-1x7-unmasked",
+      "batch": 1,
+      "tokens": 7,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "3d64f68155bc0715e6e814493e62dc0082da63ce95f80c6edad266aea47a9f7c",
+      "exact": true
+    },
+    {
+      "label": "random-1x7-image-boundaries",
+      "batch": 1,
+      "tokens": 7,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "b13491bfffd6c1e837d8a4f2bc9a5567f07b974c47b774f6a7950bcb9f923042",
+      "exact": true
+    },
+    {
+      "label": "random-3x7-unmasked",
+      "batch": 3,
+      "tokens": 7,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "d91c419021fa3e8c37fd568a94bef9bbdfad0c8873193371c75d7961d35f173d",
+      "exact": true
+    },
+    {
+      "label": "random-3x7-image-boundaries",
+      "batch": 3,
+      "tokens": 7,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "7cfec9d415ac4777ea9949322e3ad27555ffe5758724759c0065bbb8dc8c736d",
+      "exact": true
+    },
+    {
+      "label": "random-1x31-unmasked",
+      "batch": 1,
+      "tokens": 31,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "14834499a0b1a848a05269fa89199c5914b13fcf0f17f00557fff8ded29cd4b0",
+      "exact": true
+    },
+    {
+      "label": "random-1x31-image-boundaries",
+      "batch": 1,
+      "tokens": 31,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "5c9c47e74cbe4df4833a2741ae3683510be4af541982d115ffb2073c9a6f64ef",
+      "exact": true
+    },
+    {
+      "label": "random-3x31-unmasked",
+      "batch": 3,
+      "tokens": 31,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "f7ddffe288437178ea38eef823b5aeb546356d7c2c4a7ac8dee12a4b03086237",
+      "exact": true
+    },
+    {
+      "label": "random-3x31-image-boundaries",
+      "batch": 3,
+      "tokens": 31,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "a4b08eacb153402b5aa12956042697c7b1868b228de1c7c98fded098bd9ae39d",
+      "exact": true
+    },
+    {
+      "label": "random-1x129-unmasked",
+      "batch": 1,
+      "tokens": 129,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "91b2f222302571f3e8589d56fd4b5c1d85ce974b8fc725a1bc472bbeb6577434",
+      "exact": true
+    },
+    {
+      "label": "random-1x129-image-boundaries",
+      "batch": 1,
+      "tokens": 129,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "27683f1ad28e877818672d4844942bb105afd020d8601c7575775cb1cb3683be",
+      "exact": true
+    },
+    {
+      "label": "random-3x129-unmasked",
+      "batch": 3,
+      "tokens": 129,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "4bf2e3b1647c84c9fc8626ab13c1c42cd2e4f05d53ef50deb6a38295e0660a1d",
+      "exact": true
+    },
+    {
+      "label": "random-3x129-image-boundaries",
+      "batch": 3,
+      "tokens": 129,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "f5bc76df9da6f6cda54418c609f52fd0ec60a30b2e6a65a05fc6c721fffa145b",
+      "exact": true
+    },
+    {
+      "label": "random-1x4096-unmasked",
+      "batch": 1,
+      "tokens": 4096,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "9ebd96dd3572bd81d4dceb7966810395fb0f3ac1fccf7c400a6f5b9365bd004d",
+      "exact": true
+    },
+    {
+      "label": "random-1x4096-image-boundaries",
+      "batch": 1,
+      "tokens": 4096,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "3bf688d61587e7e5f7ccedfc3c3ca15bdc432e817e0358073506b4a9876f47f5",
+      "exact": true
+    },
+    {
+      "label": "random-3x4096-unmasked",
+      "batch": 3,
+      "tokens": 4096,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "97b6db40467d1081588986e982cb83e2ba35d807c1de4dc08f33164af2222d1f",
+      "exact": true
+    },
+    {
+      "label": "random-3x4096-image-boundaries",
+      "batch": 3,
+      "tokens": 4096,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "51ca15f35eeced0d73776ea60dc0a8c4ecd5ff019ed3f0b183f3a8e2085f787f",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-0",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "175c0a83166364d786635ba286392b32fdb5500f938a977832d1897c3106dfcf",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-1",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "85b9baac8792d5aaddd803b69891e05aaab79eedf189060d65d2595cd401e808",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-2",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "3ef72ba8ee331536faa9d1151d7e9c2b7f65803645e396a2c2371202d0fa3202",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-3",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "396dc804b1805347e6f55a76fa34aab12407cd17c70b2e0760478ef89b30486d",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-4",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "46ce8c08be65fbcac81918b40b73f1b793acf1db8e34cd2399db581294707604",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-5",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "bf16310956648a6b476fd5ca51666b83e0cf9b3d050d7a275e4538b78d308f66",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-6",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "fe4819d5bd9cd44def9c874ab6f2a690af6b01c764e358693dbff0113a8cf92e",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-7",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "1e5a6b8eb7dfd3dcddeb0667d399b882c0fd8a43bb7c9db617804d188e339ec5",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-8",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "352e40419c0af75809137cf279f4eade61c01e92d0bee04323c551fa75c76caa",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-9",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "ffe54f944a19f3e915e69ba2461a5dfe33c3178d59e95b6ebbca099d783616f7",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-10",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "3dd0a389b64cdc3266e7e872d9641dd67c0a3f2a325bc0aec262ea6ca9064cd0",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-11",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "e64b431e96e1a7854bde1eea536c6c5a7b8ece21f4f014b70bbba7addc935d5c",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-12",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "1abdf454fe147a765eb15651842f1633923a3324e41716b4f6abce4022796ec7",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-13",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "a1a14b3694cee695d1eac4fae0ebf70c99db191a823e4539ef3ba8073155f39c",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-14",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "5803573ecbce149c199d4b68a182ca3776c8ed2a35379583cf3b562ecc9f95f6",
+      "exact": true
+    },
+    {
+      "label": "all-four-token-masks-15",
+      "batch": 1,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "f71f2f6beb8e9dfc3782d644928e9a338d483622a991eb697273212c6e1a4f97",
+      "exact": true
+    },
+    {
+      "label": "split-reference",
+      "batch": 3,
+      "tokens": 17,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "6b69df1adb5027507c653cb63f94fde22c4212a5577bf57dd49625dda419f0ce",
+      "exact": true
+    },
+    {
+      "label": "split-1-prefill",
+      "batch": 3,
+      "tokens": 1,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "8b8ea53831f521d7e5617cb5861105f61aad66c6681e4ea74b56a485cefc217d",
+      "exact": true
+    },
+    {
+      "label": "split-1-decode",
+      "batch": 3,
+      "tokens": 16,
+      "start": 1,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "ead821995aeae05454528590bbde5512cc09652e0026843bf6be69deb2bf4dfd",
+      "exact": true
+    },
+    {
+      "label": "split-2-prefill",
+      "batch": 3,
+      "tokens": 2,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "fe8ca162ed8f84367159c3232cc0d04dd7ce0b46bcdaed83cb2c30e6c801d325",
+      "exact": true
+    },
+    {
+      "label": "split-2-decode",
+      "batch": 3,
+      "tokens": 15,
+      "start": 2,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "2bedfb7b96003aa9fdd78b2bb161635e96f358536c1c5bdb6718993b49069915",
+      "exact": true
+    },
+    {
+      "label": "split-3-prefill",
+      "batch": 3,
+      "tokens": 3,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "c29539f7c18d38994036114f1c64b72d9c8e641e4f781cc448e7d0fd460eabaa",
+      "exact": true
+    },
+    {
+      "label": "split-3-decode",
+      "batch": 3,
+      "tokens": 14,
+      "start": 3,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "c8bf62cdfe6c447080213d50fe64f86cafcf34d5786e037dc6720facdd9261ed",
+      "exact": true
+    },
+    {
+      "label": "split-4-prefill",
+      "batch": 3,
+      "tokens": 4,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "2bad5579a7a9662c14b85a551600b1e1a7f091075cca2402150c586f65d770cf",
+      "exact": true
+    },
+    {
+      "label": "split-4-decode",
+      "batch": 3,
+      "tokens": 13,
+      "start": 4,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "0291471e89400103211eb6299a04f53a7b8c7e085cb3c00e7db50df96d43ea32",
+      "exact": true
+    },
+    {
+      "label": "split-5-prefill",
+      "batch": 3,
+      "tokens": 5,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "365c028ac59c295742e803b420c1b868c98497a2a811a0ec075c3287052cd257",
+      "exact": true
+    },
+    {
+      "label": "split-5-decode",
+      "batch": 3,
+      "tokens": 12,
+      "start": 5,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "eaa43c6280a8125162a08376629e0a77f0d8835dc984fed43caa84bdec4c5afb",
+      "exact": true
+    },
+    {
+      "label": "split-6-prefill",
+      "batch": 3,
+      "tokens": 6,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "f808d98b1f25dc06a36d0f6bca870053556c5e29730b764f29ace9034e5ade9a",
+      "exact": true
+    },
+    {
+      "label": "split-6-decode",
+      "batch": 3,
+      "tokens": 11,
+      "start": 6,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "5c808315f0a758ef6ed71c692cd543ac62a1b45d0f5c6e83ab41ac19e4a768e7",
+      "exact": true
+    },
+    {
+      "label": "split-7-prefill",
+      "batch": 3,
+      "tokens": 7,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "938b27cfbce4c5247cf9ede22611e2c49ea7862104e314ebf90622f43f6f273e",
+      "exact": true
+    },
+    {
+      "label": "split-7-decode",
+      "batch": 3,
+      "tokens": 10,
+      "start": 7,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "b82a84b2b8e772cde0aa6fab81a312f539c7a31a30b0eb1208b72d98cc19bd18",
+      "exact": true
+    },
+    {
+      "label": "split-8-prefill",
+      "batch": 3,
+      "tokens": 8,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "685c7a82ea11edd9dc98e927132988e186f120e026d5f1da6546dbae9549b021",
+      "exact": true
+    },
+    {
+      "label": "split-8-decode",
+      "batch": 3,
+      "tokens": 9,
+      "start": 8,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "851dec64677fe312cc6880ec6e3ec86d8dd50cc95c154199ae3733fbd3e3ff50",
+      "exact": true
+    },
+    {
+      "label": "split-9-prefill",
+      "batch": 3,
+      "tokens": 9,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "d5456768c30c117802ebcdd8b4d1f187290b269acaeb432a4471e2fa16ae6cb9",
+      "exact": true
+    },
+    {
+      "label": "split-9-decode",
+      "batch": 3,
+      "tokens": 8,
+      "start": 9,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "0e9fb62cd828287a15667e8b93489b56c17eed68675eeebf79b0ef11e517e7c8",
+      "exact": true
+    },
+    {
+      "label": "split-10-prefill",
+      "batch": 3,
+      "tokens": 10,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "4884bd5aa3c6814203b6f730055466dadac2a0dd6d62520ff58856d5c36a9ae8",
+      "exact": true
+    },
+    {
+      "label": "split-10-decode",
+      "batch": 3,
+      "tokens": 7,
+      "start": 10,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "bc7070e6d31b2a16a6ee1835932403307c7c2a8525ae8e49fe4ff2915f329a82",
+      "exact": true
+    },
+    {
+      "label": "split-11-prefill",
+      "batch": 3,
+      "tokens": 11,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "b4f0d260a76311d8b0335023047683cca0754430ce03e9cdd2531950e9b15765",
+      "exact": true
+    },
+    {
+      "label": "split-11-decode",
+      "batch": 3,
+      "tokens": 6,
+      "start": 11,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "3eeb596690634ce8b4203305fac8fe08a99334f3904f61602847cb30d763c88e",
+      "exact": true
+    },
+    {
+      "label": "split-12-prefill",
+      "batch": 3,
+      "tokens": 12,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "8e35581d291d16abe7c332f734bc42711f1f2403e8eedf7917f5bcc3f82bfa71",
+      "exact": true
+    },
+    {
+      "label": "split-12-decode",
+      "batch": 3,
+      "tokens": 5,
+      "start": 12,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "b826bd8395ac299740d16421590f0a4b99a1408e7c518eb287a798b8272b4982",
+      "exact": true
+    },
+    {
+      "label": "split-13-prefill",
+      "batch": 3,
+      "tokens": 13,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "6ab4ad44f60e9a37b0557c96fdefbc3e322107d501b5c7ce3216cc74527c5d79",
+      "exact": true
+    },
+    {
+      "label": "split-13-decode",
+      "batch": 3,
+      "tokens": 4,
+      "start": 13,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "5fa0d5bf53dc98ce49b23979984625b7366886034ba7cb3ebc3c15c8dae9187b",
+      "exact": true
+    },
+    {
+      "label": "split-14-prefill",
+      "batch": 3,
+      "tokens": 14,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "c7e3203fdcafa290d5a06bb4f35fb64e343207a78b542273926e979445667cde",
+      "exact": true
+    },
+    {
+      "label": "split-14-decode",
+      "batch": 3,
+      "tokens": 3,
+      "start": 14,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "de3b3a961488ebe362cba19bae0c6c9079cd0ef3efe782a6591c1d00f56387e5",
+      "exact": true
+    },
+    {
+      "label": "split-15-prefill",
+      "batch": 3,
+      "tokens": 15,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "883994b48ae8bf1feba6fde96e5dca50359e2c6ec808d9ecaaf491fc9ca23029",
+      "exact": true
+    },
+    {
+      "label": "split-15-decode",
+      "batch": 3,
+      "tokens": 2,
+      "start": 15,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "803b25920c6a61b1100273d292a402206ac3312edb76cb0c4fb0149644551fbf",
+      "exact": true
+    },
+    {
+      "label": "split-16-prefill",
+      "batch": 3,
+      "tokens": 16,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "08c3cbd958a49d6614b52a1255b96719db0dbe210d6cf01e6d636202e560cb8b",
+      "exact": true
+    },
+    {
+      "label": "split-16-decode",
+      "batch": 3,
+      "tokens": 1,
+      "start": 16,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "a0825664f545b7589954f2cd356b96c605ecf5eb28dff8521e269d1fee4c6c54",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-reference",
+      "batch": 3,
+      "tokens": 512,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "2f8cd3f1e744db96a2453c0c60c8030d6a8c3e0eb1b96e458b727b735afef78f",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-0",
+      "batch": 3,
+      "tokens": 23,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "983f11e9aa705bbfef426eb1526499425ee2826c678236987a16be981d8e043e",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-23",
+      "batch": 3,
+      "tokens": 4,
+      "start": 23,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "b5fcbfa44074bd015c7fe9f47ea14538526ff71cd5a8f03a4b0222c2ba5d3698",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-27",
+      "batch": 3,
+      "tokens": 28,
+      "start": 27,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "2756740f75fa7e961ac6760e12bd25bc9e57c4dbf7892037605b187328137bda",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-55",
+      "batch": 3,
+      "tokens": 6,
+      "start": 55,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "1187d1444b0f71b916504fa7eac522e7036f78b0fc6eebeef26721171e29dd2f",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-61",
+      "batch": 3,
+      "tokens": 28,
+      "start": 61,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "54bcedc7e3fae1543952a487d27df4534a93554ce8ebc46f3952cb231847ead0",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-89",
+      "batch": 3,
+      "tokens": 17,
+      "start": 89,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "b16802a6fda90c14dcee93b2068b196768385bb090f4e7eb6dd5faff9dccaaea",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-106",
+      "batch": 3,
+      "tokens": 16,
+      "start": 106,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "3f6bede73c37c768cb98a750bba250627cb561d518cb861347143fe7a9ed994b",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-122",
+      "batch": 3,
+      "tokens": 10,
+      "start": 122,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "e8fd427d9df3284b0bbdaa9cc2dee39c59339709a5fe5edd56649cab59c3d7b6",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-132",
+      "batch": 3,
+      "tokens": 23,
+      "start": 132,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "bcbbcb07daef3d8722abac519b165d74b5c2cd76e6690c85f3f8bfc41140eb51",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-155",
+      "batch": 3,
+      "tokens": 29,
+      "start": 155,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "743803de482769d3df029904563edf089656185e1bfedd6a538d9ab70902a0f3",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-184",
+      "batch": 3,
+      "tokens": 22,
+      "start": 184,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "8a5fabf040a97abc722671cc92843aa952c26731177c85c633e4cb3465d3e84b",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-206",
+      "batch": 3,
+      "tokens": 30,
+      "start": 206,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "a27b77907765f8c95fb58996ad6b811beb98bb5925db3ec103b86b791de34443",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-236",
+      "batch": 3,
+      "tokens": 3,
+      "start": 236,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "ab505b164c8a4f9ea1f2f68f4e72cf44e2ad0e86459fc172eb70a9259c474382",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-239",
+      "batch": 3,
+      "tokens": 3,
+      "start": 239,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "90cb6a50772388d3cd5b5bfae1c94fc88ecfa0a46962a329f9fcea925862815c",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-242",
+      "batch": 3,
+      "tokens": 2,
+      "start": 242,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "5e62cf6e1d3838bf25b5c70fc87637a802bd979353dba64bd0dedf0e4246009d",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-244",
+      "batch": 3,
+      "tokens": 27,
+      "start": 244,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "532c765749240fe1b89d9867e7c30d4fd49e633adbda9ca0c53075626cad389b",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-271",
+      "batch": 3,
+      "tokens": 4,
+      "start": 271,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "8427837c97ea4f5f90fab489b5fd1f77f01af84fef7ebbf649a52695c57050e5",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-275",
+      "batch": 3,
+      "tokens": 11,
+      "start": 275,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "36a4dd2876b77254c9640230eb81cd77af6d0ada2abbc733b0c3a86f3d93b1a2",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-286",
+      "batch": 3,
+      "tokens": 8,
+      "start": 286,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "c6f1ddfd96fb52a339b2303ff4e5171d00aa284d6f2d00377cc768cd0b6c1440",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-294",
+      "batch": 3,
+      "tokens": 28,
+      "start": 294,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "e038099791c9c4dd6cdcdf48665245828205185b6ff183571623729cfb01c28d",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-322",
+      "batch": 3,
+      "tokens": 30,
+      "start": 322,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "595c10161d270e7056a9976b2021d78f40d473c3c163a81bf9213935cbd715e8",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-352",
+      "batch": 3,
+      "tokens": 26,
+      "start": 352,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "6b2c6b877b773016105b611ce8fc889ba4e005329180f33390aaf15d3e040d08",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-378",
+      "batch": 3,
+      "tokens": 6,
+      "start": 378,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "c6317cba486d5f5d32e33a23f4cddb1b0927e6fb221c1c7220932d2f523f5454",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-384",
+      "batch": 3,
+      "tokens": 33,
+      "start": 384,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "3d168ef8294c9eb22edf982186d7c10936a2faea18fbf64ed0e97da42af3f4c7",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-417",
+      "batch": 3,
+      "tokens": 10,
+      "start": 417,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "4eb92b4a0ffe9c4b72aeb59bbae8c903b5b4a66cd351a3a63c4eb1163f21d086",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-427",
+      "batch": 3,
+      "tokens": 28,
+      "start": 427,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "d2cd03a14feb81e86325925e3a3f7c7c3eb5ca1b7bf0116a588a028d8f737e2c",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-455",
+      "batch": 3,
+      "tokens": 14,
+      "start": 455,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "d064999359fcf22a9e1453257d89adacebf3b8098e5d9cd21a0979a70c5589a1",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-469",
+      "batch": 3,
+      "tokens": 21,
+      "start": 469,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "bc063d09998af1da3c91e48f2f3d7fbaac05331d6f752a7f51a827953ae6e77c",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-490",
+      "batch": 3,
+      "tokens": 16,
+      "start": 490,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "4164554f45efb8d4e1fe33c79e1f6d3ae8e66204c6b404faa942e00f2b559e89",
+      "exact": true
+    },
+    {
+      "label": "variable-chunks-506",
+      "batch": 3,
+      "tokens": 6,
+      "start": 506,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "60490fcf6b0943060f3f1b36da84edd595b3d2fcf7efa4b96d317901dce300a6",
+      "exact": true
+    },
+    {
+      "label": "fork-prefix",
+      "batch": 3,
+      "tokens": 25,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "97552289b9b81b6489e1552be5e16bfddfa2896f8736ef035f96523fd3d7d53e",
+      "exact": true
+    },
+    {
+      "label": "fork-original",
+      "batch": 3,
+      "tokens": 12,
+      "start": 25,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "c8203dbb4c91dcf261893b9e4b45352709ef8cc749bba8a5df599b28de604b22",
+      "exact": true
+    },
+    {
+      "label": "fork-clone",
+      "batch": 3,
+      "tokens": 5,
+      "start": 25,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "37e8d07653e4652a42ed887f4cf7e1b304b29b3420f5e30108c43f959136c630",
+      "exact": true
+    },
+    {
+      "label": "rollback-and-replay",
+      "batch": 3,
+      "tokens": 5,
+      "start": 25,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "37e8d07653e4652a42ed887f4cf7e1b304b29b3420f5e30108c43f959136c630",
+      "exact": true
+    },
+    {
+      "label": "request-reset-after-longer-sequence",
+      "batch": 3,
+      "tokens": 3,
+      "start": 0,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "1e1494f7cd5bcb6b27c08e924b9e4c349b71f5d60237d49b9f5009ad427ea798",
+      "exact": true
+    },
+    {
+      "label": "replace-populated-suffix",
+      "batch": 3,
+      "tokens": 1,
+      "start": 1,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "ee12e4999daafab2f22f50ca70a58b21a35da70e88c292bde9bd8d808ffaa1de",
+      "exact": true
+    },
+    {
+      "label": "state-after-rejected-calls",
+      "batch": 3,
+      "tokens": 1,
+      "start": 2,
+      "implementations": [
+        0,
+        1
+      ],
+      "output_sha256": "bb21956212ac2e04630dee5af38b557aee6c6dbb38e03b347dc0c1bfa2e3e3fd",
+      "exact": true
+    }
+  ],
+  "invalid_calls": [
+    {
+      "mode": 0,
+      "case": "negative-token",
+      "unchanged": true
+    },
+    {
+      "mode": 0,
+      "case": "out-of-vocabulary",
+      "unchanged": true
+    },
+    {
+      "mode": 0,
+      "case": "invalid-masked-token",
+      "unchanged": true
+    },
+    {
+      "mode": 0,
+      "case": "invalid-mask",
+      "unchanged": true
+    },
+    {
+      "mode": 0,
+      "case": "gap-in-history",
+      "unchanged": true
+    },
+    {
+      "mode": 0,
+      "case": "negative-start",
+      "unchanged": true
+    },
+    {
+      "mode": 0,
+      "case": "short-output",
+      "unchanged": true
+    },
+    {
+      "mode": 0,
+      "case": "sequence-overrun",
+      "unchanged": true
+    },
+    {
+      "mode": 1,
+      "case": "negative-token",
+      "unchanged": true
+    },
+    {
+      "mode": 1,
+      "case": "out-of-vocabulary",
+      "unchanged": true
+    },
+    {
+      "mode": 1,
+      "case": "invalid-masked-token",
+      "unchanged": true
+    },
+    {
+      "mode": 1,
+      "case": "invalid-mask",
+      "unchanged": true
+    },
+    {
+      "mode": 1,
+      "case": "gap-in-history",
+      "unchanged": true
+    },
+    {
+      "mode": 1,
+      "case": "negative-start",
+      "unchanged": true
+    },
+    {
+      "mode": 1,
+      "case": "short-output",
+      "unchanged": true
+    },
+    {
+      "mode": 1,
+      "case": "sequence-overrun",
+      "unchanged": true
+    }
+  ],
+  "rejected_configurations": 11,
+  "reciprocal_arithmetic_cases": 316946,
+  "full_model_loaded": false,
+  "runtime_promoted": false,
+  "scope": "Two native implementations match official CPU integer row IDs, including all vocabulary IDs, batches via independent handles, image masks, chunks, clones, rewinds, and request reuse. No projection/gate, full graph, model quality, or throughput claim."
+}
