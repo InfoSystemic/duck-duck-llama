@@ -1,0 +1,1953 @@
+{
+  "started": 1789022052.3329148,
+  "passed": true,
+  "peer_pid": 3647836,
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/probe_qwen_r8_tiles_0910.py": "5af83a55b508b1f1cac2570ac85aa2dc1444dc26c8b79d0c1790bcc8c1411859",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/iq2-repack-check.cpp": "a6587979ce6bd5686c9dd12bab28300f3e0bfefe8c579a6ed3b91eca6dd16258",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-runtime-0909/result.json": "0245e22d597fa90b13c3ae370c7456a1f33dd881f70561bd1d53fef7c0ce4d7e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/manifest.json": "b47c9683f8d34cfe61f106241851d8db284f3f95d86e2b5cfc2b664391577f67",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-columns-build-0909/private-cpu/libggml-cpu.so.0.22.0": "12c61b337736ca9210433f57c64ce7fffbf7e4b66920aba9a03f97eaef3fd9b7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/private-runtime/libggml-base.so.0.22.0": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/repack.cpp": "62ec23388c0a33d10bd1105aa8a17034d487bd42fd2c3cd6c430a1a8ef28d116",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/repack-x86.cpp": "d74c47602059f73487f954a3b457a67ea25a038b675135e723c32d423e178de6",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/qwen-q8-batch.h": "d6f958743719b549dc728d9aea94d03ca10c5b8b7ddf213179c48a124a4ad15f"
+  },
+  "fixture_sha256": "601246fe80c859c33740aaf0224830886973196f0e15d89dfb31b3761cc6150d",
+  "runtime_cpu_sha256": "12c61b337736ca9210433f57c64ce7fffbf7e4b66920aba9a03f97eaef3fd9b7",
+  "steps": [
+    {
+      "label": "compile",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "run-00-tile1",
+      "exit_code": 0,
+      "log_sha256": "4ad1678d0d0b519adbfe463caa9e41f54e8a87ce32052cb2eb560d9d1c7fc650"
+    },
+    {
+      "label": "run-01-tile2",
+      "exit_code": 0,
+      "log_sha256": "81f07cc449fb35c0a8fa8c79330b82702d7aeb3725fcce280b0b6b5f4a7c3579"
+    },
+    {
+      "label": "run-02-tile4",
+      "exit_code": 0,
+      "log_sha256": "b5024c5fcba2eb65d1d91c05cccf37d1341b116e9154c3f0bf4c597551c33cde"
+    },
+    {
+      "label": "run-03-tile8",
+      "exit_code": 0,
+      "log_sha256": "4b9128d59ba31358b83f4b8552125edeb49d51710ce822f3600c0705dc936bb1"
+    },
+    {
+      "label": "run-04-tile8",
+      "exit_code": 0,
+      "log_sha256": "76864c333acd633401e30bfe98c2e05eb5d3881abe2c889a13cf2cd0fbde2ae9"
+    },
+    {
+      "label": "run-05-tile4",
+      "exit_code": 0,
+      "log_sha256": "d860f0bcf6f9a0b0e8a0ff07566fce611e926b466e3ae5c3b268cd64794085c3"
+    },
+    {
+      "label": "run-06-tile2",
+      "exit_code": 0,
+      "log_sha256": "252d92f2f1410f9dfb3214fbe72840329a817cb0c12bfce47779a33bc83d0c25"
+    },
+    {
+      "label": "run-07-tile1",
+      "exit_code": 0,
+      "log_sha256": "59d8ac5bc7b5d7432a8992504046f6ce8a225a8360a6ef6e8d8b315d66f93106"
+    }
+  ],
+  "runs": [
+    {
+      "index": 0,
+      "tile": 1,
+      "rows": [
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "1",
+          "native_ms": "0.127235",
+          "packed_ms": "0.120106",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.553969e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "166b60d11536a132"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "1",
+          "native_ms": "0.275142",
+          "packed_ms": "0.231121",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "543dae9897e66b9a"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "1",
+          "native_ms": "0.421544",
+          "packed_ms": "0.313913",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "187412154f65d616"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.055191",
+          "packed_ms": "0.052315",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "8.9106544e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "cba0846760b2760d"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.225870",
+          "packed_ms": "0.099865",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "131cc5542a688cd5"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.539950",
+          "packed_ms": "0.089445",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "3512cfedc6916e17"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.048339",
+          "packed_ms": "0.024003",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "742c663d5285b55d"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.040040",
+          "packed_ms": "0.031661",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "ed566c90fec97aad"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.056010",
+          "packed_ms": "0.056605",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "0fa4d559b7908711"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.062680",
+          "packed_ms": "0.024807",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "c21f7806cd8032f9"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.049655",
+          "packed_ms": "0.032907",
+          "max_abs": "1.1444092e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "d374048d68ca44ff"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.069362",
+          "packed_ms": "0.054501",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "8915a1c1d696b957"
+        }
+      ],
+      "output_sha256": "d0636606607a8a0f93ffc19ef7c0aee550c6e7667078a735e41f0df486f0c938",
+      "output_bytes": 1019520,
+      "exact_packed_outputs": true,
+      "kernel_trace": [
+        [
+          "160",
+          "1",
+          "176",
+          "1"
+        ]
+      ],
+      "background_before": {
+        "time": 1789022059.78841,
+        "background_cores": 4.180053311852632,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.9994501589521059
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5879118582071211
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.58203273962505
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.574193914848955
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3605859397003677
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789022070.7853138,
+        "background_cores": 4.3801411356496835,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.9994952926985854
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5977373809275854
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5938177915444537
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5840188180866245
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3468836604071562
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "tile": 2,
+      "rows": [
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "1",
+          "native_ms": "0.289270",
+          "packed_ms": "0.125047",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.553969e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "166b60d11536a132"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "1",
+          "native_ms": "0.410932",
+          "packed_ms": "0.221677",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "543dae9897e66b9a"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "1",
+          "native_ms": "0.418988",
+          "packed_ms": "0.347505",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "187412154f65d616"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.055844",
+          "packed_ms": "0.039453",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "8.9106544e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "cba0846760b2760d"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.202471",
+          "packed_ms": "0.071123",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "131cc5542a688cd5"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.501287",
+          "packed_ms": "0.074511",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "3512cfedc6916e17"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.050770",
+          "packed_ms": "0.023790",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "742c663d5285b55d"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.039137",
+          "packed_ms": "0.032135",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "ed566c90fec97aad"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.056057",
+          "packed_ms": "0.055639",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "0fa4d559b7908711"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.061610",
+          "packed_ms": "0.024403",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "c21f7806cd8032f9"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.050819",
+          "packed_ms": "0.033657",
+          "max_abs": "1.1444092e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "d374048d68ca44ff"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.071061",
+          "packed_ms": "0.053622",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "8915a1c1d696b957"
+        }
+      ],
+      "output_sha256": "d0636606607a8a0f93ffc19ef7c0aee550c6e7667078a735e41f0df486f0c938",
+      "output_bytes": 1019520,
+      "exact_packed_outputs": true,
+      "kernel_trace": [
+        [
+          "160",
+          "1",
+          "168",
+          "2"
+        ]
+      ],
+      "background_before": {
+        "time": 1789022075.9808254,
+        "background_cores": 4.3295939237053815,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.9995893621954478
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6232733670159851
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6075935338835076
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5742738884769927
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.35279624548074634
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789022086.9429991,
+        "background_cores": 4.238210577071506,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.9997629020843978
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6018180606664905
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5959371024189352
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5763339082604175
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.34893685602161334
+          }
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "tile": 4,
+      "rows": [
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "1",
+          "native_ms": "0.123685",
+          "packed_ms": "0.089223",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.553969e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "166b60d11536a132"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "1",
+          "native_ms": "0.273170",
+          "packed_ms": "0.248466",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "543dae9897e66b9a"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "1",
+          "native_ms": "0.411774",
+          "packed_ms": "0.348575",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "187412154f65d616"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.061533",
+          "packed_ms": "0.039289",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "8.9106544e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "cba0846760b2760d"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.218580",
+          "packed_ms": "0.062900",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "131cc5542a688cd5"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.535745",
+          "packed_ms": "0.071632",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "3512cfedc6916e17"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.049642",
+          "packed_ms": "0.024402",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "742c663d5285b55d"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.039828",
+          "packed_ms": "0.032188",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "ed566c90fec97aad"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.056279",
+          "packed_ms": "0.056439",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "0fa4d559b7908711"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.064688",
+          "packed_ms": "0.024332",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "c21f7806cd8032f9"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.050715",
+          "packed_ms": "0.033307",
+          "max_abs": "1.1444092e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "d374048d68ca44ff"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.069208",
+          "packed_ms": "0.054543",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "8915a1c1d696b957"
+        }
+      ],
+      "output_sha256": "d0636606607a8a0f93ffc19ef7c0aee550c6e7667078a735e41f0df486f0c938",
+      "output_bytes": 1019520,
+      "exact_packed_outputs": true,
+      "kernel_trace": [
+        [
+          "160",
+          "1",
+          "168",
+          "4"
+        ]
+      ],
+      "background_before": {
+        "time": 1789022092.1561933,
+        "background_cores": 4.318889340433949,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.9995255674645598
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6063658041370128
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.60440978541399
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5770255232916734
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3325231829138457
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789022103.1458602,
+        "background_cores": 4.448316096990232,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.9987212326722359
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6664656366756015
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6488756345346033
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.590242294064609
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.33811893004363364
+          }
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "tile": 8,
+      "rows": [
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "1",
+          "native_ms": "0.125466",
+          "packed_ms": "0.154877",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.553969e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "166b60d11536a132"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "1",
+          "native_ms": "0.292787",
+          "packed_ms": "0.258839",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "543dae9897e66b9a"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "1",
+          "native_ms": "0.420230",
+          "packed_ms": "0.341354",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "187412154f65d616"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.066157",
+          "packed_ms": "0.032828",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "8.9106544e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "cba0846760b2760d"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.223777",
+          "packed_ms": "0.049271",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "131cc5542a688cd5"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.575988",
+          "packed_ms": "0.062366",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "3512cfedc6916e17"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.051584",
+          "packed_ms": "0.023627",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "742c663d5285b55d"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.040322",
+          "packed_ms": "0.032250",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "ed566c90fec97aad"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.056929",
+          "packed_ms": "0.056398",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "0fa4d559b7908711"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.061405",
+          "packed_ms": "0.024600",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "c21f7806cd8032f9"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.048506",
+          "packed_ms": "0.033155",
+          "max_abs": "1.1444092e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "d374048d68ca44ff"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.061625",
+          "packed_ms": "0.058744",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "8915a1c1d696b957"
+        }
+      ],
+      "output_sha256": "d0636606607a8a0f93ffc19ef7c0aee550c6e7667078a735e41f0df486f0c938",
+      "output_bytes": 1019520,
+      "exact_packed_outputs": true,
+      "kernel_trace": [
+        [
+          "160",
+          "1",
+          "168",
+          "8"
+        ]
+      ],
+      "background_before": {
+        "time": 1789022108.3629324,
+        "background_cores": 4.225377930913065,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 1.000541298747255
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6285200722071798
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.610898014107913
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5834859237312758
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.34069312325248996
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789022119.3146055,
+        "background_cores": 4.3883987679310765,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 1.0002104239129261
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6106959926826476
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.600909197928118
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5930797621244943
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3640687648685015
+          }
+        ]
+      }
+    },
+    {
+      "index": 4,
+      "tile": 8,
+      "rows": [
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "1",
+          "native_ms": "0.293053",
+          "packed_ms": "0.266097",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.553969e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "166b60d11536a132"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "1",
+          "native_ms": "0.434005",
+          "packed_ms": "0.377249",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "543dae9897e66b9a"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "1",
+          "native_ms": "0.642058",
+          "packed_ms": "0.558229",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "187412154f65d616"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.057545",
+          "packed_ms": "0.037357",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "8.9106544e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "cba0846760b2760d"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.429616",
+          "packed_ms": "0.049104",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "131cc5542a688cd5"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.513120",
+          "packed_ms": "0.061793",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "3512cfedc6916e17"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.047400",
+          "packed_ms": "0.023737",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "742c663d5285b55d"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.039895",
+          "packed_ms": "0.032584",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "ed566c90fec97aad"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.056318",
+          "packed_ms": "0.056696",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "0fa4d559b7908711"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.062961",
+          "packed_ms": "0.024421",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "c21f7806cd8032f9"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.050793",
+          "packed_ms": "0.033035",
+          "max_abs": "1.1444092e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "d374048d68ca44ff"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.066631",
+          "packed_ms": "0.055527",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "8915a1c1d696b957"
+        }
+      ],
+      "output_sha256": "d0636606607a8a0f93ffc19ef7c0aee550c6e7667078a735e41f0df486f0c938",
+      "output_bytes": 1019520,
+      "exact_packed_outputs": true,
+      "kernel_trace": [
+        [
+          "160",
+          "1",
+          "176",
+          "8"
+        ]
+      ],
+      "background_before": {
+        "time": 1789022124.5188742,
+        "background_cores": 5.002009916586391,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.998053621854092
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5929612694544899
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5870903657965247
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5753485584805943
+          },
+          {
+            "pid": 1149503,
+            "name": "Paseo Daemon",
+            "cores": 0.4031353845136137
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789022135.8032055,
+        "background_cores": 4.353871327310023,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.999313400957746
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6093852307801157
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.597628602533554
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.587831412328086
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3526988473968516
+          }
+        ]
+      }
+    },
+    {
+      "index": 5,
+      "tile": 4,
+      "rows": [
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "1",
+          "native_ms": "0.294261",
+          "packed_ms": "0.267252",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.553969e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "166b60d11536a132"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "1",
+          "native_ms": "0.436557",
+          "packed_ms": "0.405449",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "543dae9897e66b9a"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "1",
+          "native_ms": "0.651739",
+          "packed_ms": "0.538708",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "187412154f65d616"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.049724",
+          "packed_ms": "0.035179",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "8.9106544e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "cba0846760b2760d"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.174546",
+          "packed_ms": "0.061533",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "131cc5542a688cd5"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.566169",
+          "packed_ms": "0.064962",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "3512cfedc6916e17"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.051583",
+          "packed_ms": "0.023456",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "742c663d5285b55d"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.040364",
+          "packed_ms": "0.032001",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "ed566c90fec97aad"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.056652",
+          "packed_ms": "0.055643",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "0fa4d559b7908711"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.062523",
+          "packed_ms": "0.024141",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "c21f7806cd8032f9"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.048511",
+          "packed_ms": "0.033397",
+          "max_abs": "1.1444092e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "d374048d68ca44ff"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.071200",
+          "packed_ms": "0.053995",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "8915a1c1d696b957"
+        }
+      ],
+      "output_sha256": "d0636606607a8a0f93ffc19ef7c0aee550c6e7667078a735e41f0df486f0c938",
+      "output_bytes": 1019520,
+      "exact_packed_outputs": true,
+      "kernel_trace": [
+        [
+          "160",
+          "1",
+          "168",
+          "4"
+        ]
+      ],
+      "background_before": {
+        "time": 1789022140.9960022,
+        "background_cores": 4.357015223512107,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 1.000034997295758
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6235512336079434
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6000209983774549
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5725690572752185
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.34707096964970435
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789022152.277657,
+        "background_cores": 4.341497432335779,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 1.0002277673235271
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6302805109161952
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6224509393520188
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5656865455117404
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.35820289906106745
+          }
+        ]
+      }
+    },
+    {
+      "index": 6,
+      "tile": 2,
+      "rows": [
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "1",
+          "native_ms": "0.289785",
+          "packed_ms": "0.264214",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.553969e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "166b60d11536a132"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "1",
+          "native_ms": "0.436104",
+          "packed_ms": "0.392018",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "543dae9897e66b9a"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "1",
+          "native_ms": "0.653969",
+          "packed_ms": "0.551881",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "187412154f65d616"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.064894",
+          "packed_ms": "0.040376",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "8.9106544e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "cba0846760b2760d"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.295311",
+          "packed_ms": "0.053846",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "131cc5542a688cd5"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.551438",
+          "packed_ms": "0.070864",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "3512cfedc6916e17"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.050084",
+          "packed_ms": "0.023750",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "742c663d5285b55d"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.040261",
+          "packed_ms": "0.031906",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "ed566c90fec97aad"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.052936",
+          "packed_ms": "0.052767",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "0fa4d559b7908711"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.060193",
+          "packed_ms": "0.024178",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "c21f7806cd8032f9"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.050317",
+          "packed_ms": "0.033355",
+          "max_abs": "1.1444092e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "d374048d68ca44ff"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.070120",
+          "packed_ms": "0.053332",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "8915a1c1d696b957"
+        }
+      ],
+      "output_sha256": "d0636606607a8a0f93ffc19ef7c0aee550c6e7667078a735e41f0df486f0c938",
+      "output_bytes": 1019520,
+      "exact_packed_outputs": true,
+      "kernel_trace": [
+        [
+          "160",
+          "1",
+          "168",
+          "2"
+        ]
+      ],
+      "background_before": {
+        "time": 1789022157.4740689,
+        "background_cores": 4.344698138124271,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 1.000811224229168
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.592637234739625
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5906748597901561
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5887124848406872
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.39639973979272936
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789022168.747592,
+        "background_cores": 4.230889081993451,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.999885742269073
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6116948070351976
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5960103248035259
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5724836014560183
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3960331763497113
+          }
+        ]
+      }
+    },
+    {
+      "index": 7,
+      "tile": 1,
+      "rows": [
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "1",
+          "native_ms": "0.300550",
+          "packed_ms": "0.300818",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.553969e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "166b60d11536a132"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "1",
+          "native_ms": "0.438287",
+          "packed_ms": "0.385064",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "543dae9897e66b9a"
+        },
+        {
+          "k": "160",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "1",
+          "native_ms": "0.636980",
+          "packed_ms": "0.545136",
+          "max_abs": "2.3841858e-07",
+          "max_scaled": "1.7257253e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "187412154f65d616"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.084013",
+          "packed_ms": "0.048772",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "8.9106544e-07",
+          "weights": "cbf29ce484222325",
+          "hash": "cba0846760b2760d"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.327387",
+          "packed_ms": "0.070191",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "131cc5542a688cd5"
+        },
+        {
+          "k": "1536",
+          "rows": "2560",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.563591",
+          "packed_ms": "0.084831",
+          "max_abs": "1.9073486e-06",
+          "max_scaled": "1.1219273e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "3512cfedc6916e17"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.049586",
+          "packed_ms": "0.023830",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "742c663d5285b55d"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.040282",
+          "packed_ms": "0.031428",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "ed566c90fec97aad"
+        },
+        {
+          "k": "10240",
+          "rows": "64",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.054993",
+          "packed_ms": "0.054531",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "0fa4d559b7908711"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "1",
+          "moe": "0",
+          "native_ms": "0.059425",
+          "packed_ms": "0.024294",
+          "max_abs": "8.5830688e-06",
+          "max_scaled": "3.5133796e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "c21f7806cd8032f9"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "3",
+          "moe": "0",
+          "native_ms": "0.049448",
+          "packed_ms": "0.033348",
+          "max_abs": "1.1444092e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "d374048d68ca44ff"
+        },
+        {
+          "k": "10240",
+          "rows": "96",
+          "threads": "15",
+          "tokens": "5",
+          "moe": "0",
+          "native_ms": "0.069837",
+          "packed_ms": "0.055179",
+          "max_abs": "1.335144e-05",
+          "max_scaled": "3.9449392e-06",
+          "weights": "cbf29ce484222325",
+          "hash": "8915a1c1d696b957"
+        }
+      ],
+      "output_sha256": "d0636606607a8a0f93ffc19ef7c0aee550c6e7667078a735e41f0df486f0c938",
+      "output_bytes": 1019520,
+      "exact_packed_outputs": true,
+      "kernel_trace": [
+        [
+          "160",
+          "1",
+          "168",
+          "1"
+        ]
+      ],
+      "background_before": {
+        "time": 1789022173.9441607,
+        "background_cores": 4.180419788013765,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.9995377833506892
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6134418160564034
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6016825480169835
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5958029139972736
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.34297865114974635
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789022185.232388,
+        "background_cores": 4.461350285951504,
+        "largest": [
+          {
+            "pid": 3968531,
+            "name": "python3",
+            "cores": 0.9994519930386755
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6356592910715646
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6297916668462886
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5750271740770461
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.36770445145062813
+          }
+        ]
+      }
+    }
+  ],
+  "scope": "Existing R8 arithmetic, tile 1/2/4/8. 512 experts, 10 routes, rotating IDs; SSM and HC dense shapes. Exact packed outputs across tiles plus native tolerance. One-socket component timings under recorded host load, not model speed or whole-server bandwidth.",
+  "binary_sha256": "3f31f653f2d54032f54d8f35b5a2a14e8122d6e71e2103b06eea0a7617dd7d8f",
+  "peer_preserved": true,
+  "model_loaded": false,
+  "finished": 1789022185.245795
+}

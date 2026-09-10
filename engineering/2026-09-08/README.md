@@ -1,5 +1,9 @@
 # CPU inference engineering snapshot, September 8, 2026
 
+DeepSeek-V4.1-Flash has joined the CPU tuning work. The [native-precision bring-up report](archive/serving/fleet-0903/DEEPSEEK-V41-BRINGUP-20260910.md) records all 96,085 audited tensors, a bit-preserving FP4 bridge, and an AVX-512 Engram decoder. The lookup component measures 1.48–1.69× faster than its scalar baseline with numerical and caller-state checks passing. Full-model runtime support, weight storage, tok/s, and IMC baselines remain pending; no model-speed claim or profile promotion is made.
+
+The [Qwen R8 status](archive/serving/fleet-0903/QWEN-R8-PROJECTION-STATUS-20260910.md) also preserves the completed existing-tile probe and a newly compiled scoped candidate. That candidate still needs functional and model validation.
+
 The [Qwen request-state and timing follow-up](archive/serving/fleet-0903/QWEN-MTP-STATE-TIMELINES-20260910.md) records a private MTP fresh-sequence reset, controlled cache-erasure cases, and two output-matched four-socket timelines. The reset passes all eight repeated-request comparisons. The 40 tok/s and all-model 250 GB/s targets remain open; no new speed gain or serving-profile promotion is claimed.
 
 The latest Qwen speed target is **40+ generated tok/s at Q6**. [The current speed and headroom assessment](archive/serving/fleet-0903/MODEL-SPEED-HEADROOM-20260910.md) records the observed maxima, the 25 ms/token budget, conditional bandwidth figures, and measured optimization limits. No 40 tok/s or all-model 250 GB/s result is established.
