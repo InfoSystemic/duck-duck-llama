@@ -26,5 +26,23 @@
       "temporary_index_only": true,
       "no_model_loaded": true
     }
+  },
+  {
+    "name": "qwen-mtp-fresh-sequence-carry",
+    "patch": "patches/qwen-mtp-fresh-sequence-carry.patch",
+    "patch_sha256": "991a64b4eca18e3a9ee7c64ff64eef44ac611c9ff17289ead7453a6d1d825fb6",
+    "source_path": "common/speculative.cpp",
+    "before_sha256": "c5f38b84c5fd302516329c5ebb04aadda691b5ff31d705c218595eb9e220ddb4",
+    "after_sha256": "496f18557851b344a6b4ee700aeaa0306193ec1f8e3b5d4ffb4d9808f12efa33",
+    "parent": "After qwen-flash-next-goal-source.patch. CPU-only overlays do not change this common source file.",
+    "archived_source": "archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp",
+    "validation": "archive/serving/fleet-0903/results/qwen-order-and-timeline-audit-0910b.json",
+    "apply_check": true,
+    "reconstructed_file_identical": true,
+    "private_runtime_only": true,
+    "runtime_promoted": false,
+    "repeated_request_outputs_and_counts_match": true,
+    "model_gain_established": false,
+    "scope": "Reset MTP cross-batch hidden carry for a position-zero sequence before draft prefill. Continuation positions retain carry. Model repeatability checked; target-only parity and general quality not established."
   }
 ]
