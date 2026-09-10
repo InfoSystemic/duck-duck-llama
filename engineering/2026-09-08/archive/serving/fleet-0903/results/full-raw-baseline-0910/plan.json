@@ -1,0 +1,179 @@
+{
+  "prepared": 1789029362.6224134,
+  "peer_libraries": [
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libggml-base.so.0.22.0",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libggml.so.0.22.0",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libllama.so.0.3.0",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/libggml-cpu.so.0.22.0"
+  ],
+  "runtime_env": {
+    "GGML_CPU_ROUTER_F16": "1",
+    "GGML_GLM_QA_TP": "2",
+    "LLAMA_MTP_SKIP_INVALID_PREFIX_ROW": "0",
+    "GGML_CPU_REPACK_LOAD_THREADS": "16",
+    "GGML_CPU_Q8_0_REPACK": "1",
+    "GGML_CPU_NUMA_REPACK": "1",
+    "GGML_CPU_ATTN_REQUANT": "q5_K",
+    "GGML_CPU_NUMA_MERGE_REDUCE": "1",
+    "GGML_CPU_MOE_SINGLE_TOKEN_THREADS": "15",
+    "GGML_CPU_MOE_GATE_UP_FUSION": "1",
+    "GGML_CPU_IQ3_XXS_REPACK": "0",
+    "GGML_CPU_NUMA_DISPATCH_SPIN_US": "20000",
+    "GGML_CPU_X16_Q4_K": "1",
+    "GGML_CPU_NUMA_DEVICES": "1",
+    "GGML_GLM_SHEXP_TP": "1",
+    "LLAMA_MTP_DEFER_ACCEPT_REFRESH": "0",
+    "GGML_CPU_NUMA_DISPATCH_HARD_SPIN_US": "300",
+    "GGML_GLM_ATTN_TP": "1",
+    "GGML_GLM_OUTPUT_TP": "1",
+    "GGML_CPU_SHEXP_REQUANT": "q5_K",
+    "GGML_CPU_NUMA_THREADS": "15",
+    "GGML_CPU_IQ2_XS_REPACK": "0",
+    "GGML_CPU_MOE_DOWN_WEIGHTED_SUM_TILE": "192",
+    "GGML_CPU_NUMA_DIRECT_ALLREDUCE": "1",
+    "GGML_CPU_IQ3_XXS_MOE_2ROW": "1",
+    "GGML_CPU_SINGLE_TASK_MAX_ELEMENTS": "32768",
+    "GGML_CPU_MOE_WEIGHTED_SUM_FUSION": "1",
+    "GGML_CPU_NUMA_FUSED_REDUCE": "1",
+    "GGML_CPU_OUTPUT_REQUANT": "q6_K",
+    "GGML_CPU_Q8_0_REPACK_FFN": "1",
+    "GGML_CPU_Q8_0_REPACK_X_TILE": "auto",
+    "LLAMA_MTP_TRIM_STALE_KV": "1",
+    "GGML_CPU_NUMA_HUGEPAGES": "0",
+    "GGML_CPU_Q5_K_REPACK_MOE_DOWN": "1",
+    "GGML_CPU_X16_Q6_K": "1",
+    "GGML_CPU_X16_Q5_K": "1",
+    "GGML_CPU_X16_ATTN3D": "1",
+    "GGML_CPU_Q5_K_REPACK": "1",
+    "GGML_CPU_FFN_GATE_UP_FUSION": "1",
+    "GGML_CPU_MOE_DOWN_WEIGHTED_SUM_FUSION": "1",
+    "GGML_CPU_NUMA_POLL": "100",
+    "LD_LIBRARY_PATH": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin"
+  },
+  "libraries": {
+    "libggml-cpu.so.": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-cpu.so.0.20.2",
+    "libggml-base.so.": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-base.so.0.20.2",
+    "libllama.so.": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama.so.0.1.2",
+    "libllama-common.so.": "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-common.so.0.1.2"
+  },
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/run_full_raw_baseline_0910.py": "a5a53cceef3c0b39112b3d8a1e81700a6832769e82fe4e91e2217313e67b48a0",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_full_raw_controller_0910.py": "abf980d94f78cbb737597549fc13ff44326d58e46a71443bd3bc938c62b803bb",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/measure_full_raw_0910.py": "a09621c3c2f0b7fafeac6ca689097ac08eb604cefc77d7ff57aab879c4444c26",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/run_qwen_r8_projection_0910.py": "88ba840529ea200fad9bb7bbe1625d244ec17fa15c44e52af624678b5cdf2227",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_flash_q4_selected_0910.py": "0b582aa5645ac9898d3b60493a5092cff364861a346a3011f1b160745e09ad2a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/guarded_inference_request.py": "4633e6369cdeb93a3de9861c288b80edb01d14e17d0d2ec74e466a5e06b25e85",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/dram_bandwidth.py": "011ad0dfde74277c36f3f526380de20da0dd2b0ce1aee5e0c89618b247483e85",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_high_quant_trial.py": "8fefe5fc4bba5cb6b7e5e98f5a8f52f529977c7eee0a294bb738c0e53151eff5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/select_flash_q4_0910c.py": "82921824f989c466d7ad1bcaba847cdca4c0718569414405bfe2e3d93198d852",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/glm-flash-selected.json": "121d920021e85d7949ee256bdd2d774386c3966021cfdebb38015612d17ee47a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-bandwidth250-assets-0910/result.json": "2d90345a720b474cd011d189c67051bc84b4e9c39eabd214d761051745b86ec2",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-raw-admission-0910.json": "76d8dbca440f8cfe0d9325c896dedecf3faa1816b2c034159015e123914339bc",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/full-raw-controller-checks-0910.json": "a474c571d30786bbf46faffdb41e0fc68a531fb1aa722cbec6b806c480eae2f0",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/llama-server": "a5b5156a8c9c70ab2e4f6d6e194b8b6bce67c851aa37b90db409abcd3e97d835",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/glm-sr950/chat-template-glm-5.3-llamacpp.jinja": "da553ce13c37ab3c8ef744af64f38f5c399f195abdde818ad78c3737f559ee58",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-quantize-impl.so": "b03cf6000d6954c1eef0e2c697938a98897a151ea269e522e60a0470e1c1ceae",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-common.so.0.1.2": "af3c01472b528b4d5f3553af0686c001572c52fb5ab794717a350e697a2f8129",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-perplexity-impl.so": "f9121f7183fc832d3e366a22c86d49c73e82060309f381f46d31e82afd5590f9",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-cpu.so.0.20.2": "d40033e090eca525bd8384df9f2f270094c60e30844215c21794daa0b71561b6",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libmtmd.so.0.1.2": "9850047566f3f916fbceb5c973b0e1ef9dda9ae641eef9fc1b39afda4a16c5b0",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-batched-bench-impl.so": "e7e64bbd211df928053445f12bf6cd06bf237e616e7bdc2606d6bae29ca6f6b4",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml-base.so.0.20.2": "b0b207779d134a3dcc99c1876334cf78b9c2d633945da99291f9d3c851212363",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libggml.so.0.20.2": "c9433279c617ed2314af0f93e157cdbd77f722ec4a47516c53f824ae62d7001d",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-fit-params-impl.so": "97eab0ab99ce295a769c9fc5fcdbe27315c3c6e5c28c110c809b8fdd56538e23",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-server-impl.so": "5e99da7b6dd940c5e99e0b7aa526a6b0fcbad5e7b28e1ef5738588a20d492358",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama.so.0.1.2": "209ef028da447ba1b5afe503756b11c26884cb03522d07083fbe454e3da44e0f",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-cli-impl.so": "636635ad4c5a41d945bc9f2b5852c8c08b79a6fa5472424415fe4f711972d9d3",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-bench-impl.so": "c9a31dfbaad58d7ff5ff5f9a3cd8d659b60cca6177a1437c528f5ea78442ec5e",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/libllama-completion-impl.so": "e6839dba7546488cdaae1edae3f29b9152c23511960787d3baa4449e5f6d2c5f"
+  },
+  "model_records": [
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00001-of-00011.gguf",
+      "size": 9428640,
+      "inode": 38797347,
+      "device": 2049,
+      "mtime_ns": 1787962230539349301
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00002-of-00011.gguf",
+      "size": 49433942336,
+      "inode": 38797343,
+      "device": 2049,
+      "mtime_ns": 1787963569509127973
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00003-of-00011.gguf",
+      "size": 48566415136,
+      "inode": 38797338,
+      "device": 2049,
+      "mtime_ns": 1787963580116152236
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00004-of-00011.gguf",
+      "size": 48566415136,
+      "inode": 38797341,
+      "device": 2049,
+      "mtime_ns": 1787963550844085484
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00005-of-00011.gguf",
+      "size": 48566415136,
+      "inode": 38797329,
+      "device": 2049,
+      "mtime_ns": 1787963538996058656
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00006-of-00011.gguf",
+      "size": 48566415136,
+      "inode": 38797332,
+      "device": 2049,
+      "mtime_ns": 1787963550090083773
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00007-of-00011.gguf",
+      "size": 48566415136,
+      "inode": 38797334,
+      "device": 2049,
+      "mtime_ns": 1787963561186108993
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00008-of-00011.gguf",
+      "size": 48566415136,
+      "inode": 38797339,
+      "device": 2049,
+      "mtime_ns": 1787963550542084799
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00009-of-00011.gguf",
+      "size": 48566415136,
+      "inode": 38797349,
+      "device": 2049,
+      "mtime_ns": 1787963552476089188
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00010-of-00011.gguf",
+      "size": 48566415136,
+      "inode": 38797351,
+      "device": 2049,
+      "mtime_ns": 1787963833711753756
+    },
+    {
+      "path": "/models/GLM-5.3-GGUF/UD-Q4_K_XL/GLM-5.3-UD-Q4_K_XL-00011-of-00011.gguf",
+      "size": 29314424736,
+      "inode": 38797353,
+      "device": 2049,
+      "mtime_ns": 1787963774842610918
+    }
+  ],
+  "global_admission_bytes": 502698003456,
+  "node_admission_bytes": 126467450880,
+  "repetitions": 2,
+  "target_gb_s": 250,
+  "capacity_gb_s": 380,
+  "context": 32768,
+  "workers_per_socket": 15,
+  "scope": "One fresh Full load, two same-process raw prose/code pairs, no draft model or cache reuse, existing mixed Q4 runtime precision. One Flash pause and exact restoration."
+}

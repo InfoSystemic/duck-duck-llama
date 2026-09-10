@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "finished": 1789032810.94586,
+  "source_sha256": "67a743d5b5f55dd1e9f31550b0df878e2576e923d0aa9412ad69098acb9b11f8",
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-lookup-0910/result.json": "3d61f13744c3c84b3a22581cfe9babe49a4f58fc28c24f46286a193e98705a3c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-lookup-0910/correctness.json": "053c49ac1c783ee8be689daffeba294a6f44190c56058d15738b77b226830cff",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-lookup-0910/real-rows.json": "41f32a73e3ef4376ed10b18421fe6b721bfb9d0b6bd931658ca1910f4e24d649",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/probe_deepseek_v41_native_cpu_0910.py": "b8ed1e922dfe55cd00289f2faeb504e75061c1d874f85f561285383264a1cd4f"
+  },
+  "selected_flash_pid": 2334769,
+  "selected_flash_preserved": true,
+  "sequence_cases": 68,
+  "native_variants": 8,
+  "exact_bf16_values_compared": 267583488,
+  "exact_row_ids_compared": 1044096,
+  "rejected_input_calls": 112,
+  "rejected_configurations": 19,
+  "actual_selected_rows": 48,
+  "actual_retrieved_bytes": 12672,
+  "actual_row_reference_finite": true,
+  "full_model_loaded": false,
+  "model_tok_s_measured": false,
+  "imc_bandwidth_measured": false,
+  "runtime_promoted": false,
+  "limitations": [
+    "Only hash to native FP8/BF16 lookup is integrated; projection/gate and full graph remain pending.",
+    "One/four logical row shards are address-dispatch checks, not multi-socket scaling measurements.",
+    "Official 202.8 GB address spans are sparsely populated fixtures, not downloaded full tables.",
+    "Whole-shard publisher hashes are recorded, not verified. Retrieved slices are individually hash-bound."
+  ]
+}

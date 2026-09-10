@@ -2,7 +2,7 @@
 
 DeepSeek-V4.1-Flash has been added to the SR950 tuning work. The first native-format CPU component is implemented and tested. Its AVX-512 Engram lookup decoder improves the measured scalar component baseline by 1.48× on a 276.8 MB table fixture and 1.69× on a 270.3 KB fixture. Full-model loading, generated tok/s, and IMC bandwidth have not yet been measured; the V4.1 model graph is still missing from the checked llama.cpp runtimes.
 
-The subsequent [native Engram hash and history work](DEEPSEEK-V41-ENGRAM-HASH-20260910.md) now passes 16,091,808 exact row-ID comparisons against the publisher's CPU reference, including request reuse, image boundaries and speculative rollback. It reproduces the required 99,092 compressed tokenizer IDs. Reciprocal division measures 3.47–4.74× faster for this small hash component; single-token time is 0.091 µs. Hash-to-gather and full-model graph integration remain pending.
+The subsequent [native Engram hash and history work](DEEPSEEK-V41-ENGRAM-HASH-20260910.md) now passes 16,091,808 exact row-ID comparisons against the publisher's CPU reference, including request reuse, image boundaries and speculative rollback. It reproduces the required 99,092 compressed tokenizer IDs. Reciprocal division measures 3.47–4.74× faster for this small hash component; single-token time is 0.091 µs. The subsequent [combined hash-to-lookup integration](DEEPSEEK-V41-ENGRAM-LOOKUP-20260910.md) passes 267,583,488 exact BF16 comparisons and 1,044,096 exact row-ID comparisons, including 48 real selected checkpoint rows. Projection/gate and full-model graph integration remain pending.
 
 The existing goal remains 250+ adjusted decode GB/s per model, including this fourth model. Qwen's separate Q6 goal remains 40+ generated tok/s. All models can use the server sequentially; no simultaneous residency with GLM Full or any other model is required.
 
@@ -49,7 +49,7 @@ These are single-worker synthetic-table timings under recorded host load, with r
 The [bring-up assessment](results/deepseek-v41-bringup-0910/result.json) checks architecture registration and conversion at upstream commit `4ea6d1bb6dac161f70be728983e2cd58e4d9246f` and in the current Qwen engine. Both lack V4.1 registration. The official reference implementation supplies the architecture, but its accelerator kernels are not a CPU serving path.
 
 1. Add nested configuration and tensor conversion, CED/CSA2 KV sharing and hierarchical indexing, and single-pass mHC coefficient handoff.
-2. Integrate the now-tested compressed-token map, native n-gram history/hash, FP8 Engram gather, and projection/gate into the CPU graph; preserve image boundaries and request resets through the server lifecycle.
+2. Integrate the now-connected token-history/hash and FP8 lookup with the projection/gate in the CPU graph; preserve image boundaries and request resets through the server lifecycle.
 3. Add vision routing and the native vision path, then the three-block DSpark draft and verification lifecycle.
 4. Resolve weight storage and transient load/repack memory. The observed free disk space was about 25.1 GB on the root volume and 7.7 GB on `/models`, which cannot hold a native checkpoint with a reserve. A sequential model switch is allowed; it does not create persistent disk capacity.
 5. Establish deterministic text/vision correctness and fresh-request checks, then matched prose/code raw-decode and DSpark baselines using all 48 IMC counters and adjacent idle subtraction. Tune NUMA placement, thread count, expert kernels, and speculation from those results.
