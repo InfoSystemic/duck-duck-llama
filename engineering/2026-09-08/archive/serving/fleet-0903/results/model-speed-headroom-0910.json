@@ -1,0 +1,284 @@
+{
+  "passed": true,
+  "time": 1789014151.9241211,
+  "capacity_assumed_gb_s": 380,
+  "scope": "Assessment of saved evidence, not new inference, a measured hardware ceiling, or an all-history search of short checks.",
+  "measured": {
+    "qwen_q6": {
+      "prose": {
+        "tok_s": 24.874817844288895,
+        "adjusted_gb_s": 143.55459773635343,
+        "generated_tokens": 512,
+        "drafted_tokens": 589,
+        "accepted_drafts": 360,
+        "source": "results/qwen-private-decode-scheduling-250-0909b-2-candidate-decode/result.json"
+      },
+      "code": {
+        "tok_s": 32.14668787198763,
+        "adjusted_gb_s": 152.5485764605959,
+        "generated_tokens": 318,
+        "drafted_tokens": 292,
+        "accepted_drafts": 244,
+        "source": "results/qwen-private-decode-scheduling-250-0909b-2-candidate-decode/result.json"
+      }
+    },
+    "flash_q4": {
+      "prose": 15.94396311634026,
+      "code": 15.92804141041404
+    },
+    "flash_q8": {
+      "prose": 15.375720473614317,
+      "code": 16.54229675902739
+    },
+    "flash_historical_iq2_completed_or_long": 17.918005502877744,
+    "full_latest": {
+      "prose": {
+        "tok_s": 7.887103963004265,
+        "adjusted_gb_s": 196.6674017730951,
+        "generated_tokens": 512,
+        "drafted_tokens": 486,
+        "accepted_drafts": 267,
+        "source": "results/glm53-full-current-bandwidth-0906/result.json"
+      },
+      "code": {
+        "tok_s": 9.636043978904718,
+        "adjusted_gb_s": 199.01980155674428,
+        "generated_tokens": 512,
+        "drafted_tokens": 383,
+        "accepted_drafts": 319,
+        "source": "results/glm53-full-current-bandwidth-0906/result.json"
+      }
+    },
+    "full_earlier_single_prose": 8.50428867450093,
+    "full_specialized_passing_edit": 15.7029559069722
+  },
+  "conditional_projections": {
+    "GLM Flash Q4 MTP2": {
+      "prose": {
+        "basis": {
+          "tok_s": 15.854042481102393,
+          "adjusted_gb_s": 180.11799176747772
+        },
+        "approximate_gb_per_generated_token": 11.361013570019992,
+        "tok_s_if_all_costs_scale": {
+          "250": 22.005078900681223,
+          "323": 28.430561939680143,
+          "353.4": 31.106379534002976,
+          "380": 33.447719929035465
+        }
+      },
+      "code": {
+        "basis": {
+          "tok_s": 15.806098507765356,
+          "adjusted_gb_s": 181.88176343695972
+        },
+        "approximate_gb_per_generated_token": 11.507062501704851,
+        "tok_s_if_all_costs_scale": {
+          "250": 21.725787963953508,
+          "323": 28.069718049427934,
+          "353.4": 30.711573865844677,
+          "380": 33.023197705209334
+        }
+      }
+    },
+    "Qwen Flash-Next Q6 MTP4": {
+      "prose": {
+        "basis": {
+          "tok_s": 24.517821181503983,
+          "adjusted_gb_s": 141.3622418034192
+        },
+        "approximate_gb_per_generated_token": 5.765693482994385,
+        "tok_s_if_all_costs_scale": {
+          "250": 43.359918583490796,
+          "323": 56.02101480987011,
+          "353.4": 61.293580909622584,
+          "380": 65.90707624690602
+        }
+      },
+      "code": {
+        "basis": {
+          "tok_s": 31.803664786514247,
+          "adjusted_gb_s": 150.2082042225946
+        },
+        "approximate_gb_per_generated_token": 4.722984135032375,
+        "tok_s_if_all_costs_scale": {
+          "250": 52.93263598868437,
+          "323": 68.3889656973802,
+          "353.4": 74.82557423360421,
+          "380": 80.45760670280023
+        }
+      }
+    },
+    "GLM Full mixed Q4 MTP2": {
+      "prose": {
+        "basis": {
+          "tok_s": 7.887103963004265,
+          "adjusted_gb_s": 196.6674017730951,
+          "generated_tokens": 512,
+          "drafted_tokens": 486,
+          "accepted_drafts": 267,
+          "source": "results/glm53-full-current-bandwidth-0906/result.json"
+        },
+        "approximate_gb_per_generated_token": 24.935312466476326,
+        "tok_s_if_all_costs_scale": {
+          "250": 10.025942138728215,
+          "323": 12.953517243236854,
+          "353.4": 14.172671807306205,
+          "380": 15.239432050866888
+        }
+      },
+      "code": {
+        "basis": {
+          "tok_s": 9.636043978904718,
+          "adjusted_gb_s": 199.01980155674428,
+          "generated_tokens": 512,
+          "drafted_tokens": 383,
+          "accepted_drafts": 319,
+          "source": "results/glm53-full-current-bandwidth-0906/result.json"
+        },
+        "approximate_gb_per_generated_token": 20.653683398751557,
+        "tok_s_if_all_costs_scale": {
+          "250": 12.104378438139108,
+          "323": 15.638856942075728,
+          "353.4": 17.11074936015344,
+          "380": 18.398655225971446
+        }
+      }
+    }
+  },
+  "qwen_40_budget": {
+    "prose": {
+      "target_tok_s": 40,
+      "target_ms_per_token": 25,
+      "repeated_parent_ms_per_token": 40.786658512477885,
+      "required_speedup_percent_from_repeated_parent": 63.14663404991154,
+      "required_elapsed_time_reduction_percent_from_repeated_parent": 38.70544704624004,
+      "required_speedup_percent_from_peak": 60.80519765166341,
+      "conditional_gb_s_at_40": 230.6277393197754
+    },
+    "code": {
+      "target_tok_s": 40,
+      "target_ms_per_token": 25,
+      "repeated_parent_ms_per_token": 31.442917245940517,
+      "required_speedup_percent_from_repeated_parent": 25.771668983762062,
+      "required_elapsed_time_reduction_percent_from_repeated_parent": 20.490838033714386,
+      "required_speedup_percent_from_peak": 24.42961514195583,
+      "conditional_gb_s_at_40": 188.91936540129498
+    }
+  },
+  "qwen_target_precision": "UD-Q6_K_XL",
+  "qwen_40_target_reached": false,
+  "whole_model_250_goal_complete": false,
+  "projection_limitations": [
+    "Requires similar physical traffic per generated token, draft acceptance, and output workload.",
+    "Assumes other execution costs fall enough to sustain the stated average DRAM rate.",
+    "Uses stable-window DRAM averages and overall reported decode rates; the inferred bytes/token are approximate.",
+    "Flash Q4 was measured with 15-18 background CPU cores; this is not an uncontended ceiling.",
+    "Systemwide counters minus adjacent idle traffic estimate model attribution.",
+    "The 380 GB/s denominator is the stated planning capacity, not a new capacity measurement."
+  ],
+  "qwen_profile": [
+    {
+      "workload": "prose",
+      "graph_count": 80,
+      "output_and_draft_counts_match": true,
+      "groups": [
+        {
+          "role": "draft",
+          "graphs": 56,
+          "graph_cpu_counts": {
+            "0": 14,
+            "16": 14,
+            "32": 14,
+            "48": 14
+          },
+          "graph_ms_range": [
+            2.353,
+            3.603
+          ],
+          "summed_socket_graph_ms": 172.25300000000004,
+          "matrix_stage_pct": 81.42093316226719,
+          "cross_socket_reduction_stage_pct": 11.116206974624529,
+          "output_projection_stage_pct": 49.28912703987737
+        },
+        {
+          "role": "target",
+          "graphs": 8,
+          "graph_cpu_counts": {
+            "0": 2,
+            "16": 2,
+            "32": 2,
+            "48": 2
+          },
+          "graph_ms_range": [
+            102.951,
+            105.956
+          ],
+          "summed_socket_graph_ms": 835.1980000000001,
+          "matrix_stage_pct": 57.947935699079665,
+          "cross_socket_reduction_stage_pct": 11.815162392630295,
+          "output_projection_stage_pct": 1.8184909446622235
+        }
+      ]
+    },
+    {
+      "workload": "code",
+      "graph_count": 80,
+      "output_and_draft_counts_match": true,
+      "groups": [
+        {
+          "role": "draft",
+          "graphs": 56,
+          "graph_cpu_counts": {
+            "0": 14,
+            "16": 14,
+            "32": 14,
+            "48": 14
+          },
+          "graph_ms_range": [
+            2.259,
+            3.636
+          ],
+          "summed_socket_graph_ms": 176.44500000000002,
+          "matrix_stage_pct": 80.279407180708,
+          "cross_socket_reduction_stage_pct": 12.449771883589792,
+          "output_projection_stage_pct": 48.79027458981551
+        },
+        {
+          "role": "target",
+          "graphs": 8,
+          "graph_cpu_counts": {
+            "0": 2,
+            "16": 2,
+            "32": 2,
+            "48": 2
+          },
+          "graph_ms_range": [
+            100.946,
+            101.326
+          ],
+          "summed_socket_graph_ms": 809.056,
+          "matrix_stage_pct": 58.29917830162558,
+          "cross_socket_reduction_stage_pct": 11.008879484238465,
+          "output_projection_stage_pct": 1.8364612585531779
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q4-measurement-audit-0910.json": "ad2087120b96e8655bcedd892dd992460bd3c039e07ab5a28f73d46ecc0c3906",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-decode-scheduling-model-0909b/result.json": "65b9024245de72c93635816b24660a6d723fab417fb29c0915b568178af78821",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909b-2-candidate-decode/result.json": "5cd74d1a31ee4b701e9a05af89e68facc9aa74f462c438056bc660a1267f547a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm53-full-current-bandwidth-0906/result.json": "9686b7332f0758f7fa9554fca0b51a131e8b96296c5f2545f2ab635b2c23f7c1",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-bandwidth250-comparison-0909-04-mtp-control/result.json": "2f9ee55a4629a91e821fac33205125c95e9fb0675a68027365f4c3da9cf16dba",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-bandwidth250-comparison-0909-05-mtp-candidate/result.json": "366c67dde609c548617da04f5e75fd5ffb6486f304d370608743cdb715c32f9a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-bandwidth250-comparison-0909-06-mtp-candidate/result.json": "da41839199d4e867e43414784453d099c2f34d3e2c95c70c6256745fb153ba55",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-bandwidth250-comparison-0909-07-mtp-control/result.json": "3bd2546419316583450a1f0c9f6168051a5d8b0d9964982a3f7e7db7a641198c",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm53-full-bandwidth-baseline-0905c/result.json": "1b44e8e610e43095bf2b3cef5b7e7f0dd198e306fb45a5692c951d45df4b3011",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm53-full-replay-bandwidth-0906/result.json": "3d0241b5d5642cfb86cccc4638b99450664e83a63374d883184b6df0884a75ec",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm5n-goal-x16-chunk16-1024-t15/result.json": "0fc307efb3453cd2bc36b1ba27613b906b97934b3f9dce1f74da50c9b466007f",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-ops-analysis-0909.json": "01efd79d40a9661540db6cb306c37d372b2ba3d5ae23dd6d14b7c96194db470d",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/q4-switch-assessment-0910.json": "1ea1eb155ab037aea237486f4e72e490b38096ccd2ab3522534cb963a337b524",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/assess_model_speed_headroom_0910.py": "4395f8e21d311e3c1a9f7704096005f906f1f0da9acfd445ccf37c87ef860509"
+  }
+}

@@ -1,5 +1,7 @@
 # GLM-5.3-Flash validated baseline
 
+September 10 UTC: the launcher below now prefers the user-selected Q4 configuration. This document preserves the earlier IQ2 measurements; its old launch description no longer identifies the selected model. See [the completed Q4 switch](FLASH-Q4-SWITCH-20260910.md).
+
 Historical UD-IQ2_XXS runtime validation only. As of September 7, this artifact
 has not been qualified for the user's near-lossless-quality requirement and
 is not the selected target for the new serving plan. See the [current quality

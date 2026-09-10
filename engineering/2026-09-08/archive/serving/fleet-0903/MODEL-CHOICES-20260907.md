@@ -1,5 +1,15 @@
 # Model choice, storage, and conditional decode speeds
 
+The latest Qwen speed target is **40+ generated tok/s at Q6**. [The current speed and headroom assessment](MODEL-SPEED-HEADROOM-20260910.md) records the observed maxima, the 25 ms/token budget, conditional bandwidth figures, and measured optimization limits. No 40 tok/s or all-model 250 GB/s result is established.
+
+September 10 UTC steering: the user explicitly selected GLM-5.3-Flash
+UD-Q4_K_XL. Download, verification, and runtime selection are complete; see [the switch report](FLASH-Q4-SWITCH-20260910.md). This supersedes
+the tentative Q4 status and Q8-only selection rule below. Qwen remains
+UD-Q6_K_XL. Its inventoried active target weight estimate falls from 6.964 to
+6.359 GB per raw token under Q4_K_XL: an 8.69% byte reduction, corresponding
+to 9.51% weight-only speed headroom at equal bandwidth. This does not establish
+an MTP speed gain; the dense weights and other runtime costs remain.
+
 Latest user correction: Full is not required to remain running or resident.
 The assistant's earlier attribution of that restriction to the user was
 incorrect. Evaluate each selected model against the whole server and load
@@ -126,6 +136,6 @@ Source: [publisher analysis](https://unsloth.ai/docs/models/glm-5.3-flash#quanti
 - [Qwen Q6 measurements and ongoing optimization](QWEN-HIGH-QUANT-20260907.md).
 - [Current Full reasoning measurements](results/glm53-full-current-bandwidth-0906/result.json).
 - [Full replay and other bandwidth results](MODEL-BANDWIDTH-TARGETS-20260905.md).
-- [Historical 27B tuning](../model-bundle-20260815/QWEN38-27B-NUMA-20260829.md).
+- [Historical 27B tuning summary](FLEET-TUNING-20260903.md).
 - [27B Q4 replay measurements](FLEET-TUNING-20260903.md#19-20-toks-found--and-it-was-the-dense-model-not-the-flash-ones).
 - [Near-lossless quality requirement and capacity check](GLM-FLASH-QUALITY-POLICY-20260907.md).
