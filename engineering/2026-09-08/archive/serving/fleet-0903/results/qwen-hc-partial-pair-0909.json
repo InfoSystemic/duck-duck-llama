@@ -1,0 +1,132 @@
+{
+  "time": 1788999102.0007646,
+  "passed": true,
+  "comparison_complete": false,
+  "repeated_gain_established": false,
+  "expert_tile_executed": false,
+  "actual_expert_used_count": 10,
+  "actual_expert_count": 512,
+  "target_q6_weight_shapes": [
+    [
+      2560,
+      160,
+      512
+    ]
+  ],
+  "all_outputs_match": true,
+  "all_attribution_valid": true,
+  "target_gb_s": 250,
+  "target_reached": false,
+  "summaries": [
+    {
+      "workload": "prose",
+      "parent_tok_s": 24.205204810611562,
+      "hc_only_tok_s": 24.737876540374565,
+      "speed_change_percent": 2.200649545958311,
+      "parent_gb_s": 139.32949332725676,
+      "hc_only_gb_s": 143.213913080493,
+      "bandwidth_target_met": false
+    },
+    {
+      "workload": "code",
+      "parent_tok_s": 31.447295820247653,
+      "hc_only_tok_s": 32.12152759446946,
+      "speed_change_percent": 2.1440055707037775,
+      "parent_gb_s": 148.5006824289057,
+      "hc_only_gb_s": 152.1042353225962,
+      "bandwidth_target_met": false
+    }
+  ],
+  "runs": [
+    {
+      "label": "qwen-private-decode-scheduling-250-0909-0-parent",
+      "rows": {
+        "prose": {
+          "tok_s": 24.205204810611562,
+          "attribution_valid": true,
+          "idle_before_gb_s": 3.6052988261602428,
+          "idle_after_gb_s": 3.817119081130418,
+          "adjusted_gb_s": 139.32949332725676,
+          "utilization": 0.3666565613875178,
+          "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+          "generated_tokens": 512,
+          "draft_tokens": 589,
+          "accepted_draft_tokens": 360,
+          "observed_other_host_cores": 3.001776722587843
+        },
+        "code": {
+          "tok_s": 31.447295820247653,
+          "attribution_valid": true,
+          "idle_before_gb_s": 3.8863619428874077,
+          "idle_after_gb_s": 4.258694455475627,
+          "adjusted_gb_s": 148.5006824289057,
+          "utilization": 0.3907912695497518,
+          "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+          "generated_tokens": 318,
+          "draft_tokens": 292,
+          "accepted_draft_tokens": 244,
+          "observed_other_host_cores": 3.0638398481628584
+        }
+      },
+      "execution_markers": {
+        "hc_ordered": false,
+        "hc_rows": false,
+        "q6_tile": false
+      }
+    },
+    {
+      "label": "qwen-private-decode-scheduling-250-0909-1-candidate",
+      "rows": {
+        "prose": {
+          "tok_s": 24.737876540374565,
+          "attribution_valid": true,
+          "idle_before_gb_s": 3.8186582404188294,
+          "idle_after_gb_s": 3.199495888206897,
+          "adjusted_gb_s": 143.213913080493,
+          "utilization": 0.3768787186328763,
+          "output_sha256": "d501f189ffb763140b854c02d526b92fc99bce33bf31bab923ca6e99ebe64c4b",
+          "generated_tokens": 512,
+          "draft_tokens": 589,
+          "accepted_draft_tokens": 360,
+          "observed_other_host_cores": 3.082182649148038
+        },
+        "code": {
+          "tok_s": 32.12152759446946,
+          "attribution_valid": true,
+          "idle_before_gb_s": 3.342352284734611,
+          "idle_after_gb_s": 3.6764029327846215,
+          "adjusted_gb_s": 152.1042353225962,
+          "utilization": 0.4002743034805163,
+          "output_sha256": "7e9334943e2f1e3e9498d28b486add424f89e312f5c7f969e5080499010fd7d7",
+          "generated_tokens": 318,
+          "draft_tokens": 292,
+          "accepted_draft_tokens": 244,
+          "observed_other_host_cores": 3.105418618627455
+        }
+      },
+      "execution_markers": {
+        "hc_ordered": true,
+        "hc_rows": true,
+        "q6_tile": false
+      }
+    }
+  ],
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/analyze_qwen_hc_partial_pair_0909.py": "3c45b5f2c5040c6dcb449911bc539c767605542374ac97ef70c94baa498c4d13",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-decode-scheduling-model-0909/result.json": "899e3f808c2da369f9d860f51241586433c3549de12c8ee72dbecb51e9a030dc",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-0-parent/result.json": "e7e717b8d23099576339b7ac2f44c6f4ff67c5fe05be03d28c5c3087a63e0b62",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-0-parent/plan.json": "a6ab2d62a0516d9f0cdd6446849e0c6b111e7c6c806a291429ef8a159d82a39a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-0-parent-decode/result.json": "51953a28da61d9e03cfad3f8eed59de077c38c6ab6f3f6dc9f05828a26113491",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-0-parent-decode/prose-draft4/chunks.json": "781a8c986f083268c64e44f2ef0ff8b2736028fc3b03d95f70cd6c09eb17f406",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-0-parent-decode/code-draft4/chunks.json": "f8b669241d90b74b373379653336cb15fc524ad98128f9131bad8635e2b74af1",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-0-parent/model.log": "5bf9e344411e17cc2c1141443285ef35474885c8f9d89c48b5056a542cf9ed66",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-1-candidate/result.json": "6850b70d43103581b188438fd9c142632cf7dbd12b0e58ce6d1ba77df79af6cb",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-1-candidate/plan.json": "ead6da754dd2cf01a84402229ed9a7073cde863535940444007f2e8cc6beb0b9",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-1-candidate-decode/result.json": "b9a0b9cc817de577949ffa66145d6ac12247fe2098660cce91f7c4711e7cdcb7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-1-candidate-decode/prose-draft4/chunks.json": "25f5d79e5b09268cce163330a4e4b68099125d62dff643481d8b0c3cba0150f4",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-1-candidate-decode/code-draft4/chunks.json": "7a3f98bd4ce6220b87af196892fd9c9f88e55c5b76405d798987e3d434903169",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-1-candidate/model.log": "b93b4038f8b1b0bd04e6b982a1bdbba0b83f881fd849ad0c5ccc8bf3c72abd5a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-cpy-strides-0909/prose-operations.json": "8640551b7baa3fb2d871d822c7f14bcf5ecd7099bb1d78c379d5b79ae3d49b4f"
+  },
+  "scope": "One qualified parent/HC-only pair. Both model children completed and exited cleanly; the outer ABBA stopped on a missing expert execution marker. The prototype required eight routes; the actual target and draft use ten. No expert-tile or repeated model gain is established."
+}

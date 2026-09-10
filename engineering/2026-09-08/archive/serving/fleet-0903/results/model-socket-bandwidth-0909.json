@@ -1,0 +1,341 @@
+{
+  "time": 1788999741.559019,
+  "passed": true,
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/analyze_model_socket_bandwidth_0909.py": "303165afc1bd22bd12ef51261c9b39b09e51f176133ec88f7f3d32d4edc2c4e8",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-raw-0908/result.json": "d50060c252c958d746af860bd3a0e76d82aeb1e424c3ddc19a5e3097df4b2346",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-raw-repeat-0908/result.json": "03c5d378670fee800d03aa2962a990c4f7343299db8a4a56895da93a072691c1",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm53-full-current-bandwidth-0906/result.json": "9686b7332f0758f7fa9554fca0b51a131e8b96296c5f2545f2ab635b2c23f7c1",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-raw-columns-250-0909-decode/result.json": "74d8af9c913cb7bc3a9b416200a0ef8da49c50249c7c59ff498b55183551a27f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-private-decode-scheduling-250-0909-1-candidate-decode/result.json": "b9a0b9cc817de577949ffa66145d6ac12247fe2098660cce91f7c4711e7cdcb7"
+  },
+  "rows": [
+    {
+      "label": "glm-flash-q8-r8-ordered-k-raw-0908",
+      "workload": "prose",
+      "generated_tok_s": 11.465218587870085,
+      "adjusted_gb_s": 236.3803011890887,
+      "baseline_selected": "before",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 58.77454900330953,
+          "share": 0.24864402282106307
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 58.925441336028285,
+          "share": 0.24928236845291016
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 59.18510841263268,
+          "share": 0.25038088248008655
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 59.49520243711819,
+          "share": 0.2516927262459402
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.0122613179689066,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "glm-flash-q8-r8-ordered-k-raw-0908",
+      "workload": "code",
+      "generated_tok_s": 11.48717174029865,
+      "adjusted_gb_s": 237.0998099994165,
+      "baseline_selected": "after",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 59.06807364831235,
+          "share": 0.24912746091385615
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 59.046455348993575,
+          "share": 0.24903628285969057
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 59.333980251307956,
+          "share": 0.2502489573966929
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 59.651300750802605,
+          "share": 0.2515872988297604
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.0102435514246215,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "glm-flash-q8-r8-ordered-k-raw-repeat-0908",
+      "workload": "prose",
+      "generated_tok_s": 11.420622139173265,
+      "adjusted_gb_s": 234.51631022563845,
+      "baseline_selected": "after",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 58.241741360220374,
+          "share": 0.24834836137488023
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 58.815177909001925,
+          "share": 0.25079354972118256
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 58.26581723044949,
+          "share": 0.24845102319062323
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 59.19357372596667,
+          "share": 0.25240706571331406
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.0163427868658543,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "glm-flash-q8-r8-ordered-k-raw-repeat-0908",
+      "workload": "code",
+      "generated_tok_s": 11.452854938991022,
+      "adjusted_gb_s": 236.5089738866594,
+      "baseline_selected": "after",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 58.77156512359476,
+          "share": 0.248496131701791
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 59.002409972977176,
+          "share": 0.24947218282403316
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 59.3096827916832,
+          "share": 0.2507713843454658
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 59.42531599840426,
+          "share": 0.25126030112871006
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.011123591373391,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "glm53-full-current-bandwidth-0906",
+      "workload": "prose",
+      "generated_tok_s": 7.887103963004265,
+      "adjusted_gb_s": 196.6674017730951,
+      "baseline_selected": "before",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 49.374725694165946,
+          "share": 0.25105698885030275
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 49.00011290198553,
+          "share": 0.24915218516243676
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 48.742909635558206,
+          "share": 0.24784437683167906
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 49.5496535413854,
+          "share": 0.2519464491555814
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.0165510001733395,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "glm53-full-current-bandwidth-0906",
+      "workload": "code",
+      "generated_tok_s": 9.636043978904718,
+      "adjusted_gb_s": 199.0198015567443,
+      "baseline_selected": "after",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 49.67500703028472,
+          "share": 0.24959831454822062
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 49.61181526118211,
+          "share": 0.24928079956424257
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 49.728132359649,
+          "share": 0.2498652494408732
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 50.004846905628476,
+          "share": 0.25125563644666354
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.007922137949947,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "qwen-private-raw-columns-250-0909-decode",
+      "workload": "prose",
+      "generated_tok_s": 17.6392169154222,
+      "adjusted_gb_s": 173.702939974105,
+      "baseline_selected": "before",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 43.865780432210556,
+          "share": 0.25253332176617105
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 43.093068532224464,
+          "share": 0.24808485416912704
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 43.34046107260289,
+          "share": 0.2495090818788901
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 43.403629937067066,
+          "share": 0.24987274218581174
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.0179312341011006,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "qwen-private-raw-columns-250-0909-decode",
+      "workload": "code",
+      "generated_tok_s": 18.2304539733625,
+      "adjusted_gb_s": 179.54722102396772,
+      "baseline_selected": "after",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 45.18652318133629,
+          "share": 0.25166929860364895
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 44.528484033738984,
+          "share": 0.24800430649826033
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 44.878573090482874,
+          "share": 0.24995415041534974
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 44.95364071840959,
+          "share": 0.25037224448274104
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.0147779373557544,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "qwen-private-decode-scheduling-250-0909-1-candidate-decode",
+      "workload": "prose",
+      "generated_tok_s": 24.737876540374565,
+      "adjusted_gb_s": 143.213913080493,
+      "baseline_selected": "before",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 34.80155541250762,
+          "share": 0.24300401171880204
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 36.15208375841859,
+          "share": 0.25243415936899516
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 35.44577690681186,
+          "share": 0.2475023281214979
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 36.81449700275495,
+          "share": 0.257059500790705
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.0578405639169761,
+      "target_gb_s": 250,
+      "target_met": false
+    },
+    {
+      "label": "qwen-private-decode-scheduling-250-0909-1-candidate-decode",
+      "workload": "code",
+      "generated_tok_s": 32.12152759446946,
+      "adjusted_gb_s": 152.10423532259617,
+      "baseline_selected": "after",
+      "sockets": [
+        {
+          "socket": 0,
+          "adjusted_gb_s": 36.97397414831356,
+          "share": 0.2430831335491472
+        },
+        {
+          "socket": 1,
+          "adjusted_gb_s": 38.3999975697833,
+          "share": 0.25245843738894697
+        },
+        {
+          "socket": 2,
+          "adjusted_gb_s": 37.509184619779774,
+          "share": 0.24660184208695415
+        },
+        {
+          "socket": 3,
+          "adjusted_gb_s": 39.221078984719526,
+          "share": 0.2578565869749516
+        }
+      ],
+      "busiest_to_quietest_ratio": 1.060775312585879,
+      "target_gb_s": 250,
+      "target_met": false
+    }
+  ],
+  "no_new_measurements": true,
+  "scope": "Historical stable decode windows, all 48 IMC counters. Subtract the per-socket values from the same higher-total adjacent idle window used by the original measurement, so the four adjusted socket rates sum to the retained whole-server rate.",
+  "limits": [
+    "These counters measure physical DRAM traffic, not remote NUMA accesses or compute utilization.",
+    "Balanced socket contributions do not establish a memory-bandwidth ceiling or guarantee that 250 GB/s is attainable.",
+    "The Qwen HC-only sample is one completed pair from an interrupted comparison; no repeated gain is implied."
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "time": 1788999546.9928358,
+  "passed": true,
+  "controller_sha256": "e3b61892c200fed31e5111e632eb897ed42cddd132eabe4fe88a5770eaefe0a3",
+  "input_build_sha256": "480127e865d6e742c6176a9f9376457c0d771901d880e92eb4ab6f1526cd0acf",
+  "metadata": {
+    "name": "qwen-decode-scheduling-ten-routes",
+    "patch": "patches/qwen-decode-scheduling-ten-routes.patch",
+    "patch_sha256": "1a4374a030e7724b10d05ab3750205d10ae8ce66cad107cb7ba305670038b6af",
+    "files": [
+      {
+        "path": "ggml/src/ggml-cpu/repack.cpp",
+        "before_sha256": "62ec23388c0a33d10bd1105aa8a17034d487bd42fd2c3cd6c430a1a8ef28d116",
+        "after_sha256": "6ed4d56e84a313a96b80b6f8c31da13e1d12b6578fc3a3043f8411f343e7d62b",
+        "archived_source": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/private-cpu/repack.cpp"
+      },
+      {
+        "path": "ggml/src/ggml-cpu/qwen-q8-hc-ordered-k-0909.h",
+        "before_sha256": null,
+        "after_sha256": "a6f0a6ca419288a1040b3497f14e3691fa68ef0716d9719c37f2c55ddcf57515",
+        "archived_source": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/private-cpu/qwen-q8-hc-ordered-k-0909.h"
+      }
+    ],
+    "parent": "After qwen-flash-next-goal-source.patch and qwen-q6-selected-overlay.patch; compatible with the separate gather correction.",
+    "apply_check": true,
+    "reconstructed_files_identical": true,
+    "temporary_source_tree_only": true,
+    "defaults_unchanged": true,
+    "runtime_promoted": false,
+    "component_evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/result.json",
+    "flags": {
+      "GGML_CPU_QWEN_HC_ORDERED_K": "1",
+      "GGML_CPU_QWEN_HC_ROW_SPLIT": "1",
+      "GGML_CPU_QWEN_Q6_MOE_TILE_ROWS": "16"
+    },
+    "scope": "Opt-in Q8 HC scheduling for K10240/nc64 and Q6 expert tiles for K2560/nc160/512 experts/10 routes. Exact reconstruction of these two source files, not a rebuild or full reconstruction of the experimental shared-dispatch/HC-normalization model runtime. Separate private overlays and evidence remain in the archive."
+  }
+}
