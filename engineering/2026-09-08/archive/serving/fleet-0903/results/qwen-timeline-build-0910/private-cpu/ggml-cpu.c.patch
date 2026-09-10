@@ -1,0 +1,80 @@
+--- /home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu.c
++++ private/ggml-cpu.c
+@@ -3875,6 +3875,11 @@
+     const bool profile_ops = profile_graph_index >= ggml_cpu_op_profile_skip &&
+         profile_graph_index < ggml_cpu_op_profile_skip + ggml_cpu_op_profile_count;
+     int64_t * profile_node_us = profile_ops ? calloc(cgraph->n_nodes, sizeof(int64_t)) : NULL;
++    int64_t * profile_node_start = profile_ops ? calloc(cgraph->n_nodes, sizeof(int64_t)) : NULL;
++    int64_t * profile_node_work_end = profile_ops ? calloc(cgraph->n_nodes, sizeof(int64_t)) : NULL;
++    int64_t * profile_node_end = profile_ops ? calloc(cgraph->n_nodes, sizeof(int64_t)) : NULL;
++    GGML_ASSERT(!profile_ops || (profile_node_us && profile_node_start && profile_node_work_end && profile_node_end));
++    const int64_t profile_graph_start = profile_ops ? ggml_time_us() : 0;
+     int profile_cpu = -1;
+ #if defined(__linux__)
+     if (profile_ops) {
+@@ -3924,6 +3929,11 @@
+             } else {
+                 ggml_compute_forward(&params, node);
+             }
++        }
++
++        if (profile_ops) {
++            profile_node_start[measured_node_n] = profile_start_us;
++            profile_node_work_end[measured_node_n] = ggml_time_us();
+         }
+ 
+         if (state->ith == 0 && cplan->abort_callback &&
+@@ -3950,7 +3960,8 @@
+             }
+         }
+         if (profile_ops) {
+-            profile_node_us[measured_node_n] = ggml_time_us() - profile_start_us;
++            profile_node_end[measured_node_n] = ggml_time_us();
++            profile_node_us[measured_node_n] = profile_node_end[measured_node_n] - profile_start_us;
+         }
+     }
+ 
+@@ -3963,6 +3974,9 @@
+     ggml_barrier(state->threadpool);
+ 
+     if (profile_ops) {
++        const int64_t profile_graph_end = ggml_time_us();
++        GGML_LOG_WARN("CPU_OP_TIMELINE index=%d cpu=%d graph=%p threads=%d start_us=%" PRId64 " end_us=%" PRId64 "\n",
++            profile_graph_index, profile_cpu, (const void *) cgraph, n_threads_graph, profile_graph_start, profile_graph_end);
+         int64_t profile_total_us = 0;
+         for (int node_n = 0; node_n < cgraph->n_nodes; ++node_n) {
+             profile_total_us += profile_node_us[node_n];
+@@ -3971,23 +3985,30 @@
+             profile_graph_index, profile_cpu, (const void *) cgraph, cgraph->n_nodes,
+             profile_total_us / 1000.0, profile_first, profile_last);
+         for (int node_n = 0; node_n < cgraph->n_nodes; ++node_n) {
+-            if (profile_node_us[node_n] < 5) {
++            if (profile_node_start[node_n] == 0) {
+                 continue;
+             }
+             const struct ggml_tensor * node = cgraph->nodes[node_n];
+             const struct ggml_tensor * src0 = node->src[0];
+             GGML_LOG_WARN(
+                 "CPU_OP_PROFILE cpu=%d graph=%p node=%d op=%s time=%.3f ms name='%s' "
+-                "src0_type=%s src0_ne=[%" PRId64 ",%" PRId64 ",%" PRId64 "] src0_name='%s'\n",
++                "src0_type=%s src0_ne=[%" PRId64 ",%" PRId64 ",%" PRId64 "] src0_name='%s' "
++                "start_us=%" PRId64 " work_end_us=%" PRId64 " end_us=%" PRId64 " "
++                "dst_ne=[%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 "]\n",
+                 profile_cpu, (const void *) cgraph, node_n, ggml_op_name(node->op),
+                 profile_node_us[node_n] / 1000.0, node->name,
+                 src0 != NULL ? ggml_type_name(src0->type) : "none",
+                 src0 != NULL ? src0->ne[0] : 0,
+                 src0 != NULL ? src0->ne[1] : 0,
+                 src0 != NULL ? src0->ne[2] : 0,
+-                src0 != NULL ? src0->name : "");
++                src0 != NULL ? src0->name : "",
++                profile_node_start[node_n], profile_node_work_end[node_n], profile_node_end[node_n],
++                node->ne[0], node->ne[1], node->ne[2], node->ne[3]);
+         }
+         free(profile_node_us);
++        free(profile_node_start);
++        free(profile_node_work_end);
++        free(profile_node_end);
+         if (ggml_cpu_op_profile_arm_file != NULL &&
+                 profile_graph_index + 1 >= ggml_cpu_op_profile_skip + ggml_cpu_op_profile_count) {
+             atomic_store_explicit(&ggml_cpu_op_profile_arm_state, 2, memory_order_release);

@@ -1,0 +1,102 @@
+{
+  "started": 1789019414.1570888,
+  "passed": false,
+  "controller_pid": 2952551,
+  "plan_sha256": "f0fc7809525d902dbc16f5d87f1a589013bb5f875aa4243e782c1bff0fc71891",
+  "stage": "finished",
+  "model_started": true,
+  "checks": [],
+  "traces": [],
+  "restored": true,
+  "target_reached": false,
+  "diagnostic_only": true,
+  "background_before_handoff": {
+    "time": 1789019435.59462,
+    "background_cores": 3.1779887640844047,
+    "largest": [
+      {
+        "pid": 2769410,
+        "name": "Paseo",
+        "cores": 0.5730158202318343
+      },
+      {
+        "pid": 3508784,
+        "name": "containerd",
+        "cores": 0.5456362247258763
+      },
+      {
+        "pid": 3508983,
+        "name": "dockerd",
+        "cores": 0.5319464269728973
+      },
+      {
+        "pid": 4104574,
+        "name": "thunderbird-bin",
+        "cores": 0.3129096629252337
+      },
+      {
+        "pid": 4063094,
+        "name": "Paseo",
+        "cores": 0.17992305618200938
+      }
+    ]
+  },
+  "memory_after_flash_stop": {
+    "memory": {
+      "MemTotal": 811215671296,
+      "MemAvailable": 283265802240,
+      "SwapTotal": 8589930496,
+      "SwapFree": 147456,
+      "Shmem": 479033643008
+    },
+    "nodes": {
+      "node0": {
+        "MemFree": 54628818944,
+        "FilePages": 129976754176,
+        "AnonPages": 15164858368,
+        "Shmem": 120534491136,
+        "SReclaimable": 1192210432,
+        "estimated_available": 65263292416
+      },
+      "node1": {
+        "MemFree": 54648713216,
+        "FilePages": 137521909760,
+        "AnonPages": 8207548416,
+        "Shmem": 105116053504,
+        "SReclaimable": 1211711488,
+        "estimated_available": 88266280960
+      },
+      "node2": {
+        "MemFree": 54587699200,
+        "FilePages": 137596506112,
+        "AnonPages": 8598933504,
+        "Shmem": 127156150272,
+        "SReclaimable": 855330816,
+        "estimated_available": 65883385856
+      },
+      "node3": {
+        "MemFree": 55041691648,
+        "FilePages": 138736164864,
+        "AnonPages": 7058427904,
+        "Shmem": 126226948096,
+        "SReclaimable": 989896704,
+        "estimated_available": 68540805120
+      }
+    }
+  },
+  "model_pid": 2954256,
+  "error": "AssertionError()",
+  "error_traceback": "Traceback (most recent call last):\n  File \"/home/user/InfoSystemic/AI-Server/serving/fleet-0903/probe_qwen_mtp_fresh_seed_0910e.py\", line 197, in execute\n    assert {p for p in mapped_libraries(model.pid) if '/'+stem in p} == {str(Path(plan[key]).resolve())}\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+  "owned_qwen_exit": 0,
+  "dispatch_cleanup_valid": true,
+  "restored_flash_pid": 3161949,
+  "restored_flash_start": "116194461",
+  "full_environment_restored": true,
+  "restored_command_and_affinity": true,
+  "restored_libraries_match": true,
+  "restored_service": {
+    "processing": 0,
+    "queued": 0.0
+  },
+  "finished": 1789019781.6200294
+}

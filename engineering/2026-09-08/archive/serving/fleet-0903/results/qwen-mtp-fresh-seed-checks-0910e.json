@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "case": "changed-identity",
+      "passed": true,
+      "restored": false,
+      "events": []
+    },
+    {
+      "case": "cancel-after-stop",
+      "passed": true,
+      "restored": true,
+      "events": [
+        "stop-flash",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "memory-after-stop",
+      "passed": true,
+      "restored": true,
+      "events": [
+        "stop-flash",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "qwen-load-exits",
+      "passed": true,
+      "restored": true,
+      "events": [
+        "stop-flash",
+        "spawn-fake-qwen",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "restore-reserve-fails",
+      "passed": true,
+      "restored": false,
+      "events": [
+        "stop-flash"
+      ]
+    }
+  ],
+  "sources": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_qwen_mtp_fresh_seed_0910e.py": "56d4c9ea83b9d96f4e9bb65098e9d22090d43e4170b79d46fe1c0cd14d436c23",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/probe_qwen_mtp_fresh_seed_0910e.py": "a52dbc4a9609230a94c4324a2aaedf29447bf448f197779b61245f736f71b131"
+  },
+  "scope": "Fake processes, synthetic environment, temporary files. Executes actual handoff failure paths; no real inference, signal, download, or service mutation."
+}

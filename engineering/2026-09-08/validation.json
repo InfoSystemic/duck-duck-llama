@@ -176,7 +176,7 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 111,
+    "staged_files_scanned": 160,
     "credential_or_binary_findings": [],
     "manifest_files_not_tracked": [],
     "host_snapshot_filter_check_passed": true,
@@ -243,8 +243,8 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "experiment": "flash-q4-selection-and-model-headroom-0910",
-    "updated_utc": "2026-09-10T04:26:14.330234+00:00",
+    "experiment": "qwen-mtp-state-and-socket-timelines-0910",
+    "updated_utc": "2026-09-10T06:14:07.372602+00:00",
     "source_bundles_unchanged": true,
     "source_freshness_audit": {
       "source_bundles": [
@@ -310,78 +310,104 @@
       "passed": true
     },
     "archive": {
-      "archive_files": 4153,
-      "patches": 12,
-      "python_files": 1117,
+      "archive_files": 4305,
+      "patches": 13,
+      "python_files": 1165,
       "shell_files": 29,
       "errors": [],
       "passed": true
     },
     "links": {
       "passed": true,
-      "checked_links": 199,
-      "documents": 12,
+      "checked_links": 115,
+      "documents": 3,
       "missing": [],
       "scope": "Local target existence; external destinations and fragment anchors excluded"
     },
+    "evidence": "archive/serving/fleet-0903/results/qwen-order-and-timeline-audit-0910b.json",
+    "audited_model_experiments": 6,
+    "exact_flash_restorations": 6,
+    "candidate_repeated_requests": 8,
+    "candidate_outputs_and_counts_match": true,
+    "matched_timeline_captures": 2,
+    "counters_per_interval": 48,
+    "baseline_object_and_common_library_reproduced": true,
+    "candidate_correctness_patch": "patches/qwen-mtp-fresh-sequence-carry.patch",
+    "portable_patch_reconstruction": true,
+    "current_host_load_only": true,
+    "controlled_model_gain_established": false,
+    "runtime_promoted": false,
     "selected_flash_quant": "UD-Q4_K_XL",
-    "retained_flash_draft_quant": "Q8_0",
     "retained_qwen_quant": "UD-Q6_K_XL",
-    "new_portable_profile": "profiles/20260908/glm-flash-q4-mtp2.json",
-    "portable_profile_matches_selected_command": true,
-    "activation_audit": {
-      "passed": true,
-      "evidence": "archive/serving/fleet-0903/results/glm-flash-q4-activation-audit-0910c.json"
-    },
-    "measurement_audit": {
-      "passed": true,
-      "runs": 2,
-      "workload_windows": 4,
-      "counters_per_interval": 48,
-      "repeated_outputs_and_counts_match": true,
-      "summaries": {
-        "prose": {
-          "mean_tok_s": 15.854042481102393,
-          "tok_s_range": [
-            15.764121845864524,
-            15.94396311634026
-          ],
-          "adjusted_gb_s_range": [
-            178.49458576632955,
-            181.7413977686259
-          ],
-          "idle_qualifies_all": true
-        },
-        "code": {
-          "mean_tok_s": 15.806098507765356,
-          "tok_s_range": [
-            15.684155605116668,
-            15.92804141041404
-          ],
-          "adjusted_gb_s_range": [
-            179.71511698525674,
-            184.04840988866272
-          ],
-          "idle_qualifies_all": true
-        }
-      },
-      "current_host_load_only": true,
-      "target_reached": false,
-      "evidence": "archive/serving/fleet-0903/results/glm-flash-q4-measurement-audit-0910.json"
-    },
-    "lifecycle_fault_checks": 11,
-    "q4_model_payload_bytes": 199707321347,
-    "q4_payload_volatile_across_reboot": true,
-    "qwen_target_tok_s": 40,
-    "qwen_40_target_reached": false,
-    "all_model_goal_complete": false,
-    "scope": "Publishes verified Q4 staging, NUMA repair, runtime selection, repeated current-load measurements, and conditional 40 tok/s Qwen planning. Failed and superseded attempts remain distinct. No new engine build or checkpoint-equivalence quality claim.",
+    "qwen_40_tok_s_reached": false,
+    "all_models_250_gb_s_reached": false,
     "content_scan": {
-      "staged_files_scanned": 111,
+      "staged_files_scanned": 160,
       "credential_or_binary_findings": [],
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,
       "passed": true
+    },
+    "whitespace_check": {
+      "passed": true,
+      "source_whitespace_check_passed": true,
+      "patch_context_lines": [
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
+          "line": 6,
+          "reason": "trailing whitespace.",
+          "unified_diff_blank_context": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
+          "line": 14,
+          "reason": "trailing whitespace.",
+          "unified_diff_blank_context": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
+          "line": 14,
+          "reason": "new blank line at EOF.",
+          "unified_diff_blank_context": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
+          "line": 25,
+          "reason": "trailing whitespace.",
+          "unified_diff_blank_context": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
+          "line": 36,
+          "reason": "trailing whitespace.",
+          "unified_diff_blank_context": true
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
+          "line": 39,
+          "reason": "trailing whitespace.",
+          "unified_diff_blank_context": true
+        },
+        {
+          "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
+          "line": 6,
+          "reason": "trailing whitespace.",
+          "unified_diff_blank_context": true
+        },
+        {
+          "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
+          "line": 14,
+          "reason": "trailing whitespace.",
+          "unified_diff_blank_context": true
+        },
+        {
+          "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
+          "line": 14,
+          "reason": "new blank line at EOF.",
+          "unified_diff_blank_context": true
+        }
+      ],
+      "scope": "The only full-diff whitespace diagnostics are required single-space blank context lines in unified patches. All other staged files pass git diff --check unchanged."
     }
   },
   "previous_follow_ups": [
@@ -1975,6 +2001,13 @@
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,
       "passed": true
+    },
+    {
+      "staged_files_scanned": 111,
+      "credential_or_binary_findings": [],
+      "manifest_files_not_tracked": [],
+      "host_snapshot_filter_check_passed": true,
+      "passed": true
     }
   ],
   "follow_up_history": [
@@ -2324,6 +2357,148 @@
       "scope": "Publishes the completed original-host Flash comparison and allocation simulation. Earlier reconstructed publication binaries and source overlays are unchanged; no new model-quality certification.",
       "content_scan": {
         "staged_files_scanned": 124,
+        "credential_or_binary_findings": [],
+        "manifest_files_not_tracked": [],
+        "host_snapshot_filter_check_passed": true,
+        "passed": true
+      }
+    },
+    {
+      "experiment": "flash-q4-selection-and-model-headroom-0910",
+      "updated_utc": "2026-09-10T04:26:14.330234+00:00",
+      "source_bundles_unchanged": true,
+      "source_freshness_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "archive": {
+        "archive_files": 4153,
+        "patches": 12,
+        "python_files": 1117,
+        "shell_files": 29,
+        "errors": [],
+        "passed": true
+      },
+      "links": {
+        "passed": true,
+        "checked_links": 199,
+        "documents": 12,
+        "missing": [],
+        "scope": "Local target existence; external destinations and fragment anchors excluded"
+      },
+      "selected_flash_quant": "UD-Q4_K_XL",
+      "retained_flash_draft_quant": "Q8_0",
+      "retained_qwen_quant": "UD-Q6_K_XL",
+      "new_portable_profile": "profiles/20260908/glm-flash-q4-mtp2.json",
+      "portable_profile_matches_selected_command": true,
+      "activation_audit": {
+        "passed": true,
+        "evidence": "archive/serving/fleet-0903/results/glm-flash-q4-activation-audit-0910c.json"
+      },
+      "measurement_audit": {
+        "passed": true,
+        "runs": 2,
+        "workload_windows": 4,
+        "counters_per_interval": 48,
+        "repeated_outputs_and_counts_match": true,
+        "summaries": {
+          "prose": {
+            "mean_tok_s": 15.854042481102393,
+            "tok_s_range": [
+              15.764121845864524,
+              15.94396311634026
+            ],
+            "adjusted_gb_s_range": [
+              178.49458576632955,
+              181.7413977686259
+            ],
+            "idle_qualifies_all": true
+          },
+          "code": {
+            "mean_tok_s": 15.806098507765356,
+            "tok_s_range": [
+              15.684155605116668,
+              15.92804141041404
+            ],
+            "adjusted_gb_s_range": [
+              179.71511698525674,
+              184.04840988866272
+            ],
+            "idle_qualifies_all": true
+          }
+        },
+        "current_host_load_only": true,
+        "target_reached": false,
+        "evidence": "archive/serving/fleet-0903/results/glm-flash-q4-measurement-audit-0910.json"
+      },
+      "lifecycle_fault_checks": 11,
+      "q4_model_payload_bytes": 199707321347,
+      "q4_payload_volatile_across_reboot": true,
+      "qwen_target_tok_s": 40,
+      "qwen_40_target_reached": false,
+      "all_model_goal_complete": false,
+      "scope": "Publishes verified Q4 staging, NUMA repair, runtime selection, repeated current-load measurements, and conditional 40 tok/s Qwen planning. Failed and superseded attempts remain distinct. No new engine build or checkpoint-equivalence quality claim.",
+      "content_scan": {
+        "staged_files_scanned": 111,
         "credential_or_binary_findings": [],
         "manifest_files_not_tracked": [],
         "host_snapshot_filter_check_passed": true,

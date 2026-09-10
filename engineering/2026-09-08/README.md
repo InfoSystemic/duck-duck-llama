@@ -1,5 +1,7 @@
 # CPU inference engineering snapshot, September 8, 2026
 
+The [Qwen request-state and timing follow-up](archive/serving/fleet-0903/QWEN-MTP-STATE-TIMELINES-20260910.md) records a private MTP fresh-sequence reset, controlled cache-erasure cases, and two output-matched four-socket timelines. The reset passes all eight repeated-request comparisons. The 40 tok/s and all-model 250 GB/s targets remain open; no new speed gain or serving-profile promotion is claimed.
+
 The latest Qwen speed target is **40+ generated tok/s at Q6**. [The current speed and headroom assessment](archive/serving/fleet-0903/MODEL-SPEED-HEADROOM-20260910.md) records the observed maxima, the 25 ms/token budget, conditional bandwidth figures, and measured optimization limits. No 40 tok/s or all-model 250 GB/s result is established.
 
 The user-selected Flash Q4 runtime is now active with Q8 MTP2. [The switch report](archive/serving/fleet-0903/FLASH-Q4-SWITCH-20260910.md) records verified weights, NUMA placement repair, response/continuation checks, and measurements under recorded host load. Qwen retains Q6. The Q4 payload occupies a volatile RAM-backed volume. The all-model 250 GB/s goal remains incomplete.

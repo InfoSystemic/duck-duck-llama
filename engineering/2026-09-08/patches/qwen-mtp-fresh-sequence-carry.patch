@@ -1,0 +1,14 @@
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -1577,6 +1577,11 @@
+                     continue;
+                 }
+ 
++                // Position zero has no predecessor hidden row. A previous request's
++                // carry must not seed a fresh sequence, even if its KV was erased.
++                if (batch_in.pos[i_batch_beg[seq_id]] == 0) {
++                    std::fill(pending_h[seq_id].begin(), pending_h[seq_id].end(), 0.0f);
++                }
+                 set_h(i_batch_beg[seq_id], pending_h[seq_id].data());
+             }
+ 
