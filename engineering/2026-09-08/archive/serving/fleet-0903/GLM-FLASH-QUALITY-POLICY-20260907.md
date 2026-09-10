@@ -1,5 +1,14 @@
 # GLM-5.3-Flash: preserve quality before optimizing speed
 
+Latest user instruction, September 10 UTC: "Okay switch GLM-5.3-Flash to Q4."
+This explicitly selects UD-Q4_K_XL and supersedes the Q8-only selection rule
+and the earlier statement that Q4 deployment was not authorized. The switch
+is complete; the Q8 huge-page experiment was cancelled through its cleanup
+handler, which restored Qwen. All six Q4 shards are verified and Q4 MTP2 is selected. See [the switch report](FLASH-Q4-SWITCH-20260910.md).
+This choice does not establish that Q4 is near-lossless relative to the released
+checkpoint. Qwen remains Q6; the user's accompanying Qwen question requests an
+assessment and does not instruct a Qwen quantization change.
+
 User correction, September 7: the user did not instruct us to keep the existing
 Full service running. The assistant incorrectly attributed that restriction
 to the user. It is withdrawn. Evaluate each selected model against the whole

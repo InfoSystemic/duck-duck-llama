@@ -1,5 +1,9 @@
 # CPU inference engineering snapshot, September 8, 2026
 
+The latest Qwen speed target is **40+ generated tok/s at Q6**. [The current speed and headroom assessment](archive/serving/fleet-0903/MODEL-SPEED-HEADROOM-20260910.md) records the observed maxima, the 25 ms/token budget, conditional bandwidth figures, and measured optimization limits. No 40 tok/s or all-model 250 GB/s result is established.
+
+The user-selected Flash Q4 runtime is now active with Q8 MTP2. [The switch report](archive/serving/fleet-0903/FLASH-Q4-SWITCH-20260910.md) records verified weights, NUMA placement repair, response/continuation checks, and measurements under recorded host load. Qwen retains Q6. The Q4 payload occupies a volatile RAM-backed volume. The all-model 250 GB/s goal remains incomplete.
+
 This snapshot publishes the GLM-5.3 Full, GLM-5.3-Flash, and Qwen3.8 engineering from the SR950 tuning campaign. It includes source patches, selected source overlays, numerical fixtures, benchmark controllers, analyses, launch settings, and unsuccessful experiments. It supersedes the older repository findings where the same model or implementation is discussed.
 
 Refreshed September 10, 2026 (UTC) with completed shared-dispatch model pairs, CPU and operation profiles, a corrected Qwen gather implementation, and its direct, graph, and loader validation. The earlier model logging failure was caused by INFO messages being suppressed at verbosity 2; matched verbosity-4 runs now complete. The gather comparison also completed, with mean speed gains of 3.94% on prose and 2.50% on code, exact output agreement, and qualified counters. Earlier failed builds and unsuccessful candidates remain archived.
@@ -29,6 +33,7 @@ The server has four Xeon Gold 6242 sockets, 64 physical cores, 128 logical CPUs,
 | GLM Flash Q8_0, dissemination barrier, raw, two runs | 11.61-11.68 | 11.69-11.69 | 239.3-239.6 / 240.4-241.4 | 63.0-63.5% |
 | GLM Flash Q8_0, latest raw kernels with MTP2, two runs | 15.20-15.24 | 16.37-16.54 | 229.7-231.0 / 233.2-235.8 | 60.4-62.0% |
 | GLM Flash Q8_0, dissemination barrier with MTP2, two runs | 15.25-15.38 | 16.38-16.39 | 230.2-232.7 / 233.5-234.2 | 60.6-61.6% |
+| GLM Flash UD-Q4_K_XL, selected Q8 MTP2, recorded background load, two runs | 15.76-15.94 | 15.68-15.93 | 178.49-181.74 / 179.72-184.05 | See load and qualification report |
 | GLM Full, Q4-based mixed runtime, MTP default 2 | 7.89 | 9.64 | 196.7 / 199.0 | about 52% |
 
 Exact counters, token counts, and evidence paths are in [measured-status.json](measured-status.json). The separately measured earlier Flash MTP2 result predates the final raw stack. The new repeated MTP2 rows measure that combined stack. Full's mixed runtime includes load-time requantization and a hybrid draft, so its filename alone does not describe runtime precision. Favorable Full file-edit replay results of 13.59-15.70 tok/s are a separate workload, not a general generation rate.
@@ -87,7 +92,7 @@ The measured Qwen CPU library has SHA-256 `c79e19e38acfd6ada3f0637c136cf9cb10253
 
 Qwen keeps UD-Q6_K_XL with a Q8 draft and MTP4. The six target shards total 169,165,382,688 bytes at model repository revision `38bb39ee97821de2c9009abb7e93950eec396e66`. Fresh arithmetic, factual, generated-code and continuation checks passed within the recorded test scope. Explicit prompt-cache extension still fails parity; requests must use `cache_prompt=false`, and the selected preset disables reuse by default. This is not broad model-quality certification.
 
-GLM Flash keeps the higher-precision quality objective. Q8 raw tuning is retained as an experimental source stack; no broad comparison with the source checkpoint establishes near-lossless quality. Lower-quant historical speed results do not replace that objective. The earlier lower-quant launcher in the archive is historical, not the selected Q8 profile.
+The user explicitly selected Flash UD-Q4_K_XL on September 10 UTC, superseding the Q8-only rule. The Q4 profile retains the Q8 draft and validated arithmetic stack. Earlier Q8 and IQ2 measurements remain historical; Q4 checkpoint-quality equivalence is not certified.
 
 The following candidates remain separate from the selected Qwen overlay:
 
