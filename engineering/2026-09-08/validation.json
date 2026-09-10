@@ -243,9 +243,11 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "updated_utc": "2026-09-10T00:39:49.679366+00:00",
+    "experiment": "qwen-q6-single-0910",
+    "updated_utc": "2026-09-10T01:25:45.417541+00:00",
     "source_bundles_and_selected_overlays_unchanged": true,
     "correctness_overlay_unchanged": true,
+    "experimental_scheduling_overlay_unchanged": true,
     "source_freshness_audit": {
       "source_bundles": [
         {
@@ -309,181 +311,169 @@
       "issues": [],
       "passed": true
     },
-    "ordered_k_proof": {
+    "q6_single_component": {
       "passed": true,
-      "cases": 96,
-      "evidence": "archive/serving/fleet-0903/results/qwen-hc-ordered-k-proof-0909/result.json"
-    },
-    "hc_graph_validation": {
-      "passed": true,
-      "builds": 3,
-      "cases_per_build": 480,
-      "broad_96_output_candidates_rejected": true,
-      "bounded_64_output_recheck_passed": true
-    },
-    "eight_route_prototype": {
-      "expert_cases": 196,
-      "expert_bit_exact": true,
-      "actual_model_routes": 10,
-      "model_comparison_complete": false,
-      "expert_path_executed": false,
-      "completed_hc_only_pair": [
+      "cases": [
         {
-          "workload": "prose",
-          "parent_tok_s": 24.205204810611562,
-          "hc_only_tok_s": 24.737876540374565,
-          "speed_change_percent": 2.200649545958311,
-          "parent_gb_s": 139.32949332725676,
-          "hc_only_gb_s": 143.213913080493,
-          "bandwidth_target_met": false
+          "rows": 64,
+          "matrices": 1,
+          "speed_ratio": 1.2315423369515044
         },
         {
-          "workload": "code",
-          "parent_tok_s": 31.447295820247653,
-          "hc_only_tok_s": 32.12152759446946,
-          "speed_change_percent": 2.1440055707037775,
-          "parent_gb_s": 148.5006824289057,
-          "hc_only_gb_s": 152.1042353225962,
-          "bandwidth_target_met": false
+          "rows": 32,
+          "matrices": 1,
+          "speed_ratio": 1.1902771548743587
+        },
+        {
+          "rows": 64,
+          "matrices": 512,
+          "speed_ratio": 1.0831848701878286
+        },
+        {
+          "rows": 32,
+          "matrices": 512,
+          "speed_ratio": 1.133484401268139
         }
       ],
-      "evidence": "archive/serving/fleet-0903/results/qwen-hc-partial-pair-0909.json"
+      "evidence": "archive/serving/fleet-0903/results/qwen-q6-packed-single-component-qualified-0910/result.json"
     },
-    "ten_route_component": {
+    "private_build": {
       "passed": true,
+      "cpu_sha256": "bf09cb90e62569cf111917c04b14fb1cf74fabda74fdd71d70a05d5514b46074",
+      "parent_cpu_sha256": "12c61b337736ca9210433f57c64ce7fffbf7e4b66920aba9a03f97eaef3fd9b7",
+      "baseline_rebuild_identical": true,
+      "first_compile_failure_preserved": true,
+      "evidence": "archive/serving/fleet-0903/results/qwen-q6-single-build-0910b/result.json"
+    },
+    "graph_validation": {
+      "passed": true,
+      "exact_outputs": true,
       "expert_cases": 210,
-      "expert_bit_exact": true,
-      "timing_arms": 10,
-      "expert_eligibility": [
+      "four_numa_arms": 10,
+      "packed_weights_unchanged": true,
+      "timing_arms": 8,
+      "qualified_timing_arms": 4,
+      "qualified_cold_pairs": [
         {
-          "tile": 16,
-          "rotating_geomean_speedup": 1.0312603928141073,
-          "model_test_eligible": true
+          "socket": 0,
+          "control": "timing-s0-3",
+          "candidate": "timing-s0-2",
+          "rows": [
+            {
+              "tokens": 1,
+              "disjoint": false,
+              "parent_us": 98.048,
+              "candidate_us": 102.0845,
+              "speed_ratio": 0.960459227404748
+            },
+            {
+              "tokens": 5,
+              "disjoint": false,
+              "parent_us": 224.5515,
+              "candidate_us": 224.8985,
+              "speed_ratio": 0.9984570817502118
+            },
+            {
+              "tokens": 5,
+              "disjoint": true,
+              "parent_us": 302.7535,
+              "candidate_us": 303.893,
+              "speed_ratio": 0.9962503249499002
+            }
+          ],
+          "cold_geomean_speed_ratio": 0.9849003013538128
         },
         {
-          "tile": 32,
-          "rotating_geomean_speedup": 1.0094804942477351,
-          "model_test_eligible": false
-        },
-        {
-          "tile": 48,
-          "rotating_geomean_speedup": 1.0032773768081538,
-          "model_test_eligible": false
+          "socket": 2,
+          "control": "timing-s2-0",
+          "candidate": "timing-s2-1",
+          "rows": [
+            {
+              "tokens": 1,
+              "disjoint": false,
+              "parent_us": 100.281,
+              "candidate_us": 102.365,
+              "speed_ratio": 0.97964147902115
+            },
+            {
+              "tokens": 5,
+              "disjoint": false,
+              "parent_us": 233.9415,
+              "candidate_us": 230.9095,
+              "speed_ratio": 1.013130685398392
+            },
+            {
+              "tokens": 5,
+              "disjoint": true,
+              "parent_us": 314.135,
+              "candidate_us": 311.244,
+              "speed_ratio": 1.009288532469702
+            }
+          ],
+          "cold_geomean_speed_ratio": 1.0005742556828625
         }
       ],
-      "cpu_sha256": "f437355d2ae73fe9ebf5f461e51ca2410f1c9fb88892cd2c68a8ed168f1f6034",
-      "evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/result.json"
+      "model_trial_eligible": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-q6-single-validation-0910/result.json"
     },
-    "scheduling_model_comparison": {
-      "validation_passed": true,
-      "candidate_repeated": true,
-      "all_outputs_match": true,
-      "all_eight_counter_windows_qualified": true,
-      "summaries": [
-        {
-          "workload": "prose",
-          "parent_mean_tok_s": 24.517821181503983,
-          "candidate_mean_tok_s": 24.371588674526333,
-          "speed_change_percent": -0.5964335325520986,
-          "parent_mean_gb_s": 141.3622418034192,
-          "candidate_mean_gb_s": 141.20599540137528,
-          "all_attribution_valid": true,
-          "repeated_bandwidth_target_met": false
-        },
-        {
-          "workload": "code",
-          "parent_mean_tok_s": 31.803664786514247,
-          "candidate_mean_tok_s": 31.83638554067742,
-          "speed_change_percent": 0.10288359653773949,
-          "parent_mean_gb_s": 150.2082042225946,
-          "candidate_mean_gb_s": 150.9825638272663,
-          "all_attribution_valid": true,
-          "repeated_bandwidth_target_met": false
-        }
-      ],
-      "paired_speed_changes_percent": [
-        {
-          "prose": -1.324936839930091,
-          "code": -0.7296249509953445
-        },
-        {
-          "prose": 0.11277882188187593,
-          "code": 0.9329942347906961
-        }
-      ],
-      "consistent_gain_established": false,
+    "assessment": {
+      "passed": true,
+      "model_controller_executed": false,
+      "new_model_bandwidth_measurements": 0,
+      "candidate_promoted": false,
       "target_reached": false,
-      "evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-model-0909b/result.json"
+      "evidence": "archive/serving/fleet-0903/results/qwen-q6-single-assessment-0910.json"
     },
     "post_trial_audit": {
       "passed": true,
-      "all_owned_models_exited_zero": true,
+      "all_owned_components_released": true,
       "independent_peer_preserved": true,
-      "private_ports_free": true,
-      "lifecycle_lock_free": true,
-      "evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-host-audit-0909b.json"
+      "evidence": "archive/serving/fleet-0903/results/qwen-q6-single-host-audit-0910.json"
     },
-    "experimental_source_overlay": {
-      "name": "qwen-decode-scheduling-ten-routes",
-      "patch": "patches/qwen-decode-scheduling-ten-routes.patch",
-      "patch_sha256": "1a4374a030e7724b10d05ab3750205d10ae8ce66cad107cb7ba305670038b6af",
-      "files": [
-        {
-          "path": "ggml/src/ggml-cpu/repack.cpp",
-          "before_sha256": "62ec23388c0a33d10bd1105aa8a17034d487bd42fd2c3cd6c430a1a8ef28d116",
-          "after_sha256": "6ed4d56e84a313a96b80b6f8c31da13e1d12b6578fc3a3043f8411f343e7d62b",
-          "archived_source": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/private-cpu/repack.cpp"
-        },
-        {
-          "path": "ggml/src/ggml-cpu/qwen-q8-hc-ordered-k-0909.h",
-          "before_sha256": null,
-          "after_sha256": "a6f0a6ca419288a1040b3497f14e3691fa68ef0716d9719c37f2c55ddcf57515",
-          "archived_source": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/private-cpu/qwen-q8-hc-ordered-k-0909.h"
-        }
-      ],
-      "parent": "After qwen-flash-next-goal-source.patch and qwen-q6-selected-overlay.patch; compatible with the separate gather correction.",
-      "apply_check": true,
-      "reconstructed_files_identical": true,
-      "temporary_source_tree_only": true,
-      "defaults_unchanged": true,
-      "runtime_promoted": false,
-      "component_evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/result.json",
-      "flags": {
-        "GGML_CPU_QWEN_HC_ORDERED_K": "1",
-        "GGML_CPU_QWEN_HC_ROW_SPLIT": "1",
-        "GGML_CPU_QWEN_Q6_MOE_TILE_ROWS": "16"
-      },
-      "scope": "Opt-in Q8 HC scheduling for K10240/nc64 and Q6 expert tiles for K2560/nc160/512 experts/10 routes. Exact reconstruction of these two source files, not a rebuild or full reconstruction of the experimental shared-dispatch/HC-normalization model runtime. Separate private overlays and evidence remain in the archive.",
-      "model_evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-model-0909b/result.json",
-      "model_validation_passed": true,
-      "consistent_model_gain_established": false,
-      "model_target_reached": false,
-      "selection": "Retain as an opt-in experiment; keep disabled in selected serving profiles."
-    },
-    "socket_counter_analysis": {
+    "q8_precision_assessment": {
       "passed": true,
-      "existing_decode_windows": 10,
-      "all_four_sockets_contribute": true,
-      "evidence": "archive/serving/fleet-0903/results/model-socket-bandwidth-0909.json"
+      "inventoried_target_tensors": 1152,
+      "expert_q6_to_q8": 94,
+      "fp32_to_q8": 168,
+      "standard_q8_is_uniform_upgrade": false,
+      "expert_only_upgrade_additional_stored_bytes": 19097190400.0,
+      "model_built": false,
+      "quality_gain_established": false,
+      "evidence": "archive/serving/fleet-0903/results/qwen-q8-precision-assessment-0910.json"
     },
     "runtime_promoted": false,
-    "scope": "Publish exact scheduling source, numerical/component checks, a failed route-count prototype, and the completed repeated model comparison. Candidate gains are inconsistent across pairs and neither bandwidth target is reached. No new Flash/Full trial or broad quality certification.",
-    "archive_files_added": 187,
-    "archive_files_updated": 3,
-    "archive_source_freshness": {
-      "added": 0,
-      "updated": 0,
+    "scope": "The single-core arithmetic gain does not establish a graph or model gain. Four graph timing arms fail the existing background limit; the two fully qualified cold pairs do not meet the predeclared 2% graph gate. Exact expert and four-NUMA outputs pass, but the prepared full-model controller remains unexecuted. All three models remain below the requested 250 GB/s acceptance target.",
+    "snapshot_verification": {
+      "archive_files": 3945,
+      "patches": 12,
+      "python_files": 1037,
+      "shell_files": 29,
+      "errors": [],
       "passed": true
     },
-    "local_links": {
-      "documents": 7,
-      "local_links_checked": 159,
-      "missing": [],
-      "passed": true
-    },
-    "whitespace_check": {
+    "documentation_links": {
       "passed": true,
-      "scope": "Repository-owned docs, metadata and verifier; archived source and patches preserve historical bytes."
+      "documents": 6,
+      "links": 146,
+      "errors": []
+    },
+    "patch_publication_check": {
+      "passed": true,
+      "source_whitespace_check_passed": true,
+      "archived_patch_context_preserved": [
+        {
+          "patch": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-q6-single-build-0910/private-cpu/repack-x86.cpp.patch",
+          "exact_reconstruction": true,
+          "blank_context_line": 6,
+          "source_sha256": "caea0afa8039b6376cff6d23158a7311ccfd4ebbc9f61ffcf1bd5e3d95c24c18"
+        },
+        {
+          "patch": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-q6-single-build-0910b/private-cpu/repack-x86.cpp.patch",
+          "exact_reconstruction": true,
+          "blank_context_line": 6,
+          "source_sha256": "526b2ca015857f01139e5f2df772d9c6cf29fbd1f4e71e9018adbf8dd1139898"
+        }
+      ]
     }
   },
   "previous_follow_ups": [
@@ -1774,6 +1764,250 @@
         "added": 0,
         "updated": 0,
         "passed": true
+      }
+    },
+    {
+      "updated_utc": "2026-09-10T00:39:49.679366+00:00",
+      "source_bundles_and_selected_overlays_unchanged": true,
+      "correctness_overlay_unchanged": true,
+      "source_freshness_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "ordered_k_proof": {
+        "passed": true,
+        "cases": 96,
+        "evidence": "archive/serving/fleet-0903/results/qwen-hc-ordered-k-proof-0909/result.json"
+      },
+      "hc_graph_validation": {
+        "passed": true,
+        "builds": 3,
+        "cases_per_build": 480,
+        "broad_96_output_candidates_rejected": true,
+        "bounded_64_output_recheck_passed": true
+      },
+      "eight_route_prototype": {
+        "expert_cases": 196,
+        "expert_bit_exact": true,
+        "actual_model_routes": 10,
+        "model_comparison_complete": false,
+        "expert_path_executed": false,
+        "completed_hc_only_pair": [
+          {
+            "workload": "prose",
+            "parent_tok_s": 24.205204810611562,
+            "hc_only_tok_s": 24.737876540374565,
+            "speed_change_percent": 2.200649545958311,
+            "parent_gb_s": 139.32949332725676,
+            "hc_only_gb_s": 143.213913080493,
+            "bandwidth_target_met": false
+          },
+          {
+            "workload": "code",
+            "parent_tok_s": 31.447295820247653,
+            "hc_only_tok_s": 32.12152759446946,
+            "speed_change_percent": 2.1440055707037775,
+            "parent_gb_s": 148.5006824289057,
+            "hc_only_gb_s": 152.1042353225962,
+            "bandwidth_target_met": false
+          }
+        ],
+        "evidence": "archive/serving/fleet-0903/results/qwen-hc-partial-pair-0909.json"
+      },
+      "ten_route_component": {
+        "passed": true,
+        "expert_cases": 210,
+        "expert_bit_exact": true,
+        "timing_arms": 10,
+        "expert_eligibility": [
+          {
+            "tile": 16,
+            "rotating_geomean_speedup": 1.0312603928141073,
+            "model_test_eligible": true
+          },
+          {
+            "tile": 32,
+            "rotating_geomean_speedup": 1.0094804942477351,
+            "model_test_eligible": false
+          },
+          {
+            "tile": 48,
+            "rotating_geomean_speedup": 1.0032773768081538,
+            "model_test_eligible": false
+          }
+        ],
+        "cpu_sha256": "f437355d2ae73fe9ebf5f461e51ca2410f1c9fb88892cd2c68a8ed168f1f6034",
+        "evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/result.json"
+      },
+      "scheduling_model_comparison": {
+        "validation_passed": true,
+        "candidate_repeated": true,
+        "all_outputs_match": true,
+        "all_eight_counter_windows_qualified": true,
+        "summaries": [
+          {
+            "workload": "prose",
+            "parent_mean_tok_s": 24.517821181503983,
+            "candidate_mean_tok_s": 24.371588674526333,
+            "speed_change_percent": -0.5964335325520986,
+            "parent_mean_gb_s": 141.3622418034192,
+            "candidate_mean_gb_s": 141.20599540137528,
+            "all_attribution_valid": true,
+            "repeated_bandwidth_target_met": false
+          },
+          {
+            "workload": "code",
+            "parent_mean_tok_s": 31.803664786514247,
+            "candidate_mean_tok_s": 31.83638554067742,
+            "speed_change_percent": 0.10288359653773949,
+            "parent_mean_gb_s": 150.2082042225946,
+            "candidate_mean_gb_s": 150.9825638272663,
+            "all_attribution_valid": true,
+            "repeated_bandwidth_target_met": false
+          }
+        ],
+        "paired_speed_changes_percent": [
+          {
+            "prose": -1.324936839930091,
+            "code": -0.7296249509953445
+          },
+          {
+            "prose": 0.11277882188187593,
+            "code": 0.9329942347906961
+          }
+        ],
+        "consistent_gain_established": false,
+        "target_reached": false,
+        "evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-model-0909b/result.json"
+      },
+      "post_trial_audit": {
+        "passed": true,
+        "all_owned_models_exited_zero": true,
+        "independent_peer_preserved": true,
+        "private_ports_free": true,
+        "lifecycle_lock_free": true,
+        "evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-host-audit-0909b.json"
+      },
+      "experimental_source_overlay": {
+        "name": "qwen-decode-scheduling-ten-routes",
+        "patch": "patches/qwen-decode-scheduling-ten-routes.patch",
+        "patch_sha256": "1a4374a030e7724b10d05ab3750205d10ae8ce66cad107cb7ba305670038b6af",
+        "files": [
+          {
+            "path": "ggml/src/ggml-cpu/repack.cpp",
+            "before_sha256": "62ec23388c0a33d10bd1105aa8a17034d487bd42fd2c3cd6c430a1a8ef28d116",
+            "after_sha256": "6ed4d56e84a313a96b80b6f8c31da13e1d12b6578fc3a3043f8411f343e7d62b",
+            "archived_source": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/private-cpu/repack.cpp"
+          },
+          {
+            "path": "ggml/src/ggml-cpu/qwen-q8-hc-ordered-k-0909.h",
+            "before_sha256": null,
+            "after_sha256": "a6f0a6ca419288a1040b3497f14e3691fa68ef0716d9719c37f2c55ddcf57515",
+            "archived_source": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/private-cpu/qwen-q8-hc-ordered-k-0909.h"
+          }
+        ],
+        "parent": "After qwen-flash-next-goal-source.patch and qwen-q6-selected-overlay.patch; compatible with the separate gather correction.",
+        "apply_check": true,
+        "reconstructed_files_identical": true,
+        "temporary_source_tree_only": true,
+        "defaults_unchanged": true,
+        "runtime_promoted": false,
+        "component_evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-build-0909b/result.json",
+        "flags": {
+          "GGML_CPU_QWEN_HC_ORDERED_K": "1",
+          "GGML_CPU_QWEN_HC_ROW_SPLIT": "1",
+          "GGML_CPU_QWEN_Q6_MOE_TILE_ROWS": "16"
+        },
+        "scope": "Opt-in Q8 HC scheduling for K10240/nc64 and Q6 expert tiles for K2560/nc160/512 experts/10 routes. Exact reconstruction of these two source files, not a rebuild or full reconstruction of the experimental shared-dispatch/HC-normalization model runtime. Separate private overlays and evidence remain in the archive.",
+        "model_evidence": "archive/serving/fleet-0903/results/qwen-decode-scheduling-model-0909b/result.json",
+        "model_validation_passed": true,
+        "consistent_model_gain_established": false,
+        "model_target_reached": false,
+        "selection": "Retain as an opt-in experiment; keep disabled in selected serving profiles."
+      },
+      "socket_counter_analysis": {
+        "passed": true,
+        "existing_decode_windows": 10,
+        "all_four_sockets_contribute": true,
+        "evidence": "archive/serving/fleet-0903/results/model-socket-bandwidth-0909.json"
+      },
+      "runtime_promoted": false,
+      "scope": "Publish exact scheduling source, numerical/component checks, a failed route-count prototype, and the completed repeated model comparison. Candidate gains are inconsistent across pairs and neither bandwidth target is reached. No new Flash/Full trial or broad quality certification.",
+      "archive_files_added": 187,
+      "archive_files_updated": 3,
+      "archive_source_freshness": {
+        "added": 0,
+        "updated": 0,
+        "passed": true
+      },
+      "local_links": {
+        "documents": 7,
+        "local_links_checked": 159,
+        "missing": [],
+        "passed": true
+      },
+      "whitespace_check": {
+        "passed": true,
+        "scope": "Repository-owned docs, metadata and verifier; archived source and patches preserve historical bytes."
       }
     }
   ],

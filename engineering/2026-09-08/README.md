@@ -8,6 +8,8 @@ The preceding continuation adds a verified copy-layout diagnostic and raw/MTP3 m
 
 The [scheduling follow-up](archive/serving/fleet-0903/QWEN-DECODE-SCHEDULING-20260909.md) adds exact HC projection scheduling and a bounded ten-route Q6 expert experiment. The first model pair completed with an HC-only gain, but its outer comparison stopped because the prototype required eight routes while the model uses ten. The corrected ten-route graph suite passes all 210 cases, and the complete repeated model comparison passes output/counter checks. It establishes no meaningful overall gain: mean speed changes are -0.60% on prose and +0.10% on code, with mixed signs across pairs. The combined candidate stays disabled in selected profiles. Both the failed prototype and corrected experiment are preserved.
 
+The [Q6 single-activation follow-up](archive/serving/fleet-0903/QWEN-Q6-SINGLE-20260910.md) passes exact expert and four-NUMA graph checks, but its single-core gain does not qualify at graph level. Four timing arms exceed the background limit; the two fully qualified cold pairs measure 0.9849x and 1.0006x. The candidate remains disabled and its prepared model controller is unexecuted. No new model rate supersedes the table below. A separate tensor inventory explains why the standard Qwen Q8 file is not a uniform precision upgrade over Q6 XL.
+
 The server has four Xeon Gold 6242 sockets, 64 physical cores, 128 logical CPUs, about 811 decimal GB of RAM, and no GPU. The utilization denominator below is the requested approximately 380 decimal GB/s whole-server capacity. These are single-conversation decode measurements, with IMC counters and adjacent idle-traffic subtraction. They are not prefill rates or aggregate multi-user throughput.
 
 ## Retained measurements

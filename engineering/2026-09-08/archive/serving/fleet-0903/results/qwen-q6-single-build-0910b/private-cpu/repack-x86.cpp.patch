@@ -1,0 +1,50 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/repack-x86.cpp
++++ private/repack-x86.cpp
+@@ -7718,9 +7718,47 @@
+     ggml_gemv_q5_K_x16_q8_K_generic(n, s, bs, vx, vy, nr, nc);
+ }
+ 
++
++#if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++#include "qwen-q6-packed-single-0908.h"
++
++static std::atomic<uint64_t> qwen_q6_single_calls{0};
++extern "C" {
++GGML_BACKEND_API uint64_t ggml_cpu_qwen_q6_single_count();
++}
++extern "C" uint64_t ggml_cpu_qwen_q6_single_count() {
++    return qwen_q6_single_calls.load(std::memory_order_relaxed);
++}
++
++static bool qwen_q6_single_enabled() {
++    static const bool enabled = [] {
++        const char * value = getenv("GGML_CPU_QWEN_Q6_PACKED_SINGLE");
++        const bool active = value && atoi(value) == 1;
++        if (active) GGML_LOG_INFO("QWEN_Q6_PACKED_SINGLE nr=1 storage=unchanged\n");
++        return active;
++    }();
++    return enabled;
++}
++
++static void qwen_q6_single_audit() {
++    static const bool enabled = [] {
++        const char * value = getenv("GGML_CPU_QWEN_Q6_PACKED_SINGLE_AUDIT");
++        return value && atoi(value) == 1;
++    }();
++    if (enabled) qwen_q6_single_calls.fetch_add(1, std::memory_order_relaxed);
++}
++#endif
++
+ void ggml_gemv_q6_K_x16_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+ #if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
+     GGML_ASSERT(nr == 1 && n % QK_K == 0 && nc % 16 == 0);
++    if (qwen_q6_single_enabled()) {
++        const block_q8_K * activation[] = { (const block_q8_K *) vy };
++        float * output[] = { s };
++        qwen_q6_packed_batch_impl<1>(n, nc, (const block_q6_K_x16 *) vx, activation, output);
++        qwen_q6_single_audit();
++        return;
++    }
+     GGML_UNUSED(bs);
+     const int nb = n / QK_K; const __m512i m4 = _mm512_set1_epi8(0x0F); const __m512i m30 = _mm512_set1_epi8(0x30);
+     const block_q6_K_x16 * vxb = (const block_q6_K_x16 *) vx; const block_q8_K * vy8 = (const block_q8_K *) vy;
