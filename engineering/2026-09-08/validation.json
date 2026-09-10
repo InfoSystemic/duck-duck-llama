@@ -243,8 +243,8 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "experiment": "qwen-mtp-state-and-socket-timelines-0910",
-    "updated_utc": "2026-09-10T06:14:07.372602+00:00",
+    "experiment": "deepseek-v41-native-cpu-bringup-0910",
+    "updated_utc": "2026-09-10T07:17:16.927071+00:00",
     "source_bundles_unchanged": true,
     "source_freshness_audit": {
       "source_bundles": [
@@ -310,39 +310,57 @@
       "passed": true
     },
     "archive": {
-      "archive_files": 4305,
+      "archive_files": 4395,
       "patches": 13,
-      "python_files": 1165,
+      "python_files": 1178,
       "shell_files": 29,
       "errors": [],
       "passed": true
     },
     "links": {
       "passed": true,
-      "checked_links": 115,
-      "documents": 3,
+      "checked_links": 129,
+      "documents": 4,
       "missing": [],
-      "scope": "Local target existence; external destinations and fragment anchors excluded"
+      "scope": "Local targets; external URLs and fragments excluded"
     },
-    "evidence": "archive/serving/fleet-0903/results/qwen-order-and-timeline-audit-0910b.json",
-    "audited_model_experiments": 6,
-    "exact_flash_restorations": 6,
-    "candidate_repeated_requests": 8,
-    "candidate_outputs_and_counts_match": true,
-    "matched_timeline_captures": 2,
-    "counters_per_interval": 48,
-    "baseline_object_and_common_library_reproduced": true,
-    "candidate_correctness_patch": "patches/qwen-mtp-fresh-sequence-carry.patch",
-    "portable_patch_reconstruction": true,
-    "current_host_load_only": true,
-    "controlled_model_gain_established": false,
+    "evidence": "archive/serving/fleet-0903/results/deepseek-v41-validation-audit-0910.json",
+    "official_model_revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
+    "header_count": 48,
+    "tensor_count": 96085,
+    "exhaustive_fp8_scale_pairs_per_implementation": 65536,
+    "real_engram_rows": 128,
+    "floating_point_state_cases": 16,
+    "fp4_packed_byte_cases": 256,
+    "component_benchmark_arms": 8,
+    "component_comparison": [
+      {
+        "table_rows": 1024,
+        "scalar_mean_median_us": 18.146677500000003,
+        "avx512_mean_median_us": 10.7527265,
+        "scalar_over_avx512": 1.6876349919250715
+      },
+      {
+        "table_rows": 1048576,
+        "scalar_mean_median_us": 24.654984499999998,
+        "avx512_mean_median_us": 16.6550115,
+        "scalar_over_avx512": 1.480334282567142
+      }
+    ],
+    "deepseek_full_model_loaded": false,
+    "deepseek_model_tok_s_measured": false,
+    "deepseek_imc_bandwidth_measured": false,
+    "qwen_r8_existing_tiles_passed": true,
+    "qwen_r8_scoped_candidate_compiled": true,
+    "qwen_r8_scoped_candidate_functionally_validated": false,
+    "qwen_r8_scoped_candidate_model_tested": false,
     "runtime_promoted": false,
     "selected_flash_quant": "UD-Q4_K_XL",
     "retained_qwen_quant": "UD-Q6_K_XL",
     "qwen_40_tok_s_reached": false,
     "all_models_250_gb_s_reached": false,
-    "content_scan": {
-      "staged_files_scanned": 160,
+    "publication_content_scan": {
+      "staged_files_scanned": 94,
       "credential_or_binary_findings": [],
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,
@@ -350,64 +368,136 @@
     },
     "whitespace_check": {
       "passed": true,
-      "source_whitespace_check_passed": true,
-      "patch_context_lines": [
+      "reported_lines": 25,
+      "verified_preserved_lines": [
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 1,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 2,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 3,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 4,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 5,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
           "line": 6,
-          "reason": "trailing whitespace.",
-          "unified_diff_blank_context": true
+          "reason": "unchanged upstream license CRLF"
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 7,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 8,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 9,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 10,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 11,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 12,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 13,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
           "line": 14,
-          "reason": "trailing whitespace.",
-          "unified_diff_blank_context": true
+          "reason": "unchanged upstream license CRLF"
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
-          "line": 14,
-          "reason": "new blank line at EOF.",
-          "unified_diff_blank_context": true
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 15,
+          "reason": "unchanged upstream license CRLF"
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
-          "line": 25,
-          "reason": "trailing whitespace.",
-          "unified_diff_blank_context": true
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 16,
+          "reason": "unchanged upstream license CRLF"
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
-          "line": 36,
-          "reason": "trailing whitespace.",
-          "unified_diff_blank_context": true
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 17,
+          "reason": "unchanged upstream license CRLF"
         },
         {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
-          "line": 39,
-          "reason": "trailing whitespace.",
-          "unified_diff_blank_context": true
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 18,
+          "reason": "unchanged upstream license CRLF"
         },
         {
-          "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 19,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+          "line": 20,
+          "reason": "unchanged upstream license CRLF"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
           "line": 6,
-          "reason": "trailing whitespace.",
-          "unified_diff_blank_context": true
+          "reason": "required blank unified-diff context"
         },
         {
-          "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
-          "line": 14,
-          "reason": "trailing whitespace.",
-          "unified_diff_blank_context": true
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+          "line": 23,
+          "reason": "required blank unified-diff context"
         },
         {
-          "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
-          "line": 14,
-          "reason": "new blank line at EOF.",
-          "unified_diff_blank_context": true
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+          "line": 29,
+          "reason": "required blank unified-diff context"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+          "line": 55,
+          "reason": "required blank unified-diff context"
+        },
+        {
+          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+          "line": 66,
+          "reason": "required blank unified-diff context"
         }
       ],
-      "scope": "The only full-diff whitespace diagnostics are required single-space blank context lines in unified patches. All other staged files pass git diff --check unchanged."
+      "nonpatch_check_passed_with_cr_at_eol": true,
+      "scope": "Required patch context and byte-exact upstream CRLF license retained"
     }
   },
   "previous_follow_ups": [
@@ -2503,6 +2593,174 @@
         "manifest_files_not_tracked": [],
         "host_snapshot_filter_check_passed": true,
         "passed": true
+      }
+    },
+    {
+      "experiment": "qwen-mtp-state-and-socket-timelines-0910",
+      "updated_utc": "2026-09-10T06:14:07.372602+00:00",
+      "source_bundles_unchanged": true,
+      "source_freshness_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "archive": {
+        "archive_files": 4305,
+        "patches": 13,
+        "python_files": 1165,
+        "shell_files": 29,
+        "errors": [],
+        "passed": true
+      },
+      "links": {
+        "passed": true,
+        "checked_links": 115,
+        "documents": 3,
+        "missing": [],
+        "scope": "Local target existence; external destinations and fragment anchors excluded"
+      },
+      "evidence": "archive/serving/fleet-0903/results/qwen-order-and-timeline-audit-0910b.json",
+      "audited_model_experiments": 6,
+      "exact_flash_restorations": 6,
+      "candidate_repeated_requests": 8,
+      "candidate_outputs_and_counts_match": true,
+      "matched_timeline_captures": 2,
+      "counters_per_interval": 48,
+      "baseline_object_and_common_library_reproduced": true,
+      "candidate_correctness_patch": "patches/qwen-mtp-fresh-sequence-carry.patch",
+      "portable_patch_reconstruction": true,
+      "current_host_load_only": true,
+      "controlled_model_gain_established": false,
+      "runtime_promoted": false,
+      "selected_flash_quant": "UD-Q4_K_XL",
+      "retained_qwen_quant": "UD-Q6_K_XL",
+      "qwen_40_tok_s_reached": false,
+      "all_models_250_gb_s_reached": false,
+      "content_scan": {
+        "staged_files_scanned": 160,
+        "credential_or_binary_findings": [],
+        "manifest_files_not_tracked": [],
+        "host_snapshot_filter_check_passed": true,
+        "passed": true
+      },
+      "whitespace_check": {
+        "passed": true,
+        "source_whitespace_check_passed": true,
+        "patch_context_lines": [
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
+            "line": 6,
+            "reason": "trailing whitespace.",
+            "unified_diff_blank_context": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
+            "line": 14,
+            "reason": "trailing whitespace.",
+            "unified_diff_blank_context": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-mtp-fresh-seed-build-0910/private-common/speculative.cpp.patch",
+            "line": 14,
+            "reason": "new blank line at EOF.",
+            "unified_diff_blank_context": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
+            "line": 25,
+            "reason": "trailing whitespace.",
+            "unified_diff_blank_context": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
+            "line": 36,
+            "reason": "trailing whitespace.",
+            "unified_diff_blank_context": true
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-timeline-build-0910/private-cpu/ggml-cpu.c.patch",
+            "line": 39,
+            "reason": "trailing whitespace.",
+            "unified_diff_blank_context": true
+          },
+          {
+            "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
+            "line": 6,
+            "reason": "trailing whitespace.",
+            "unified_diff_blank_context": true
+          },
+          {
+            "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
+            "line": 14,
+            "reason": "trailing whitespace.",
+            "unified_diff_blank_context": true
+          },
+          {
+            "path": "engineering/2026-09-08/patches/qwen-mtp-fresh-sequence-carry.patch",
+            "line": 14,
+            "reason": "new blank line at EOF.",
+            "unified_diff_blank_context": true
+          }
+        ],
+        "scope": "The only full-diff whitespace diagnostics are required single-space blank context lines in unified patches. All other staged files pass git diff --check unchanged."
       }
     }
   ]
