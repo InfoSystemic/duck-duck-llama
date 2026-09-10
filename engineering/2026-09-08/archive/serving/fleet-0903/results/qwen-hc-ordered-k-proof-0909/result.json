@@ -1,0 +1,1256 @@
+{
+  "started": 1788995314.3265867,
+  "passed": true,
+  "model_loaded": false,
+  "controller_pid": 3743652,
+  "steps": [
+    {
+      "name": "compile",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "proof",
+      "exit_code": 0,
+      "log_sha256": "9ea7b9487fd16b7a84a9cdd05050a3bd60ff441d1f608b2613d5420966cb248c"
+    }
+  ],
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/prove_qwen_hc_ordered_k_0909.py": "5cb54aacb5a3987ad3a1bd760bf42456d1d551ab94202f92075cf86b7cf5233c",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/flash-q8-r8-ordered-k-0908.h": "381bc9012349b78c81425f1f40235ea9cc0086ab348f7a79219ad6e117768ace",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-hc-ordered-k-0909.cpp": "4bb367cb8918105ff441bbf826a04f48771ca88b3342951d434dae89aac17f88",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include/ggml.h": "bddf5fbc90e7d4a201f114073e6feafbd3473582af9960bb33b28321a7e3f879",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/include/ggml-cpu.h": "316279e004cdeb8e6ef78599acb602bf79a8abdf897fed9fd1914808c1518c6e",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/repack.h": "80d654fa34a49575ffc83e23ba630112fac6267ee76965a6b2f21256a26ae2de",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/simd-mappings.h": "d1ca849419a643d4304d82d3921d11b02722ccf69d607a86c2c579b864f700b2",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-cpu/ggml-cpu-impl.h": "e7008069e3e46f1db5e3d2eaafb4ddec3c7d0ece5c0454f99c5a8e33a50f20ba",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-runtime-0909/result.json": "0245e22d597fa90b13c3ae370c7456a1f33dd881f70561bd1d53fef7c0ce4d7e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-get-rows-columns-build-0909/private-cpu/libggml-cpu.so.0.22.0": "12c61b337736ca9210433f57c64ce7fffbf7e4b66920aba9a03f97eaef3fd9b7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/private-runtime/libggml-base.so.0.22.0": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_qwen_q6.py": "dc54fad63ced5c123b4fe17c55b2aaa8104aa782497afc65f0a5f5d944805542",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437"
+  },
+  "private_source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-hc-ordered-k-proof-0909/check-qwen-hc-ordered-k-0909.cpp": "4bb367cb8918105ff441bbf826a04f48771ca88b3342951d434dae89aac17f88",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-hc-ordered-k-proof-0909/qwen-q8-hc-ordered-k-0909.h": "a6f0a6ca419288a1040b3497f14e3691fa68ef0716d9719c37f2c55ddcf57515"
+  },
+  "scope": "Arithmetic proof only. Extend the existing ordered-K header from three to eight activation rows. Compare 96 graph cases on the unchanged corrected Qwen CPU, including packed-four activation quantization, input preservation, and guards. No performance claim or model change.",
+  "idle_gate": {
+    "time": 1788995381.5330913,
+    "quiet_seconds": 60.813497226918116,
+    "required_quiet_seconds": 60,
+    "state": {
+      "servers": {
+        "1219506": {
+          "processing": 0,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "background_gate": {
+    "max_cores": 4,
+    "samples": [
+      {
+        "time": 1788995386.7888973,
+        "background_cores": 3.0105548476067794,
+        "quiet_seconds": 5.102049548178911,
+        "largest": [
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5879989936731991
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5742790171541579
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5703590238630032
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.31359946329237287
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.15875972829176377
+          }
+        ]
+      },
+      {
+        "time": 1788995392.0453897,
+        "background_cores": 3.911814493697655,
+        "quiet_seconds": 10.204540996113792,
+        "largest": [
+          {
+            "pid": 3745583,
+            "name": "python3",
+            "cores": 0.8446853941802049
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5899078970956884
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.584028416393738
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5742292818904875
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3135723041040204
+          }
+        ]
+      },
+      {
+        "time": 1788995397.314381,
+        "background_cores": 3.978140618117737,
+        "quiet_seconds": 15.304913745028898,
+        "largest": [
+          {
+            "pid": 3745583,
+            "name": "python3",
+            "cores": 0.9999269173188987
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5901529453195854
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5764284582191299
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5705465351760776
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3078206392530728
+          }
+        ]
+      },
+      {
+        "time": 1788995402.6357696,
+        "background_cores": 3.5790016831825793,
+        "quiet_seconds": 20.40689513995312,
+        "largest": [
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.6193672135190006
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.6134871450362253
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5801667569671651
+          },
+          {
+            "pid": 3745583,
+            "name": "python3",
+            "cores": 0.5488063917256967
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3116436295870921
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 1,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 1,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 2,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 2,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 3,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 3,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 4,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 4,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 5,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 5,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 6,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 6,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 7,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 7,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 8,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 64,
+      "nr": 8,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 1,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 1,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 2,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 2,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 3,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 3,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 4,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 4,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 5,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 5,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 6,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 6,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 7,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 7,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 8,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 4096,
+      "nc": 96,
+      "nr": 8,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 1,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 1,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 2,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 2,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 3,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 3,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 4,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 4,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 5,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 5,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 6,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 6,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 7,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 7,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 8,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 64,
+      "nr": 8,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 1,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 1,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 2,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 2,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 3,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 3,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 4,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 4,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 5,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 5,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 6,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 6,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 7,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 7,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 8,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 10240,
+      "nc": 96,
+      "nr": 8,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 1,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 1,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 2,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 2,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 3,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 3,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 4,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 4,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 5,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 5,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 6,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 6,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 7,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 7,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 8,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 64,
+      "nr": 8,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 1,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 1,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 2,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 2,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 3,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 3,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 4,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 4,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 5,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 5,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 6,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 6,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 7,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 7,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 8,
+      "padded": false,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    },
+    {
+      "k": 32768,
+      "nc": 96,
+      "nr": 8,
+      "padded": true,
+      "exact": true,
+      "quant_exact": true,
+      "guards": true,
+      "inputs": true,
+      "mismatches": 0
+    }
+  ],
+  "runtime_library_correct": true,
+  "summary": [
+    {
+      "cases": 96,
+      "failures": 0
+    }
+  ],
+  "fixture_sha256": "f646b473257cdf25fff4e3caa967944579d3ef049d293d7b322aef5ee69d3771",
+  "peer_preserved": true,
+  "finished": 1788995403.3086457
+}

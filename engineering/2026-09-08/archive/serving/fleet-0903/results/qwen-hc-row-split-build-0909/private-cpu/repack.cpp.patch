@@ -1,0 +1,147 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-q8-wide-batch-0907/private-cpu/repack.cpp
++++ private/repack.cpp
+@@ -29,6 +29,41 @@
+ 
+ #include "repack.h"
+ #include "ggml-quants.h"
++
++#include "qwen-q8-hc-ordered-k-0909.h"
++
++static bool qwen_hc_row_split_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_QWEN_HC_ROW_SPLIT");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++static std::atomic<uint64_t> qwen_hc_row_split_calls{0};
++extern "C" uint64_t ggml_cpu_qwen_hc_row_split_count();
++extern "C" uint64_t ggml_cpu_qwen_hc_row_split_count() {
++    return qwen_hc_row_split_calls.load(std::memory_order_relaxed);
++}
++
++static bool qwen_hc_ordered_k_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_QWEN_HC_ORDERED_K");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++static bool qwen_hc_ordered_k_audit() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_QWEN_HC_ORDERED_K_AUDIT");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++static std::atomic<uint64_t> qwen_hc_ordered_k_calls{0};
++extern "C" uint64_t ggml_cpu_qwen_hc_ordered_k_count();
++extern "C" uint64_t ggml_cpu_qwen_hc_ordered_k_count() {
++    return qwen_hc_ordered_k_calls.load(std::memory_order_relaxed);
++}
+ 
+ #if defined(__GNUC__)
+ #pragma GCC diagnostic ignored "-Woverlength-strings"
+@@ -5587,12 +5622,44 @@
+         return ggml_nbytes(t);
+     }
+ 
++    static bool hc_row_split_eligible(int n_threads, const ggml_tensor * op) {
++        if constexpr (!std::is_same_v<BLOC_TYPE, block_q8_0> || INTER_SIZE != 8 || NB_COLS != 8 || PARAM_TYPE != GGML_TYPE_Q8_0) {
++            return false;
++        }
++        if (!qwen_hc_row_split_enabled() || op->op != GGML_OP_MUL_MAT) return false;
++        const ggml_tensor * a = op->src[0], * b = op->src[1];
++        return a->type == GGML_TYPE_Q8_0 && b->type == GGML_TYPE_F32 && op->type == GGML_TYPE_F32 &&
++            a->ne[0] == 10240 && (a->ne[1] == 64 || a->ne[1] == 96) && n_threads > a->ne[1] / 8 &&
++            a->ne[2] == 1 && a->ne[3] == 1 && b->ne[0] == a->ne[0] &&
++            b->ne[1] >= 2 && b->ne[1] <= 8 && b->ne[2] == 1 && b->ne[3] == 1 &&
++            op->ne[0] == a->ne[1] && op->ne[1] == b->ne[1] && op->ne[2] == 1 && op->ne[3] == 1 &&
++            b->nb[0] == sizeof(float) && op->nb[0] == sizeof(float) && op->nb[1] % sizeof(float) == 0;
++    }
++
++    static bool hc_ordered_k_eligible(int n_threads, const ggml_tensor * op) {
++        if constexpr (!std::is_same_v<BLOC_TYPE, block_q8_0> || INTER_SIZE != 8 || NB_COLS != 8 || PARAM_TYPE != GGML_TYPE_Q8_0) {
++            return false;
++        }
++        if (!qwen_hc_ordered_k_enabled() || op->op != GGML_OP_MUL_MAT) return false;
++        const ggml_tensor * a = op->src[0], * b = op->src[1];
++        return a->type == GGML_TYPE_Q8_0 && b->type == GGML_TYPE_F32 && op->type == GGML_TYPE_F32 &&
++            a->ne[0] == 10240 && a->ne[1] == 64 && n_threads > a->ne[1] / 8 &&
++            a->ne[2] == 1 && a->ne[3] == 1 && b->ne[0] == a->ne[0] &&
++            b->ne[1] == 1 && b->ne[2] == 1 && b->ne[3] == 1 &&
++            op->ne[0] == a->ne[1] && op->ne[1] == b->ne[1] && op->ne[2] == 1 && op->ne[3] == 1 &&
++            b->nb[0] == sizeof(float) && op->nb[0] == sizeof(float) && op->nb[1] % sizeof(float) == 0;
++    }
++
+     bool work_size(int n_threads, const struct ggml_tensor * op, size_t & size) override {
+         // not realy a GGML_TYPE_Q8_0 but same size.
+         switch (op->op) {
+             case GGML_OP_MUL_MAT:
+                 {
+                     size = ggml_row_size(PARAM_TYPE, ggml_nelements(op->src[1]));
++                    if (hc_ordered_k_eligible(n_threads, op)) {
++                        size += alignof(qwen_q8_hc_partial) - 1 + sizeof(qwen_q8_hc_partial) *
++                            (op->src[0]->ne[0] / QK8_0) * (op->src[0]->ne[1] / 8) * op->src[1]->ne[1];
++                    }
+                     return true;
+                 }
+             case GGML_OP_MUL_MAT_ID:
+@@ -6308,6 +6375,57 @@
+         assert(params->wsize >= nbw2 * ne12);
+ 
+         const ggml_from_float_t from_float = ggml_get_type_traits_cpu(PARAM_TYPE)->from_float;
++
++        if (!params->use_ref && hc_row_split_eligible(nth, op)) {
++            const int blocks = ne00 / QK8_0;
++            const int first = ith * blocks / nth, last = (ith + 1) * blocks / nth;
++            for (int row = 0; row < ne11; ++row) {
++                if (last > first) from_float(
++                    (const float *) ((const char *) src1->data + row * nb11 + first * QK8_0 * sizeof(float)),
++                    wdata + row * nbw1 + first * sizeof(block_q8_0), (last - first) * QK8_0);
++            }
++            ggml_barrier(params->threadpool);
++            const int groups = ne01 / 8;
++            for (int task = ith; task < groups * ne11; task += nth) {
++                const int row = task / groups, group = task % groups;
++                forward_mul_mat_one_chunk(params, op, group * 8, (group + 1) * 8, row, row + 1);
++            }
++            if (ith == 0) {
++                static std::once_flag first_call;
++                std::call_once(first_call, [=] {
++                    GGML_LOG_INFO("QWEN_HC_ROW_SPLIT k=%lld nc=%lld nr=%lld nth=%d\n",
++                                  (long long) ne00, (long long) ne01, (long long) ne11, nth);
++                });
++                if (qwen_hc_ordered_k_audit()) qwen_hc_row_split_calls.fetch_add(1, std::memory_order_relaxed);
++            }
++            return;
++        }
++
++        if (!params->use_ref && hc_ordered_k_eligible(nth, op)) {
++            const int blocks = ne00 / QK8_0;
++            const int first = ith * blocks / nth, last = (ith + 1) * blocks / nth;
++            const uintptr_t begin = GGML_PAD((uintptr_t) wdata + nbw2, alignof(qwen_q8_hc_partial));
++            auto * partial = (qwen_q8_hc_partial *) begin;
++            GGML_ASSERT(begin + sizeof(*partial) * blocks * (ne01 / 8) * ne11 <= (uintptr_t) wdata + params->wsize);
++            for (int row = 0; row < ne11; ++row) {
++                if (last > first) from_float(
++                    (const float *) ((const char *) src1->data + row * nb11 + first * QK8_0 * sizeof(float)),
++                    wdata + row * nbw1 + first * sizeof(block_q8_0), (last - first) * QK8_0);
++            }
++            qwen_q8_hc_prepare(ne00, ne01, ne11, (const block_q8_0x8 *) src0->data,
++                               (const block_q8_0 *) wdata, first, last, partial);
++            ggml_barrier(params->threadpool);
++            qwen_q8_hc_finish(ne00, ne01, ne11, partial, (float *) dst->data, nb1 / sizeof(float), ith, nth);
++            if (ith == 0) {
++                static std::once_flag first_call;
++                std::call_once(first_call, [=] {
++                    GGML_LOG_INFO("QWEN_HC_ORDERED_K k=%lld nc=%lld nr=%lld nth=%d\n",
++                                  (long long) ne00, (long long) ne01, (long long) ne11, nth);
++                });
++                if (qwen_hc_ordered_k_audit()) qwen_hc_ordered_k_calls.fetch_add(1, std::memory_order_relaxed);
++            }
++            return;
++        }
+ 
+         // INFO: Quantization is done in planes to avoid extra complexity in chunking.
+         // Flattening dimensions not multiple of INTER_SIZE would require extra handling depending on how
