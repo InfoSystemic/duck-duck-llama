@@ -1,0 +1,71 @@
+--- a/ggml/src/ggml-cpu/arch/x86/repack.cpp
++++ b/ggml/src/ggml-cpu/arch/x86/repack.cpp
+@@ -2959,7 +2959,7 @@
+     }
+ }
+ 
+-static int q8_0_vnni_x_tile() {
++static int q8_0_vnni_x_tile(int n) {
+     static const int value = []() {
+         const char * text = std::getenv("GGML_CPU_Q8_0_REPACK_X_TILE");
+         if (text == nullptr) {
+@@ -2971,9 +2971,17 @@
+         const int parsed = atoi(text);
+         return parsed == 2 || parsed == 4 || parsed == 8 ? parsed : 1;
+     }();
+-    return value;
++    static const bool ssm_tile8=[] {
++        const char * text=std::getenv("GGML_CPU_Q8_R8_SSM_TILE8");
++        return text && std::strcmp(text,"1")==0;
++    }();
++    return n==1536 && ssm_tile8 ? 8 : value;
+ }
+ 
++#endif
++
++#if defined(__AVX512F__) && defined(__AVX512BW__)
++#include "qwen-q8-r8-k160-0910.h"
+ #endif
+ 
+ void ggml_gemv_q8_0_8x8_q8_0(
+@@ -2981,13 +2989,21 @@
+         const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
+         int nr, int nc) {
+ #if defined(__AVX512F__) && defined(__AVX512BW__)
++    static const bool prepare_k160=[] {
++        const char * value=std::getenv("GGML_CPU_Q8_R8_K160_PREP");
++        return value && std::strcmp(value,"1")==0;
++    }();
++    if (prepare_k160 && n==160 && nr==1 && nc>0 && nc%8==0) {
++        qwen_q8_r8_k160_prepared(s,vx,vy,nc);
++        return;
++    }
+     static const bool trace_enabled = []() {
+         const char * value = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
+         return value != nullptr && strcmp(value, "1") == 0;
+     }();
+     static std::atomic_flag traced = ATOMIC_FLAG_INIT;
+     if (trace_enabled && !traced.test_and_set(std::memory_order_relaxed)) {
+-        const int configured_tile = q8_0_vnni_x_tile();
++        const int configured_tile = q8_0_vnni_x_tile(n);
+         const int active_tile = configured_tile == 0 ? (nr <= 2 ? 2 : 4) : configured_tile;
+         fprintf(stderr, "q8_0_r8: AVX-512/VNNI GEMV n=%d nr=%d nc=%d x_tile=%d\n",
+                 n, nr, nc, active_tile);
+@@ -2995,7 +3011,7 @@
+ 
+     assert(n % QK8_0 == 0);
+     assert(nc % 8 == 0);
+-    const int configured_tile = q8_0_vnni_x_tile();
++    const int configured_tile = q8_0_vnni_x_tile(n);
+     const int active_tile = configured_tile == 0 ? (nr <= 2 ? 2 : 4) : configured_tile;
+     switch (active_tile) {
+         case 2: if (q8_0_vnni_gemv_rows_x_tiled_dispatch<2>(n, s, bs, vx, vy, nr, nc)) return; break;
+@@ -3109,7 +3125,7 @@
+     assert(nr % 4 == 0);
+     assert(nc % ncols_interleaved == 0);
+ 
+-    const int configured_tile = q8_0_vnni_x_tile();
++    const int configured_tile = q8_0_vnni_x_tile(n);
+     switch (configured_tile == 0 ? 8 : configured_tile) {
+         case 2: q8_0_vnni_gemm_x_tiled<2>(n, s, bs, vx, vy, nr, nc); return;
+         case 4: q8_0_vnni_gemm_x_tiled<4>(n, s, bs, vx, vy, nr, nc); return;

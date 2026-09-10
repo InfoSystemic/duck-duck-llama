@@ -1,0 +1,131 @@
+{
+  "started": 1789024216.4035468,
+  "passed": true,
+  "model_id": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/assess_deepseek_v41_bringup_0910.py": "ba0872c275ba189e2852cfa0cd1064d3ef298c96403488f717b1eda0abc77f95",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-deepseek-v41-engram-env-0910.cpp": "599caa29b7ff6bd0eee07ad7887b16a1c3cfcce187978f3d0fae091ef3e1bbf0",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-cpu-0910/libdeepseek-v41-engram.so": "4c855cb41d7c0e8487f43824efcd424b8a9b99d323ac999367cf0b1142d38bc1",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-tensor-audit-0910/result.json": "42b993b9636fa307efcb9af1a9b7220c3b00841462ed953469dc6b4471390bf7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-cpu-0910/result.json": "dafa1a55846d4e83a0b8ae189d193d492551af27c49343cfcd739fabff5c92ad",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-intake-0910/official/config.json": "8be45ce0476004a3f529fd896115a4a2e800a129ad2d3ec05b16050f52e21879"
+  },
+  "caller_environment_check": {},
+  "check_binary_sha256": "32815e34e93a1fdf9bd56c7006e36984f43857d9c9eceab5cf9b4b4c3a435cdf",
+  "compile_command": [
+    "c++",
+    "-O2",
+    "-std=c++17",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check-deepseek-v41-engram-env-0910.cpp",
+    "-L/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-cpu-0910",
+    "-Wl,-rpath,/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-cpu-0910",
+    "-ldeepseek-v41-engram",
+    "-o",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-bringup-0910/check-engram-env"
+  ],
+  "source_and_sample_audit_passed": true,
+  "architecture": "DeepseekV41ForCausalLM",
+  "current_runtime_support": [
+    {
+      "runtime": "local_qwen_engine",
+      "registration_present": false,
+      "sources": [
+        {
+          "file": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/src/llama-arch.cpp",
+          "sha256": "4ba17ca635091f58ec430d99ec572eff652343b05913bb6fb0989da1accb4b4f",
+          "v41_identifiers": []
+        },
+        {
+          "file": "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/conversion/deepseek.py",
+          "sha256": "f2451ab0b9a52e6178af1ee658e193d9ba8ad906d10e0574a99859e45733a1f2",
+          "v41_identifiers": []
+        }
+      ]
+    },
+    {
+      "runtime": "upstream_snapshot",
+      "registration_present": false,
+      "sources": [
+        {
+          "file": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-intake-0910/upstream/src/llama-arch.cpp",
+          "sha256": "ac7a0f75543f8747e777faf49cc0f42011181d6eaed260fb5cd964024d8eee73",
+          "v41_identifiers": []
+        },
+        {
+          "file": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-intake-0910/upstream/conversion/deepseek.py",
+          "sha256": "09ba15cefd9448d13f27eb0b46462d1a845d7576a6b401f0bf81d73e0419d655",
+          "v41_identifiers": []
+        }
+      ]
+    }
+  ],
+  "upstream_commit": "4ea6d1bb6dac161f70be728983e2cd58e4d9246f",
+  "checkpoint_bytes": 510296708312,
+  "native_engram_table_bytes": 202758032400,
+  "bf16_engram_table_bytes": 393227699200,
+  "native_table_bytes_saved_vs_bf16": 190469666800,
+  "engram_rows_per_text_token": 48,
+  "engram_table_payload_bytes_per_text_token": 12672,
+  "lookup_traffic_scope": "One use of each selected row and scale; excludes cache lines, page faults, projections, and inter-socket transfers.",
+  "routed_expert_native_bytes_per_decode_token": 4512153600.0,
+  "routed_expert_traffic_scope": "Expert weight and scale payload only; not total bytes per token or measured bandwidth.",
+  "storage": [
+    {
+      "path": "/home/user",
+      "available_bytes": 25087692800,
+      "holds_native_checkpoint_with_32gib_reserve": false
+    },
+    {
+      "path": "/models",
+      "available_bytes": 7671832576,
+      "holds_native_checkpoint_with_32gib_reserve": false
+    }
+  ],
+  "memory": {
+    "MemTotal": 811215671296,
+    "MemAvailable": 312764702720,
+    "Shmem": 229693411328
+  },
+  "component_comparison": [
+    {
+      "table_rows": 1024,
+      "scalar_mean_median_us": 18.146677500000003,
+      "avx512_mean_median_us": 10.7527265,
+      "scalar_over_avx512": 1.6876349919250715,
+      "scope": "single worker synthetic table; not model tok/s, full-table residency, or IMC bandwidth"
+    },
+    {
+      "table_rows": 1048576,
+      "scalar_mean_median_us": 24.654984499999998,
+      "avx512_mean_median_us": 16.6550115,
+      "scalar_over_avx512": 1.480334282567142,
+      "scope": "single worker synthetic table; not model tok/s, full-table residency, or IMC bandwidth"
+    }
+  ],
+  "intended_precision": "Preserve publisher FP4 experts and FP8 Engram tables. Audit dense conversion separately. No target quant selected or downloaded.",
+  "runtime_work_remaining": [
+    "V4.1 architecture registration, nested config and tensor-name conversion",
+    "CED/CSA2 cross-layer KV ownership, reuse and hierarchical index candidates",
+    "Single-pass mHC coefficient handoff across sublayers",
+    "Exact compressed-token map and n-gram state, Engram graph/gather integration",
+    "Text/vision routing bias and native vision path",
+    "Three-block DSpark draft, verification and cache/state lifecycle",
+    "Whole-server memory/load plan, native-precision correctness, then prose/code IMC baselines"
+  ],
+  "tuning_targets": {
+    "adjusted_decode_gb_s": 250,
+    "server_capacity_denominator_gb_s": 380,
+    "model_tok_s": null,
+    "qwen_q6_generated_tok_s": 40
+  },
+  "simultaneous_model_residency_required": false,
+  "model_loaded": false,
+  "model_tok_s_measured": false,
+  "imc_bandwidth_measured": false,
+  "runtime_promoted": false,
+  "selected_flash_pid": 3647836,
+  "selected_flash_quant": "UD-Q4_K_XL",
+  "peer_preserved": true,
+  "finished": 1789024217.3677607
+}

@@ -1,0 +1,763 @@
+{
+  "started": 1789023871.2914462,
+  "passed": true,
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/probe_deepseek_v41_native_cpu_0910.py": "b8ed1e922dfe55cd00289f2faeb504e75061c1d874f85f561285383264a1cd4f",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-engram-cpu-0910.cpp": "8b323ae8021784daf5e2433fe003a88e5b1de66ca866cd5f2cb70b665cf50f8b",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-tensor-audit-0910/result.json": "42b993b9636fa307efcb9af1a9b7220c3b00841462ed953469dc6b4471390bf7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_formats_0910.py": "5b7367ee2c6c7cd876a58951ad1c63328f5103fa3501aceab9bcc928391bef74",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384"
+  },
+  "peer_pid": 3647836,
+  "model_loaded": false,
+  "runtime_promoted": false,
+  "steps": [
+    {
+      "label": "compile-library",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "compile-benchmark",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "rows1024-arm0-mode0",
+      "exit_code": 0,
+      "log_sha256": "be0ebb86d6ef5f8374a3a24fd610aaf4d8dbe3cc1cfc4d7218e4a321d68ba047"
+    },
+    {
+      "label": "rows1024-arm1-mode1",
+      "exit_code": 0,
+      "log_sha256": "1c146269096a4301036d83efcdad1379ccc86d0e2adefc65ce4a6417ac9ecc7c"
+    },
+    {
+      "label": "rows1024-arm2-mode1",
+      "exit_code": 0,
+      "log_sha256": "20919fa485de8ad1639b910835b1b51a22d9f2e8ab31ff478ac243e856c2b2cf"
+    },
+    {
+      "label": "rows1024-arm3-mode0",
+      "exit_code": 0,
+      "log_sha256": "28108d2545e4082d0c990e50dd624612ee6298e2c5590d2cbae3b76d10b6c899"
+    },
+    {
+      "label": "rows1048576-arm0-mode0",
+      "exit_code": 0,
+      "log_sha256": "4ed8048cc5c8be7168fa11225d10a5cf73b59dc50b034e4d95e9e6a2c7d21941"
+    },
+    {
+      "label": "rows1048576-arm1-mode1",
+      "exit_code": 0,
+      "log_sha256": "38e0ade61fede03b8995a73f0a8496e34f6a3575be3c35fb0af4862874ac95d2"
+    },
+    {
+      "label": "rows1048576-arm2-mode1",
+      "exit_code": 0,
+      "log_sha256": "d50415d5f9c7e3532fe10ca542860b849b595c3d2e5a221c272390041c3ada64"
+    },
+    {
+      "label": "rows1048576-arm3-mode0",
+      "exit_code": 0,
+      "log_sha256": "6b5a7b19a4463803eac2d35a07d6d013d426fc190b0361d7493a8fe8dbdf38c2"
+    }
+  ],
+  "runs": [
+    {
+      "mode": 0,
+      "table_rows": 1024,
+      "table_bytes": 270336,
+      "lookups_per_call": 48,
+      "median_us": 18.161531,
+      "p10_us": 17.992742,
+      "p90_us": 20.194188,
+      "checksum": "0000000019b6c140",
+      "scope": "single-worker component; synthetic rows, no model or IMC claim",
+      "arm": 0,
+      "background_before": {
+        "time": 1789023879.801266,
+        "background_cores": 18.5662169183309,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.20344940222153
+          },
+          {
+            "pid": 38201,
+            "name": "python3",
+            "cores": 1.0016757705147967
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.57126821287172
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.42649476166450334
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.40888717976092287
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789023885.4650989,
+        "background_cores": 17.31610930638642,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 13.562064866594383
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5542236390022195
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.4306336985975434
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.41711604886578196
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.39201184222108204
+          }
+        ]
+      }
+    },
+    {
+      "mode": 1,
+      "table_rows": 1024,
+      "table_bytes": 270336,
+      "lookups_per_call": 48,
+      "median_us": 10.564969,
+      "p10_us": 10.281113,
+      "p90_us": 10.89152,
+      "checksum": "0000000019b6c140",
+      "scope": "single-worker component; synthetic rows, no model or IMC claim",
+      "arm": 1,
+      "background_before": {
+        "time": 1789023890.8208537,
+        "background_cores": 33.16632447513217,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 13.075185610388646
+          },
+          {
+            "pid": 39803,
+            "name": "node",
+            "cores": 2.3077267729200357
+          },
+          {
+            "pid": 40918,
+            "name": "node",
+            "cores": 2.30386123393692
+          },
+          {
+            "pid": 40127,
+            "name": "node",
+            "cores": 2.294197386479131
+          },
+          {
+            "pid": 41226,
+            "name": "node",
+            "cores": 2.2671386135973215
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789023896.6250522,
+        "background_cores": 19.667129500475607,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 13.853575497190365
+          },
+          {
+            "pid": 40308,
+            "name": "node",
+            "cores": 1.1460896023763791
+          },
+          {
+            "pid": 39453,
+            "name": "python3",
+            "cores": 0.9953391993656582
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5740111499254379
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.44838581408317024
+          }
+        ]
+      }
+    },
+    {
+      "mode": 1,
+      "table_rows": 1024,
+      "table_bytes": 270336,
+      "lookups_per_call": 48,
+      "median_us": 10.940484,
+      "p10_us": 10.921891,
+      "p90_us": 11.404945,
+      "checksum": "0000000019b6c140",
+      "scope": "single-worker component; synthetic rows, no model or IMC claim",
+      "arm": 2,
+      "background_before": {
+        "time": 1789023901.91185,
+        "background_cores": 18.20827922459952,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.229128857110254
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.580740864444379
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.4438659132285321
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.43799984389071006
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.36174094249902394
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789023907.526051,
+        "background_cores": 19.00675875903329,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.274623347833643
+          },
+          {
+            "pid": 39453,
+            "name": "python3",
+            "cores": 0.9972682064924873
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5768512174809486
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.43019412829087694
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.42237241686740645
+          }
+        ]
+      }
+    },
+    {
+      "mode": 0,
+      "table_rows": 1024,
+      "table_bytes": 270336,
+      "lookups_per_call": 48,
+      "median_us": 18.131824,
+      "p10_us": 18.088289,
+      "p90_us": 18.547934,
+      "checksum": "0000000019b6c140",
+      "scope": "single-worker component; synthetic rows, no model or IMC claim",
+      "arm": 3,
+      "background_before": {
+        "time": 1789023912.7724922,
+        "background_cores": 18.198453382547484,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.53425693360878
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5659666489602777
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.4356581765192516
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.42787856622426496
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3617518787168785
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789023918.3851533,
+        "background_cores": 18.016703693019956,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.219900252006404
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.573730483866411
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.46799175987737957
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.4562430127674872
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.4190386469194947
+          }
+        ]
+      }
+    },
+    {
+      "mode": 0,
+      "table_rows": 1048576,
+      "table_bytes": 276824064,
+      "lookups_per_call": 48,
+      "median_us": 24.690469,
+      "p10_us": 24.540023,
+      "p90_us": 25.339465,
+      "checksum": "0000000019d03670",
+      "scope": "single-worker component; synthetic rows, no model or IMC claim",
+      "arm": 0,
+      "background_before": {
+        "time": 1789023923.6080575,
+        "background_cores": 18.770683610773418,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.258443630565615
+          },
+          {
+            "pid": 2045156,
+            "name": "Paseo",
+            "cores": 0.6493557318721239
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5887231183539438
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.4694137820762342
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.4557225467656774
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789023930.191472,
+        "background_cores": 17.949386260457786,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.122245881005831
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5579207202781622
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5070226896562947
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5031074565315357
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.34845574810355395
+          }
+        ]
+      }
+    },
+    {
+      "mode": 1,
+      "table_rows": 1048576,
+      "table_bytes": 276824064,
+      "lookups_per_call": 48,
+      "median_us": 16.738578,
+      "p10_us": 16.343719,
+      "p90_us": 17.829004,
+      "checksum": "0000000019d03670",
+      "scope": "single-worker component; synthetic rows, no model or IMC claim",
+      "arm": 1,
+      "background_before": {
+        "time": 1789023935.4258819,
+        "background_cores": 17.95358743147522,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.41176315713953
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5436925169880295
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.4635076493746871
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.4517732785044418
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.36963268241272507
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789023941.6891305,
+        "background_cores": 17.68658232062742,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.153957776206754
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5532555318600154
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.45746217121994204
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.45746217121994204
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3616688105798687
+          }
+        ]
+      }
+    },
+    {
+      "mode": 1,
+      "table_rows": 1048576,
+      "table_bytes": 276824064,
+      "lookups_per_call": 48,
+      "median_us": 16.571445,
+      "p10_us": 16.159242,
+      "p90_us": 17.31066,
+      "checksum": "0000000019d03670",
+      "scope": "single-worker component; synthetic rows, no model or IMC claim",
+      "arm": 2,
+      "background_before": {
+        "time": 1789023946.9095957,
+        "background_cores": 18.07012762800276,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.401741151416548
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5514312294228739
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.4497488750612092
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.4497488750612092
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3734871092899607
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789023953.18541,
+        "background_cores": 18.1171206924208,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.393783092125789
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5659160922880259
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.4976158742532641
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.4898101350492913
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.3883355253976453
+          }
+        ]
+      }
+    },
+    {
+      "mode": 0,
+      "table_rows": 1048576,
+      "table_bytes": 276824064,
+      "lookups_per_call": 48,
+      "median_us": 24.6195,
+      "p10_us": 24.441527,
+      "p90_us": 25.056297,
+      "checksum": "0000000019d03670",
+      "scope": "single-worker component; synthetic rows, no model or IMC claim",
+      "arm": 3,
+      "background_before": {
+        "time": 1789023958.4136496,
+        "background_cores": 17.950239008103555,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.434535520630849
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5575823561100288
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.4499787435273916
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.4421530262486543
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.36976514142033484
+          }
+        ]
+      },
+      "background_after": {
+        "time": 1789023964.9827483,
+        "background_cores": 17.284225302053112,
+        "largest": [
+          {
+            "pid": 4175271,
+            "name": "chrome",
+            "cores": 14.01201652867585
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.5632971468814412
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.4498553603567065
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.4361641102588937
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3657519668987136
+          }
+        ]
+      }
+    }
+  ],
+  "library_sha256": "4c855cb41d7c0e8487f43824efcd424b8a9b99d323ac999367cf0b1142d38bc1",
+  "binary_sha256": "0e3ee0aaec6b956e5a5c57c54173eb185eceed8250858cd7313a6b46bc8b1bc5",
+  "engram_correctness": {
+    "checks": [
+      {
+        "mode": 0,
+        "kind": "all E4M3 x E8M0 byte pairs",
+        "values": 65536,
+        "exact": true,
+        "nan_policy": "canonical quiet BF16 NaN; signs/payloads not preserved for NaNs"
+      },
+      {
+        "mode": 1,
+        "kind": "all E4M3 x E8M0 byte pairs",
+        "values": 65536,
+        "exact": true,
+        "nan_policy": "canonical quiet BF16 NaN; signs/payloads not preserved for NaNs"
+      },
+      {
+        "mode": 0,
+        "kind": "actual pinned Engram rows and duplicate/reversed IDs",
+        "values": 33792,
+        "exact": true
+      },
+      {
+        "mode": 1,
+        "kind": "actual pinned Engram rows and duplicate/reversed IDs",
+        "values": 33792,
+        "exact": true
+      }
+    ],
+    "real_table_rows": 128,
+    "invalid_id_cases": 8,
+    "empty_cases": 2,
+    "passed": true
+  },
+  "fp4_correctness": {
+    "passed": true,
+    "samples": [
+      {
+        "tensor": "layers.0.ffn.experts.0.w1.weight",
+        "first_row": 0,
+        "rows": 4,
+        "cols": 5120,
+        "values": 20480,
+        "packed_codes_and_scales_roundtrip_exact": true,
+        "finite_values_match_ggml": true,
+        "signed_zero_note": "ggml numeric comparison treats positive/negative zero equally"
+      },
+      {
+        "tensor": "layers.0.ffn.experts.0.w1.weight",
+        "first_row": 1152,
+        "rows": 4,
+        "cols": 5120,
+        "values": 20480,
+        "packed_codes_and_scales_roundtrip_exact": true,
+        "finite_values_match_ggml": true,
+        "signed_zero_note": "ggml numeric comparison treats positive/negative zero equally"
+      },
+      {
+        "tensor": "layers.0.ffn.experts.0.w2.weight",
+        "first_row": 0,
+        "rows": 4,
+        "cols": 2304,
+        "values": 9216,
+        "packed_codes_and_scales_roundtrip_exact": true,
+        "finite_values_match_ggml": true,
+        "signed_zero_note": "ggml numeric comparison treats positive/negative zero equally"
+      },
+      {
+        "tensor": "layers.0.ffn.experts.0.w2.weight",
+        "first_row": 2560,
+        "rows": 4,
+        "cols": 2304,
+        "values": 9216,
+        "packed_codes_and_scales_roundtrip_exact": true,
+        "finite_values_match_ggml": true,
+        "signed_zero_note": "ggml numeric comparison treats positive/negative zero equally"
+      }
+    ],
+    "exhaustive_packed_byte_cases": 256,
+    "rejected_shapes": 4,
+    "decoder_library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-shared-dispatch-build-0909b/private-runtime/libggml-base.so.0.22.0",
+    "decoder_sha256": "f42fe6c5f86f74d6188b5fed099745c97786c62f8cda731da4d1e16cb2269a99"
+  },
+  "component_comparison": [
+    {
+      "table_rows": 1024,
+      "scalar_mean_median_us": 18.146677500000003,
+      "avx512_mean_median_us": 10.7527265,
+      "scalar_over_avx512": 1.6876349919250715,
+      "scope": "single worker synthetic table; not model tok/s, full-table residency, or IMC bandwidth"
+    },
+    {
+      "table_rows": 1048576,
+      "scalar_mean_median_us": 24.654984499999998,
+      "avx512_mean_median_us": 16.6550115,
+      "scalar_over_avx512": 1.480334282567142,
+      "scope": "single worker synthetic table; not model tok/s, full-table residency, or IMC bandwidth"
+    }
+  ],
+  "peer_preserved": true,
+  "finished": 1789023964.9915552
+}
