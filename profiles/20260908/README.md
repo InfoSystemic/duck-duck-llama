@@ -5,6 +5,7 @@ These parameterized profiles accompany the [engineering source snapshot](../../e
 | Profile | Required source | Status |
 | --- | --- | --- |
 | [qwen-flash-next-q6-mtp4.json](qwen-flash-next-q6-mtp4.json) | Qwen goal patch, selected Q6 overlay, then gather correctness fix | Selected UD-Q6_K_XL target, Q8 draft, MTP4, 15 workers/socket |
+| [glm-flash-q4-mtp2.json](glm-flash-q4-mtp2.json) | GLM Flash goal patch plus Q8 raw overlay | User-selected Q4 target, Q8 draft, MTP2; current-load measurements |
 | [glm-flash-q8-raw.json](glm-flash-q8-raw.json) | GLM Flash goal patch plus Q8 raw overlay | Retained Q8 raw experimental stack; no MTP in this profile |
 | [glm-full-q4-mixed-mtp2.json](glm-full-q4-mixed-mtp2.json) | Current Full/SR950 patch | Q4-based mixed runtime with hybrid draft; MTP default 2 and maximum 32 |
 
@@ -27,4 +28,4 @@ Load one large model at a time on this server. Full is not required to remain re
 
 Use fresh benchmark requests with `cache_prompt=false` and verify `cache_n=0`. Qwen's explicit prompt-cache extension has an unresolved parity failure. Qwen also ignores the request-level speculative settings in this source version: change MTP depth through launch flags and reload, then verify actual draft counts. Full's patched server has a different request-control contract; its MTP default and maximum are distinct.
 
-The profiles retain recorded compute settings while parameterizing paths, bind address and port. Ephemeral thread-control files are replaced by the recorded fixed 15-worker value. GLM Flash's older lower-quant launcher remains historical; its Q8 source and weights have not been broadly certified as near-lossless. The saved Flash MTP2 rate belongs to an earlier stack and is not a benchmark of this raw profile with MTP added.
+The profiles retain recorded compute settings while parameterizing paths, bind address and port. Ephemeral thread-control files are replaced by the recorded fixed 15-worker value. The user explicitly selected Flash Q4_K_XL on September 10 UTC. The new Q4 MTP2 profile matches the [completed activation](../../engineering/2026-09-08/archive/serving/fleet-0903/FLASH-Q4-SWITCH-20260910.md). Earlier Q8 and IQ2 configurations remain historical. Checkpoint-equivalent task quality is not certified.

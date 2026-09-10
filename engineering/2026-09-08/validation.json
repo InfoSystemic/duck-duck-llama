@@ -7,9 +7,9 @@
     "all_reconstructed_trees_match": true
   },
   "archive": {
-    "archive_files": 4059,
+    "archive_files": 4153,
     "patches": 12,
-    "python_files": 1083,
+    "python_files": 1117,
     "shell_files": 29,
     "errors": [],
     "passed": true
@@ -176,7 +176,7 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 124,
+    "staged_files_scanned": 111,
     "credential_or_binary_findings": [],
     "manifest_files_not_tracked": [],
     "host_snapshot_filter_check_passed": true,
@@ -243,11 +243,9 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "experiment": "flash-bandwidth250-0910",
-    "updated_utc": "2026-09-10T02:50:33.068960+00:00",
-    "source_bundles_and_selected_overlays_unchanged": true,
-    "correctness_overlay_unchanged": true,
-    "experimental_scheduling_overlay_unchanged": true,
+    "experiment": "flash-q4-selection-and-model-headroom-0910",
+    "updated_utc": "2026-09-10T04:26:14.330234+00:00",
+    "source_bundles_unchanged": true,
     "source_freshness_audit": {
       "source_bundles": [
         {
@@ -312,48 +310,74 @@
       "passed": true
     },
     "archive": {
-      "archive_files": 4059,
+      "archive_files": 4153,
       "patches": 12,
-      "python_files": 1083,
+      "python_files": 1117,
       "shell_files": 29,
       "errors": [],
       "passed": true
     },
     "links": {
       "passed": true,
-      "checked_links": 154,
-      "documents": 6,
-      "missing": []
+      "checked_links": 199,
+      "documents": 12,
+      "missing": [],
+      "scope": "Local target existence; external destinations and fragment anchors excluded"
     },
-    "flash_model_comparison": {
-      "runs": 8,
-      "workload_windows": 16,
-      "counters_per_interval": 48,
-      "all_outputs_and_counts_match_within_mode": true,
-      "target_gb_s": 250,
-      "target_reached": false,
-      "qwen_exact_configuration_restored": true,
-      "evidence": "archive/serving/fleet-0903/results/flash-bandwidth250-assessment-0910.json"
-    },
-    "full_allocation_plan": {
+    "selected_flash_quant": "UD-Q4_K_XL",
+    "retained_flash_draft_quant": "Q8_0",
+    "retained_qwen_quant": "UD-Q6_K_XL",
+    "new_portable_profile": "profiles/20260908/glm-flash-q4-mtp2.json",
+    "portable_profile_matches_selected_command": true,
+    "activation_audit": {
       "passed": true,
-      "no_weight_payload_loaded": true,
-      "raw_total_estimate_bytes": 468338265088,
-      "peak_helper_rss_bytes": 92717056,
-      "first_failed_link_preserved": true,
-      "evidence": "archive/serving/fleet-0903/results/full-memory-plan-0910b/result.json"
+      "evidence": "archive/serving/fleet-0903/results/glm-flash-q4-activation-audit-0910c.json"
     },
-    "prepared_hugepage_trial": {
-      "lifecycle_fault_checks": 7,
-      "model_executed": false,
-      "global_policy_changed": false,
-      "evidence": "archive/serving/fleet-0903/results/flash-hugepages250-lifecycle-0910.json"
+    "measurement_audit": {
+      "passed": true,
+      "runs": 2,
+      "workload_windows": 4,
+      "counters_per_interval": 48,
+      "repeated_outputs_and_counts_match": true,
+      "summaries": {
+        "prose": {
+          "mean_tok_s": 15.854042481102393,
+          "tok_s_range": [
+            15.764121845864524,
+            15.94396311634026
+          ],
+          "adjusted_gb_s_range": [
+            178.49458576632955,
+            181.7413977686259
+          ],
+          "idle_qualifies_all": true
+        },
+        "code": {
+          "mean_tok_s": 15.806098507765356,
+          "tok_s_range": [
+            15.684155605116668,
+            15.92804141041404
+          ],
+          "adjusted_gb_s_range": [
+            179.71511698525674,
+            184.04840988866272
+          ],
+          "idle_qualifies_all": true
+        }
+      },
+      "current_host_load_only": true,
+      "target_reached": false,
+      "evidence": "archive/serving/fleet-0903/results/glm-flash-q4-measurement-audit-0910.json"
     },
-    "runtime_promoted": false,
+    "lifecycle_fault_checks": 11,
+    "q4_model_payload_bytes": 199707321347,
+    "q4_payload_volatile_across_reboot": true,
+    "qwen_target_tok_s": 40,
+    "qwen_40_target_reached": false,
     "all_model_goal_complete": false,
-    "scope": "Publishes the completed original-host Flash comparison and allocation simulation. Earlier reconstructed publication binaries and source overlays are unchanged; no new model-quality certification.",
+    "scope": "Publishes verified Q4 staging, NUMA repair, runtime selection, repeated current-load measurements, and conditional 40 tok/s Qwen planning. Failed and superseded attempts remain distinct. No new engine build or checkpoint-equivalence quality claim.",
     "content_scan": {
-      "staged_files_scanned": 124,
+      "staged_files_scanned": 111,
       "credential_or_binary_findings": [],
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,
@@ -1944,6 +1968,13 @@
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,
       "passed": true
+    },
+    {
+      "staged_files_scanned": 124,
+      "credential_or_binary_findings": [],
+      "manifest_files_not_tracked": [],
+      "host_snapshot_filter_check_passed": true,
+      "passed": true
     }
   ],
   "follow_up_history": [
@@ -2179,6 +2210,124 @@
             "source_sha256": "526b2ca015857f01139e5f2df772d9c6cf29fbd1f4e71e9018adbf8dd1139898"
           }
         ]
+      }
+    },
+    {
+      "experiment": "flash-bandwidth250-0910",
+      "updated_utc": "2026-09-10T02:50:33.068960+00:00",
+      "source_bundles_and_selected_overlays_unchanged": true,
+      "correctness_overlay_unchanged": true,
+      "experimental_scheduling_overlay_unchanged": true,
+      "source_freshness_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "archive": {
+        "archive_files": 4059,
+        "patches": 12,
+        "python_files": 1083,
+        "shell_files": 29,
+        "errors": [],
+        "passed": true
+      },
+      "links": {
+        "passed": true,
+        "checked_links": 154,
+        "documents": 6,
+        "missing": []
+      },
+      "flash_model_comparison": {
+        "runs": 8,
+        "workload_windows": 16,
+        "counters_per_interval": 48,
+        "all_outputs_and_counts_match_within_mode": true,
+        "target_gb_s": 250,
+        "target_reached": false,
+        "qwen_exact_configuration_restored": true,
+        "evidence": "archive/serving/fleet-0903/results/flash-bandwidth250-assessment-0910.json"
+      },
+      "full_allocation_plan": {
+        "passed": true,
+        "no_weight_payload_loaded": true,
+        "raw_total_estimate_bytes": 468338265088,
+        "peak_helper_rss_bytes": 92717056,
+        "first_failed_link_preserved": true,
+        "evidence": "archive/serving/fleet-0903/results/full-memory-plan-0910b/result.json"
+      },
+      "prepared_hugepage_trial": {
+        "lifecycle_fault_checks": 7,
+        "model_executed": false,
+        "global_policy_changed": false,
+        "evidence": "archive/serving/fleet-0903/results/flash-hugepages250-lifecycle-0910.json"
+      },
+      "runtime_promoted": false,
+      "all_model_goal_complete": false,
+      "scope": "Publishes the completed original-host Flash comparison and allocation simulation. Earlier reconstructed publication binaries and source overlays are unchanged; no new model-quality certification.",
+      "content_scan": {
+        "staged_files_scanned": 124,
+        "credential_or_binary_findings": [],
+        "manifest_files_not_tracked": [],
+        "host_snapshot_filter_check_passed": true,
+        "passed": true
       }
     }
   ]

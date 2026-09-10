@@ -1,0 +1,104 @@
+{
+  "time": 1789010567.9986386,
+  "passed": true,
+  "estimates": [
+    {
+      "model": "GLM-5.3-Flash",
+      "from_quant": "Q8_0",
+      "to_quant": "UD-Q4_K_XL",
+      "before_gb_per_raw_token": 17.949210616,
+      "after_gb_per_raw_token": 14.246164472,
+      "byte_reduction_percent": 20.63069080430249,
+      "equal_bandwidth_weight_only_speedup_percent": 25.993285078788176,
+      "raw_weight_only_tok_s_at_250_gb_s": 17.54858302326639
+    },
+    {
+      "model": "Qwen3.8-Flash-Next",
+      "from_quant": "UD-Q6_K_XL",
+      "to_quant": "UD-Q4_K_XL",
+      "before_gb_per_raw_token": 6.963900416,
+      "after_gb_per_raw_token": 6.358972416,
+      "byte_reduction_percent": 8.686626227597106,
+      "equal_bandwidth_weight_only_speedup_percent": 9.512983551838072,
+      "raw_weight_only_tok_s_at_250_gb_s": 39.31452814152292
+    }
+  ],
+  "flash_user_selected_q4": true,
+  "qwen_q6_retained": true,
+  "superseded_q8_trial": {
+    "reason": "User explicitly selected Q4 during the candidate load.",
+    "comparison_complete": false,
+    "candidate_measurements": 0,
+    "control_rows": {
+      "prose": {
+        "tok_s": 11.569304104999652,
+        "adjusted_gb_s": 239.0283645156262,
+        "over_250_gb_s": false,
+        "output_sha256": "a155a043d5f74cac25ca31ffa0baf5ab1a5f41da00e34ed3340500e4139a6036",
+        "chunks_sha256": "0145da0da6313ccb4ac8ac2abf36a19640b87b0b0130a8d5d197f0ef03ed74b5",
+        "generated_tokens": 512,
+        "draft_tokens": 0,
+        "accepted_draft_tokens": 0,
+        "completed_answer": false
+      },
+      "code": {
+        "tok_s": 11.5953128704728,
+        "adjusted_gb_s": 239.14265095822668,
+        "over_250_gb_s": false,
+        "output_sha256": "fce79dae2c178f9b7effdbebca3b23b5e9f027275b6e1b59eab32ebc5ac647ca",
+        "chunks_sha256": "ed64d6911df3d3063b651614e0cb01e4104645c70de06f202c9840fd153b5317",
+        "generated_tokens": 512,
+        "draft_tokens": 0,
+        "accepted_draft_tokens": 0,
+        "completed_answer": false
+      }
+    },
+    "control_counters": {
+      "prose": {
+        "intervals": 113,
+        "decode_intervals": 85,
+        "decode_seconds": 42.780782214,
+        "counters_per_interval": 48,
+        "baseline_before_gb_s": 3.7550221598917153,
+        "baseline_after_gb_s": 5.234882099742048,
+        "gross_decode_gb_s": 244.26324661536825,
+        "adjusted_decode_gb_s": 239.0283645156262,
+        "adjusted_sockets_gb_s": [
+          59.657963883253124,
+          59.683313255225706,
+          59.54411340230509,
+          60.14297397484227
+        ]
+      },
+      "code": {
+        "intervals": 113,
+        "decode_intervals": 84,
+        "decode_seconds": 42.283077649,
+        "counters_per_interval": 48,
+        "baseline_before_gb_s": 5.186029336103998,
+        "baseline_after_gb_s": 4.440052664557074,
+        "gross_decode_gb_s": 244.32868029433067,
+        "adjusted_decode_gb_s": 239.14265095822668,
+        "adjusted_sockets_gb_s": [
+          59.81707114845923,
+          59.58910429167939,
+          59.42656256697072,
+          60.303275192768034
+        ]
+      }
+    },
+    "exact_qwen_restore_verified_by_controller": true,
+    "restored_qwen_pid": 3900573,
+    "restored_qwen_start": "115195851"
+  },
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/assess_q4_switch_0910.py": "e2cc1424afe70c338f3774bdfe38987f7baf75fa9400805cb4d13772f079b5a8",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q4-bandwidth-inventory-0907.json": "13bbcfa755c1c3c599c7d3aa82f49de5e01c7b1cdff24174dabecc687a524601",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-inventory-0908/result.json": "8b1d40857ae8af126e19e2b1108e8de9aee61c4bfa2cbf8f9ad4559e2e3f577a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-higher-quant-bandwidth-inventory-0907.json": "8a3e38df829dc89238bc602d1973601dae991f46372ba2774fd0d55430a1e56e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-hugepages250-comparison-0910-00-raw-control/result.json": "b91d955401b247a3f29f1c3ac2a490bdfa438f1e5248d216db3376cd78dd49f8",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-hugepages250-comparison-0910/plan.json": "9176fc20caef1a36cdfa501aa897191b8597f3b70f14866a96d23bd937408ac5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-hugepages250-comparison-0910/result.json": "4d3b598ceae45348c4e989422e6b81fb2f3cdf0950827ced59ebd865bc90c6c5"
+  },
+  "scope": "Metadata-based, raw target-weight planning at equal bandwidth. It excludes KV/state, other runtime traffic, kernel-efficiency changes, and speculation. It does not establish an end-to-end speedup or certify quality. Full already uses UD-Q4_K_XL with mixed runtime requants."
+}
