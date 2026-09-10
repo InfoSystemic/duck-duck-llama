@@ -1,0 +1,122 @@
+{
+  "passed": true,
+  "finished": 1789041298.4652004,
+  "revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
+  "real_released_text_backbone_executed": true,
+  "full_checkpoint_resident": false,
+  "all_declared_text_shapes_match_checkpoint": true,
+  "layers": 40,
+  "dim": 5120,
+  "routed_experts_per_layer": 384,
+  "selected_experts_per_token": 6,
+  "parameter_entries": 93338,
+  "native_checkpoint_precision_preserved": true,
+  "greedy_tokens": [
+    19923,
+    3,
+    1730,
+    588,
+    342,
+    1694,
+    440,
+    4316,
+    33,
+    1
+  ],
+  "complete_response": "Hello! How can I help you today?",
+  "repeated_logits_exact": true,
+  "initial_warm_decode_tok_s": 0.4820524011167875,
+  "initial_warm_decode_tokens": 9,
+  "initial_warm_decode_seconds": 18.670169423799962,
+  "initial_warm_prefill_seconds": 8.125738710165024,
+  "initial_cold_prefill_seconds": 364.55620425287634,
+  "current_endpoint_warm_decode_tok_s": 0.6062851678669816,
+  "current_endpoint_warm_response": {
+    "id": "chatcmpl-95076471ecb94d5e8c82f9ee0d871c5d",
+    "object": "chat.completion",
+    "created": 1789041250,
+    "model": "DeepSeek-V4.1-Flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 6,
+      "completion_tokens": 10,
+      "total_tokens": 16
+    },
+    "timings": {
+      "total_seconds": 20.986020238837227,
+      "prefill_seconds": 6.136814425000921,
+      "decode_seconds": 14.844499712344259,
+      "downloaded_bytes": 0,
+      "cache_bytes": 38841841088
+    }
+  },
+  "server_pid": 3928841,
+  "server_start": "118307976",
+  "endpoint": "http://127.0.0.1:18170/v1",
+  "model": "DeepSeek-V4.1-Flash",
+  "physical_workers": 16,
+  "affinity": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "context": 256,
+  "vision_enabled": false,
+  "dspark_enabled": false,
+  "server_lifecycle_lock_verified": true,
+  "server_healthy": true,
+  "api_json_and_streaming_checked": true,
+  "cached_tensor_count": 10560,
+  "cached_tensor_bytes": 38841841088,
+  "cached_manifest_sha256": "9b5518ec32d5c3d93f72ac88fa2e9a859a6bfd18f010108618ff26cebe4e240a",
+  "whole_shard_lfs_hashes_verified": false,
+  "cpu_kernels_exact_matrix_values": 82032,
+  "fp8_finite_codes_exact": 254,
+  "fp8_nan_codes_checked": 2,
+  "cache_eviction_cases": [
+    "owned_expert_only",
+    "completed_eviction_idempotent",
+    "recover_after_unlink",
+    "common_weights_protected",
+    "symlink_protected"
+  ],
+  "incremental_decode_prefixes": 24,
+  "imc_bandwidth_measured": false,
+  "whole_server_tuning_complete": false,
+  "broad_quality_evaluation": false,
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/audit_deepseek_v41_checkpoint_run_0910.py": "49f4f87825cae591715ce076f2e4f713948da0bfcbb5cc6f0ee74ac0c23ee556",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-selected.json": "627a8e31df38b1cf0b49278b6a7b10305e2ff22384d5b323ffca8cced25e6b6b",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-checkpoint-run-0910b/generation.json": "d2bc933af92ff4004690f9fce5b8dbc0641617c81481ed91a394d794a5e2e0d2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-checkpoint-run-0910b/result.json": "3191d9c416ca939278439f826eba733f67bb61a0e9c19a241fcbe6d64d4ab7fc",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-checkpoint-run-0910b/shape-check.json": "c646e8956e14bda0fc9a79e6ad903856a3d5f4e7762170bb8c54958e42023688",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-checkpoint-run-0910b/transport.json": "5a1c051dbaf365ce36ac3d957c84d22b30fea8e1b7c22b99742dd306f24730e2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/kernel-check.json": "cb47414866499190b8873a6c4bd4209f10dd53634a3bcbe725c2a2b1b3edce21",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/decode-check.json": "1e9ea4749f55f53ec6266703bf0f245289a7e5ff8c1dd34191b7ebbee9597116",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-server-0910/result.json": "a837bbf2bc0ac08e5ba973d65f84c88e751767c76410d7b193514d4f7cb1370e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-server-0910/cache-check.json": "a4db7bd4fad318abda39754da93a8465111741a4d8770e87bee5cdf09a815ed2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-server-greeting-0910/result.json": "5b430e4b711828060ef767c65f29109dde3d74884cc6e85feaca29acb6325a5f"
+  },
+  "scope": "Verified real text generation and a running local endpoint with temporary native-weight caches. The short warm greeting measures the initial CPU implementation, not full-server capability. Checkpoint range integrity, finite logits, and exact repeated CPU logits do not establish GPU-reference or broad task-quality equivalence."
+}

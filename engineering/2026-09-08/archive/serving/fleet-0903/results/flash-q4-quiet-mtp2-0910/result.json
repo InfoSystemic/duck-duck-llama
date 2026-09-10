@@ -1,0 +1,556 @@
+{
+  "started": 1789033493.1376727,
+  "passed": true,
+  "controller_pid": 2769951,
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_flash_q4_quiet_0910.py": "983b3b1612f0a74341f8729c1720dd5f89df0c265d456d46560d223422220014",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/glm-flash-selected.json": "121d920021e85d7949ee256bdd2d774386c3966021cfdebb38015612d17ee47a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/measure-model-bandwidth.py": "227be7c13e6941baf574e2e0bda74a28f0e11af30da7f35acd7ac8b70890958a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_flash_q4_selected_0910.py": "0b582aa5645ac9898d3b60493a5092cff364861a346a3011f1b160745e09ad2a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_qwen_q6.py": "dc54fad63ced5c123b4fe17c55b2aaa8104aa782497afc65f0a5f5d944805542",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/guarded_inference_request.py": "4633e6369cdeb93a3de9861c288b80edb01d14e17d0d2ec74e466a5e06b25e85",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/dram_bandwidth.py": "011ad0dfde74277c36f3f526380de20da0dd2b0ce1aee5e0c89618b247483e85",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/inference_contention_guard.py": "d78b0e557b17e553c7fabb071b093a27d5d2eab2249fa8d344ebca8fc0493a23",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/select_flash_q4_0910c.py": "82921824f989c466d7ad1bcaba847cdca4c0718569414405bfe2e3d93198d852"
+  },
+  "mapped_libraries": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/libggml-cpu.so.0.22.0": "5ba125771f3e8bac0b634a845f6666700d53e25b90573581c62f8bbbb8718f2b",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libggml.so.0.22.0": "fee7b0b8269797a1ed8c43d4032a6b96f5feaa8a43968ec12ee07307af7f0119",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libggml-base.so.0.22.0": "01e54cdb7764b31968c533933ad96ac363fd215132e6fa8ce3e56a9f557ee28d",
+    "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libllama.so.0.3.0": "8c794722eccdcc27aac88def7f1a1d549926a0d6aa3dd00586d6fdca5c8eb08a"
+  },
+  "runs": [
+    {
+      "index": 0,
+      "started": 1789033493.1997921,
+      "idle_gate": {
+        "time": 1789033513.547153,
+        "quiet_seconds": 15.203394521027803,
+        "required_quiet_seconds": 15,
+        "state": {
+          "servers": {
+            "2334769": {
+              "processing": 0,
+              "queued": 0.0
+            }
+          },
+          "foreign_pids": [],
+          "busy": false
+        },
+        "churn": []
+      },
+      "background_gate": {
+        "max_cores": 6,
+        "samples": [
+          {
+            "time": 1789033518.8076065,
+            "background_cores": 3.5961525924840574,
+            "quiet_seconds": 5.108237074920908,
+            "largest": [
+              {
+                "pid": 2769410,
+                "name": "Paseo",
+                "cores": 0.5912020048612876
+              },
+              {
+                "pid": 3508784,
+                "name": "containerd",
+                "cores": 0.5481343091429156
+              },
+              {
+                "pid": 3508983,
+                "name": "dockerd",
+                "cores": 0.5363885739469961
+              },
+              {
+                "pid": 4104574,
+                "name": "thunderbird-bin",
+                "cores": 0.35432967841024193
+              },
+              {
+                "pid": 4101570,
+                "name": "codex",
+                "cores": 0.19380463073267376
+              }
+            ]
+          },
+          {
+            "time": 1789033524.0800765,
+            "background_cores": 3.7239834695506446,
+            "quiet_seconds": 10.22104172501713,
+            "largest": [
+              {
+                "pid": 3508983,
+                "name": "dockerd",
+                "cores": 0.5828503539527794
+              },
+              {
+                "pid": 2769410,
+                "name": "Paseo",
+                "cores": 0.580894480281797
+              },
+              {
+                "pid": 3508784,
+                "name": "containerd",
+                "cores": 0.5730709855978671
+              },
+              {
+                "pid": 4104574,
+                "name": "thunderbird-bin",
+                "cores": 0.37943949217060136
+              },
+              {
+                "pid": 4063094,
+                "name": "Paseo",
+                "cores": 0.20145498811119558
+              }
+            ]
+          },
+          {
+            "time": 1789033529.381065,
+            "background_cores": 3.4848593086370485,
+            "quiet_seconds": 15.334591059945524,
+            "largest": [
+              {
+                "pid": 2769410,
+                "name": "Paseo",
+                "cores": 0.6081881284995073
+              },
+              {
+                "pid": 3508983,
+                "name": "dockerd",
+                "cores": 0.5827654736104604
+              },
+              {
+                "pid": 3508784,
+                "name": "containerd",
+                "cores": 0.5729875294223654
+              },
+              {
+                "pid": 4104574,
+                "name": "thunderbird-bin",
+                "cores": 0.35787275728427603
+              },
+              {
+                "pid": 4063094,
+                "name": "Paseo",
+                "cores": 0.18969211724904247
+              }
+            ]
+          },
+          {
+            "time": 1789033534.6465397,
+            "background_cores": 3.9046430335038296,
+            "quiet_seconds": 20.44389294204302,
+            "largest": [
+              {
+                "pid": 2769410,
+                "name": "Paseo",
+                "cores": 0.5891215804935602
+              },
+              {
+                "pid": 3508983,
+                "name": "dockerd",
+                "cores": 0.5793355077278866
+              },
+              {
+                "pid": 3508784,
+                "name": "containerd",
+                "cores": 0.5499772894308652
+              },
+              {
+                "pid": 4104574,
+                "name": "thunderbird-bin",
+                "cores": 0.3601274777767943
+              },
+              {
+                "pid": 1222077,
+                "name": "codex",
+                "cores": 0.2955393975233475
+              }
+            ]
+          }
+        ]
+      },
+      "background_before": {
+        "time": 1789033539.8563776,
+        "background_cores": 3.5142163214847275,
+        "largest": [
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.6186586950357514
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5697141780234294
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.542305248496529
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.3563160838497049
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.35044274180822627
+          }
+        ]
+      },
+      "rows": {
+        "prose": {
+          "tok_s": 14.323941630302262,
+          "adjusted_gb_s": 173.9328958626209,
+          "counters": {
+            "counters_per_interval": 48,
+            "intervals": 96,
+            "decode_seconds": 34.209207484,
+            "baseline_before_gb_s": 4.842882441294122,
+            "baseline_after_gb_s": 12.979677076889665,
+            "adjusted_gb_s": 173.9328958626209,
+            "adjacent_idle_qualifies": true
+          },
+          "generated_tokens": 512,
+          "draft_tokens": 424,
+          "accepted_draft_tokens": 298,
+          "completed_answer": false,
+          "output_sha256": "480dbf41aded75edbae35a54413fe26a862edd816cce4fe678810b3fcaf05b27",
+          "chunks_sha256": "c8c43e21f597ce03b3312a9818b22b7e8409bdc7241b09f595b7c6914bcf889b",
+          "qualified_over_250": false
+        },
+        "code": {
+          "tok_s": 16.675957557305736,
+          "adjusted_gb_s": 192.890166090022,
+          "counters": {
+            "counters_per_interval": 48,
+            "intervals": 87,
+            "decode_seconds": 29.164530772,
+            "baseline_before_gb_s": 4.091572136606561,
+            "baseline_after_gb_s": 6.677471746026923,
+            "adjusted_gb_s": 192.890166090022,
+            "adjacent_idle_qualifies": true
+          },
+          "generated_tokens": 512,
+          "draft_tokens": 418,
+          "accepted_draft_tokens": 301,
+          "completed_answer": false,
+          "output_sha256": "1fec91d10390b44419c1c6fd238555f254653bd5af8c58e2d05afc4fa3442199",
+          "chunks_sha256": "ec2283dfc03a751fc56d7f0d97526cfccca0f386f2764e2f0dca1951de4e5cac",
+          "qualified_over_250": false
+        }
+      },
+      "measurement": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-q4-quiet-mtp2-measure-0910-0/result.json",
+      "measurement_sha256": "fda544aef66cf2434ca51b6910466efae66168abf907addf06e1c10414b3ab5c",
+      "background_after": {
+        "time": 1789033641.28835,
+        "background_cores": 4.3387305334671,
+        "largest": [
+          {
+            "pid": 2830065,
+            "name": "python3",
+            "cores": 0.9991398389372186
+          },
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.6315502308742105
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.565071259203241
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5455186204764852
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.37736592742638586
+          }
+        ]
+      },
+      "finished": 1789033641.2885857,
+      "outputs_and_counts_match": true
+    },
+    {
+      "index": 1,
+      "started": 1789033641.3515406,
+      "idle_gate": {
+        "time": 1789033661.6857543,
+        "quiet_seconds": 15.207764261867851,
+        "required_quiet_seconds": 15,
+        "state": {
+          "servers": {
+            "2334769": {
+              "processing": 0,
+              "queued": 0.0
+            }
+          },
+          "foreign_pids": [],
+          "busy": false
+        },
+        "churn": []
+      },
+      "background_gate": {
+        "max_cores": 6,
+        "samples": [
+          {
+            "time": 1789033666.948129,
+            "background_cores": 3.455013975385718,
+            "quiet_seconds": 5.105623342096806,
+            "largest": [
+              {
+                "pid": 2769410,
+                "name": "Paseo",
+                "cores": 0.622842655426677
+              },
+              {
+                "pid": 3508983,
+                "name": "dockerd",
+                "cores": 0.526870044999296
+              },
+              {
+                "pid": 3508784,
+                "name": "containerd",
+                "cores": 0.511201047378499
+              },
+              {
+                "pid": 4104574,
+                "name": "thunderbird-bin",
+                "cores": 0.3408006982523327
+              },
+              {
+                "pid": 2839321,
+                "name": "python3",
+                "cores": 0.17627622323396522
+              }
+            ]
+          },
+          {
+            "time": 1789033672.2459676,
+            "background_cores": 4.198851434722313,
+            "quiet_seconds": 10.221308032050729,
+            "largest": [
+              {
+                "pid": 2839321,
+                "name": "python3",
+                "cores": 1.000843544961743
+              },
+              {
+                "pid": 2769410,
+                "name": "Paseo",
+                "cores": 0.5883865371747747
+              },
+              {
+                "pid": 3508784,
+                "name": "containerd",
+                "cores": 0.541471996004693
+              },
+              {
+                "pid": 3508983,
+                "name": "dockerd",
+                "cores": 0.5297433607121725
+              },
+              {
+                "pid": 4104574,
+                "name": "thunderbird-bin",
+                "cores": 0.34013042348309236
+              }
+            ]
+          },
+          {
+            "time": 1789033677.5140014,
+            "background_cores": 3.1903866981382323,
+            "quiet_seconds": 15.327272149035707,
+            "largest": [
+              {
+                "pid": 2769410,
+                "name": "Paseo",
+                "cores": 0.5973406647834013
+              },
+              {
+                "pid": 3508983,
+                "name": "dockerd",
+                "cores": 0.5327103633478203
+              },
+              {
+                "pid": 3508784,
+                "name": "containerd",
+                "cores": 0.5131254235188563
+              },
+              {
+                "pid": 4104574,
+                "name": "thunderbird-bin",
+                "cores": 0.33881945904107685
+              },
+              {
+                "pid": 4063094,
+                "name": "Paseo",
+                "cores": 0.16647198854619383
+              }
+            ]
+          },
+          {
+            "time": 1789033682.776321,
+            "background_cores": 3.206081889919055,
+            "quiet_seconds": 20.433192884083837,
+            "largest": [
+              {
+                "pid": 2769410,
+                "name": "Paseo",
+                "cores": 0.6032212718968045
+              },
+              {
+                "pid": 3508784,
+                "name": "containerd",
+                "cores": 0.5934287187815966
+              },
+              {
+                "pid": 3508983,
+                "name": "dockerd",
+                "cores": 0.5914702081585551
+              },
+              {
+                "pid": 4104574,
+                "name": "thunderbird-bin",
+                "cores": 0.33294680591706743
+              },
+              {
+                "pid": 4063094,
+                "name": "Paseo",
+                "cores": 0.16255638171245054
+              }
+            ]
+          }
+        ]
+      },
+      "background_before": {
+        "time": 1789033687.9806654,
+        "background_cores": 3.2773553681547773,
+        "largest": [
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.6030020629579876
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5716772804666637
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5716772804666637
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3445726074045644
+          },
+          {
+            "pid": 4063094,
+            "name": "Paseo",
+            "cores": 0.16249730917374341
+          }
+        ]
+      },
+      "rows": {
+        "prose": {
+          "tok_s": 16.86261898912394,
+          "adjusted_gb_s": 194.22544582380235,
+          "counters": {
+            "counters_per_interval": 48,
+            "intervals": 86,
+            "decode_seconds": 29.157136776,
+            "baseline_before_gb_s": 3.8541993753112167,
+            "baseline_after_gb_s": 4.751995920607156,
+            "adjusted_gb_s": 194.22544582380235,
+            "adjacent_idle_qualifies": true
+          },
+          "generated_tokens": 512,
+          "draft_tokens": 424,
+          "accepted_draft_tokens": 298,
+          "completed_answer": false,
+          "output_sha256": "480dbf41aded75edbae35a54413fe26a862edd816cce4fe678810b3fcaf05b27",
+          "chunks_sha256": "ca1e33d740d94aba776aaedc73cfeb58ba3f98fa5f7a4985a12664821f7e5d8f",
+          "qualified_over_250": false
+        },
+        "code": {
+          "tok_s": 16.599617422672583,
+          "adjusted_gb_s": 193.75000179713436,
+          "counters": {
+            "counters_per_interval": 48,
+            "intervals": 86,
+            "decode_seconds": 29.173302178,
+            "baseline_before_gb_s": 5.109527446258241,
+            "baseline_after_gb_s": 4.575434345610434,
+            "adjusted_gb_s": 193.75000179713436,
+            "adjacent_idle_qualifies": true
+          },
+          "generated_tokens": 512,
+          "draft_tokens": 418,
+          "accepted_draft_tokens": 301,
+          "completed_answer": false,
+          "output_sha256": "1fec91d10390b44419c1c6fd238555f254653bd5af8c58e2d05afc4fa3442199",
+          "chunks_sha256": "794f46ac47e2fe48ef13b1e792357754400b8a2a0ccb3f6fe8e3c5d03e853af9",
+          "qualified_over_250": false
+        }
+      },
+      "measurement": "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-q4-quiet-mtp2-measure-0910-1/result.json",
+      "measurement_sha256": "3f198ff302933ea97e830c5ff37dd1d8ee44f0bd654bd0161c7d23577aa526f6",
+      "background_after": {
+        "time": 1789033784.4017744,
+        "background_cores": 3.8085081343425466,
+        "largest": [
+          {
+            "pid": 2769410,
+            "name": "Paseo",
+            "cores": 0.6128858848582093
+          },
+          {
+            "pid": 3508983,
+            "name": "dockerd",
+            "cores": 0.5874305605669737
+          },
+          {
+            "pid": 3508784,
+            "name": "containerd",
+            "cores": 0.5854724586984172
+          },
+          {
+            "pid": 4104574,
+            "name": "thunderbird-bin",
+            "cores": 0.3642069475515238
+          },
+          {
+            "pid": 2874490,
+            "name": "Paseo",
+            "cores": 0.28588287280926056
+          }
+        ]
+      },
+      "finished": 1789033784.4020226,
+      "outputs_and_counts_match": true
+    }
+  ],
+  "model_started": false,
+  "runtime_promoted": false,
+  "policy": "Two repeated prose/code pairs on the same loaded selected Q4/Q8-MTP2 process. Require 20 seconds at <=6 background CPU cores before each pair; record later load and qualify IMC independently. The server ignores request draft overrides; effective MTP2 is checked in the launch and returned token counts.",
+  "all_outputs_and_counts_match": true,
+  "all_adjacent_idle_qualifies": true,
+  "target_240_reached": false,
+  "target_250_reached": false,
+  "selected_flash_preserved": true,
+  "finished": 1789033784.4257226
+}

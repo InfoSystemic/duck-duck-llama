@@ -1,0 +1,190 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "case": "changed-identity",
+      "passed": true,
+      "restored": false,
+      "launches": {
+        "full": 0,
+        "measure": 0
+      },
+      "events": []
+    },
+    {
+      "case": "cancel-after-stop",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 0,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "memory-after-stop",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 0,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "full-load-exits",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 1,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-full",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "library-mismatch",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 1,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-full",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "first-measurement-exits",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 1,
+        "measure": 1
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-full",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "second-measurement-exits",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 1,
+        "measure": 2
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-full",
+        "measure",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "cancel-after-first-measurement",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 1,
+        "measure": 1
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-full",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "outputs-change",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 1,
+        "measure": 2
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-full",
+        "measure",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "restore-reserve-fails",
+      "passed": true,
+      "restored": false,
+      "launches": {
+        "full": 0,
+        "measure": 0
+      },
+      "events": [
+        "stop-flash"
+      ]
+    },
+    {
+      "case": "success",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 1,
+        "measure": 2
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-full",
+        "measure",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    },
+    {
+      "case": "unqualified-background",
+      "passed": true,
+      "restored": true,
+      "launches": {
+        "full": 1,
+        "measure": 2
+      },
+      "events": [
+        "stop-flash",
+        "spawn-fake-full",
+        "measure",
+        "measure",
+        "spawn-fake-flash",
+        "record-restore"
+      ]
+    }
+  ],
+  "sources": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_flash_q4_raw_controller_0910.py": "09bdb52bcfbbe9b67b58be7ddef31781d478b9467e65b9dbca43068b25f646a0",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/run_flash_q4_raw_baseline_0910.py": "17be67e2ef2d2299661382f5b3f6b4ab338e24bb1f659b114ed0da9cde2f730a"
+  },
+  "scope": "Synthetic processes and state exercise the actual controller. No real server is loaded, stopped or signaled."
+}

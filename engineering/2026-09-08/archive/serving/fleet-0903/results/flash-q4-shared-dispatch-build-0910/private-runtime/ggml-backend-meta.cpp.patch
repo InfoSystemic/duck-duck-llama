@@ -1,0 +1,32 @@
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -28,0 +29,2 @@
++
++#include "qwen-shared-dispatch-0909.h"
+@@ -2302,0 +2305,2 @@
++    std::shared_ptr<qwen_shared_numa_dispatch> shared_cpu_numa_dispatch;
++    std::vector<ggml_backend_t> shared_cpu_numa_backends;
+@@ -2339,0 +2344,3 @@
++        if (shared_cpu_numa_dispatch) {
++            return shared_cpu_numa_dispatch->run(shared_cpu_numa_backends, graphs);
++        }
+@@ -2393,0 +2401,13 @@
++            return;
++        }
++
++        const char * shared_env = getenv("GGML_CPU_NUMA_SHARED_DISPATCH");
++        if (shared_env != nullptr && atoi(shared_env) != 0) {
++            std::vector<ggml_backend_dev_t> devices;
++            for (const backend_config & bc : backend_configs) {
++                devices.push_back(ggml_backend_get_device(bc.backend));
++                shared_cpu_numa_backends.push_back(bc.backend);
++            }
++            shared_cpu_numa_dispatch = qwen_shared_numa_dispatch::obtain(devices);
++            GGML_LOG_INFO("SHARED_NUMA_DISPATCH attach group=%" PRIu64 " ranks=%zu\n",
++                shared_cpu_numa_dispatch->id(), n_devs);
+@@ -2467,0 +2488,5 @@
++        if (shared_cpu_numa_dispatch) {
++            shared_cpu_numa_dispatch.reset();
++            shared_cpu_numa_backends.clear();
++            return;
++        }
