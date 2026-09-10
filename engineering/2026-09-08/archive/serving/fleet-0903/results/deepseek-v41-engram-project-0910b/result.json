@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "started": 1789036601.6878974,
+  "controller_pid": 3774475,
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/probe_deepseek_v41_engram_project_0910b.py": "d5581f0b92f1f98ebd8b3bd1ed2bd43955cc48e01f5719f4f1f1c0a668713927",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-engram-project-0910.cpp": "dac1e81b11308779ec782ca3fc5c4c37430167a6f417f4d61c344e18c7712401",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-engram-project-0910.h": "082428770f96d56fee8399c04ad71ac7a7da298fbacccd6ed991ce6a55ca7bf7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_engram_project_0910b.py": "2fb00d46247e2e47b529f602d47a123df7db582f560e100c3fb6c7dcd8251679",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/fetch_deepseek_v41_engram_project_0910.py": "ec068e1818c314c2a8b0b7b290cbab70912db1393a550fe8bfe675261aba2053",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-hash-reference-setup-0910/result.json": "a17679b0a3d6ba47036590ba088ef2c559639a90c0930ed26966d8b0968edd5c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/audit_deepseek_v41_tensors_0910.py": "1d402069e9acf365d9d20d59b9b38814c9d6fd5e60ea5aed9bdd8b10745ab8b6",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_engram_lookup_0910.py": "861b9692c145ba537a60a47601477b3aa0f9a70e0aff6093b492ff7663d7575f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_engram_hash_0910.py": "5600c7bc9b6c51a3a20ffb9686696643cfccd2614bbe12197d882447b8ce2ac2",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-lookup-0910/result.json": "3d61f13744c3c84b3a22581cfe9babe49a4f58fc28c24f46286a193e98705a3c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/select_flash_q4_0910c.py": "82921824f989c466d7ad1bcaba847cdca4c0718569414405bfe2e3d93198d852",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-project-0910/result.json": "c71f10f6af46393d64dc1e1af15c48bbbccff7085719ef34b3fb9fca746a6407",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-project-0910/weight-manifest.json": "1bcf095d59b340b7359a8a3fc9b18a23f1394c826fae55fd0e36f4b912c75473",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-project-0910/libdeepseek-v41-engram-project.so": "78d7e280ee797dc7b68ae3b69ab0a0ee0637ab5a3e7e15c659438041734fb26a"
+  },
+  "selected_flash_pid": 3437776,
+  "selected_flash_start": "117706077",
+  "model_loaded": false,
+  "runtime_promoted": false,
+  "steps": [
+    {
+      "label": "reference-correctness",
+      "exit_code": 0,
+      "log_sha256": "34f017a22cf96d023ca43179708b8131ab6ef3f092f27f3165ee6fbe8303ddc6"
+    }
+  ],
+  "library": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-project-0910/libdeepseek-v41-engram-project.so",
+  "library_sha256": "78d7e280ee797dc7b68ae3b69ab0a0ee0637ab5a3e7e15c659438041734fb26a",
+  "parent_failed_run": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-project-0910/result.json",
+  "harness_fix": "Rename native wrapper parameters so invalid-pointer overrides reach the C API instead of colliding with Python arguments.",
+  "reused_native_library_and_downloads": true,
+  "owned": {
+    "pid": 3774500,
+    "label": "reference-correctness"
+  },
+  "selected_flash_preserved": true,
+  "correctness_sha256": "ec5e786fe98dcffaa19289fbea4ef5016d5eee3fad172812be0fcdcda541f11e",
+  "weight_manifest_sha256": "1bcf095d59b340b7359a8a3fc9b18a23f1394c826fae55fd0e36f4b912c75473",
+  "limitations": [
+    "Pinned Engram.forward executes on CPU. FP8 GEMM is checked against an independent CPU transcription of publisher block arithmetic, not GPU execution.",
+    "Complete real Engram projections and selected real lookup rows; residual inputs are synthetic.",
+    "Scalar/AVX-512/one/four worker results match exactly. Publisher-style FP32 reductions are tolerance checked and exact BF16 fractions are reported.",
+    "Lookup and projection/gate are composed in this checker, not wired to llama.cpp graph or request lifecycle.",
+    "Warm component timings are descriptive only; no full-model speed, quality, or bandwidth claim."
+  ],
+  "finished": 1789036615.614531
+}

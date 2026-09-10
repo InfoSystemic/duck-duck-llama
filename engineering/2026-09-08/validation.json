@@ -243,8 +243,8 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "experiment": "deepseek-lookup-full-raw-0910",
-    "updated_utc": "2026-09-10T09:38:24.630182+00:00",
+    "experiment": "deepseek-real-cpu-endpoint-0910",
+    "updated_utc": "2026-09-10T11:59:40.827610+00:00",
     "source_bundles_unchanged": true,
     "source_freshness_audit": {
       "source_bundles": [
@@ -310,125 +310,56 @@
       "passed": true
     },
     "archive": {
-      "archive_files": 4522,
+      "archive_files": 4697,
       "patches": 13,
-      "python_files": 1227,
+      "python_files": 1294,
       "shell_files": 29,
       "errors": [],
       "passed": true
     },
     "links": {
       "passed": true,
-      "checked_links": 166,
-      "documents": 6,
+      "checked_links": 134,
+      "documents": 3,
       "missing": [],
       "scope": "Local targets; external URLs and fragments excluded"
     },
     "evidence": [
-      "archive/serving/fleet-0903/results/deepseek-v41-engram-lookup-audit-0910.json",
-      "archive/serving/fleet-0903/results/full-raw-baseline-audit-0910b.json"
+      "archive/serving/fleet-0903/results/deepseek-v41-real-run-audit-0910.json",
+      "archive/serving/fleet-0903/results/deepseek-v41-server-0910/result.json",
+      "archive/serving/fleet-0903/results/deepseek-v41-server-greeting-0910/result.json",
+      "archive/serving/fleet-0903/results/flash-q4-shared-dispatch-publication-0910.json"
     ],
     "official_model_revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
-    "deepseek_lookup_sequence_cases": 68,
-    "deepseek_lookup_variants": 8,
-    "deepseek_lookup_exact_bf16_values": 267583488,
-    "deepseek_lookup_exact_row_ids": 1044096,
-    "deepseek_lookup_rejected_inputs": 112,
-    "deepseek_lookup_rejected_configurations": 19,
-    "deepseek_actual_selected_rows": 48,
-    "deepseek_actual_retrieved_bytes": 12672,
-    "deepseek_full_model_loaded": false,
-    "deepseek_model_tok_s_measured": false,
+    "real_released_text_backbone_executed": true,
+    "native_precision_preserved": true,
+    "full_checkpoint_resident": false,
+    "deepseek_endpoint_retained": true,
+    "endpoint": "http://127.0.0.1:18170/v1",
+    "model": "DeepSeek-V4.1-Flash",
+    "context": 256,
+    "vision": false,
+    "dspark": false,
+    "initial_warm_decode_tok_s": 0.4820524011167875,
+    "current_endpoint_warm_decode_tok_s": 0.6062851678669816,
+    "decode_tokens_measured": 9,
+    "physical_workers": 16,
+    "exact_repeated_initial_logits": true,
+    "current_greedy_greeting_matches_initial": true,
+    "kernel_exact_values": 82032,
+    "fp8_finite_codes_exact": 254,
+    "cached_tensor_bytes": 38841841088,
+    "temporary_ram_cache": true,
     "deepseek_imc_bandwidth_measured": false,
-    "full_raw_model_run_passed": false,
-    "full_raw_repeatability_passed": false,
-    "full_raw_all_attribution_valid": true,
-    "full_raw_lifecycle_cases": 12,
-    "full_raw_240_gb_s_reached": false,
-    "full_raw_250_gb_s_reached": false,
-    "full_raw_rows": [
-      {
-        "repetition": 0,
-        "kind": "prose",
-        "tok_s": 7.5669527981777,
-        "counters": {
-          "counters_per_interval": 48,
-          "intervals": 159,
-          "decode_seconds": 66.426243266,
-          "baseline_before_gb_s": 4.85481623462301,
-          "baseline_after_gb_s": 5.9881900366335366,
-          "adjusted_gb_s": 223.57375646867706,
-          "adjacent_idle_qualifies": true
-        },
-        "generated_tokens": 512,
-        "completed_answer": false
-      },
-      {
-        "repetition": 0,
-        "kind": "code",
-        "tok_s": 7.533870831032689,
-        "counters": {
-          "counters_per_interval": 48,
-          "intervals": 160,
-          "decode_seconds": 66.43582288099999,
-          "baseline_before_gb_s": 7.095970031650639,
-          "baseline_after_gb_s": 5.051554648803208,
-          "adjusted_gb_s": 222.05597106015887,
-          "adjacent_idle_qualifies": true
-        },
-        "generated_tokens": 512,
-        "completed_answer": false
-      },
-      {
-        "repetition": 1,
-        "kind": "prose",
-        "tok_s": 7.436815628315231,
-        "counters": {
-          "counters_per_interval": 48,
-          "intervals": 161,
-          "decode_seconds": 67.447004397,
-          "baseline_before_gb_s": 8.273085890412442,
-          "baseline_after_gb_s": 6.037910025968493,
-          "adjusted_gb_s": 219.1284131246591,
-          "adjacent_idle_qualifies": true
-        },
-        "generated_tokens": 512,
-        "completed_answer": false
-      },
-      {
-        "repetition": 1,
-        "kind": "code",
-        "tok_s": 7.525135942096214,
-        "counters": {
-          "counters_per_interval": 48,
-          "intervals": 160,
-          "decode_seconds": 66.457729597,
-          "baseline_before_gb_s": 4.634242578039118,
-          "baseline_after_gb_s": 5.352542473933086,
-          "adjusted_gb_s": 223.91023507123464,
-          "adjacent_idle_qualifies": true
-        },
-        "generated_tokens": 512,
-        "completed_answer": false
-      }
-    ],
-    "selected_flash_restored": true,
+    "whole_server_tuning_complete": false,
+    "broad_quality_evaluation": false,
+    "selected_flash_preserved": true,
     "selected_flash_quant": "UD-Q4_K_XL",
     "retained_qwen_quant": "UD-Q6_K_XL",
-    "runtime_promoted": false,
+    "glm_or_qwen_candidate_promoted": false,
     "qwen_40_tok_s_reached": false,
     "all_models_250_gb_s_reached": false,
-    "publication_content_scan": {
-      "staged_files_scanned": 56,
-      "credential_or_binary_findings": [],
-      "manifest_files_not_tracked": [],
-      "host_snapshot_filter_check_passed": true,
-      "passed": true
-    },
-    "whitespace_check": {
-      "passed": true,
-      "scope": "All staged files; no exemptions required"
-    }
+    "diagnostic_patch_formatting": "Zero-context relative-header diagnostics; exact unchanged Flash candidate reconstruction checked."
   },
   "previous_follow_ups": [
     {
@@ -3118,6 +3049,194 @@
       "all_models_250_gb_s_reached": false,
       "publication_content_scan": {
         "staged_files_scanned": 85,
+        "credential_or_binary_findings": [],
+        "manifest_files_not_tracked": [],
+        "host_snapshot_filter_check_passed": true,
+        "passed": true
+      },
+      "whitespace_check": {
+        "passed": true,
+        "scope": "All staged files; no exemptions required"
+      }
+    },
+    {
+      "experiment": "deepseek-lookup-full-raw-0910",
+      "updated_utc": "2026-09-10T09:38:24.630182+00:00",
+      "source_bundles_unchanged": true,
+      "source_freshness_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "archive": {
+        "archive_files": 4522,
+        "patches": 13,
+        "python_files": 1227,
+        "shell_files": 29,
+        "errors": [],
+        "passed": true
+      },
+      "links": {
+        "passed": true,
+        "checked_links": 166,
+        "documents": 6,
+        "missing": [],
+        "scope": "Local targets; external URLs and fragments excluded"
+      },
+      "evidence": [
+        "archive/serving/fleet-0903/results/deepseek-v41-engram-lookup-audit-0910.json",
+        "archive/serving/fleet-0903/results/full-raw-baseline-audit-0910b.json"
+      ],
+      "official_model_revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
+      "deepseek_lookup_sequence_cases": 68,
+      "deepseek_lookup_variants": 8,
+      "deepseek_lookup_exact_bf16_values": 267583488,
+      "deepseek_lookup_exact_row_ids": 1044096,
+      "deepseek_lookup_rejected_inputs": 112,
+      "deepseek_lookup_rejected_configurations": 19,
+      "deepseek_actual_selected_rows": 48,
+      "deepseek_actual_retrieved_bytes": 12672,
+      "deepseek_full_model_loaded": false,
+      "deepseek_model_tok_s_measured": false,
+      "deepseek_imc_bandwidth_measured": false,
+      "full_raw_model_run_passed": false,
+      "full_raw_repeatability_passed": false,
+      "full_raw_all_attribution_valid": true,
+      "full_raw_lifecycle_cases": 12,
+      "full_raw_240_gb_s_reached": false,
+      "full_raw_250_gb_s_reached": false,
+      "full_raw_rows": [
+        {
+          "repetition": 0,
+          "kind": "prose",
+          "tok_s": 7.5669527981777,
+          "counters": {
+            "counters_per_interval": 48,
+            "intervals": 159,
+            "decode_seconds": 66.426243266,
+            "baseline_before_gb_s": 4.85481623462301,
+            "baseline_after_gb_s": 5.9881900366335366,
+            "adjusted_gb_s": 223.57375646867706,
+            "adjacent_idle_qualifies": true
+          },
+          "generated_tokens": 512,
+          "completed_answer": false
+        },
+        {
+          "repetition": 0,
+          "kind": "code",
+          "tok_s": 7.533870831032689,
+          "counters": {
+            "counters_per_interval": 48,
+            "intervals": 160,
+            "decode_seconds": 66.43582288099999,
+            "baseline_before_gb_s": 7.095970031650639,
+            "baseline_after_gb_s": 5.051554648803208,
+            "adjusted_gb_s": 222.05597106015887,
+            "adjacent_idle_qualifies": true
+          },
+          "generated_tokens": 512,
+          "completed_answer": false
+        },
+        {
+          "repetition": 1,
+          "kind": "prose",
+          "tok_s": 7.436815628315231,
+          "counters": {
+            "counters_per_interval": 48,
+            "intervals": 161,
+            "decode_seconds": 67.447004397,
+            "baseline_before_gb_s": 8.273085890412442,
+            "baseline_after_gb_s": 6.037910025968493,
+            "adjusted_gb_s": 219.1284131246591,
+            "adjacent_idle_qualifies": true
+          },
+          "generated_tokens": 512,
+          "completed_answer": false
+        },
+        {
+          "repetition": 1,
+          "kind": "code",
+          "tok_s": 7.525135942096214,
+          "counters": {
+            "counters_per_interval": 48,
+            "intervals": 160,
+            "decode_seconds": 66.457729597,
+            "baseline_before_gb_s": 4.634242578039118,
+            "baseline_after_gb_s": 5.352542473933086,
+            "adjusted_gb_s": 223.91023507123464,
+            "adjacent_idle_qualifies": true
+          },
+          "generated_tokens": 512,
+          "completed_answer": false
+        }
+      ],
+      "selected_flash_restored": true,
+      "selected_flash_quant": "UD-Q4_K_XL",
+      "retained_qwen_quant": "UD-Q6_K_XL",
+      "runtime_promoted": false,
+      "qwen_40_tok_s_reached": false,
+      "all_models_250_gb_s_reached": false,
+      "publication_content_scan": {
+        "staged_files_scanned": 56,
         "credential_or_binary_findings": [],
         "manifest_files_not_tracked": [],
         "host_snapshot_filter_check_passed": true,

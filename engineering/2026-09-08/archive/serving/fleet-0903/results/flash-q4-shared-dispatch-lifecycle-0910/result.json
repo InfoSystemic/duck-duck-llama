@@ -1,0 +1,148 @@
+{
+  "started": 1789035666.8711412,
+  "controller_pid": 3739458,
+  "passed": true,
+  "checks": [
+    {
+      "arm": "parent",
+      "proof": {
+        "passed": true,
+        "runs": 24,
+        "exact_values": 209920,
+        "shared_workers": false,
+        "workers_per_context": 60,
+        "baseline_threads": 1,
+        "active_threads_two_contexts": 129,
+        "final_threads": 1,
+        "concurrent_rounds": 8,
+        "destroyed_context_while_peer_workers_held": true
+      },
+      "full_output_matches_parent": true,
+      "output_sha256": "254c0efd26ec78e684343ba5bccb33630d846ec8b7902cabee2294373a95297a",
+      "bytes": 839680,
+      "runtime_cpu_sha256": "5ba125771f3e8bac0b634a845f6666700d53e25b90573581c62f8bbbb8718f2b",
+      "runtime_base_sha256": "01e54cdb7764b31968c533933ad96ac363fd215132e6fa8ce3e56a9f557ee28d",
+      "groups_created": [],
+      "groups_attached": [],
+      "groups_destroyed": []
+    },
+    {
+      "arm": "off",
+      "proof": {
+        "passed": true,
+        "runs": 24,
+        "exact_values": 209920,
+        "shared_workers": false,
+        "workers_per_context": 60,
+        "baseline_threads": 1,
+        "active_threads_two_contexts": 129,
+        "final_threads": 1,
+        "concurrent_rounds": 8,
+        "destroyed_context_while_peer_workers_held": true
+      },
+      "full_output_matches_parent": true,
+      "output_sha256": "254c0efd26ec78e684343ba5bccb33630d846ec8b7902cabee2294373a95297a",
+      "bytes": 839680,
+      "runtime_cpu_sha256": "318869ddb22ed87b96e8beb4b540f835fd88b389ffe1e4a4e30a18e499586f21",
+      "runtime_base_sha256": "3e84923a794498de1eb8c4ab6a85dcd7c5be7782fcc3212cd55847f703926e65",
+      "groups_created": [],
+      "groups_attached": [],
+      "groups_destroyed": []
+    },
+    {
+      "arm": "on",
+      "proof": {
+        "passed": true,
+        "runs": 24,
+        "exact_values": 209920,
+        "shared_workers": true,
+        "workers_per_context": 60,
+        "baseline_threads": 1,
+        "active_threads_two_contexts": 61,
+        "final_threads": 1,
+        "concurrent_rounds": 8,
+        "destroyed_context_while_peer_workers_held": true
+      },
+      "full_output_matches_parent": true,
+      "output_sha256": "254c0efd26ec78e684343ba5bccb33630d846ec8b7902cabee2294373a95297a",
+      "bytes": 839680,
+      "runtime_cpu_sha256": "318869ddb22ed87b96e8beb4b540f835fd88b389ffe1e4a4e30a18e499586f21",
+      "runtime_base_sha256": "3e84923a794498de1eb8c4ab6a85dcd7c5be7782fcc3212cd55847f703926e65",
+      "groups_created": [
+        "1",
+        "2"
+      ],
+      "groups_attached": [
+        "1",
+        "1",
+        "1",
+        "2"
+      ],
+      "groups_destroyed": [
+        "1",
+        "2"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "label": "compile",
+      "exit_code": 0
+    },
+    {
+      "label": "parent",
+      "exit_code": 0
+    },
+    {
+      "label": "off",
+      "exit_code": 0
+    },
+    {
+      "label": "on",
+      "exit_code": 0
+    }
+  ],
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/validate_flash_q4_shared_dispatch_lifecycle_0910.py": "acbda5dd35ea2dd3bc872c739e4ecd7635803257b25d5d6cd02fac822a920afd",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-q4-shared-dispatch-build-0910/private-runtime/manifest.json": "4d0dc0498228ea8dbac8164eba5e2bf1714aef27fffeb7c4385156eed94cf5cf",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/libggml-cpu.so.0.22.0": "5ba125771f3e8bac0b634a845f6666700d53e25b90573581c62f8bbbb8718f2b",
+    "/home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/validated-chunk16-bin/libggml-base.so.0.22.0": "01e54cdb7764b31968c533933ad96ac363fd215132e6fa8ce3e56a9f557ee28d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/glm-flash-selected.json": "121d920021e85d7949ee256bdd2d774386c3966021cfdebb38015612d17ee47a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check-qwen-shared-dispatch-lifecycle-0909.cpp": "04e46569244744030dcb4f6a5c050f4de52e18e4d907c3d4941ac357a65a29b5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-q4-shared-dispatch-build-0910/private-runtime/libggml-base.so.0.22.0": "3e84923a794498de1eb8c4ab6a85dcd7c5be7782fcc3212cd55847f703926e65",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/flash-q4-shared-dispatch-build-0910/private-runtime/libggml-cpu.so.0.22.0": "318869ddb22ed87b96e8beb4b540f835fd88b389ffe1e4a4e30a18e499586f21",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/qwen_split_trial.py": "88b1078bb5a31d40facda54d9cc145b75ddccf29e55f9120ceea3a8828bc5437",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/glm_flash_q8_trial.py": "3a99a4512a3d9ceebce8de82b0c1048774bed028b48c6d8c0e3bca25c9fc802d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/validate_qwen_quantize_blocks_0909.py": "c5e9eaf1c5d01d1acc41f217eadda4d5d37614a992fe062e13836a3620d6c34e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/select_flash_q4_0910c.py": "82921824f989c466d7ad1bcaba847cdca4c0718569414405bfe2e3d93198d852"
+  },
+  "model_loaded": false,
+  "selected_flash_pid": 3437776,
+  "selected_flash_start": "117706077",
+  "scope": "Flash backend; independent private-buffer Meta contexts: exact dyadic reference, alternating and concurrent submissions, 60-worker identity reuse, destruction during a peer graph, and final thread cleanup. No model-rate claim.",
+  "idle_gate": {
+    "time": 1789035687.3416617,
+    "quiet_seconds": 15.21936546987854,
+    "required_quiet_seconds": 15,
+    "state": {
+      "servers": {
+        "3437776": {
+          "processing": 0,
+          "queued": 0.0
+        }
+      },
+      "foreign_pids": [],
+      "busy": false
+    },
+    "churn": []
+  },
+  "owned": {
+    "pid": 3741918,
+    "label": "on"
+  },
+  "bit_exact": true,
+  "binary_sha256": "ba4c70915695c24ad7ef0a38fc6a65d11aedbfcaa7e99c997b1c7078d20db094",
+  "finished": 1789035691.1563897,
+  "peer_preserved": true
+}
