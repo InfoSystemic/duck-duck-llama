@@ -1,0 +1,110 @@
+{
+  "time": 1789003343.5587327,
+  "passed": true,
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-packed-single-component-qualified-0910/result.json": "491f229843d688d0809710a4f2d47bcd9e99dffb44fd6bdbfbcbc50e27cd92d0",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-single-build-0910b/result.json": "184c023fe1d55505e36576262166be69eb838922b553335ff3abb64f4254864c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-single-validation-0910/result.json": "8d31332eb33410a9e90051cb0783e8241eea06e909a533b4ec2a2f37071979fe",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q6-single-host-audit-0910.json": "388d6ddd3c4c24f65713c6659807c20d677582a8dc5a453f63515a4380ddd19c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q8-precision-assessment-0910.json": "f33b0a43ccec2c36c8f99fa4f8865c9a60abc7ac9000c6ca3e569e4c680313ef",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/analyze_qwen_q6_single_0910.py": "e50673f40cc1d463a8a8e81f02ece9f3f41ad34ca95d6e9739806e224cb06f7b"
+  },
+  "single_core_qualified_cases": [
+    {
+      "rows": 64,
+      "matrices": 1,
+      "speed_ratio": 1.2315423369515044
+    },
+    {
+      "rows": 32,
+      "matrices": 1,
+      "speed_ratio": 1.1902771548743587
+    },
+    {
+      "rows": 64,
+      "matrices": 512,
+      "speed_ratio": 1.0831848701878286
+    },
+    {
+      "rows": 32,
+      "matrices": 512,
+      "speed_ratio": 1.133484401268139
+    }
+  ],
+  "expert_graph_cases": 210,
+  "four_numa_graph_arms": 10,
+  "exact_outputs": true,
+  "packed_weights_unchanged": true,
+  "cpu_sha256": "bf09cb90e62569cf111917c04b14fb1cf74fabda74fdd71d70a05d5514b46074",
+  "parent_cpu_sha256": "12c61b337736ca9210433f57c64ce7fffbf7e4b66920aba9a03f97eaef3fd9b7",
+  "graph_timing_arms": 8,
+  "qualified_graph_timing_arms": 4,
+  "qualified_cold_pairs": [
+    {
+      "socket": 0,
+      "control": "timing-s0-3",
+      "candidate": "timing-s0-2",
+      "rows": [
+        {
+          "tokens": 1,
+          "disjoint": false,
+          "parent_us": 98.048,
+          "candidate_us": 102.0845,
+          "speed_ratio": 0.960459227404748
+        },
+        {
+          "tokens": 5,
+          "disjoint": false,
+          "parent_us": 224.5515,
+          "candidate_us": 224.8985,
+          "speed_ratio": 0.9984570817502118
+        },
+        {
+          "tokens": 5,
+          "disjoint": true,
+          "parent_us": 302.7535,
+          "candidate_us": 303.893,
+          "speed_ratio": 0.9962503249499002
+        }
+      ],
+      "cold_geomean_speed_ratio": 0.9849003013538128
+    },
+    {
+      "socket": 2,
+      "control": "timing-s2-0",
+      "candidate": "timing-s2-1",
+      "rows": [
+        {
+          "tokens": 1,
+          "disjoint": false,
+          "parent_us": 100.281,
+          "candidate_us": 102.365,
+          "speed_ratio": 0.97964147902115
+        },
+        {
+          "tokens": 5,
+          "disjoint": false,
+          "parent_us": 233.9415,
+          "candidate_us": 230.9095,
+          "speed_ratio": 1.013130685398392
+        },
+        {
+          "tokens": 5,
+          "disjoint": true,
+          "parent_us": 314.135,
+          "candidate_us": 311.244,
+          "speed_ratio": 1.009288532469702
+        }
+      ],
+      "cold_geomean_speed_ratio": 1.0005742556828625
+    }
+  ],
+  "repeated_graph_speed_gain_established": false,
+  "model_trial_eligible": false,
+  "model_controller_executed": false,
+  "new_model_bandwidth_measurements": 0,
+  "candidate_promoted": false,
+  "bandwidth_target_reached": false,
+  "q8_precision_assessment": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/qwen-q8-precision-assessment-0910.json",
+  "scope": "The single-core arithmetic gain does not establish a graph or model gain. Four graph timing arms fail the existing background limit; the two fully qualified cold pairs do not meet the predeclared 2% graph gate. Exact expert and four-NUMA outputs pass, but the prepared full-model controller remains unexecuted. All three models remain below the requested 250 GB/s acceptance target."
+}
