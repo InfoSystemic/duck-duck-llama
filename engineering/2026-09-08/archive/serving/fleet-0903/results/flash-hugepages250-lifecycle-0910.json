@@ -1,0 +1,114 @@
+{
+  "time": 1789006509.183538,
+  "passed": true,
+  "cases": [
+    {
+      "case": "approval_absent",
+      "passed": true,
+      "events": [],
+      "original_preserved": true,
+      "exact_restore": false,
+      "foreign_preserved": false,
+      "owned_flash_absent": true
+    },
+    {
+      "case": "busy_before_pause",
+      "passed": true,
+      "events": [
+        "idle_gate"
+      ],
+      "original_preserved": true,
+      "exact_restore": false,
+      "foreign_preserved": false,
+      "owned_flash_absent": true
+    },
+    {
+      "case": "peer_signal_failure",
+      "passed": true,
+      "events": [
+        "idle_gate",
+        "peer_sigterm",
+        "pidfd_close"
+      ],
+      "original_preserved": true,
+      "exact_restore": false,
+      "foreign_preserved": false,
+      "owned_flash_absent": true
+    },
+    {
+      "case": "flash_load_failure",
+      "passed": true,
+      "events": [
+        "idle_gate",
+        "peer_sigterm",
+        "flash_start",
+        "qwen_restore",
+        "pidfd_close"
+      ],
+      "original_preserved": false,
+      "exact_restore": true,
+      "foreign_preserved": false,
+      "owned_flash_absent": true
+    },
+    {
+      "case": "measurement_failure",
+      "passed": true,
+      "events": [
+        "idle_gate",
+        "peer_sigterm",
+        "flash_start",
+        "idle_gate",
+        "measurement_start",
+        "flash_idle_gate",
+        "flash_stop",
+        "flash_reap",
+        "qwen_restore",
+        "pidfd_close"
+      ],
+      "original_preserved": false,
+      "exact_restore": true,
+      "foreign_preserved": false,
+      "owned_flash_absent": true
+    },
+    {
+      "case": "cancel_during_measurement",
+      "passed": true,
+      "events": [
+        "idle_gate",
+        "peer_sigterm",
+        "flash_start",
+        "idle_gate",
+        "measurement_start",
+        "measurement_stop",
+        "flash_idle_gate",
+        "flash_stop",
+        "flash_reap",
+        "qwen_restore",
+        "pidfd_close"
+      ],
+      "original_preserved": false,
+      "exact_restore": true,
+      "foreign_preserved": false,
+      "owned_flash_absent": true
+    },
+    {
+      "case": "foreign_during_flash_failure",
+      "passed": true,
+      "events": [
+        "idle_gate",
+        "peer_sigterm",
+        "flash_start",
+        "pidfd_close"
+      ],
+      "original_preserved": false,
+      "exact_restore": false,
+      "foreign_preserved": true,
+      "owned_flash_absent": true
+    }
+  ],
+  "sources": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_flash_hugepages250_trial_0910.py": "d56bed7f0968bc37f2d76337a530ce39f91fbc6931febb68bd2ebaed968b896d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/flash_hugepages250_trial_0910.py": "a0adfb44491b0f5625a72fe856cb0692871690a6c10e90545b0d5728d9719507"
+  },
+  "scope": "Seven deterministic lifecycle fault injections. No real process, model, queue, or hardware counter was queried or changed."
+}
