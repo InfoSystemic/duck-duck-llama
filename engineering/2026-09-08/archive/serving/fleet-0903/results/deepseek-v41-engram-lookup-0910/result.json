@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "started": 1789032565.135528,
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/probe_deepseek_v41_engram_lookup_0910.py": "dff3943dd203a62f4769384284405bd20564975e18045d227c32f931afb33342",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-engram-lookup-0910.cpp": "467478563645dced1d445d6aa59413570920211f9e16a25948a36f0122aea798",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-engram-lookup-0910.h": "7d30303b6df1134e0200887048da561ae5e65d9c64ced72c7379e7436299f780",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_engram_lookup_0910.py": "861b9692c145ba537a60a47601477b3aa0f9a70e0aff6093b492ff7663d7575f",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-hash-reference-setup-0910/result.json": "a17679b0a3d6ba47036590ba088ef2c559639a90c0930ed26966d8b0968edd5c",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/model_measurement_guard.py": "1ca6b81df9480d544717149e439bde295773e989a26a3dc8ab0c8d24ff5d7384",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/audit_deepseek_v41_tensors_0910.py": "1d402069e9acf365d9d20d59b9b38814c9d6fd5e60ea5aed9bdd8b10745ab8b6",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_engram_hash_0910.py": "5600c7bc9b6c51a3a20ffb9686696643cfccd2614bbe12197d882447b8ce2ac2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-engram-hash-0910.cpp": "868681076c796b2d229ff727d73ce102f0ae5a5827d0d60f329c6c6f966f0604",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-engram-cpu-0910.cpp": "8b323ae8021784daf5e2433fe003a88e5b1de66ca866cd5f2cb70b665cf50f8b"
+  },
+  "selected_flash_pid": 2334769,
+  "model_loaded": false,
+  "runtime_promoted": false,
+  "steps": [
+    {
+      "label": "compile-library",
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "official-reference-correctness",
+      "exit_code": 0,
+      "log_sha256": "300df8d0e84f453f241d1a5c8ffece8aa3daae6628be43a2bcebc5b52f0ed062"
+    }
+  ],
+  "runs": [],
+  "library_sha256": "7d5dd7594fc3e85da5e6a5d24b531f9297610e0a139be5b6a504e204a7a3fe63",
+  "correctness_sha256": "053c49ac1c783ee8be689daffeba294a6f44190c56058d15738b77b226830cff",
+  "exact_bf16_values_compared": 267583488,
+  "exact_row_ids_compared": 1044096,
+  "actual_pinned_rows": 48,
+  "actual_retrieved_bytes": 12672,
+  "selected_flash_preserved": true,
+  "limitations": [
+    "Integrated hash and native FP8 lookup component; projection/gate and full model graph remain pending.",
+    "Single CPU correctness with one or four logical row shards per layer; no NUMA scaling claim.",
+    "The actual 202.8 GB address spans are reserved without populating full tables; only bounded fixture rows are touched.",
+    "No model tok/s or IMC bandwidth measured. Native table precision is preserved."
+  ],
+  "finished": 1789032582.6111956
+}
