@@ -10,6 +10,8 @@ The [scheduling follow-up](archive/serving/fleet-0903/QWEN-DECODE-SCHEDULING-202
 
 The [Q6 single-activation follow-up](archive/serving/fleet-0903/QWEN-Q6-SINGLE-20260910.md) passes exact expert and four-NUMA graph checks, but its single-core gain does not qualify at graph level. Four timing arms exceed the background limit; the two fully qualified cold pairs measure 0.9849x and 1.0006x. The candidate remains disabled and its prepared model controller is unexecuted. No new model rate supersedes the table below. A separate tensor inventory explains why the standard Qwen Q8 file is not a uniform precision upgrade over Q6 XL.
 
+The [whole-server Flash Q8 comparison](archive/serving/fleet-0903/FLASH-BANDWIDTH250-20260910.md) now includes eight completed runs. The barrier candidate measures 11.61-11.68/11.69-11.69 generated tok/s on raw prose/code, with repeated output agreement. The latest MTP2 candidate measures 15.25-15.38/16.38-16.39 tok/s. All 48 IMC counters and exact Qwen restoration pass independent checks. The 250 GB/s objective remains incomplete; the report distinguishes the prepared huge-page test and Full allocation simulation from model results.
+
 The server has four Xeon Gold 6242 sockets, 64 physical cores, 128 logical CPUs, about 811 decimal GB of RAM, and no GPU. The utilization denominator below is the requested approximately 380 decimal GB/s whole-server capacity. These are single-conversation decode measurements, with IMC counters and adjacent idle-traffic subtraction. They are not prefill rates or aggregate multi-user throughput.
 
 ## Retained measurements
@@ -24,9 +26,12 @@ The server has four Xeon Gold 6242 sockets, 64 physical cores, 128 logical CPUs,
 | Qwen Flash-Next UD-Q6_K_XL, experimental bounded HC/ten-route scheduling, Q8 MTP4, two runs | 23.87-24.87 | 31.53-32.15 | 138.9-143.6 / 149.4-152.5 | 36.5-40.1% |
 | GLM Flash Q8_0, separately measured MTP2 batching stack | 13.60 | 14.78 | 205.4 / 210.0 | 54-55% |
 | GLM Flash Q8_0, retained raw stack, two runs | 11.42-11.47 | 11.45-11.49 | 234.5-237.1 across workloads | 61.7-62.4% |
+| GLM Flash Q8_0, dissemination barrier, raw, two runs | 11.61-11.68 | 11.69-11.69 | 239.3-239.6 / 240.4-241.4 | 63.0-63.5% |
+| GLM Flash Q8_0, latest raw kernels with MTP2, two runs | 15.20-15.24 | 16.37-16.54 | 229.7-231.0 / 233.2-235.8 | 60.4-62.0% |
+| GLM Flash Q8_0, dissemination barrier with MTP2, two runs | 15.25-15.38 | 16.38-16.39 | 230.2-232.7 / 233.5-234.2 | 60.6-61.6% |
 | GLM Full, Q4-based mixed runtime, MTP default 2 | 7.89 | 9.64 | 196.7 / 199.0 | about 52% |
 
-Exact counters, token counts, and evidence paths are in [measured-status.json](measured-status.json). The Flash MTP2 result predates the final raw stack; it is not a measurement of that combined stack with MTP enabled. Full's mixed runtime includes load-time requantization and a hybrid draft, so its filename alone does not describe runtime precision. Favorable Full file-edit replay results of 13.59-15.70 tok/s are a separate workload, not a general generation rate.
+Exact counters, token counts, and evidence paths are in [measured-status.json](measured-status.json). The separately measured earlier Flash MTP2 result predates the final raw stack. The new repeated MTP2 rows measure that combined stack. Full's mixed runtime includes load-time requantization and a hybrid draft, so its filename alone does not describe runtime precision. Favorable Full file-edit replay results of 13.59-15.70 tok/s are a separate workload, not a general generation rate.
 
 No measured configuration establishes 250 GB/s, or the earlier 85-93% utilization requests. The latest user request is 250+ GB/s for each model, about 65.8% of the stated server capacity. The earlier Qwen speed preference also remains unmet on repeated prose and code. See the [250 GB/s assessment](archive/serving/fleet-0903/MODEL-250GBPS-20260909.md). A component kernel gain, a waiting-cycle percentage, or active-weight bytes multiplied by speculative output tok/s cannot establish model bandwidth.
 
@@ -129,7 +134,7 @@ The [raw Qwen baseline](archive/serving/fleet-0903/results/qwen-private-raw-colu
 
 The [MTP3 baseline](archive/serving/fleet-0903/results/qwen-private-mtp3-columns-250-0909/result.json) retains the Q8 draft and launch cutoff of 0.3, changing only the draft limit. Its 22.92/30.91 tok/s and 136.48/151.39 GB/s do not establish a speed gain over the preceding MTP4 runs. Code output matches MTP4; prose differs. The [mode comparison](archive/serving/fleet-0903/results/qwen-decode-modes-250-0909.json) verifies the common runtime, model, and worker settings and all eight qualifying counter windows across one raw, one MTP3, and two preceding MTP4 runs. This is not an interleaved repeated mode trial. The [post-trial audit](archive/serving/fleet-0903/results/qwen-decode-modes-host-audit-0909.json) verifies cleanup and preservation of the original peer. No preset or service is promoted.
 
-The [Flash 250 GB/s plan](archive/serving/fleet-0903/results/flash-bandwidth250-comparison-0909/plan.json) keeps Q8 weights and tests the retained kernels with raw decode and MTP2, each with and without the validated barrier candidate. Its [seven handoff fault checks](archive/serving/fleet-0903/results/flash-bandwidth250-lifecycle-0909.json) pass. Execution is pending authorization to pause the separately launched Qwen instance and restore its exact configuration; no new Flash model result is established by that preparation.
+The [Flash 250 GB/s plan](archive/serving/fleet-0903/results/flash-bandwidth250-comparison-0909/plan.json) keeps Q8 weights and tests the retained kernels with raw decode and MTP2, each with and without the validated barrier candidate. Its [seven handoff fault checks](archive/serving/fleet-0903/results/flash-bandwidth250-lifecycle-0909.json) pass. Execution and exact Qwen restoration completed under the existing whole-server task authorization. The September 10 Flash report gives the repeated model results and independent counter audit.
 
 ## Archive contract and verification
 
