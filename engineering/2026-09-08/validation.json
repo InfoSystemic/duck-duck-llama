@@ -176,7 +176,7 @@
     ]
   },
   "content_scan": {
-    "staged_files_scanned": 160,
+    "staged_files_scanned": 85,
     "credential_or_binary_findings": [],
     "manifest_files_not_tracked": [],
     "host_snapshot_filter_check_passed": true,
@@ -243,8 +243,8 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "experiment": "deepseek-v41-native-cpu-bringup-0910",
-    "updated_utc": "2026-09-10T07:17:16.927071+00:00",
+    "experiment": "deepseek-v41-engram-hash-qwen-r8-0910",
+    "updated_utc": "2026-09-10T08:21:58.670801+00:00",
     "source_bundles_unchanged": true,
     "source_freshness_audit": {
       "source_bundles": [
@@ -310,57 +310,98 @@
       "passed": true
     },
     "archive": {
-      "archive_files": 4395,
+      "archive_files": 4473,
       "patches": 13,
-      "python_files": 1178,
+      "python_files": 1208,
       "shell_files": 29,
       "errors": [],
       "passed": true
     },
     "links": {
       "passed": true,
-      "checked_links": 129,
-      "documents": 4,
+      "checked_links": 150,
+      "documents": 5,
       "missing": [],
       "scope": "Local targets; external URLs and fragments excluded"
     },
-    "evidence": "archive/serving/fleet-0903/results/deepseek-v41-validation-audit-0910.json",
+    "evidence": [
+      "archive/serving/fleet-0903/results/deepseek-v41-engram-hash-audit-0910.json",
+      "archive/serving/fleet-0903/results/qwen-r8-projection-audit-0910c.json"
+    ],
     "official_model_revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
-    "header_count": 48,
-    "tensor_count": 96085,
-    "exhaustive_fp8_scale_pairs_per_implementation": 65536,
-    "real_engram_rows": 128,
-    "floating_point_state_cases": 16,
-    "fp4_packed_byte_cases": 256,
-    "component_benchmark_arms": 8,
-    "component_comparison": [
+    "original_vocabulary": 129280,
+    "compressed_vocabulary": 99092,
+    "exact_hash_values_compared": 16091808,
+    "sequence_cases": 120,
+    "reciprocal_arithmetic_cases": 316946,
+    "component_benchmark_arms": 12,
+    "component_comparisons": [
       {
-        "table_rows": 1024,
-        "scalar_mean_median_us": 18.146677500000003,
-        "avx512_mean_median_us": 10.7527265,
-        "scalar_over_avx512": 1.6876349919250715
+        "tokens": 1,
+        "baseline_ns_per_call": 314.44444999999996,
+        "reciprocal_ns_per_call": 90.52905000000001,
+        "baseline_over_reciprocal": 3.4734093641764705,
+        "component_only": true
       },
       {
-        "table_rows": 1048576,
-        "scalar_mean_median_us": 24.654984499999998,
-        "avx512_mean_median_us": 16.6550115,
-        "scalar_over_avx512": 1.480334282567142
+        "tokens": 128,
+        "baseline_ns_per_call": 37734.933,
+        "reciprocal_ns_per_call": 7952.9925,
+        "baseline_over_reciprocal": 4.7447464586443395,
+        "component_only": true
+      },
+      {
+        "tokens": 4096,
+        "baseline_ns_per_call": 1193066.9833333334,
+        "reciprocal_ns_per_call": 295404.0333333335,
+        "baseline_over_reciprocal": 4.038763350218304,
+        "component_only": true
       }
     ],
     "deepseek_full_model_loaded": false,
     "deepseek_model_tok_s_measured": false,
     "deepseek_imc_bandwidth_measured": false,
-    "qwen_r8_existing_tiles_passed": true,
-    "qwen_r8_scoped_candidate_compiled": true,
-    "qwen_r8_scoped_candidate_functionally_validated": false,
-    "qwen_r8_scoped_candidate_model_tested": false,
+    "qwen_r8_correctness_cases": 330,
+    "qwen_r8_lifecycle_cases": 12,
+    "qwen_r8_model_arms": 4,
+    "qwen_r8_all_outputs_and_counts_match": true,
+    "qwen_r8_unqualified_control_arm": 0,
+    "qwen_r8_comparisons": [
+      {
+        "kind": "prose",
+        "excluded_unqualified_control_arms": [
+          0
+        ],
+        "qualified_control_arm": 3,
+        "qualified_control_tok_s": 22.34128636492493,
+        "candidate_mean_tok_s": 21.962195986294066,
+        "candidate_mean_change_percent": -1.6968153598622804,
+        "adjacent_candidate_change_percent": -0.38317660500362116,
+        "causal_gain_established": false,
+        "promotion_supported": false
+      },
+      {
+        "kind": "code",
+        "excluded_unqualified_control_arms": [
+          0
+        ],
+        "qualified_control_arm": 3,
+        "qualified_control_tok_s": 29.150055196595055,
+        "candidate_mean_tok_s": 29.062256121248897,
+        "candidate_mean_change_percent": -0.3011969437245354,
+        "adjacent_candidate_change_percent": -0.2923080110970977,
+        "causal_gain_established": false,
+        "promotion_supported": false
+      }
+    ],
+    "qwen_r8_causal_speed_gain_established": false,
     "runtime_promoted": false,
     "selected_flash_quant": "UD-Q4_K_XL",
     "retained_qwen_quant": "UD-Q6_K_XL",
     "qwen_40_tok_s_reached": false,
     "all_models_250_gb_s_reached": false,
     "publication_content_scan": {
-      "staged_files_scanned": 94,
+      "staged_files_scanned": 85,
       "credential_or_binary_findings": [],
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,
@@ -368,136 +409,7 @@
     },
     "whitespace_check": {
       "passed": true,
-      "reported_lines": 25,
-      "verified_preserved_lines": [
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 1,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 2,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 3,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 4,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 5,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 6,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 7,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 8,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 9,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 10,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 11,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 12,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 13,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 14,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 15,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 16,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 17,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 18,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 19,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
-          "line": 20,
-          "reason": "unchanged upstream license CRLF"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
-          "line": 6,
-          "reason": "required blank unified-diff context"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
-          "line": 23,
-          "reason": "required blank unified-diff context"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
-          "line": 29,
-          "reason": "required blank unified-diff context"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
-          "line": 55,
-          "reason": "required blank unified-diff context"
-        },
-        {
-          "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
-          "line": 66,
-          "reason": "required blank unified-diff context"
-        }
-      ],
-      "nonpatch_check_passed_with_cr_at_eol": true,
-      "scope": "Required patch context and byte-exact upstream CRLF license retained"
+      "scope": "All staged files; no exemptions required"
     }
   },
   "previous_follow_ups": [
@@ -2098,6 +2010,13 @@
       "manifest_files_not_tracked": [],
       "host_snapshot_filter_check_passed": true,
       "passed": true
+    },
+    {
+      "staged_files_scanned": 160,
+      "credential_or_binary_findings": [],
+      "manifest_files_not_tracked": [],
+      "host_snapshot_filter_check_passed": true,
+      "passed": true
     }
   ],
   "follow_up_history": [
@@ -2761,6 +2680,264 @@
           }
         ],
         "scope": "The only full-diff whitespace diagnostics are required single-space blank context lines in unified patches. All other staged files pass git diff --check unchanged."
+      }
+    },
+    {
+      "experiment": "deepseek-v41-native-cpu-bringup-0910",
+      "updated_utc": "2026-09-10T07:17:16.927071+00:00",
+      "source_bundles_unchanged": true,
+      "source_freshness_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "archive": {
+        "archive_files": 4395,
+        "patches": 13,
+        "python_files": 1178,
+        "shell_files": 29,
+        "errors": [],
+        "passed": true
+      },
+      "links": {
+        "passed": true,
+        "checked_links": 129,
+        "documents": 4,
+        "missing": [],
+        "scope": "Local targets; external URLs and fragments excluded"
+      },
+      "evidence": "archive/serving/fleet-0903/results/deepseek-v41-validation-audit-0910.json",
+      "official_model_revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
+      "header_count": 48,
+      "tensor_count": 96085,
+      "exhaustive_fp8_scale_pairs_per_implementation": 65536,
+      "real_engram_rows": 128,
+      "floating_point_state_cases": 16,
+      "fp4_packed_byte_cases": 256,
+      "component_benchmark_arms": 8,
+      "component_comparison": [
+        {
+          "table_rows": 1024,
+          "scalar_mean_median_us": 18.146677500000003,
+          "avx512_mean_median_us": 10.7527265,
+          "scalar_over_avx512": 1.6876349919250715
+        },
+        {
+          "table_rows": 1048576,
+          "scalar_mean_median_us": 24.654984499999998,
+          "avx512_mean_median_us": 16.6550115,
+          "scalar_over_avx512": 1.480334282567142
+        }
+      ],
+      "deepseek_full_model_loaded": false,
+      "deepseek_model_tok_s_measured": false,
+      "deepseek_imc_bandwidth_measured": false,
+      "qwen_r8_existing_tiles_passed": true,
+      "qwen_r8_scoped_candidate_compiled": true,
+      "qwen_r8_scoped_candidate_functionally_validated": false,
+      "qwen_r8_scoped_candidate_model_tested": false,
+      "runtime_promoted": false,
+      "selected_flash_quant": "UD-Q4_K_XL",
+      "retained_qwen_quant": "UD-Q6_K_XL",
+      "qwen_40_tok_s_reached": false,
+      "all_models_250_gb_s_reached": false,
+      "publication_content_scan": {
+        "staged_files_scanned": 94,
+        "credential_or_binary_findings": [],
+        "manifest_files_not_tracked": [],
+        "host_snapshot_filter_check_passed": true,
+        "passed": true
+      },
+      "whitespace_check": {
+        "passed": true,
+        "reported_lines": 25,
+        "verified_preserved_lines": [
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 1,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 2,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 3,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 4,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 5,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 6,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 7,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 8,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 9,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 10,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 11,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 12,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 13,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 14,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 15,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 16,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 17,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 18,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 19,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/deepseek-v41-intake-0910/official/LICENSE-DEEPSEEK-V41.md",
+            "line": 20,
+            "reason": "unchanged upstream license CRLF"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+            "line": 6,
+            "reason": "required blank unified-diff context"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+            "line": 23,
+            "reason": "required blank unified-diff context"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+            "line": 29,
+            "reason": "required blank unified-diff context"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+            "line": 55,
+            "reason": "required blank unified-diff context"
+          },
+          {
+            "path": "engineering/2026-09-08/archive/serving/fleet-0903/results/qwen-r8-projection-build-0910/private-cpu/repack-x86.cpp.patch",
+            "line": 66,
+            "reason": "required blank unified-diff context"
+          }
+        ],
+        "nonpatch_check_passed_with_cr_at_eol": true,
+        "scope": "Required patch context and byte-exact upstream CRLF license retained"
       }
     }
   ]

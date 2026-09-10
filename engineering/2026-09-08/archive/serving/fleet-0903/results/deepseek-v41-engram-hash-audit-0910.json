@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "finished": 1789028272.428705,
+  "source_sha256": "1272a0edb45417eca9b3da5024cdf3f6d26c000ee3b184fda10160adf8c42e86",
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-hash-reference-setup-0910/result.json": "a17679b0a3d6ba47036590ba088ef2c559639a90c0930ed26966d8b0968edd5c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-hash-0910/result.json": "4a560bd6a5a592d477126af27e862c5ab9376787c65df5171f0bf022d998bc58",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-engram-hash-0910/correctness.json": "664926b83beac1b0d92ce1429e3ffdf62defde3a19c9fb18742008625b77d874"
+  },
+  "selected_flash_pid": 1173340,
+  "selected_flash_preserved": true,
+  "official_reference_cpu": true,
+  "original_vocabulary": 129280,
+  "compressed_vocabulary": 99092,
+  "token_map_sha256": "c60a86322ec17b4142bfef3c57a8d81fb428550cdf487f88a4320cb59fe46481",
+  "exact_hash_values_compared": 16091808,
+  "sequence_cases": 120,
+  "reciprocal_arithmetic_cases": 316946,
+  "rejected_configurations": 11,
+  "rejected_input_calls": 16,
+  "component_benchmark_arms": 12,
+  "summaries": [
+    {
+      "tokens": 1,
+      "baseline_ns_per_call": 314.44444999999996,
+      "reciprocal_ns_per_call": 90.52905000000001,
+      "baseline_over_reciprocal": 3.4734093641764705,
+      "component_only": true
+    },
+    {
+      "tokens": 128,
+      "baseline_ns_per_call": 37734.933,
+      "reciprocal_ns_per_call": 7952.9925,
+      "baseline_over_reciprocal": 4.7447464586443395,
+      "component_only": true
+    },
+    {
+      "tokens": 4096,
+      "baseline_ns_per_call": 1193066.9833333334,
+      "reciprocal_ns_per_call": 295404.0333333335,
+      "baseline_over_reciprocal": 4.038763350218304,
+      "component_only": true
+    }
+  ],
+  "full_model_loaded": false,
+  "model_tok_s_measured": false,
+  "imc_bandwidth_measured": false,
+  "runtime_promoted": false,
+  "limits": [
+    "Native hash and state management component only; model graph and native gather integration remain pending.",
+    "The official reference and versioned tokenizer supply map, prime, and RNG semantics; native row IDs compare exactly.",
+    "The independent integer-remainder checks cover unsigned boundaries beyond the model product range.",
+    "Timing uses one CPU and records host load; component ratios do not multiply model throughput."
+  ]
+}
