@@ -1,0 +1,414 @@
+{
+  "passed": true,
+  "source_sha256": "8145cba0ccbe76863cc89b7c1a75b9b7b6a42e9973361d320bbdf63f4b9271db",
+  "golden_sha256": "d2bc933af92ff4004690f9fce5b8dbc0641617c81481ed91a394d794a5e2e0d2",
+  "inclusive_timers": true,
+  "timers_can_overlap": true,
+  "runs": [
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 91.00232246494852,
+        "prefill_seconds": 44.96923842886463,
+        "decode_seconds": 46.02756105037406,
+        "downloaded_bytes": 0,
+        "cache_bytes": 38841841088
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "name": "warmup",
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "step_seconds": [
+        44.967904038960114,
+        6.235389573033899,
+        4.947094179922715,
+        6.357611420797184,
+        5.571817267918959,
+        4.940928200958297,
+        5.602709172992036,
+        4.285773145966232,
+        4.8769022691994905,
+        3.1974203470163047
+      ],
+      "operations": {
+        "decode:act_quant": {
+          "calls": 9450,
+          "inclusive_seconds": 2.8510371069423854
+        },
+        "decode:fp4_act_quant": {
+          "calls": 114,
+          "inclusive_seconds": 0.07311870763078332
+        },
+        "decode:gemm_fp4": {
+          "calls": 6480,
+          "inclusive_seconds": 4.477739242604002
+        },
+        "decode:gemm_fp8": {
+          "calls": 2610,
+          "inclusive_seconds": 2.9480104208923876
+        },
+        "decode:hc_split_sinkhorn": {
+          "calls": 720,
+          "inclusive_seconds": 0.8741782871074975
+        },
+        "decode:load_parameters": {
+          "calls": 2160,
+          "inclusive_seconds": 1.8736211627256125
+        },
+        "decode:sparse_attn": {
+          "calls": 360,
+          "inclusive_seconds": 0.8010678845457733
+        },
+        "decode:store_ensure": {
+          "calls": 15480,
+          "inclusive_seconds": 28.360183210112154
+        },
+        "decode:store_rows": {
+          "calls": 18,
+          "inclusive_seconds": 0.06978462706319988
+        },
+        "decode:store_tensor": {
+          "calls": 12960,
+          "inclusive_seconds": 1.0665935738943517
+        },
+        "prefill:act_quant": {
+          "calls": 3066,
+          "inclusive_seconds": 0.9764413426164538
+        },
+        "prefill:fp4_act_quant": {
+          "calls": 16,
+          "inclusive_seconds": 0.01208443776704371
+        },
+        "prefill:gemm_fp4": {
+          "calls": 2736,
+          "inclusive_seconds": 2.4722673860378563
+        },
+        "prefill:gemm_fp8": {
+          "calls": 290,
+          "inclusive_seconds": 1.0435572427231818
+        },
+        "prefill:hc_split_sinkhorn": {
+          "calls": 80,
+          "inclusive_seconds": 0.08990585221908987
+        },
+        "prefill:load_parameters": {
+          "calls": 912,
+          "inclusive_seconds": 0.7868102488573641
+        },
+        "prefill:sparse_attn": {
+          "calls": 40,
+          "inclusive_seconds": 0.2171800525393337
+        },
+        "prefill:store_ensure": {
+          "calls": 6464,
+          "inclusive_seconds": 38.234167725080624
+        },
+        "prefill:store_rows": {
+          "calls": 2,
+          "inclusive_seconds": 0.04372557904571295
+        },
+        "prefill:store_tensor": {
+          "calls": 5472,
+          "inclusive_seconds": 0.4451693657319993
+        }
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 25.232423434965312,
+        "prefill_seconds": 6.632811554009095,
+        "decode_seconds": 18.593937942758203,
+        "downloaded_bytes": 0,
+        "cache_bytes": 38841841088
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "name": "wall_timers",
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "step_seconds": [
+        6.631496825022623,
+        1.9916674438863993,
+        2.1685817160177976,
+        2.1201983659993857,
+        2.1106529720127583,
+        2.084889305057004,
+        2.102610877947882,
+        2.0008412410970777,
+        2.006278261076659,
+        1.9962497900705785
+      ],
+      "operations": {
+        "decode:act_quant": {
+          "calls": 9450,
+          "inclusive_seconds": 2.8676203100476414
+        },
+        "decode:fp4_act_quant": {
+          "calls": 114,
+          "inclusive_seconds": 0.07587657845579088
+        },
+        "decode:gemm_fp4": {
+          "calls": 6480,
+          "inclusive_seconds": 4.417769009014592
+        },
+        "decode:gemm_fp8": {
+          "calls": 2610,
+          "inclusive_seconds": 2.958960401825607
+        },
+        "decode:hc_split_sinkhorn": {
+          "calls": 720,
+          "inclusive_seconds": 0.8637455992866307
+        },
+        "decode:load_parameters": {
+          "calls": 2160,
+          "inclusive_seconds": 1.884270894806832
+        },
+        "decode:sparse_attn": {
+          "calls": 360,
+          "inclusive_seconds": 0.8149836657103151
+        },
+        "decode:store_ensure": {
+          "calls": 15480,
+          "inclusive_seconds": 1.0691177893895656
+        },
+        "decode:store_rows": {
+          "calls": 18,
+          "inclusive_seconds": 0.0021727541461586952
+        },
+        "decode:store_tensor": {
+          "calls": 12960,
+          "inclusive_seconds": 1.0774324797093868
+        },
+        "prefill:act_quant": {
+          "calls": 3066,
+          "inclusive_seconds": 0.9372101160697639
+        },
+        "prefill:fp4_act_quant": {
+          "calls": 16,
+          "inclusive_seconds": 0.011826005764305592
+        },
+        "prefill:gemm_fp4": {
+          "calls": 2736,
+          "inclusive_seconds": 2.189739784458652
+        },
+        "prefill:gemm_fp8": {
+          "calls": 290,
+          "inclusive_seconds": 1.0024169106036425
+        },
+        "prefill:hc_split_sinkhorn": {
+          "calls": 80,
+          "inclusive_seconds": 0.08828151668421924
+        },
+        "prefill:load_parameters": {
+          "calls": 912,
+          "inclusive_seconds": 0.741417970508337
+        },
+        "prefill:sparse_attn": {
+          "calls": 40,
+          "inclusive_seconds": 0.21468995418399572
+        },
+        "prefill:store_ensure": {
+          "calls": 6464,
+          "inclusive_seconds": 0.3899380941875279
+        },
+        "prefill:store_rows": {
+          "calls": 2,
+          "inclusive_seconds": 0.0006005517207086086
+        },
+        "prefill:store_tensor": {
+          "calls": 5472,
+          "inclusive_seconds": 0.42184944776818156
+        }
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 28.66006414592266,
+        "prefill_seconds": 6.650268611963838,
+        "decode_seconds": 22.00432776240632,
+        "downloaded_bytes": 0,
+        "cache_bytes": 38841841088
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "name": "decode_cprofile",
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "step_seconds": [
+        6.648957466008142,
+        2.342230147914961,
+        2.4682310030329973,
+        2.4974189838394523,
+        2.54079750017263,
+        2.4714644530322403,
+        2.51046381611377,
+        2.430604337947443,
+        2.334808547049761,
+        2.3963558829855174
+      ],
+      "operations": {
+        "decode:act_quant": {
+          "calls": 9450,
+          "inclusive_seconds": 3.53886501211673
+        },
+        "decode:fp4_act_quant": {
+          "calls": 114,
+          "inclusive_seconds": 0.08687232667580247
+        },
+        "decode:gemm_fp4": {
+          "calls": 6480,
+          "inclusive_seconds": 4.64978302270174
+        },
+        "decode:gemm_fp8": {
+          "calls": 2610,
+          "inclusive_seconds": 3.085685071069747
+        },
+        "decode:hc_split_sinkhorn": {
+          "calls": 720,
+          "inclusive_seconds": 1.0169569544959813
+        },
+        "decode:load_parameters": {
+          "calls": 2160,
+          "inclusive_seconds": 3.2090297364629805
+        },
+        "decode:sparse_attn": {
+          "calls": 360,
+          "inclusive_seconds": 0.89852115069516
+        },
+        "decode:store_ensure": {
+          "calls": 15480,
+          "inclusive_seconds": 2.071299235802144
+        },
+        "decode:store_rows": {
+          "calls": 18,
+          "inclusive_seconds": 0.003079360816627741
+        },
+        "decode:store_tensor": {
+          "calls": 12960,
+          "inclusive_seconds": 1.828604525187984
+        },
+        "prefill:act_quant": {
+          "calls": 3066,
+          "inclusive_seconds": 0.9423163456376642
+        },
+        "prefill:fp4_act_quant": {
+          "calls": 16,
+          "inclusive_seconds": 0.012334311380982399
+        },
+        "prefill:gemm_fp4": {
+          "calls": 2736,
+          "inclusive_seconds": 2.2023255238309503
+        },
+        "prefill:gemm_fp8": {
+          "calls": 290,
+          "inclusive_seconds": 0.9873412302695215
+        },
+        "prefill:hc_split_sinkhorn": {
+          "calls": 80,
+          "inclusive_seconds": 0.08879990503191948
+        },
+        "prefill:load_parameters": {
+          "calls": 912,
+          "inclusive_seconds": 0.7452335569541901
+        },
+        "prefill:sparse_attn": {
+          "calls": 40,
+          "inclusive_seconds": 0.21484580379910767
+        },
+        "prefill:store_ensure": {
+          "calls": 6464,
+          "inclusive_seconds": 0.39029844640754163
+        },
+        "prefill:store_rows": {
+          "calls": 2,
+          "inclusive_seconds": 0.000604298198595643
+        },
+        "prefill:store_tensor": {
+          "calls": 5472,
+          "inclusive_seconds": 0.4230225181672722
+        }
+      }
+    }
+  ],
+  "exact_logits_all_runs": true,
+  "zero_downloads": true,
+  "cprofile_sha256": "fb808b523f29f0a54e4ccc9222b07ce22898be45db9a6cc59172c3ec46181b74"
+}
