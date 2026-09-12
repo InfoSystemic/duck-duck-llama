@@ -1,25 +1,54 @@
 {
-  "checked_utc": "2026-09-12T09:07:03.504829+00:00",
-  "scope": "Publication integrity, source reconstruction, syntax and local controller/probe regression tests. Component evidence and historical model measurements retain their original scope.",
-  "snapshot": {
-    "archive_files": 652,
-    "inherited_files": 5011,
-    "patches": 13,
-    "python_files": 52,
-    "shell_files": 72,
-    "errors": [],
-    "passed": true
-  },
-  "prior_snapshot": {
-    "archive_files": 5015,
-    "inherited_files": 0,
-    "patches": 13,
-    "python_files": 1413,
-    "shell_files": 29,
-    "errors": [],
+  "checked_utc": "2026-09-12T10:06:38.073246+00:00",
+  "scope": "Publication integrity, source reconstruction, syntax, curated links, catalog consistency, and portable probe/controller tests. Historical model results and component evidence retain their original scope.",
+  "repository_checks": {
+    "scope": "Published artifact integrity, source syntax, curated local documentation links, catalog consistency, and portable probe/controller tests. No full-model or hardware validation.",
+    "snapshots": {
+      "2026-09-08": {
+        "archive_files": 5015,
+        "inherited_files": 0,
+        "patches": 13,
+        "python_files": 1413,
+        "shell_files": 29,
+        "errors": [],
+        "passed": true
+      },
+      "2026-09-12": {
+        "archive_files": 664,
+        "inherited_files": 5011,
+        "patches": 13,
+        "python_files": 54,
+        "shell_files": 72,
+        "errors": [],
+        "passed": true
+      }
+    },
+    "tool_syntax_errors": [],
+    "catalog_passed": true,
+    "documentation": {
+      "documents": 27,
+      "local_links": 384,
+      "errors": [],
+      "passed": true
+    },
+    "portable_tests": [
+      {
+        "directory": "tools",
+        "pattern": "test_quality_and_decode.py",
+        "tests": 5,
+        "passed": true
+      },
+      {
+        "directory": "engineering/2026-09-12/archive/serving/fleet-0912",
+        "pattern": "test_ab_profiles.py",
+        "tests": 10,
+        "passed": true
+      }
+    ],
     "passed": true
   },
   "original_source_comparison": {
+    "source_files_compared": 661,
     "archived_source_drift": [],
     "unlisted_archive_files": [],
     "missing_archive_files": [],
@@ -30,44 +59,50 @@
     "passed": true,
     "method": "Each complete patch applied to its base in a temporary Git index; reconstructed tree ID equals the exported source tree."
   },
-  "regression_tests": [
-    {
-      "command": "python3 -B -m unittest discover -s tools -p 'test_quality_and_decode.py' -v",
-      "tests": 5,
-      "passed": true
-    },
-    {
-      "command": "python3 -B -m unittest discover -s engineering/2026-09-12/archive/serving/fleet-0912 -p 'test_ab_profiles.py' -v",
-      "tests": 10,
-      "passed": true
-    }
-  ],
-  "known_limits": [
-    "No new full-model performance or quality validation is implied by publication checks.",
-    "GLM Full split correction and NUMA migration have metadata/component validation only; no bulk model relocation was run.",
-    "The isolated DeepSeek V4.1 CPU benchmark and server built successfully, but this engine port has not loaded the checkpoint.",
-    "The native DeepSeek context candidate remains unpromoted and has a documented interruption-recovery cache-accounting defect.",
-    "Legacy dspark-dsv4 retains an unresolved index merge; all three merge-stage blobs are preserved.",
-    "Historical source and patches retain their original whitespace and are not reformatted during export."
-  ],
-  "passed": true,
   "publication_content_scan": {
-    "staged_files_scanned": 973,
-    "filtered_evidence_files_checked": 3326,
+    "publication_files_scanned": 5798,
+    "filtered_evidence_files_checked": 3334,
     "credential_or_binary_findings": [],
-    "manifest_files_not_tracked": [],
     "host_snapshot_filter_check_passed": true,
-    "passed": true
+    "passed": true,
+    "manifest_files_missing_from_publication": [],
+    "scope": "All tracked and new nonignored publication files; signature-based credential/binary scan and evidence-field checks."
   },
-  "publication_files": {
-    "missing_curated_links": [],
-    "oversized_files": [],
-    "unstaged_changes": [],
-    "untracked_files": [],
+  "preserved_history_scan": {
+    "scope": "All reachable Git history blobs before the portfolio commit. Pattern scan for embedded credentials and binary payloads; no secret values printed.",
+    "objects": 5933,
+    "blobs": 4466,
+    "bytes": 222365654,
+    "findings": [],
     "passed": true
   },
   "curated_file_whitespace_check": {
     "passed": true,
-    "scope": "Tools, root README, snapshot README files and publication metadata. Byte-exact archived source and patches retain original formatting."
-  }
+    "scope": "Tools, curated guides, and snapshot overview metadata. Byte-exact archived source and patches retain original formatting."
+  },
+  "component_evidence": [
+    {
+      "path": "archive/serving/fleet-0912/deepseek-context/recovery-verification.json",
+      "scope": "Five cache fault-injection cases repaired and four existing context tests pass. No full-model context validation."
+    },
+    {
+      "path": "archive/serving/fleet-0912/glmfull-split/build-verification.json",
+      "scope": "Isolated candidate library build and loader preflight; baseline relink byte-identical. No unequal-split model run."
+    },
+    {
+      "path": "archive/serving/fleet-0912/numa/deepseek-inventory-summary-20260912-0928.json",
+      "scope": "5,530 cached tensors fully inventoried, complete before/after manifest hashes match, zero bytes moved."
+    }
+  ],
+  "known_limits": [
+    "No new full-model performance or quality validation is implied by publication checks.",
+    "Three recorded GLM Full loads failed with node-3 memory-policy OOM, including the no-repacking attempt.",
+    "GLM Full split correction has metadata and isolated-build validation; full-model unequal-split validation remains pending.",
+    "NUMA relocation is fixture-tested; real cached model data was inventoried read-only, without bulk migration.",
+    "The isolated DeepSeek V4.1 CPU benchmark and server built successfully, but this engine port has not loaded the checkpoint.",
+    "Native DeepSeek cache recovery is corrected at component scope; 4K/16K full-model context remains unvalidated.",
+    "Legacy dspark-dsv4 retains an unresolved index merge; all three merge-stage blobs are preserved.",
+    "Historical source and patches retain their original whitespace and are not reformatted during export."
+  ],
+  "passed": true
 }
