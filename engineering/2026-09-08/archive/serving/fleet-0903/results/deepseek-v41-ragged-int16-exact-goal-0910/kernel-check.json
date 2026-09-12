@@ -1,0 +1,1128 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "label": "mixed_modes_all_m_shared_activation_and_weight_pointers",
+      "task_count": 24,
+      "batches": [
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        6,
+        6,
+        6,
+        7,
+        7,
+        7,
+        8,
+        8,
+        8
+      ],
+      "n": 33,
+      "k": 96,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 3564,
+          "unique_eligible_blocks": 100,
+          "unique_fallback_blocks": 8
+        },
+        {
+          "workers": 4,
+          "exact_values": 3564,
+          "unique_eligible_blocks": 100,
+          "unique_fallback_blocks": 8
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "maximum_128_tasks",
+      "task_count": 128,
+      "batches": [
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "n": 17,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 17408,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 17408,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "real_gate_up",
+      "task_count": 14,
+      "batches": [
+        1,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        4,
+        6,
+        6,
+        8,
+        8,
+        8,
+        8
+      ],
+      "n": 2304,
+      "k": 5120,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 147456,
+          "unique_eligible_blocks": 3776,
+          "unique_fallback_blocks": 64
+        },
+        {
+          "workers": 4,
+          "exact_values": 147456,
+          "unique_eligible_blocks": 3776,
+          "unique_fallback_blocks": 64
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "real_down",
+      "task_count": 7,
+      "batches": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        8,
+        8
+      ],
+      "n": 5120,
+      "k": 2304,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 163840,
+          "unique_eligible_blocks": 1705,
+          "unique_fallback_blocks": 23
+        },
+        {
+          "workers": 4,
+          "exact_values": 163840,
+          "unique_eligible_blocks": 1705,
+          "unique_fallback_blocks": 23
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "hostile_rounding_nan_tiny_and_scale_edges",
+      "task_count": 2,
+      "batches": [
+        8,
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 528,
+          "unique_eligible_blocks": 3,
+          "unique_fallback_blocks": 5
+        },
+        {
+          "workers": 4,
+          "exact_values": 528,
+          "unique_eligible_blocks": 3,
+          "unique_fallback_blocks": 5
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_000",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 1,
+          "unique_fallback_blocks": 7
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 1,
+          "unique_fallback_blocks": 7
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_008",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 1,
+          "unique_fallback_blocks": 7
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 1,
+          "unique_fallback_blocks": 7
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_016",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 2,
+          "unique_fallback_blocks": 6
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 2,
+          "unique_fallback_blocks": 6
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_024",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 4,
+          "unique_fallback_blocks": 4
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 4,
+          "unique_fallback_blocks": 4
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_032",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_040",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_048",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_056",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_064",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_072",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_080",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_088",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_096",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_104",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_112",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_120",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 7,
+          "unique_fallback_blocks": 1
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 7,
+          "unique_fallback_blocks": 1
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_128",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 1,
+          "unique_fallback_blocks": 7
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 1,
+          "unique_fallback_blocks": 7
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_136",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 1,
+          "unique_fallback_blocks": 7
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 1,
+          "unique_fallback_blocks": 7
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_144",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 2,
+          "unique_fallback_blocks": 6
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 2,
+          "unique_fallback_blocks": 6
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_152",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 4,
+          "unique_fallback_blocks": 4
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 4,
+          "unique_fallback_blocks": 4
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_160",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_168",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_176",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_184",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_192",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_200",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_208",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_216",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_224",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_232",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_240",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 8,
+          "unique_fallback_blocks": 0
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    },
+    {
+      "label": "all_fp8_codes_248",
+      "task_count": 1,
+      "batches": [
+        8
+      ],
+      "n": 33,
+      "k": 32,
+      "checks": [
+        {
+          "workers": 1,
+          "exact_values": 264,
+          "unique_eligible_blocks": 7,
+          "unique_fallback_blocks": 1
+        },
+        {
+          "workers": 4,
+          "exact_values": 264,
+          "unique_eligible_blocks": 7,
+          "unique_fallback_blocks": 1
+        }
+      ],
+      "source_and_packed_buffers_unchanged": true,
+      "activation_pointer_dedup_verified": true
+    }
+  ],
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_ragged_int16_exact_goal_0910.py": "04fba087f8bad88e9d5e6281211f327f674a76a6984148b1e523f971ab2eff9f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-ragged-int16-exact-goal-0910/libdeepseek-v41-ragged-int16-exact.so": "221772afa2898fb020408ca0affbc48fd5c996015cf12006d15b8ef9c7ca618b",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-ragged-int16-exact-goal-0910.cpp": "7f36f3da45c810338edf7b0d952c6617a91110b350f8369b48df9b2e9f14f7d5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-batched-int16-exact-goal-0910.cpp": "6893b7aacf58b19a2bcec7954fbe5d2f8185c4b09a3e1ea6c0828e5c04d26fca",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-grouped-int16-exact-goal-0910.cpp": "bba19076a79ca481dc963f433a3aa3543b3d7c6767184dab62f26db878c9272a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-0910b.cpp": "67e9391f008082251946fb1f7486179f03a7efbf7dbb3c96d6078446d195a9b7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_ragged_int16_goal_0910.py": "fe0aa6b238d715b16d05505543be674f99727419028b7f3c7a378eb5d9240f91"
+  },
+  "exact_values": 682488,
+  "workers": [
+    1,
+    4
+  ],
+  "cpu_affinity": [
+    0
+  ],
+  "descriptor_bytes": 72,
+  "invalid_descriptors_rejected": 13,
+  "whole_call_cap_fallback": true,
+  "all_256_fp8_codes": true,
+  "original_fp8_arithmetic_unchanged": true,
+  "hostile_values": [
+    10752.0,
+    -10752.0
+  ],
+  "full_checkpoint_loaded": false,
+  "model_tok_s_measured": false
+}

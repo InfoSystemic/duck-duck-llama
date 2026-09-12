@@ -19,6 +19,55 @@ PROBES = (
 )
 
 
+def is_degenerate_completion(text):
+    """True for empty, slash-only, or otherwise non-content completions."""
+    if not isinstance(text, str):
+        return True
+    stripped = text.strip()
+    if not stripped:
+        return True
+    compact = stripped.replace(" ", "").replace("\n", "").replace("\t", "")
+    if not compact:
+        return True
+    if set(compact) <= {"/", "-", ".", ",", ";", ":"}:
+        return True
+    if compact[:24] == "/" * min(24, len(compact)) and compact.count("/") / len(compact) > 0.8:
+        return True
+    return False
+
+
+def build_probe_payload(model, prompt, max_tokens=600):
+    """Temperature-0 factual probe used on the real serving entry."""
+    return {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": max_tokens,
+        "temperature": 0.0,
+        "seed": 42,
+        "cache_prompt": False,
+        "reasoning_effort": "low",
+    }
+
+
+def evaluate_probe_response(data, validator):
+    """Score a /v1/chat/completions JSON body from the real server."""
+    if not isinstance(data, dict):
+        return False, "", None, "not an object"
+    choices = data.get("choices") or []
+    if not choices:
+        return False, "", None, "no choices"
+    message = (choices[0] or {}).get("message") or {}
+    content = (message.get("content") or "").strip()
+    reasoning = (message.get("reasoning_content") or "").strip()
+    text = content or reasoning
+    timings = data.get("timings") or {}
+    rate = timings.get("predicted_per_second")
+    if is_degenerate_completion(content if content else text):
+        return False, text, rate, "degenerate"
+    ok = bool(content) and bool(validator(content))
+    return ok, text, rate, "ok" if ok else "validator_miss"
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("port_pos", nargs="?", type=int)
@@ -38,14 +87,7 @@ def run():
     failures = 0
     url = f"http://{args.host}:{args.port}/v1/chat/completions"
     for name, prompt, validator in PROBES:
-        payload = {
-            "model": args.model,
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 600,
-            "temperature": 0.0,
-            "seed": 42,
-            "reasoning_effort": "low",
-        }
+        payload = build_probe_payload(args.model, prompt)
         request = urllib.request.Request(
             url,
             data=json.dumps(payload).encode(),
@@ -54,12 +96,8 @@ def run():
         try:
             with urllib.request.urlopen(request, timeout=args.timeout) as response:
                 data = json.loads(response.read().decode())
-            message = data["choices"][0]["message"]
-            content = (message.get("content") or "").strip().replace("\n", " ")
-            reasoning = (message.get("reasoning_content") or "").strip().replace("\n", " ")
-            text = content or reasoning
-            ok = bool(content) and validator(content)
-            rate = (data.get("timings") or {}).get("predicted_per_second")
+            ok, text, rate, detail = evaluate_probe_response(data, validator)
+            text = text.replace("\n", " ")
             rate_text = f" {rate:.3f} tok/s" if isinstance(rate, (int, float)) else ""
             print(f"  {name:6}: {'PASS' if ok else 'FAIL'}{rate_text} {text[:110]!r}")
             failures += not ok

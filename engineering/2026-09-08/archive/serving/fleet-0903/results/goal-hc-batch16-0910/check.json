@@ -1,0 +1,4556 @@
+{
+  "completed": true,
+  "all_exact_bits": false,
+  "torch_threads": 16,
+  "affinity": [
+    127
+  ],
+  "no_full_checkpoint": true,
+  "no_performance_measurement": true,
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_check_hc_batch16_0910.py": "d9752725d07934070d3ad8d0ea5dbd833d4bc8e15f57f17b61565143f78df141",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_hc_0910.py": "fc0c8d5caa5e5076b8cd67d7c6d0fa4f67cdcc7291b34e6ef80b929af8a33081",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-intake-0910/official/inference/model.py": "4e9ae23620edc8028ccc5d5fef552ab7fdc7dcd6f79608754fe9f67644056f65",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_chunk_verify_0910.py": "7ac00f1416de67fdab8f6f7762c00407e4612ab4ef4746caed466a114a7fa1c1",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/goal_hc_0910/libgoal_hc_0910.so": "17cff8041c7bf0cb0e115e4b2bd0c052e91eab0dc0c006f11f76d385d8d35440"
+  },
+  "native_hc_calls": 108,
+  "native_hc_fallback_calls": 16,
+  "first_differences": [
+    {
+      "component": "HC",
+      "distribution": "normal",
+      "sequence": 8,
+      "dim": 5120,
+      "first_different_operator": "hc_post_mix"
+    },
+    {
+      "component": "HC",
+      "distribution": "dynamic",
+      "sequence": 8,
+      "dim": 5120,
+      "first_different_operator": "hc_post_mix"
+    }
+  ],
+  "cases": [
+    {
+      "component": "HC",
+      "distribution": "normal",
+      "sequence": 2,
+      "dim": 5120,
+      "hc_mult": 4,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "hc_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            20480
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_strict_projection": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 48,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mixes_before_sinkhorn": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 48,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            4,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      },
+      "shared_coefficient_hc_pre": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 10240,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "shared_coefficient_hc_post": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 40960,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2,
+          4,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "per_token_sinkhorn": {
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 2,
+      "dim": 512,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1024,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1024,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1024,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1024,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 2,
+      "dim": 1280,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 2,
+      "dim": 5120,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 2,
+      "dim": 8192,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 16384,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 16384,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 16384,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 16384,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "HC",
+      "distribution": "normal",
+      "sequence": 3,
+      "dim": 5120,
+      "hc_mult": 4,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "hc_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 61440,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            20480
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_strict_projection": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 72,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mixes_before_sinkhorn": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 72,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 12,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 12,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 48,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 61440,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            4,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      },
+      "shared_coefficient_hc_pre": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 15360,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          3,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "shared_coefficient_hc_post": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 61440,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          3,
+          4,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "per_token_sinkhorn": {
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 12,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 12,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 48,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 3,
+      "dim": 512,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1536,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 3,
+      "dim": 1280,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3840,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3840,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3840,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3840,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 3,
+      "dim": 5120,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 3,
+      "dim": 8192,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 24576,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 24576,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 24576,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 24576,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "HC",
+      "distribution": "normal",
+      "sequence": 5,
+      "dim": 5120,
+      "hc_mult": 4,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "hc_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 102400,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            20480
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_strict_projection": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 120,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mixes_before_sinkhorn": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 120,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 20,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 20,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 80,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 102400,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      },
+      "shared_coefficient_hc_pre": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 25600,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          5,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "shared_coefficient_hc_post": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 102400,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          5,
+          4,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "per_token_sinkhorn": {
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 20,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 20,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 80,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 5,
+      "dim": 512,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 5,
+      "dim": 1280,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 6400,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 6400,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 6400,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 6400,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 5,
+      "dim": 5120,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 5,
+      "dim": 8192,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "HC",
+      "distribution": "normal",
+      "sequence": 8,
+      "dim": 5120,
+      "hc_mult": 4,
+      "exact_bits": false,
+      "first_different_operator": "hc_post_mix",
+      "operators": {
+        "hc_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 163840,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            20480
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_strict_projection": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 192,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mixes_before_sinkhorn": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 192,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": false,
+          "different_elements": 3,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4
+          ],
+          "max_abs": 1.1920928955078125e-07,
+          "first_flat_index": 0,
+          "actual": 0.8685008883476257,
+          "expected": 0.8685010075569153
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 128,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post": {
+          "exact_bits": false,
+          "different_elements": 2,
+          "elements": 163840,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            4,
+            5120
+          ],
+          "max_abs": 4.76837158203125e-07,
+          "first_flat_index": 3731,
+          "actual": -2.3484230041503906e-05,
+          "expected": -2.3365020751953125e-05
+        }
+      },
+      "shared_coefficient_hc_pre": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 40960,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "shared_coefficient_hc_post": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 163840,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8,
+          4,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "per_token_sinkhorn": {
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 128,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 8,
+      "dim": 512,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 4096,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 4096,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 4096,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 4096,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 8,
+      "dim": 1280,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 8,
+      "dim": 5120,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "normal",
+      "sequence": 8,
+      "dim": 8192,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 65536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 65536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 65536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 65536,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "HC",
+      "distribution": "dynamic",
+      "sequence": 2,
+      "dim": 5120,
+      "hc_mult": 4,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "hc_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            20480
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_strict_projection": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 48,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mixes_before_sinkhorn": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 48,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            4,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      },
+      "shared_coefficient_hc_pre": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 10240,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "shared_coefficient_hc_post": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 40960,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          2,
+          4,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "per_token_sinkhorn": {
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 2,
+      "dim": 512,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1024,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1024,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1024,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1024,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 2,
+      "dim": 1280,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 2,
+      "dim": 5120,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 2,
+      "dim": 8192,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 16384,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 16384,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 16384,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            2,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 16384,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            2,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "HC",
+      "distribution": "dynamic",
+      "sequence": 3,
+      "dim": 5120,
+      "hc_mult": 4,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "hc_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 61440,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            20480
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_strict_projection": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 72,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mixes_before_sinkhorn": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 72,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 12,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 12,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 48,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 61440,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            4,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      },
+      "shared_coefficient_hc_pre": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 15360,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          3,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "shared_coefficient_hc_post": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 61440,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          3,
+          4,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "per_token_sinkhorn": {
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 12,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 12,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 48,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 3,
+      "dim": 512,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 1536,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 3,
+      "dim": 1280,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3840,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3840,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3840,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3840,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 3,
+      "dim": 5120,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 15360,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 3,
+      "dim": 8192,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 24576,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 3,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 24576,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 24576,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            3,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 24576,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            3,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "HC",
+      "distribution": "dynamic",
+      "sequence": 5,
+      "dim": 5120,
+      "hc_mult": 4,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "hc_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 102400,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            20480
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_strict_projection": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 120,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mixes_before_sinkhorn": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 120,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 20,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 20,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 80,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 102400,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            4,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      },
+      "shared_coefficient_hc_pre": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 25600,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          5,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "shared_coefficient_hc_post": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 102400,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          5,
+          4,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "per_token_sinkhorn": {
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 20,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 20,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 80,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 5,
+      "dim": 512,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 2560,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 5,
+      "dim": 1280,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 6400,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 6400,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 6400,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 6400,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 5,
+      "dim": 5120,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 25600,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 5,
+      "dim": 8192,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 5,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            5,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            5,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "HC",
+      "distribution": "dynamic",
+      "sequence": 8,
+      "dim": 5120,
+      "hc_mult": 4,
+      "exact_bits": false,
+      "first_different_operator": "hc_post_mix",
+      "operators": {
+        "hc_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 163840,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            20480
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_strict_projection": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 192,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_mixes_before_sinkhorn": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 192,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            24
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": false,
+          "different_elements": 1,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4
+          ],
+          "max_abs": 5.960464477539063e-08,
+          "first_flat_index": 13,
+          "actual": 0.7860312461853027,
+          "expected": 0.7860313057899475
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 128,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_pre": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 163840,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            4,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      },
+      "shared_coefficient_hc_pre": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 40960,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "shared_coefficient_hc_post": {
+        "exact_bits": true,
+        "different_elements": 0,
+        "elements": 163840,
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          8,
+          4,
+          5120
+        ],
+        "max_abs": 0.0,
+        "first_flat_index": null
+      },
+      "per_token_sinkhorn": {
+        "hc_pre_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_post_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 32,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "hc_comb_mix": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 128,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            4,
+            4
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 8,
+      "dim": 512,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 4096,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 4096,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 4096,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 4096,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            512
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 8,
+      "dim": 1280,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 10240,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            1280
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 8,
+      "dim": 5120,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 40960,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            5120
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    },
+    {
+      "component": "RMSNorm",
+      "distribution": "dynamic",
+      "sequence": 8,
+      "dim": 8192,
+      "exact_bits": true,
+      "first_different_operator": null,
+      "operators": {
+        "rms_square": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 65536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_mean": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_rsqrt": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 8,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            1
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_normalized": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 65536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_weighted": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 65536,
+          "dtype": "torch.float32",
+          "shape": [
+            1,
+            8,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        },
+        "rms_output": {
+          "exact_bits": true,
+          "different_elements": 0,
+          "elements": 65536,
+          "dtype": "torch.bfloat16",
+          "shape": [
+            1,
+            8,
+            8192
+          ],
+          "max_abs": 0.0,
+          "first_flat_index": null
+        }
+      }
+    }
+  ]
+}

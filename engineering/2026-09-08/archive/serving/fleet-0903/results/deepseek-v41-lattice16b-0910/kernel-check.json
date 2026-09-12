@@ -1,0 +1,301 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "tasks": 3,
+      "n": 33,
+      "k": 32,
+      "shared_activation": true,
+      "checks": [
+        {
+          "workers": 1,
+          "preallocated": false,
+          "exact_values": 99
+        },
+        {
+          "workers": 1,
+          "preallocated": true,
+          "exact_values": 99
+        },
+        {
+          "workers": 4,
+          "preallocated": false,
+          "exact_values": 99
+        },
+        {
+          "workers": 4,
+          "preallocated": true,
+          "exact_values": 99
+        },
+        {
+          "workers": 16,
+          "preallocated": false,
+          "exact_values": 99
+        },
+        {
+          "workers": 16,
+          "preallocated": true,
+          "exact_values": 99
+        }
+      ],
+      "source_and_packed_buffers_preserved": true,
+      "native_calls": 6,
+      "fallback_calls": 0
+    },
+    {
+      "tasks": 7,
+      "n": 65,
+      "k": 96,
+      "shared_activation": false,
+      "checks": [
+        {
+          "workers": 1,
+          "preallocated": false,
+          "exact_values": 455
+        },
+        {
+          "workers": 1,
+          "preallocated": true,
+          "exact_values": 455
+        },
+        {
+          "workers": 4,
+          "preallocated": false,
+          "exact_values": 455
+        },
+        {
+          "workers": 4,
+          "preallocated": true,
+          "exact_values": 455
+        },
+        {
+          "workers": 16,
+          "preallocated": false,
+          "exact_values": 455
+        },
+        {
+          "workers": 16,
+          "preallocated": true,
+          "exact_values": 455
+        }
+      ],
+      "source_and_packed_buffers_preserved": true,
+      "native_calls": 6,
+      "fallback_calls": 0
+    },
+    {
+      "tasks": 14,
+      "n": 2304,
+      "k": 5120,
+      "shared_activation": true,
+      "checks": [
+        {
+          "workers": 1,
+          "preallocated": false,
+          "exact_values": 32256
+        },
+        {
+          "workers": 1,
+          "preallocated": true,
+          "exact_values": 32256
+        },
+        {
+          "workers": 4,
+          "preallocated": false,
+          "exact_values": 32256
+        },
+        {
+          "workers": 4,
+          "preallocated": true,
+          "exact_values": 32256
+        },
+        {
+          "workers": 16,
+          "preallocated": false,
+          "exact_values": 32256
+        },
+        {
+          "workers": 16,
+          "preallocated": true,
+          "exact_values": 32256
+        }
+      ],
+      "source_and_packed_buffers_preserved": true,
+      "native_calls": 6,
+      "fallback_calls": 0
+    },
+    {
+      "tasks": 7,
+      "n": 5120,
+      "k": 2304,
+      "shared_activation": false,
+      "checks": [
+        {
+          "workers": 1,
+          "preallocated": false,
+          "exact_values": 35840
+        },
+        {
+          "workers": 1,
+          "preallocated": true,
+          "exact_values": 35840
+        },
+        {
+          "workers": 4,
+          "preallocated": false,
+          "exact_values": 35840
+        },
+        {
+          "workers": 4,
+          "preallocated": true,
+          "exact_values": 35840
+        },
+        {
+          "workers": 16,
+          "preallocated": false,
+          "exact_values": 35840
+        },
+        {
+          "workers": 16,
+          "preallocated": true,
+          "exact_values": 35840
+        }
+      ],
+      "source_and_packed_buffers_preserved": true,
+      "native_calls": 6,
+      "fallback_calls": 0
+    }
+  ],
+  "benchmarks": [
+    {
+      "n": 2304,
+      "k": 5120,
+      "tasks": 14,
+      "workers": 16,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.003215617030946305
+        },
+        {
+          "variant": "lattice16",
+          "seconds_per_call": 0.0017834526261140127
+        },
+        {
+          "variant": "lattice16",
+          "seconds_per_call": 0.0019161559066560585
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.002895978330343496
+        }
+      ],
+      "component_only": true,
+      "eligible_blocks": [
+        158
+      ],
+      "total_blocks": [
+        160
+      ],
+      "speedup": 1.651957310389746,
+      "control_ratio": 1.1103733053710025
+    },
+    {
+      "n": 5120,
+      "k": 2304,
+      "tasks": 7,
+      "workers": 16,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0018756407807813957
+        },
+        {
+          "variant": "lattice16",
+          "seconds_per_call": 0.0011365618265699595
+        },
+        {
+          "variant": "lattice16",
+          "seconds_per_call": 0.0010411921721242834
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0014971558412071317
+        }
+      ],
+      "component_only": true,
+      "eligible_blocks": [
+        70,
+        70,
+        70,
+        68,
+        70,
+        72,
+        70
+      ],
+      "total_blocks": [
+        72,
+        72,
+        72,
+        72,
+        72,
+        72,
+        72
+      ],
+      "speedup": 1.54875005350045,
+      "control_ratio": 1.2528026336049947
+    }
+  ],
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_lattice16b_0910.py": "5e9271861498edc2af335ba3ef8ded444f39dd120dd9a58e45a464224b6eced2",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-lattice16b-0910/libdeepseek-v41-lattice16b.so": "d8aa2df7d56557ecf06f864c63b4b9c7b89ad990f092534ef005e0f5cd0e7f1f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-lattice16b-0910.cpp": "114cb9b7308798cb51792f215a5b9c7e81b01f59e09770f14d1320fdd1d31b81",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_lattice16_0910.py": "b28b06872776ad7203b33a80d004e6a53f91dffbe854b80f3f193d3984d4e4a2",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-grouped-vnni-goal-0910.cpp": "e19d4bf5de30135dcb8ba2c3e60b3156b822e9c48425fe9d8d9b371a554cabc9",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-vnni-goal-0910.cpp": "d48d3fc6666cf85a18a6e86b2e036d4dc6fd6134146cb11d0e8c78d8c019af8d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-0910b.cpp": "67e9391f008082251946fb1f7486179f03a7efbf7dbb3c96d6078446d195a9b7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_grouped_vnni_goal_0910.py": "150e512a796996852706b40d0a11f3d4840d4f5b074bd54381655aa0c49f5250",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_vnni_goal_0910.py": "3b784a67c72fa296db8798cff38e7b2282022d29f99b2ee665339f97f6b40c8c"
+  },
+  "all_fp8_codes_checked": true,
+  "extra_format_exact_values": 8712,
+  "exact_values": 411900,
+  "independent_tree_oracle_values": 7880,
+  "workers": [
+    1,
+    4,
+    16
+  ],
+  "cpu_affinity": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "whole_call_cap_fallback_exact": true,
+  "no_packed_tensor_retention": true,
+  "hostile_native_values": [
+    10752.0,
+    -10752.0
+  ],
+  "hostile_fallback_values": [
+    10752.0,
+    -10752.0
+  ],
+  "fp32_tree_preserved": true,
+  "full_checkpoint_loaded": false,
+  "model_tok_s_measured": false,
+  "component_only": true
+}

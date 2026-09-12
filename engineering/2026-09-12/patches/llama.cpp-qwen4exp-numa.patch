@@ -1,0 +1,3236 @@
+diff --git a/common/arg.cpp b/common/arg.cpp
+index 4469612cd5b26611ee08a1937cb721576e24d095..f9ca1c57547356f17f5bd1be685a4ab5ae355ff0 100644
+--- a/common/arg.cpp
++++ b/common/arg.cpp
+@@ -1125,7 +1125,10 @@ static std::vector<ggml_backend_dev_t> parse_device_list(const std::string & val
+         ggml_backend_load_all();
+         for (const auto & device : dev_names) {
+             auto * dev = ggml_backend_dev_by_name(device.c_str());
+-            if (!dev || ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU) {
++            const bool selectable_numa_cpu = dev &&
++                ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU &&
++                device.rfind("CPU-NUMA", 0) == 0;
++            if (!dev || (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU && !selectable_numa_cpu)) {
+                 throw std::invalid_argument(string_format("invalid device: %s", device.c_str()));
+             }
+             devices.push_back(dev);
+@@ -1135,6 +1138,21 @@ static std::vector<ggml_backend_dev_t> parse_device_list(const std::string & val
+     return devices;
+ }
+ 
++static bool common_supports_device_offload() {
++    if (llama_supports_gpu_offload()) {
++        return true;
++    }
++    ggml_backend_load_all();
++    for (size_t i = 0; i < ggml_backend_dev_count(); ++i) {
++        ggml_backend_dev_t dev = ggml_backend_dev_get(i);
++        if (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU &&
++                std::string(ggml_backend_dev_name(dev)).rfind("CPU-NUMA", 0) == 0) {
++            return true;
++        }
++    }
++    return false;
++}
++
+ void common_print_available_devices() {
+     constexpr size_t MiB = 1024 * 1024;
+     std::vector<ggml_backend_dev_t> devices;
+@@ -1143,7 +1161,9 @@ void common_print_available_devices() {
+ 
+     for (size_t i = 0; i < ggml_backend_dev_count(); ++i) {
+         auto * dev = ggml_backend_dev_get(i);
+-        if (ggml_backend_dev_type(dev) != GGML_BACKEND_DEVICE_TYPE_CPU) {
++        const bool selectable_numa_cpu = ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU &&
++            std::string(ggml_backend_dev_name(dev)).rfind("CPU-NUMA", 0) == 0;
++        if (ggml_backend_dev_type(dev) != GGML_BACKEND_DEVICE_TYPE_CPU || selectable_numa_cpu) {
+             devices.push_back(dev);
+         }
+     }
+@@ -2818,7 +2838,7 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+             } else {
+                 params.n_gpu_layers = std::stoi(value);
+             }
+-            if (!llama_supports_gpu_offload()) {
++            if (!common_supports_device_offload()) {
+                 fprintf(stderr, "warning: no usable GPU found, --gpu-layers option will be ignored\n");
+                 fprintf(stderr, "warning: one possible reason is that llama.cpp was compiled without GPU support\n");
+                 fprintf(stderr, "warning: consult docs/build.md for compilation instructions\n");
+@@ -2844,7 +2864,7 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+             } else {
+                 throw std::invalid_argument("invalid value");
+             }
+-            if (!llama_supports_gpu_offload()) {
++            if (!common_supports_device_offload()) {
+                 fprintf(stderr, "warning: llama.cpp was compiled without support for GPU offload. Setting the split mode has no effect.\n");
+             }
+         }
+@@ -2871,7 +2891,7 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+                     params.tensor_split[i] = 0.0f;
+                 }
+             }
+-            if (!llama_supports_gpu_offload()) {
++            if (!common_supports_device_offload()) {
+                 fprintf(stderr, "warning: llama.cpp was compiled without support for GPU offload. Setting a tensor split has no effect.\n");
+             }
+         }
+@@ -2881,7 +2901,7 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+         string_format("the GPU to use for the model (with split-mode = none), or for intermediate results and KV (with split-mode = row) (default: %d)", params.main_gpu),
+         [](common_params & params, int value) {
+             params.main_gpu = value;
+-            if (!llama_supports_gpu_offload()) {
++            if (!common_supports_device_offload()) {
+                 fprintf(stderr, "warning: llama.cpp was compiled without support for GPU offload. Setting the main GPU has no effect.\n");
+             }
+         }
+@@ -4230,7 +4250,7 @@ common_params_context common_params_parser_init(common_params & params, llama_ex
+             } else {
+                 params.speculative.draft.n_gpu_layers = std::stoi(value);
+             }
+-            if (!llama_supports_gpu_offload()) {
++            if (!common_supports_device_offload()) {
+                 fprintf(stderr, "warning: no usable GPU found, --gpu-layers-draft option will be ignored\n");
+                 fprintf(stderr, "warning: one possible reason is that llama.cpp was compiled without GPU support\n");
+                 fprintf(stderr, "warning: consult docs/build.md for compilation instructions\n");
+diff --git a/conversion/qwen.py b/conversion/qwen.py
+index 419611896fc36ea9df1b23825f54543cc89ef2f1..00d5a706d1ffd3b237295eaee2c6e3b0d1153102 100644
+--- a/conversion/qwen.py
++++ b/conversion/qwen.py
+@@ -341,7 +341,7 @@ class _QwenMtpMixin:
+             keep = name in (
+                 "model.embed_tokens.weight", "model.norm.weight", "lm_head.weight",
+                 "embed_tokens.weight", "norm.weight",
+-            )
++            ) or name.startswith("model.hyper_connection_mixer.")
+             if not keep:
+                 return None
+         return name, gen
+diff --git a/conversion/qwen4exp.py b/conversion/qwen4exp.py
+index 168796d616b98725ad27d209843f38d0fd27f147..5de299346056e14e0fc0a35bb436451c4ebeb0a2 100644
+--- a/conversion/qwen4exp.py
++++ b/conversion/qwen4exp.py
+@@ -1,6 +1,6 @@
+ from __future__ import annotations
+ 
+-from typing import Iterable, cast
++from typing import Callable, Iterable, cast
+ 
+ import torch
+ from torch import Tensor
+@@ -21,20 +21,64 @@ class Qwen4ExpTextModel(_Qwen35MRopeMixin, _LinearAttentionVReorderBase):
+     Shares the Qwen3.5 gated delta net and interleaved mrope, and adds three things:
+     hyper-connections in place of every layer norm, QSA sparse attention on the full
+     attention layers, and PLE n-gram hash embeddings on a single layer.
++
++    The checkpoint also carries a NextN/MTP draft head under `mtp.*`, exported as a
++    trailing block; pass --no-nextn to leave it out.
+     """
+ 
+     model_arch = gguf.MODEL_ARCH.QWEN4EXP
+ 
+-    # the MTP block is a separate draft head; vLLM drops it too
+-    supports_mtp_export = False
+-    no_mtp = True
+-
+     def __init__(self, *args, **kwargs):
+         super().__init__(*args, **kwargs)
+         # only the shard names, so the table itself is never held
+         self._ple_shards: dict[int, str] = {}
+         self._ple_row_dim: int | None = None
+ 
++    # The MTP head is one trunk-shaped block (dense attention + MoE, wrapped in
++    # hyper-connections) plus a combiner, so once _QwenMtpMixin renames
++    # `mtp.layers.0.*` to the trailing block index its tensors ride the existing
++    # qwen4exp mappings unchanged. Only the two head-level pieces below differ.
++
++    _MTP_MIXER_PREFIX = "mtp.hyper_connection_mixer."
++
++    @classmethod
++    def filter_tensors(cls, item):
++        # the head carries its own copy of the trunk's hc_head_* output mixer,
++        # which qwen4exp has in place of a final norm; it is unindexed in the
++        # checkpoint and per-block in the GGUF
++        name, gen = item
++        if name.startswith("model." + cls._MTP_MIXER_PREFIX):
++            name = name.replace("model.", "", 1)
++        if name.startswith(cls._MTP_MIXER_PREFIX):
++            if cls.no_mtp:
++                return None
++            assert cls._original_block_count is not None
++            return f"model.layers.{cls._original_block_count}.{name[len('mtp.'):]}", gen
++        return super().filter_tensors((name, gen))
++
++    def index_tensors(self, remote_hf_model_id: str | None = None) -> dict[str, Callable[[], Tensor]]:
++        # qwen4exp splits the combiner the shared NextN code calls eh_proj into
++        # fc_embedding and fc_hidden; W_e@e + W_h@h == [W_e|W_h] @ concat(e, h),
++        # so the two fuse back into the single expected matmul
++        tensors = super().index_tensors(remote_hf_model_id=remote_hf_model_id)
++
++        emb = tensors.pop("mtp.fc_embedding.weight", None)
++        hid = tensors.pop("mtp.fc_hidden.weight", None)
++        if emb is None and hid is None:
++            return tensors
++        if emb is None or hid is None:
++            raise ValueError(
++                "the qwen4exp MTP combiner needs both mtp.fc_embedding.weight and "
++                "mtp.fc_hidden.weight; pass --no-nextn to convert without the draft head"
++            )
++
++        assert self._original_block_count is not None
++        # fc_embedding first: the graph concatenates the token embedding ahead of
++        # the hidden state, so the fused weight has to be ordered to match
++        name = f"model.layers.{self._original_block_count}.eh_proj.weight"
++        tensors[name] = lambda: torch.cat([emb(), hid()], dim=1)
++        return tensors
++
+     def _read_hash_constants(self, suffix: str) -> list[int]:
+         """Read an int64 PLE constant straight from the checkpoint.
+ 
+@@ -63,14 +107,18 @@ class Qwen4ExpTextModel(_Qwen35MRopeMixin, _LinearAttentionVReorderBase):
+         self.gguf_writer.add_indexer_top_k(hp["indexer_budget"])
+         ratio = hp["indexer_compress_ratio"]
+         layer_types = hp["layer_types"]
+-        self.gguf_writer.add_attention_compress_ratios(
+-            [ratio if layer_types[i] == "full_attention" else 0 for i in range(n_layer)]
+-        )
++        ratios = [ratio if layer_types[i] == "full_attention" else 0 for i in range(n_layer)]
++        # llama.cpp reads this array with length block_count, and the MTP blocks
++        # trailing the trunk attend densely, which is what a ratio of 0 selects
++        ratios += [0] * (self.block_count - n_layer)
++        self.gguf_writer.add_attention_compress_ratios(ratios)
+ 
+         # ple_layer_ids is 1-based in the HF config; empty means no n-gram table,
+-        # so emit no PLE keys rather than optional ones
++        # so emit no PLE keys rather than optional ones.
++        # a draft-only export carries no trunk tensors, so it carries no PLE table
++        # to describe either
+         ple_layers = [i - 1 for i in hp["ple_layer_ids"]]
+-        if not ple_layers:
++        if not ple_layers or self.mtp_only:
+             return
+         self.gguf_writer.add_ple_layers(ple_layers)
+         self.gguf_writer.add_ple_ngram_size(hp["ngram_size"])
+diff --git a/docs/backend/CPU-NUMA.md b/docs/backend/CPU-NUMA.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..8a36b27b5827fd3d6af00a9d791d7922b861e8bf
+--- /dev/null
++++ b/docs/backend/CPU-NUMA.md
+@@ -0,0 +1,95 @@
++# Linux NUMA CPU devices
++
++The CPU backend can optionally expose one selectable device per Linux NUMA
++node. This makes the existing Meta tensor-split backend usable across CPU
++sockets while keeping weights and worker threads local to each node.
++
++The feature is disabled by default. Set the environment before the process
++starts:
++
++| Variable | Default | Purpose |
++| --- | ---: | --- |
++| `GGML_CPU_NUMA_DEVICES` | off | Expose `CPU-NUMA0`, `CPU-NUMA1`, ... devices. |
++| `GGML_CPU_NUMA_THREADS` | min(10, physical cores/node) | Physical worker cores used by each device. |
++| `GGML_CPU_NUMA_POLL` | 50 | Thread-pool polling level, capped at 100. |
++| `GGML_CPU_NUMA_HUGEPAGES` | off | Apply `MADV_HUGEPAGE` to node-local mappings. Benchmark before enabling. |
++| `GGML_CPU_NUMA_DIRECT_ALLREDUCE` | off | Use the direct host-memory F32 collective when supported. |
++
++Device discovery respects the process CPU-affinity mask and selects one
++logical CPU per physical core. Buffers are allocated with a strict Linux
++`mbind()` policy. Device memory reporting is node-local and includes
++reclaimable file cache rather than reporting total host RAM for every node.
++
++## Server example
++
++```bash
++export GGML_CPU_NUMA_DEVICES=1
++export GGML_CPU_NUMA_THREADS=12
++export GGML_CPU_NUMA_POLL=100
++export GGML_CPU_NUMA_DIRECT_ALLREDUCE=1
++
++llama-server \
++  --model "$MODEL" \
++  --gpu-layers all \
++  --device CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3 \
++  --split-mode tensor \
++  --tensor-split 1,1,1,1 \
++  --fit off \
++  --threads 12 \
++  --threads-batch 12
++```
++
++`llama-bench` uses `/` between values because commas select parameter sweep
++values:
++
++```bash
++llama-bench \
++  --model "$MODEL" \
++  --n-prompt 0 \
++  --n-gen 32 \
++  --repetitions 3 \
++  --threads 12 \
++  --n-gpu-layers 999 \
++  --device CPU-NUMA0/CPU-NUMA1/CPU-NUMA2/CPU-NUMA3 \
++  --split-mode tensor \
++  --tensor-split 1/1/1/1
++```
++
++## Direct all-reduce contract
++
++The direct collective is deliberately narrow. It activates only when every
++backend is a `CPU-NUMA*` device and every reduction tensor is contiguous F32,
++has the same shape, and belongs to its corresponding NUMA device. It waits for
++all socket workers, reduces directly through host-addressable memory, and
++replicates the result. Any unsupported type, layout, or backend returns to the
++Meta backend's generic butterfly implementation.
++
++Meta host-backed buffers still require per-device view mapping. Treating a
++Meta buffer as an ordinary host buffer can leak its placeholder address into a
++worker graph, notably for hybrid recurrent-state views. The Meta backend also
++establishes a completion boundary before graph metadata can be recycled by the
++scheduler.
++
++## Example measurements
++
++The following decode-only results used a 27.3B, 31.45 GB GGUF on four Intel
++Xeon Gold 6242 sockets. Each value is the mean of three 32-token runs with Q8_0
++KV cache and Flash Attention enabled.
++
++| Configuration | Tokens/s |
++| --- | ---: |
++| One NUMA device, 16 cores | 2.524 |
++| Four devices, generic collective, 16 cores/socket | 5.239 |
++| Four devices, direct collective, 16 cores/socket | 6.091 |
++| Direct collective, 10 cores/socket, poll 50 | 6.783 |
++| Direct collective, 12 cores/socket, poll 50 | 7.054 |
++| Direct collective, 12 cores/socket, poll 100 | **7.169** |
++| Same peak profile with huge-page advice | 6.989 |
++
++The direct-collective output matched the generic fallback byte-for-byte for a
++fixed-seed greedy generation. In a production-style MTP smoke test, the same
++12-core profile generated 14.06-14.27 tokens/s with 90-94% draft acceptance;
++the exact-output validation completed correctly.
++
++Core count, polling, and huge pages are workload- and platform-dependent.
++Measure them independently for each model and quantization.
+diff --git a/ggml/include/ggml-backend.h b/ggml/include/ggml-backend.h
+index cc3f8cd36e3549c4f3ed3d6ad5f6b577af4b837b..1c6da4c9598de508e7f486e84b7b0d75a6d4b52c 100644
+--- a/ggml/include/ggml-backend.h
++++ b/ggml/include/ggml-backend.h
+@@ -404,6 +404,10 @@ extern "C" {
+     GGML_API ggml_backend_dev_t ggml_backend_meta_device(
+         ggml_backend_dev_t * devs, size_t n_devs, ggml_backend_meta_get_split_state_t get_split_state, void * get_split_state_ud);
+ 
++    // Aggregate matching extra buffer types from all simple devices. The
++    // returned array is NULL-terminated and owned by the meta device.
++    GGML_API ggml_backend_buffer_type_t * ggml_backend_meta_device_get_extra_bufts(ggml_backend_dev_t dev);
++
+     //
+     // Utils
+     //
+diff --git a/ggml/src/ggml-backend-meta.cpp b/ggml/src/ggml-backend-meta.cpp
+index 3ec40fb1af7f025f7ba46a34e2b3950d5cd8d5b4..7684e65e1462cbea2075cd197191528cc36aa29f 100644
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -6,10 +6,13 @@
+ #include "ggml-cpp.h"
+ 
+ #include <algorithm>
++#include <array>
+ #include <cassert>
+ #include <cmath>
+ #include <cstddef>
+ #include <cstdint>
++#include <cstdio>
++#include <cstdlib>
+ #include <cstring>
+ #include <map>
+ #include <memory>
+@@ -151,11 +154,48 @@ static ggml_backend_buffer_type_t ggml_backend_meta_device_get_buffer_type(ggml_
+ 
+ static ggml_backend_buffer_type_t ggml_backend_meta_device_get_host_buffer_type(ggml_backend_dev_t dev);
+ 
++static size_t ggml_backend_meta_buft_n_bufts(ggml_backend_buffer_type_t meta_buft);
++
++static ggml_backend_buffer_type_t ggml_backend_meta_buft_simple_buft(
++        ggml_backend_buffer_type_t meta_buft, size_t index);
++
+ static bool ggml_backend_meta_device_supports_op(ggml_backend_dev_t dev, const ggml_tensor * op) {
+     GGML_ASSERT(ggml_backend_dev_is_meta(dev));
+     const ggml_backend_meta_device_context * meta_dev_ctx = (const ggml_backend_meta_device_context *) dev->context;
+-    return std::all_of(meta_dev_ctx->simple_devs.begin(), meta_dev_ctx->simple_devs.end(),
+-        [op](ggml_backend_dev_t simple_dev) { return ggml_backend_dev_supports_op(simple_dev, op); });
++
++    for (size_t j = 0; j < meta_dev_ctx->simple_devs.size(); ++j) {
++        ggml_tensor op_simple = *op;
++        std::array<ggml_tensor, GGML_MAX_SRC> src_simple;
++        std::array<ggml_backend_buffer, GGML_MAX_SRC> src_buffers = {};
++
++        for (int i = 0; i < GGML_MAX_SRC; ++i) {
++            if (op->src[i] == nullptr) {
++                continue;
++            }
++            if (op->src[i] == op) {
++                op_simple.src[i] = &op_simple;
++                continue;
++            }
++
++            src_simple[i] = *op->src[i];
++            op_simple.src[i] = &src_simple[i];
++
++            ggml_backend_buffer_t src_buffer = op->src[i]->buffer;
++            if (src_buffer != nullptr && ggml_backend_buft_is_meta(src_buffer->buft)) {
++                if (ggml_backend_meta_buft_n_bufts(src_buffer->buft) != meta_dev_ctx->simple_devs.size()) {
++                    return false;
++                }
++                src_buffers[i] = *src_buffer;
++                src_buffers[i].buft = ggml_backend_meta_buft_simple_buft(src_buffer->buft, j);
++                src_simple[i].buffer = &src_buffers[i];
++            }
++        }
++
++        if (!ggml_backend_dev_supports_op(meta_dev_ctx->simple_devs[j], &op_simple)) {
++            return false;
++        }
++    }
++    return true;
+ }
+ 
+ static bool ggml_backend_meta_device_supports_buft(ggml_backend_dev_t dev, ggml_backend_buffer_type_t buft) {
+@@ -255,11 +295,11 @@ struct ggml_backend_meta_buffer_type_context {
+ 
+     ggml_backend_meta_buffer_type_context(std::vector<ggml_backend_buffer_type_t> simple_bufts) : simple_bufts(std::move(simple_bufts)) {
+         name = "Meta(";
+-        for (size_t i = 0; i < simple_bufts.size(); i++) {
++        for (size_t i = 0; i < this->simple_bufts.size(); i++) {
+             if (i > 0) {
+                 name += ",";
+             }
+-            name += ggml_backend_buft_name(simple_bufts[i]);
++            name += ggml_backend_buft_name(this->simple_bufts[i]);
+         }
+         name += ")";
+     }
+@@ -343,31 +383,105 @@ bool ggml_backend_buft_is_meta(ggml_backend_buffer_type_t buft) {
+     return buft != nullptr && buft->iface.get_name == ggml_backend_meta_buffer_type_iface.get_name;
+ }
+ 
+-static ggml_backend_buffer_type_t ggml_backend_meta_device_get_buffer_type(ggml_backend_dev_t dev) {
+-    static std::map<ggml_backend_dev_t, struct ggml_backend_buffer_type> meta_bufts;
++using ggml_backend_meta_buft_key =
++    std::pair<ggml_backend_dev_t, std::vector<ggml_backend_buffer_type_t>>;
++
++static ggml_backend_buffer_type_t ggml_backend_meta_buffer_type_from_simple(
++        ggml_backend_dev_t dev, const std::vector<ggml_backend_buffer_type_t> & simple_bufts) {
++    static std::vector<std::unique_ptr<ggml_backend_meta_buffer_type_context>> buft_ctxs;
++    static std::map<ggml_backend_meta_buft_key, struct ggml_backend_buffer_type> meta_bufts;
+     GGML_ASSERT(ggml_backend_dev_is_meta(dev));
++
++    const ggml_backend_meta_buft_key key(dev, simple_bufts);
+     {
+-        auto it = meta_bufts.find(dev);
++        auto it = meta_bufts.find(key);
+         if (it != meta_bufts.end()) {
+             return &it->second;
+         }
+     }
+ 
++    buft_ctxs.push_back(std::make_unique<ggml_backend_meta_buffer_type_context>(simple_bufts));
++    struct ggml_backend_buffer_type meta_buft = {
++        /*iface  =*/ ggml_backend_meta_buffer_type_iface,
++        /*device =*/ dev,
++        /*ctx    =*/ buft_ctxs.back().get(),
++    };
++    auto result = meta_bufts.emplace(key, meta_buft);
++    return &result.first->second;
++}
++
++static ggml_backend_buffer_type_t ggml_backend_meta_device_get_buffer_type(ggml_backend_dev_t dev) {
++    GGML_ASSERT(ggml_backend_dev_is_meta(dev));
++
+     const size_t n_devs = ggml_backend_meta_dev_n_devs(dev);
+     std::vector<ggml_backend_buffer_type_t> simple_bufts;
+     simple_bufts.reserve(n_devs);
+     for (size_t i = 0; i < n_devs; i++) {
+         simple_bufts.push_back(ggml_backend_dev_buffer_type(ggml_backend_meta_dev_simple_dev(dev, i)));
+     }
+-    ggml_backend_meta_buffer_type_context * buft_ctx = new ggml_backend_meta_buffer_type_context(simple_bufts);
++    return ggml_backend_meta_buffer_type_from_simple(dev, simple_bufts);
++}
++
++ggml_backend_buffer_type_t * ggml_backend_meta_device_get_extra_bufts(ggml_backend_dev_t dev) {
++    static std::map<ggml_backend_dev_t, std::vector<ggml_backend_buffer_type_t>> meta_extra_bufts;
++    GGML_ASSERT(ggml_backend_dev_is_meta(dev));
++
++    auto cached = meta_extra_bufts.find(dev);
++    if (cached != meta_extra_bufts.end()) {
++        return cached->second.data();
++    }
+ 
+-    struct ggml_backend_buffer_type meta_buft = {
+-        /*iface  =*/ ggml_backend_meta_buffer_type_iface,
+-        /*device =*/ dev,
+-        /*ctx    =*/ buft_ctx,
+-    };
+-    auto result = meta_bufts.emplace(dev, meta_buft);
+-    return &result.first->second;
++    const size_t n_devs = ggml_backend_meta_dev_n_devs(dev);
++    std::vector<ggml_backend_buffer_type_t *> simple_extra_bufts;
++    simple_extra_bufts.reserve(n_devs);
++    for (size_t i = 0; i < n_devs; ++i) {
++        ggml_backend_dev_t simple_dev = ggml_backend_meta_dev_simple_dev(dev, i);
++        ggml_backend_reg_t reg = ggml_backend_dev_backend_reg(simple_dev);
++        if (reg == nullptr) {
++            simple_extra_bufts.push_back(nullptr);
++            continue;
++        }
++        auto get_extra_bufts = (ggml_backend_dev_get_extra_bufts_t)
++            ggml_backend_reg_get_proc_address(reg, "ggml_backend_dev_get_extra_bufts");
++        simple_extra_bufts.push_back(get_extra_bufts ? get_extra_bufts(simple_dev) : nullptr);
++    }
++
++    std::vector<ggml_backend_buffer_type_t> result;
++    for (size_t extra = 0;; ++extra) {
++        std::vector<ggml_backend_buffer_type_t> simple_bufts;
++        simple_bufts.reserve(n_devs);
++        for (size_t i = 0; i < n_devs; ++i) {
++            if (simple_extra_bufts[i] == nullptr || simple_extra_bufts[i][extra] == nullptr) {
++                simple_bufts.clear();
++                break;
++            }
++            simple_bufts.push_back(simple_extra_bufts[i][extra]);
++        }
++        if (simple_bufts.size() != n_devs) {
++            break;
++        }
++        if (const char * trace = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
++                trace != nullptr && strcmp(trace, "1") == 0) {
++            for (size_t i = 0; i < simple_bufts.size(); ++i) {
++                fprintf(stderr, "q8_0_r8: Meta extra[%zu] device[%zu]=%s\n",
++                        extra, i, ggml_backend_buft_name(simple_bufts[i]));
++            }
++        }
++        result.push_back(ggml_backend_meta_buffer_type_from_simple(dev, simple_bufts));
++    }
++    result.push_back(nullptr);
++
++    if (const char * trace = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
++            trace != nullptr && strcmp(trace, "1") == 0) {
++        for (ggml_backend_buffer_type_t buft : result) {
++            if (buft != nullptr) {
++                fprintf(stderr, "q8_0_r8: Meta extra buffer %s\n", ggml_backend_buft_name(buft));
++            }
++        }
++    }
++
++    auto inserted = meta_extra_bufts.emplace(dev, std::move(result));
++    return inserted.first->second.data();
+ }
+ 
+ static ggml_backend_buffer_type_t ggml_backend_meta_device_get_host_buffer_type(ggml_backend_dev_t dev) {
+@@ -1740,6 +1854,12 @@ struct ggml_backend_buffer * ggml_backend_meta_alloc_ctx_tensors_from_buft(struc
+         ggml_context * ctx = meta_buf_ctx->stc_static.ctxs[i].get();
+         ggml_backend_buffer_type_t simple_buft = ggml_backend_meta_buft_simple_buft(buft, i);
+ 
++        if (const char * trace = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
++                trace != nullptr && strcmp(trace, "1") == 0 && ggml_get_first_tensor(ctx) != nullptr) {
++            fprintf(stderr, "q8_0_r8: Meta allocation device[%zu]=%s first=%s\n",
++                    i, ggml_backend_buft_name(simple_buft), ggml_get_first_tensor(ctx)->name);
++        }
++
+         // If a ggml_context only has zero-sized tensors, ggml_backend_alloc_ctx_tensors_from_buft returns NULL.
+         // For those edge cases, allocate a dummy buffer instead.
+         bool any_nonzero_slice = false;
+@@ -1966,6 +2086,17 @@ static enum ggml_status ggml_backend_meta_graph_compute(ggml_backend_t backend,
+     const size_t n_backends = ggml_backend_meta_n_backends(backend);
+     ggml_backend_meta_context * backend_ctx = (ggml_backend_meta_context *) backend->context;
+ 
++    // CPU-NUMA workers retain graph and tensor pointers after this call. Synchronize before the scheduler reuses them.
++    bool requires_pointer_lifetime_barrier = false;
++    for (size_t j = 0; j < n_backends; ++j) {
++        ggml_backend_dev_t dev = ggml_backend_get_device(backend_ctx->backend_configs[j].backend);
++        const char * name = dev != nullptr ? ggml_backend_dev_name(dev) : nullptr;
++        if (name != nullptr && strncmp(name, "CPU-NUMA", 8) == 0) {
++            requires_pointer_lifetime_barrier = true;
++            break;
++        }
++    }
++
+     // If the previous cgraph had a defined UID it can be used to skip rebuilding the subgraphs per simple backend.
+     const bool needs_rebuild = (cgraph->uid == 0) || (cgraph->uid != backend_ctx->uid);
+ 
+@@ -2010,7 +2141,9 @@ static enum ggml_status ggml_backend_meta_graph_compute(ggml_backend_t backend,
+ 
+             for (int i = 0; i < cgraph->n_nodes; i++) {
+                 ggml_tensor * node = cgraph->nodes[i];
+-                if (node->view_src != nullptr && node->view_src->op == GGML_OP_NONE && ggml_backend_buffer_is_host(node->view_src->buffer)) {
++                if (node->view_src != nullptr && node->view_src->op == GGML_OP_NONE &&
++                        ggml_backend_buffer_is_host(node->view_src->buffer) &&
++                        !ggml_backend_buffer_is_meta(node->view_src->buffer)) {
+                     // FIXME s_copy_main is on the CPU and its view seems to be incorrectly added to the graph nodes.
+                     // For regular usage this doesn't matter since it's a noop but trying to call ggml_backend_meta_buffer_simple_tensor results in a crash.
+                     bcj.nodes[i] = node;
+@@ -2143,7 +2276,9 @@ static enum ggml_status ggml_backend_meta_graph_compute(ggml_backend_t backend,
+                         }
+                     }
+ 
+-                    if (next->view_src != nullptr && next->view_src->op == GGML_OP_NONE && ggml_backend_buffer_is_host(next->view_src->buffer)) {
++                    if (next->view_src != nullptr && next->view_src->op == GGML_OP_NONE &&
++                            ggml_backend_buffer_is_host(next->view_src->buffer) &&
++                            !ggml_backend_buffer_is_meta(next->view_src->buffer)) {
+                         continue;
+                     }
+                     if (ggml_backend_meta_get_split_state(next, false).axis != GGML_BACKEND_SPLIT_AXIS_PARTIAL) {
+@@ -2182,7 +2317,9 @@ static enum ggml_status ggml_backend_meta_graph_compute(ggml_backend_t backend,
+             int i_start = 0;
+             for (int i = 0; i < cgraph->n_nodes; i++) {
+                 ggml_tensor * node = cgraph->nodes[i];
+-                if (node->view_src != nullptr && node->view_src->op == GGML_OP_NONE && ggml_backend_buffer_is_host(node->view_src->buffer)) {
++                if (node->view_src != nullptr && node->view_src->op == GGML_OP_NONE &&
++                        ggml_backend_buffer_is_host(node->view_src->buffer) &&
++                        !ggml_backend_buffer_is_meta(node->view_src->buffer)) {
+                     continue;
+                 }
+                 const ggml_backend_meta_split_state split_state = ggml_backend_meta_get_split_state(node, /*assume_sync =*/ false);
+@@ -2461,6 +2598,9 @@ static enum ggml_status ggml_backend_meta_graph_compute(ggml_backend_t backend,
+             }
+         }
+     }
++    if (requires_pointer_lifetime_barrier) {
++        ggml_backend_meta_synchronize(backend);
++    }
+     return GGML_STATUS_SUCCESS;
+ }
+ 
+diff --git a/ggml/src/ggml-cpu/arch/x86/repack.cpp b/ggml/src/ggml-cpu/arch/x86/repack.cpp
+index af1cebad131d17118c26634faccb9a6e0c08a6f9..7a16f685451d455b6da310b96296b380553447da 100644
+--- a/ggml/src/ggml-cpu/arch/x86/repack.cpp
++++ b/ggml/src/ggml-cpu/arch/x86/repack.cpp
+@@ -12,6 +12,7 @@
+ #include <cmath>
+ #include <cstring>
+ #include <cassert>
++#include <atomic>
+ #include <cstdlib> // for qsort
+ #include <cstdio>  // for GGML_ASSERT
+ 
+@@ -2023,6 +2024,415 @@ void ggml_gemv_q2_K_8x8_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const vo
+ #endif
+ }
+ 
++static inline int q8_0_sum_i8x16(__m128i values) {
++    const __m128i pair_sums = _mm_maddubs_epi16(_mm_set1_epi8(1), values);
++    __m128i sums = _mm_madd_epi16(pair_sums, _mm_set1_epi16(1));
++    sums = _mm_hadd_epi32(sums, sums);
++    sums = _mm_hadd_epi32(sums, sums);
++    return _mm_cvtsi128_si32(sums);
++}
++
++#if defined(__AVX512F__) && defined(__AVX512BW__)
++static inline __m128i q8_0_vnni_dot_4rows(__m512i weights, __m128i activation) {
++    const __m512i aq = _mm512_broadcast_i32x4(activation);
++    __m512i dots = mul_sum_us8_pairs_acc_int32x16(
++        _mm512_setzero_si512(), weights, aq);
++    dots = _mm512_add_epi32(
++        dots, _mm512_shuffle_epi32(
++            dots, (_MM_PERM_ENUM) _MM_SHUFFLE(2, 3, 0, 1)));
++    dots = _mm512_add_epi32(
++        dots, _mm512_shuffle_epi32(
++            dots, (_MM_PERM_ENUM) _MM_SHUFFLE(1, 0, 3, 2)));
++    return _mm512_castsi512_si128(
++        _mm512_maskz_compress_epi32((__mmask16) 0x1111, dots));
++}
++
++template <int NR>
++static void q8_0_vnni_gemv_rows(
++        int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
++        int nc) {
++    static_assert(NR >= 1 && NR <= 3);
++    constexpr int ncols_interleaved = 8;
++
++    const int nb = n / QK8_0;
++    const block_q8_0x8 * b_ptr_start = (const block_q8_0x8 *) vx;
++    const block_q8_0 * a_ptr_start = (const block_q8_0 *) vy;
++
++    for (int x = 0; x < nc / ncols_interleaved; ++x) {
++        const block_q8_0x8 * b_ptr = b_ptr_start + x * nb;
++        __m256 sumf[NR];
++        for (int row = 0; row < NR; ++row) {
++            sumf[row] = _mm256_setzero_ps();
++        }
++
++        for (int b = 0; b < nb; ++b) {
++            __m128i row_dots[NR][2];
++            int activation_sum[NR] = {};
++            for (int row = 0; row < NR; ++row) {
++                row_dots[row][0] = _mm_setzero_si128();
++                row_dots[row][1] = _mm_setzero_si128();
++            }
++
++            for (int half = 0; half < 2; ++half) {
++                const __m512i weights[2] = {
++                    _mm512_loadu_si512((const void *) (b_ptr[b].qs + (half * 2 + 0) * 64)),
++                    _mm512_loadu_si512((const void *) (b_ptr[b].qs + (half * 2 + 1) * 64)),
++                };
++
++                for (int row = 0; row < NR; ++row) {
++                    const block_q8_0 * a_ptr = a_ptr_start + row * nb;
++                    const __m128i aq = _mm_loadu_si128(
++                        (const __m128i *) (a_ptr[b].qs + half * 16));
++                    activation_sum[row] += q8_0_sum_i8x16(aq);
++                    row_dots[row][0] = _mm_add_epi32(
++                        row_dots[row][0], q8_0_vnni_dot_4rows(weights[0], aq));
++                    row_dots[row][1] = _mm_add_epi32(
++                        row_dots[row][1], q8_0_vnni_dot_4rows(weights[1], aq));
++                }
++            }
++
++            const __m256 weight_scale = _mm256_cvtph_ps(
++                _mm_loadu_si128((const __m128i *) b_ptr[b].d));
++            for (int row = 0; row < NR; ++row) {
++                const block_q8_0 * a_ptr = a_ptr_start + row * nb;
++                __m256i isum = _mm256_set_m128i(row_dots[row][1], row_dots[row][0]);
++                isum = _mm256_sub_epi32(
++                    isum, _mm256_set1_epi32(activation_sum[row] * 128));
++                const __m256 scale = _mm256_mul_ps(
++                    weight_scale,
++                    _mm256_set1_ps(GGML_CPU_FP16_TO_FP32(a_ptr[b].d)));
++                sumf[row] = _mm256_fmadd_ps(
++                    _mm256_cvtepi32_ps(isum), scale, sumf[row]);
++            }
++        }
++
++        for (int row = 0; row < NR; ++row) {
++            _mm256_storeu_ps(s + row * bs + x * ncols_interleaved, sumf[row]);
++        }
++    }
++}
++
++template <int NR, int X_TILE>
++static void q8_0_vnni_gemv_rows_x_tiled(
++        int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
++        int nc) {
++    static_assert(NR >= 1 && NR <= 3);
++    static_assert(X_TILE == 2 || X_TILE == 4 || X_TILE == 8);
++    constexpr int ncols_interleaved = 8;
++
++    const int nb = n / QK8_0;
++    const int nx = nc / ncols_interleaved;
++    const block_q8_0x8 * b_ptr_start = (const block_q8_0x8 *) vx;
++    const block_q8_0 * a_ptr_start = (const block_q8_0 *) vy;
++
++    for (int x = 0; x < nx; x += X_TILE) {
++        const int nx_tile = nx - x < X_TILE ? nx - x : X_TILE;
++        __m256 sumf[NR][X_TILE];
++        for (int row = 0; row < NR; ++row) {
++            for (int tx = 0; tx < nx_tile; ++tx) {
++                sumf[row][tx] = _mm256_setzero_ps();
++            }
++        }
++
++        for (int b = 0; b < nb; ++b) {
++            __m128i activations[NR][2];
++            int activation_sum[NR] = {};
++            for (int row = 0; row < NR; ++row) {
++                const block_q8_0 * a_ptr = a_ptr_start + row * nb;
++                for (int half = 0; half < 2; ++half) {
++                    activations[row][half] = _mm_loadu_si128(
++                        (const __m128i *) (a_ptr[b].qs + half * 16));
++                    activation_sum[row] += q8_0_sum_i8x16(activations[row][half]);
++                }
++            }
++
++            for (int tx = 0; tx < nx_tile; ++tx) {
++                const block_q8_0x8 * b_ptr = b_ptr_start + (x + tx) * nb;
++                __m128i row_dots[NR][2];
++                for (int row = 0; row < NR; ++row) {
++                    row_dots[row][0] = _mm_setzero_si128();
++                    row_dots[row][1] = _mm_setzero_si128();
++                }
++
++                for (int half = 0; half < 2; ++half) {
++                    const __m512i weights[2] = {
++                        _mm512_loadu_si512((const void *) (b_ptr[b].qs + (half * 2 + 0) * 64)),
++                        _mm512_loadu_si512((const void *) (b_ptr[b].qs + (half * 2 + 1) * 64)),
++                    };
++                    for (int row = 0; row < NR; ++row) {
++                        row_dots[row][0] = _mm_add_epi32(
++                            row_dots[row][0], q8_0_vnni_dot_4rows(weights[0], activations[row][half]));
++                        row_dots[row][1] = _mm_add_epi32(
++                            row_dots[row][1], q8_0_vnni_dot_4rows(weights[1], activations[row][half]));
++                    }
++                }
++
++                const __m256 weight_scale = _mm256_cvtph_ps(
++                    _mm_loadu_si128((const __m128i *) b_ptr[b].d));
++                for (int row = 0; row < NR; ++row) {
++                    const block_q8_0 * a_ptr = a_ptr_start + row * nb;
++                    __m256i isum = _mm256_set_m128i(row_dots[row][1], row_dots[row][0]);
++                    isum = _mm256_sub_epi32(
++                        isum, _mm256_set1_epi32(activation_sum[row] * 128));
++                    const __m256 scale = _mm256_mul_ps(
++                        weight_scale,
++                        _mm256_set1_ps(GGML_CPU_FP16_TO_FP32(a_ptr[b].d)));
++                    sumf[row][tx] = _mm256_fmadd_ps(
++                        _mm256_cvtepi32_ps(isum), scale, sumf[row][tx]);
++                }
++            }
++        }
++
++        for (int row = 0; row < NR; ++row) {
++            for (int tx = 0; tx < nx_tile; ++tx) {
++                _mm256_storeu_ps(
++                    s + row * bs + (x + tx) * ncols_interleaved, sumf[row][tx]);
++            }
++        }
++    }
++}
++
++template <int X_TILE>
++static bool q8_0_vnni_gemv_rows_x_tiled_dispatch(
++        int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
++        int nr, int nc) {
++    switch (nr) {
++        case 1: q8_0_vnni_gemv_rows_x_tiled<1, X_TILE>(n, s, bs, vx, vy, nc); return true;
++        case 2: q8_0_vnni_gemv_rows_x_tiled<2, X_TILE>(n, s, bs, vx, vy, nc); return true;
++        case 3: q8_0_vnni_gemv_rows_x_tiled<3, X_TILE>(n, s, bs, vx, vy, nc); return true;
++        default: return false;
++    }
++}
++
++static int q8_0_vnni_x_tile() {
++    static const int value = []() {
++        const char * text = std::getenv("GGML_CPU_Q8_0_REPACK_X_TILE");
++        if (text == nullptr) {
++            return 1;
++        }
++        if (strcmp(text, "auto") == 0) {
++            return 0;
++        }
++        const int parsed = atoi(text);
++        return parsed == 2 || parsed == 4 || parsed == 8 ? parsed : 1;
++    }();
++    return value;
++}
++
++#endif
++
++void ggml_gemv_q8_0_8x8_q8_0(
++        int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
++        int nr, int nc) {
++#if defined(__AVX512F__) && defined(__AVX512BW__)
++    static const bool trace_enabled = []() {
++        const char * value = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
++        return value != nullptr && strcmp(value, "1") == 0;
++    }();
++    static std::atomic_flag traced = ATOMIC_FLAG_INIT;
++    if (trace_enabled && !traced.test_and_set(std::memory_order_relaxed)) {
++        const int configured_tile = q8_0_vnni_x_tile();
++        const int active_tile = configured_tile == 0 ? (nr <= 2 ? 2 : 4) : configured_tile;
++        fprintf(stderr, "q8_0_r8: AVX-512/VNNI GEMV n=%d nr=%d nc=%d x_tile=%d\n",
++                n, nr, nc, active_tile);
++    }
++
++    assert(n % QK8_0 == 0);
++    assert(nc % 8 == 0);
++    const int configured_tile = q8_0_vnni_x_tile();
++    const int active_tile = configured_tile == 0 ? (nr <= 2 ? 2 : 4) : configured_tile;
++    switch (active_tile) {
++        case 2: if (q8_0_vnni_gemv_rows_x_tiled_dispatch<2>(n, s, bs, vx, vy, nr, nc)) return; break;
++        case 4: if (q8_0_vnni_gemv_rows_x_tiled_dispatch<4>(n, s, bs, vx, vy, nr, nc)) return; break;
++        case 8: if (q8_0_vnni_gemv_rows_x_tiled_dispatch<8>(n, s, bs, vx, vy, nr, nc)) return; break;
++        default: break;
++    }
++    switch (nr) {
++        case 1: q8_0_vnni_gemv_rows<1>(n, s, bs, vx, vy, nc); return;
++        case 2: q8_0_vnni_gemv_rows<2>(n, s, bs, vx, vy, nc); return;
++        case 3: q8_0_vnni_gemv_rows<3>(n, s, bs, vx, vy, nc); return;
++        default: break;
++    }
++#endif
++    ggml_gemv_q8_0_8x8_q8_0_generic(n, s, bs, vx, vy, nr, nc);
++}
++
++template <int X_TILE>
++static void q8_0_vnni_gemm_x_tiled(
++        int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
++        int nr, int nc) {
++    static_assert(X_TILE == 2 || X_TILE == 4 || X_TILE == 8);
++    constexpr int ncols_interleaved = 8;
++
++    const int nb = n / QK8_0;
++    const int nx = nc / ncols_interleaved;
++    const block_q8_0x8 * b_ptr_start = (const block_q8_0x8 *) vx;
++    const block_q8_0x4 * a_ptr_start = (const block_q8_0x4 *) vy;
++
++    for (int y = 0; y < nr / 4; ++y) {
++        const block_q8_0x4 * a_ptr = a_ptr_start + y * nb;
++        for (int x = 0; x < nx; x += X_TILE) {
++            const int nx_tile = nx - x < X_TILE ? nx - x : X_TILE;
++            __m256 sumf[4][X_TILE];
++            for (int row = 0; row < 4; ++row) {
++                for (int tx = 0; tx < nx_tile; ++tx) {
++                    sumf[row][tx] = _mm256_setzero_ps();
++                }
++            }
++
++            for (int b = 0; b < nb; ++b) {
++                __m128i activations[4][2];
++                int activation_sum[4] = {};
++                for (int half = 0; half < 2; ++half) {
++                    for (int row = 0; row < 4; ++row) {
++                        const int activation_offset = half * 64 + row * 8;
++                        const __m128i aq_lo = _mm_loadl_epi64(
++                            (const __m128i *) (a_ptr[b].qs + activation_offset));
++                        const __m128i aq_hi = _mm_loadl_epi64(
++                            (const __m128i *) (a_ptr[b].qs + activation_offset + 32));
++                        activations[row][half] = _mm_unpacklo_epi64(aq_lo, aq_hi);
++                        activation_sum[row] += q8_0_sum_i8x16(activations[row][half]);
++                    }
++                }
++
++                for (int tx = 0; tx < nx_tile; ++tx) {
++                    const block_q8_0x8 * b_ptr = b_ptr_start + (x + tx) * nb;
++                    __m128i row_dots[4][2];
++                    for (int row = 0; row < 4; ++row) {
++                        row_dots[row][0] = _mm_setzero_si128();
++                        row_dots[row][1] = _mm_setzero_si128();
++                    }
++
++                    for (int half = 0; half < 2; ++half) {
++                        const __m512i weights[2] = {
++                            _mm512_loadu_si512((const void *) (b_ptr[b].qs + (half * 2 + 0) * 64)),
++                            _mm512_loadu_si512((const void *) (b_ptr[b].qs + (half * 2 + 1) * 64)),
++                        };
++                        for (int row = 0; row < 4; ++row) {
++                            row_dots[row][0] = _mm_add_epi32(
++                                row_dots[row][0], q8_0_vnni_dot_4rows(weights[0], activations[row][half]));
++                            row_dots[row][1] = _mm_add_epi32(
++                                row_dots[row][1], q8_0_vnni_dot_4rows(weights[1], activations[row][half]));
++                        }
++                    }
++
++                    const __m256 weight_scale = _mm256_cvtph_ps(
++                        _mm_loadu_si128((const __m128i *) b_ptr[b].d));
++                    for (int row = 0; row < 4; ++row) {
++                        __m256i isum = _mm256_set_m128i(row_dots[row][1], row_dots[row][0]);
++                        isum = _mm256_sub_epi32(
++                            isum, _mm256_set1_epi32(activation_sum[row] * 128));
++                        const __m256 scale = _mm256_mul_ps(
++                            weight_scale,
++                            _mm256_set1_ps(GGML_CPU_FP16_TO_FP32(a_ptr[b].d[row])));
++                        sumf[row][tx] = _mm256_fmadd_ps(
++                            _mm256_cvtepi32_ps(isum), scale, sumf[row][tx]);
++                    }
++                }
++            }
++
++            for (int row = 0; row < 4; ++row) {
++                for (int tx = 0; tx < nx_tile; ++tx) {
++                    _mm256_storeu_ps(
++                        s + (y * 4 + row) * bs + (x + tx) * ncols_interleaved,
++                        sumf[row][tx]);
++                }
++            }
++        }
++    }
++}
++
++void ggml_gemm_q8_0_8x8_q8_0(
++        int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
++        int nr, int nc) {
++#if defined(__AVX512F__) && defined(__AVX512BW__)
++    constexpr int ncols_interleaved = 8;
++    assert(n % QK8_0 == 0);
++    assert(nr % 4 == 0);
++    assert(nc % ncols_interleaved == 0);
++
++    const int configured_tile = q8_0_vnni_x_tile();
++    switch (configured_tile == 0 ? 8 : configured_tile) {
++        case 2: q8_0_vnni_gemm_x_tiled<2>(n, s, bs, vx, vy, nr, nc); return;
++        case 4: q8_0_vnni_gemm_x_tiled<4>(n, s, bs, vx, vy, nr, nc); return;
++        case 8: q8_0_vnni_gemm_x_tiled<8>(n, s, bs, vx, vy, nr, nc); return;
++        default: break;
++    }
++
++    const int nb = n / QK8_0;
++    const block_q8_0x8 * b_ptr_start = (const block_q8_0x8 *) vx;
++    const block_q8_0x4 * a_ptr_start = (const block_q8_0x4 *) vy;
++
++    for (int y = 0; y < nr / 4; ++y) {
++        const block_q8_0x4 * a_ptr = a_ptr_start + y * nb;
++        for (int x = 0; x < nc / ncols_interleaved; ++x) {
++            const block_q8_0x8 * b_ptr = b_ptr_start + x * nb;
++            __m256 sumf[4] = {
++                _mm256_setzero_ps(), _mm256_setzero_ps(),
++                _mm256_setzero_ps(), _mm256_setzero_ps(),
++            };
++
++            for (int b = 0; b < nb; ++b) {
++                __m128i row_dots[4][2];
++                int activation_sum[4] = {};
++                for (int row = 0; row < 4; ++row) {
++                    row_dots[row][0] = _mm_setzero_si128();
++                    row_dots[row][1] = _mm_setzero_si128();
++                }
++
++                for (int half = 0; half < 2; ++half) {
++                    const __m512i weights[2] = {
++                        _mm512_loadu_si512((const void *) (b_ptr[b].qs + (half * 2 + 0) * 64)),
++                        _mm512_loadu_si512((const void *) (b_ptr[b].qs + (half * 2 + 1) * 64)),
++                    };
++
++                    for (int row = 0; row < 4; ++row) {
++                        const int activation_offset = half * 64 + row * 8;
++                        const __m128i aq_lo = _mm_loadl_epi64(
++                            (const __m128i *) (a_ptr[b].qs + activation_offset));
++                        const __m128i aq_hi = _mm_loadl_epi64(
++                            (const __m128i *) (a_ptr[b].qs + activation_offset + 32));
++                        const __m128i aq = _mm_unpacklo_epi64(aq_lo, aq_hi);
++                        activation_sum[row] += q8_0_sum_i8x16(aq);
++                        row_dots[row][0] = _mm_add_epi32(
++                            row_dots[row][0], q8_0_vnni_dot_4rows(weights[0], aq));
++                        row_dots[row][1] = _mm_add_epi32(
++                            row_dots[row][1], q8_0_vnni_dot_4rows(weights[1], aq));
++                    }
++                }
++
++                const __m256 weight_scale = _mm256_cvtph_ps(
++                    _mm_loadu_si128((const __m128i *) b_ptr[b].d));
++                for (int row = 0; row < 4; ++row) {
++                    __m256i isum = _mm256_set_m128i(row_dots[row][1], row_dots[row][0]);
++                    isum = _mm256_sub_epi32(
++                        isum, _mm256_set1_epi32(activation_sum[row] * 128));
++                    const __m256 scale = _mm256_mul_ps(
++                        weight_scale,
++                        _mm256_set1_ps(GGML_CPU_FP16_TO_FP32(a_ptr[b].d[row])));
++                    sumf[row] = _mm256_fmadd_ps(
++                        _mm256_cvtepi32_ps(isum), scale, sumf[row]);
++                }
++            }
++
++            for (int row = 0; row < 4; ++row) {
++                _mm256_storeu_ps(
++                    s + (y * 4 + row) * bs + x * ncols_interleaved,
++                    sumf[row]);
++            }
++        }
++    }
++    return;
++#endif
++    ggml_gemm_q8_0_8x8_q8_0_generic(n, s, bs, vx, vy, nr, nc);
++}
++
+ void ggml_gemm_q4_0_8x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+ #if defined(__AVX2__) || defined(__AVX512F__)
+     {
+diff --git a/ggml/src/ggml-cpu/ggml-cpu.cpp b/ggml/src/ggml-cpu/ggml-cpu.cpp
+index 8cece71f186f9c99d5f5a110241e6e3b890c1581..41c316474dc87201e8fa292d97a6bd3c33cb60b6 100644
+--- a/ggml/src/ggml-cpu/ggml-cpu.cpp
++++ b/ggml/src/ggml-cpu/ggml-cpu.cpp
+@@ -6,8 +6,18 @@
+ #include "ggml-impl.h"
+ #include "amx/amx.h"
+ 
++#include <algorithm>
+ #include <cctype>
++#include <condition_variable>
++#include <cstdlib>
++#include <fstream>
++#include <iterator>
++#include <memory>
++#include <mutex>
++#include <set>
++#include <sstream>
+ #include <string>
++#include <thread>
+ #include <vector>
+ 
+ #ifdef GGML_USE_CPU_HBM
+@@ -29,6 +39,14 @@
+ #    endif
+ #    include <windows.h>
+ #else
++#    include <cerrno>
++#    include <climits>
++#    include <cstring>
++#    include <linux/mempolicy.h>
++#    include <pthread.h>
++#    include <sched.h>
++#    include <sys/mman.h>
++#    include <sys/syscall.h>
+ #    include <unistd.h>
+ #endif
+ 
+@@ -73,19 +91,12 @@ std::vector<ggml_backend_buffer_type_t> & ggml_backend_cpu_get_extra_buffer_type
+     return bufts;
+ }
+ 
+-static ggml_backend_buffer_type_t * ggml_backend_cpu_device_get_extra_buffers_type(ggml_backend_dev_t device) {
+-    static std::vector<ggml_backend_buffer_type_t> extra_bufts = [] {
+-        std::vector<ggml_backend_buffer_type_t> bufts = ggml_backend_cpu_get_extra_buffer_types();
+-        bufts.push_back(nullptr);
+-        return bufts;
+-    }();
+-
+-    return extra_bufts.data();
+-
+-    GGML_UNUSED(device);
+-}
+-
+ static bool ggml_backend_cpu_is_extra_buffer_type(ggml_backend_buffer_type_t buft) {
++#ifdef GGML_USE_CPU_REPACK
++    if (ggml_backend_cpu_is_repack_buffer_type(buft)) {
++        return true;
++    }
++#endif
+     for (auto * extra : ggml_backend_cpu_get_extra_buffer_types()) {
+         if (extra == buft) {
+             return true;
+@@ -107,6 +118,19 @@ struct ggml_backend_cpu_context {
+     void *              abort_callback_data;
+ 
+     bool                use_ref;  // use reference implementation
++
++    // NUMA CPU backends use a persistent per-socket dispatcher for concurrent Meta tensor shards.
++    bool                    async_enabled;
++    bool                    async_stop;
++    bool                    async_pending;
++    bool                    async_running;
++    ggml_cgraph *           async_graph;
++    ggml_status             async_status;
++    std::mutex              async_mutex;
++    std::condition_variable async_cv;
++    std::thread             async_worker;
++
++    bool                owns_threadpool;
+ };
+ 
+ static const char * ggml_backend_cpu_get_name(ggml_backend_t backend) {
+@@ -117,6 +141,21 @@ static const char * ggml_backend_cpu_get_name(ggml_backend_t backend) {
+ 
+ static void ggml_backend_cpu_free(ggml_backend_t backend) {
+     struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
++
++    if (cpu_ctx->async_enabled) {
++        {
++            std::lock_guard<std::mutex> lock(cpu_ctx->async_mutex);
++            cpu_ctx->async_stop = true;
++        }
++        cpu_ctx->async_cv.notify_all();
++        if (cpu_ctx->async_worker.joinable()) {
++            cpu_ctx->async_worker.join();
++        }
++    }
++    if (cpu_ctx->owns_threadpool && cpu_ctx->threadpool) {
++        ggml_threadpool_free(cpu_ctx->threadpool);
++        cpu_ctx->threadpool = nullptr;
++    }
+     delete[] cpu_ctx->work_data;
+     delete cpu_ctx;
+     delete backend;
+@@ -167,7 +206,7 @@ static enum ggml_status ggml_backend_cpu_graph_plan_compute(ggml_backend_t backe
+     GGML_UNUSED(backend);
+ }
+ 
+-static enum ggml_status ggml_backend_cpu_graph_compute(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
++static enum ggml_status ggml_backend_cpu_graph_compute_impl(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
+     struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
+ 
+     struct ggml_cplan cplan = ggml_graph_plan(cgraph, cpu_ctx->n_threads, cpu_ctx->threadpool);
+@@ -190,6 +229,40 @@ static enum ggml_status ggml_backend_cpu_graph_compute(ggml_backend_t backend, s
+     return ggml_graph_compute(cgraph, &cplan);
+ }
+ 
++static enum ggml_status ggml_backend_cpu_graph_compute(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
++    struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
++
++    if (!cpu_ctx->async_enabled) {
++        return ggml_backend_cpu_graph_compute_impl(backend, cgraph);
++    }
++
++    std::unique_lock<std::mutex> lock(cpu_ctx->async_mutex);
++    cpu_ctx->async_cv.wait(lock, [cpu_ctx]() {
++        return !cpu_ctx->async_pending && !cpu_ctx->async_running;
++    });
++    cpu_ctx->async_graph   = cgraph;
++    cpu_ctx->async_status  = GGML_STATUS_SUCCESS;
++    cpu_ctx->async_pending = true;
++    lock.unlock();
++    cpu_ctx->async_cv.notify_all();
++    return GGML_STATUS_SUCCESS;
++}
++
++static void ggml_backend_cpu_synchronize(ggml_backend_t backend) {
++    struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
++    if (!cpu_ctx->async_enabled) {
++        return;
++    }
++
++    std::unique_lock<std::mutex> lock(cpu_ctx->async_mutex);
++    cpu_ctx->async_cv.wait(lock, [cpu_ctx]() {
++        return !cpu_ctx->async_pending && !cpu_ctx->async_running;
++    });
++    if (cpu_ctx->async_status != GGML_STATUS_SUCCESS) {
++        GGML_LOG_ERROR("%s: asynchronous CPU graph failed with status %d\n", __func__, cpu_ctx->async_status);
++    }
++}
++
+ static const struct ggml_backend_i ggml_backend_cpu_i = {
+     /* .get_name                = */ ggml_backend_cpu_get_name,
+     /* .free                    = */ ggml_backend_cpu_free,
+@@ -198,7 +271,7 @@ static const struct ggml_backend_i ggml_backend_cpu_i = {
+     /* .set_tensor_2d_async     = */ NULL,
+     /* .get_tensor_2d_async     = */ NULL,
+     /* .cpy_tensor_async        = */ NULL,
+-    /* .synchronize             = */ NULL,
++    /* .synchronize             = */ ggml_backend_cpu_synchronize,
+     /* .graph_plan_create       = */ ggml_backend_cpu_graph_plan_create,
+     /* .graph_plan_free         = */ ggml_backend_cpu_graph_plan_free,
+     /* .graph_plan_update       = */ NULL,
+@@ -214,7 +287,7 @@ static ggml_guid_t ggml_backend_cpu_guid(void) {
+     return &guid;
+ }
+ 
+-ggml_backend_t ggml_backend_cpu_init(void) {
++static ggml_backend_t ggml_backend_cpu_init_device(ggml_backend_dev_t device) {
+     // initialize CPU backend now to avoid slowing the first graph computation
+     ggml_cpu_init();
+ 
+@@ -230,11 +303,18 @@ ggml_backend_t ggml_backend_cpu_init(void) {
+     ctx->abort_callback      = NULL;
+     ctx->abort_callback_data = NULL;
+     ctx->use_ref             = false;
++    ctx->async_enabled       = false;
++    ctx->async_stop          = false;
++    ctx->async_pending       = false;
++    ctx->async_running       = false;
++    ctx->async_graph         = nullptr;
++    ctx->async_status        = GGML_STATUS_SUCCESS;
++    ctx->owns_threadpool     = false;
+ 
+     ggml_backend_t cpu_backend = new ggml_backend {
+         /* .guid    = */ ggml_backend_cpu_guid(),
+         /* .iface   = */ ggml_backend_cpu_i,
+-        /* .device  = */ ggml_backend_reg_dev_get(ggml_backend_cpu_reg(), 0),
++        /* .device  = */ device,
+         /* .context = */ ctx,
+     };
+ 
+@@ -246,6 +326,10 @@ ggml_backend_t ggml_backend_cpu_init(void) {
+     return cpu_backend;
+ }
+ 
++ggml_backend_t ggml_backend_cpu_init(void) {
++    return ggml_backend_cpu_init_device(ggml_backend_reg_dev_get(ggml_backend_cpu_reg(), 0));
++}
++
+ bool ggml_backend_is_cpu(ggml_backend_t backend) {
+     return backend != NULL && ggml_guid_matches(backend->guid, ggml_backend_cpu_guid());
+ }
+@@ -254,7 +338,9 @@ void ggml_backend_cpu_set_n_threads(ggml_backend_t backend_cpu, int n_threads) {
+     GGML_ASSERT(ggml_backend_is_cpu(backend_cpu));
+ 
+     struct ggml_backend_cpu_context * ctx = (struct ggml_backend_cpu_context *)backend_cpu->context;
+-    ctx->n_threads = n_threads;
++    if (!ctx->owns_threadpool) {
++        ctx->n_threads = n_threads;
++    }
+ }
+ 
+ void ggml_backend_cpu_set_threadpool(ggml_backend_t backend_cpu, ggml_threadpool_t threadpool) {
+@@ -284,10 +370,149 @@ void ggml_backend_cpu_set_use_ref(ggml_backend_t backend_cpu, bool use_ref) {
+     ctx->use_ref = use_ref;
+ }
+ 
++#if defined(__linux__)
++
++struct ggml_backend_cpu_numa_buft_context {
++    int         node;
++    std::string name;
++    bool        huge_pages;
++};
++
++struct ggml_backend_cpu_numa_buffer_context {
++    void * data;
++    size_t mapping_size;
++};
++
++static void * ggml_backend_cpu_numa_buffer_get_base(ggml_backend_buffer_t buffer) {
++    auto * ctx = (ggml_backend_cpu_numa_buffer_context *) buffer->context;
++    return ctx->data;
++}
++
++static void ggml_backend_cpu_numa_buffer_free(ggml_backend_buffer_t buffer) {
++    auto * ctx = (ggml_backend_cpu_numa_buffer_context *) buffer->context;
++    if (ctx) {
++        if (ctx->data && ctx->mapping_size) {
++            munmap(ctx->data, ctx->mapping_size);
++        }
++        delete ctx;
++    }
++}
++
++static void ggml_backend_cpu_numa_buffer_memset_tensor(
++        ggml_backend_buffer_t buffer, ggml_tensor * tensor, uint8_t value, size_t offset, size_t size) {
++    memset((char *) tensor->data + offset, value, size);
++    GGML_UNUSED(buffer);
++}
++
++static void ggml_backend_cpu_numa_buffer_set_tensor(
++        ggml_backend_buffer_t buffer, ggml_tensor * tensor, const void * data, size_t offset, size_t size) {
++    memcpy((char *) tensor->data + offset, data, size);
++    GGML_UNUSED(buffer);
++}
++
++static void ggml_backend_cpu_numa_buffer_get_tensor(
++        ggml_backend_buffer_t buffer, const ggml_tensor * tensor, void * data, size_t offset, size_t size) {
++    memcpy(data, (const char *) tensor->data + offset, size);
++    GGML_UNUSED(buffer);
++}
++
++static bool ggml_backend_cpu_numa_buffer_cpy_tensor(
++        ggml_backend_buffer_t buffer, const ggml_tensor * src, ggml_tensor * dst) {
++    if (ggml_backend_buffer_is_host(src->buffer)) {
++        memcpy(dst->data, src->data, ggml_nbytes(src));
++        return true;
++    }
++    GGML_UNUSED(buffer);
++    return false;
++}
++
++static void ggml_backend_cpu_numa_buffer_clear(ggml_backend_buffer_t buffer, uint8_t value) {
++    auto * ctx = (ggml_backend_cpu_numa_buffer_context *) buffer->context;
++    memset(ctx->data, value, buffer->size);
++}
++
++static const ggml_backend_buffer_i ggml_backend_cpu_numa_buffer_iface = {
++    /* .free_buffer     = */ ggml_backend_cpu_numa_buffer_free,
++    /* .get_base        = */ ggml_backend_cpu_numa_buffer_get_base,
++    /* .init_tensor     = */ nullptr,
++    /* .memset_tensor   = */ ggml_backend_cpu_numa_buffer_memset_tensor,
++    /* .set_tensor      = */ ggml_backend_cpu_numa_buffer_set_tensor,
++    /* .get_tensor      = */ ggml_backend_cpu_numa_buffer_get_tensor,
++    /* .set_tensor_2d   = */ nullptr,
++    /* .get_tensor_2d   = */ nullptr,
++    /* .cpy_tensor      = */ ggml_backend_cpu_numa_buffer_cpy_tensor,
++    /* .clear           = */ ggml_backend_cpu_numa_buffer_clear,
++    /* .reset           = */ nullptr,
++};
++
++static const char * ggml_backend_cpu_numa_buft_get_name(ggml_backend_buffer_type_t buft) {
++    auto * ctx = (ggml_backend_cpu_numa_buft_context *) buft->context;
++    return ctx->name.c_str();
++}
++
++static ggml_backend_buffer_t ggml_backend_cpu_numa_buft_alloc_buffer(
++        ggml_backend_buffer_type_t buft, size_t size) {
++    auto * buft_ctx = (ggml_backend_cpu_numa_buft_context *) buft->context;
++    const long page_size = sysconf(_SC_PAGESIZE);
++    if (page_size <= 0) {
++        GGML_LOG_ERROR("%s: failed to determine page size\n", __func__);
++        return nullptr;
++    }
++    const size_t requested_size = size;
++    const size_t mapping_size = ((std::max<size_t>(size, 1) + page_size - 1) / page_size) * page_size;
++    void * data = mmap(nullptr, mapping_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
++    if (data == MAP_FAILED) {
++        GGML_LOG_ERROR("%s: mmap failed for %zu bytes: %s\n", __func__, mapping_size, strerror(errno));
++        return nullptr;
++    }
++
++    unsigned long node_mask = 1UL << buft_ctx->node;
++    const long mbind_rc = syscall(
++        SYS_mbind, data, mapping_size, MPOL_BIND, &node_mask, sizeof(node_mask) * CHAR_BIT,
++        MPOL_MF_STRICT | MPOL_MF_MOVE);
++    if (mbind_rc != 0) {
++        GGML_LOG_ERROR("%s: mbind to NUMA node %d failed for %zu bytes: %s\n",
++            __func__, buft_ctx->node, mapping_size, strerror(errno));
++        munmap(data, mapping_size);
++        return nullptr;
++    }
++
++    if (buft_ctx->huge_pages) {
++        if (madvise(data, mapping_size, MADV_HUGEPAGE) != 0) {
++            GGML_LOG_WARN("%s: MADV_HUGEPAGE failed for NUMA node %d: %s\n",
++                __func__, buft_ctx->node, strerror(errno));
++        }
++    }
++
++    auto * buffer_ctx = new ggml_backend_cpu_numa_buffer_context { data, mapping_size };
++    return ggml_backend_buffer_init(buft, ggml_backend_cpu_numa_buffer_iface, buffer_ctx, requested_size);
++}
++
++static size_t ggml_backend_cpu_numa_buft_get_alignment(ggml_backend_buffer_type_t buft) {
++    GGML_UNUSED(buft);
++    return TENSOR_ALIGNMENT;
++}
++
++static bool ggml_backend_cpu_numa_buft_is_host(ggml_backend_buffer_type_t buft) {
++    GGML_UNUSED(buft);
++    // NUMA buffers are CPU-addressable but belong to one device. Marking them
++    // as generic host memory lets the scheduler silently cross socket bounds.
++    return false;
++}
++
++#endif // __linux__
++
+ // CPU backend - device
+ 
+ struct ggml_backend_cpu_device_context {
++    std::string name        = "CPU";
+     std::string description = "CPU";
++    int         numa_node   = -1;
++    int         n_threads   = 0;
++    int         poll        = 50;
++    std::vector<int> cpus;
++    ggml_backend_buffer_type_t buffer_type = nullptr;
++    std::vector<ggml_backend_buffer_type_t> extra_buffer_types;
+ 
+     ggml_backend_cpu_device_context() {
+ #ifdef __APPLE__
+@@ -350,10 +575,24 @@ struct ggml_backend_cpu_device_context {
+     }
+ };
+ 
+-static const char * ggml_backend_cpu_device_get_name(ggml_backend_dev_t dev) {
+-    return "CPU";
++static ggml_backend_buffer_type_t * ggml_backend_cpu_device_get_extra_buffers_type(ggml_backend_dev_t device) {
++    auto * ctx = (ggml_backend_cpu_device_context *) device->context;
++    if (ctx->numa_node >= 0) {
++        static std::vector<ggml_backend_buffer_type_t> no_extra_bufts = { nullptr };
++        return ctx->extra_buffer_types.empty() ? no_extra_bufts.data() : ctx->extra_buffer_types.data();
++    }
+ 
+-    GGML_UNUSED(dev);
++    static std::vector<ggml_backend_buffer_type_t> extra_bufts = [] {
++        std::vector<ggml_backend_buffer_type_t> bufts = ggml_backend_cpu_get_extra_buffer_types();
++        bufts.push_back(nullptr);
++        return bufts;
++    }();
++    return extra_bufts.data();
++}
++
++static const char * ggml_backend_cpu_device_get_name(ggml_backend_dev_t dev) {
++    auto * ctx = (ggml_backend_cpu_device_context *) dev->context;
++    return ctx->name.c_str();
+ }
+ 
+ static const char * ggml_backend_cpu_device_get_description(ggml_backend_dev_t dev) {
+@@ -370,6 +609,43 @@ static void ggml_backend_cpu_device_get_memory(ggml_backend_dev_t dev, size_t *
+     *total = status.ullTotalPhys;
+     *free = status.ullAvailPhys;
+ #else
++#if defined(__linux__)
++    auto * ctx = (ggml_backend_cpu_device_context *) dev->context;
++    if (ctx->numa_node >= 0) {
++        std::ifstream file("/sys/devices/system/node/node" + std::to_string(ctx->numa_node) + "/meminfo");
++        std::string node_word;
++        std::string node_number;
++        std::string key;
++        std::string unit;
++        unsigned long long value_kb       = 0;
++        unsigned long long total_kb       = 0;
++        unsigned long long free_kb        = 0;
++        unsigned long long file_pages_kb  = 0;
++        unsigned long long shmem_kb       = 0;
++        unsigned long long reclaimable_kb = 0;
++        while (file >> node_word >> node_number >> key >> value_kb >> unit) {
++            if (key == "MemTotal:") {
++                total_kb = value_kb;
++            } else if (key == "MemFree:") {
++                free_kb = value_kb;
++            } else if (key == "FilePages:") {
++                file_pages_kb = value_kb;
++            } else if (key == "Shmem:") {
++                shmem_kb = value_kb;
++            } else if (key == "SReclaimable:") {
++                reclaimable_kb = value_kb;
++            }
++        }
++        if (total_kb > 0) {
++            const unsigned long long file_cache_kb = file_pages_kb > shmem_kb ? file_pages_kb - shmem_kb : 0;
++            const unsigned long long available_kb =
++                std::min(total_kb, free_kb + file_cache_kb + reclaimable_kb);
++            *total = total_kb * 1024;
++            *free  = available_kb * 1024;
++            return;
++        }
++    }
++#endif
+     long pages = sysconf(_SC_PHYS_PAGES);
+     long page_size = sysconf(_SC_PAGE_SIZE);
+     *total = pages * page_size;
+@@ -388,30 +664,96 @@ static enum ggml_backend_dev_type ggml_backend_cpu_device_get_type(ggml_backend_
+ }
+ 
+ static void ggml_backend_cpu_device_get_props(ggml_backend_dev_t dev, struct ggml_backend_dev_props * props) {
++    auto * ctx = (ggml_backend_cpu_device_context *) dev->context;
+     props->name        = ggml_backend_cpu_device_get_name(dev);
+     props->description = ggml_backend_cpu_device_get_description(dev);
+     props->type        = ggml_backend_cpu_device_get_type(dev);
+     ggml_backend_cpu_device_get_memory(dev, &props->memory_free, &props->memory_total);
+     props->caps = {
+-        /* .async                 = */ false,
++        /* .async                 = */ ctx->numa_node >= 0,
+         /* .host_buffer           = */ false,
+-        /* .buffer_from_host_ptr  = */ true,
++        /* .buffer_from_host_ptr  = */ ctx->numa_node < 0,
+         /* .events                = */ false,
+         /* .mmap_support          = */ true,
+     };
+ }
+ 
+ static ggml_backend_t ggml_backend_cpu_device_init_backend(ggml_backend_dev_t dev, const char * params) {
+-    return ggml_backend_cpu_init();
++    auto * dev_ctx = (ggml_backend_cpu_device_context *) dev->context;
++    ggml_backend_t backend = ggml_backend_cpu_init_device(dev);
++    if (!backend || dev_ctx->numa_node < 0) {
++        return backend;
++    }
+ 
+-    GGML_UNUSED(dev);
++    auto * cpu_ctx = (ggml_backend_cpu_context *) backend->context;
++    ggml_threadpool_params tpp = ggml_threadpool_params_default(dev_ctx->n_threads);
++    std::fill(std::begin(tpp.cpumask), std::end(tpp.cpumask), false);
++    for (int cpu : dev_ctx->cpus) {
++        if (cpu >= 0 && cpu < GGML_MAX_N_THREADS) {
++            tpp.cpumask[cpu] = true;
++        }
++    }
++    tpp.strict_cpu = true;
++    tpp.poll       = dev_ctx->poll;
++
++    cpu_ctx->n_threads       = dev_ctx->n_threads;
++    cpu_ctx->threadpool      = ggml_threadpool_new(&tpp);
++    cpu_ctx->owns_threadpool = true;
++    cpu_ctx->async_enabled   = true;
++
++    if (!cpu_ctx->threadpool) {
++        ggml_backend_free(backend);
++        return nullptr;
++    }
++
++    const std::vector<int> cpus = dev_ctx->cpus;
++    cpu_ctx->async_worker = std::thread([backend, cpu_ctx, cpus]() {
++#if defined(__linux__)
++        cpu_set_t affinity;
++        CPU_ZERO(&affinity);
++        for (int cpu : cpus) {
++            if (cpu >= 0 && cpu < CPU_SETSIZE) {
++                CPU_SET(cpu, &affinity);
++            }
++        }
++        if (pthread_setaffinity_np(pthread_self(), sizeof(affinity), &affinity) != 0) {
++            GGML_LOG_WARN("%s: failed to bind NUMA dispatcher thread\n", __func__);
++        }
++#endif
++        while (true) {
++            ggml_cgraph * graph = nullptr;
++            {
++                std::unique_lock<std::mutex> lock(cpu_ctx->async_mutex);
++                cpu_ctx->async_cv.wait(lock, [cpu_ctx]() {
++                    return cpu_ctx->async_stop || cpu_ctx->async_pending;
++                });
++                if (cpu_ctx->async_stop) {
++                    return;
++                }
++                graph = cpu_ctx->async_graph;
++                cpu_ctx->async_pending = false;
++                cpu_ctx->async_running = true;
++            }
++
++            const ggml_status status = ggml_backend_cpu_graph_compute_impl(backend, graph);
++            {
++                std::lock_guard<std::mutex> lock(cpu_ctx->async_mutex);
++                cpu_ctx->async_status  = status;
++                cpu_ctx->async_running = false;
++            }
++            cpu_ctx->async_cv.notify_all();
++        }
++    });
++
++    GGML_LOG_INFO("%s: initialized %s with %d threads\n",
++        __func__, dev_ctx->name.c_str(), dev_ctx->n_threads);
+     GGML_UNUSED(params);
++    return backend;
+ }
+ 
+ static ggml_backend_buffer_type_t ggml_backend_cpu_device_get_buffer_type(ggml_backend_dev_t dev) {
+-    return ggml_backend_cpu_buffer_type();
+-
+-    GGML_UNUSED(dev);
++    auto * ctx = (ggml_backend_cpu_device_context *) dev->context;
++    return ctx->buffer_type ? ctx->buffer_type : ggml_backend_cpu_buffer_type();
+ }
+ 
+ static ggml_backend_buffer_t ggml_backend_cpu_device_buffer_from_host_ptr(ggml_backend_dev_t dev, void * ptr, size_t size, size_t max_tensor_size) {
+@@ -480,8 +822,13 @@ static bool ggml_backend_cpu_device_supports_op(ggml_backend_dev_t dev, const st
+ }
+ 
+ static bool ggml_backend_cpu_device_supports_buft(ggml_backend_dev_t dev, ggml_backend_buffer_type_t buft) {
+-    return ggml_backend_buft_is_host(buft) || ggml_backend_cpu_is_extra_buffer_type(buft);
+-    GGML_UNUSED(dev);
++    auto * ctx = (ggml_backend_cpu_device_context *) dev->context;
++#ifdef GGML_USE_CPU_REPACK
++    if (ggml_backend_cpu_is_repack_buffer_type(buft)) {
++        return ggml_backend_buft_get_device(buft) == dev;
++    }
++#endif
++    return buft == ctx->buffer_type || ggml_backend_buft_is_host(buft) || ggml_backend_cpu_is_extra_buffer_type(buft);
+ }
+ 
+ static const struct ggml_backend_device_i ggml_backend_cpu_device_i = {
+@@ -504,6 +851,303 @@ static const struct ggml_backend_device_i ggml_backend_cpu_device_i = {
+ 
+ // CPU backend - backend (reg)
+ 
++#if defined(__linux__)
++
++static bool ggml_backend_cpu_env_flag(const char * name, bool fallback = false) {
++    const char * value = getenv(name);
++    if (!value || !*value) {
++        return fallback;
++    }
++    return strcmp(value, "0") != 0 && strcasecmp(value, "false") != 0 && strcasecmp(value, "no") != 0;
++}
++
++static int ggml_backend_cpu_env_int(const char * name, int fallback) {
++    const char * value = getenv(name);
++    if (!value || !*value) {
++        return fallback;
++    }
++    char * end = nullptr;
++    const long parsed = strtol(value, &end, 10);
++    if (!end || *end != '\0' || parsed <= 0 || parsed > INT_MAX) {
++        GGML_LOG_WARN("%s: ignoring invalid %s=%s\n", __func__, name, value);
++        return fallback;
++    }
++    return (int) parsed;
++}
++
++struct ggml_backend_cpu_numa_comm_context {
++    std::vector<ggml_backend_t> backends;
++    std::mutex                  mutex;
++    bool                        logged_first_reduce = false;
++};
++
++static void * ggml_backend_cpu_numa_comm_init(ggml_backend_t * backends, size_t n_backends) {
++    if (!ggml_backend_cpu_env_flag("GGML_CPU_NUMA_DIRECT_ALLREDUCE") || n_backends < 2) {
++        return nullptr;
++    }
++
++    for (size_t i = 0; i < n_backends; ++i) {
++        if (!ggml_backend_is_cpu(backends[i])) {
++            return nullptr;
++        }
++        auto * dev_ctx = (ggml_backend_cpu_device_context *) ggml_backend_get_device(backends[i])->context;
++        if (dev_ctx->numa_node < 0) {
++            return nullptr;
++        }
++    }
++
++    auto * ctx = new ggml_backend_cpu_numa_comm_context;
++    ctx->backends.assign(backends, backends + n_backends);
++    GGML_LOG_INFO("%s: enabled direct all-reduce for %zu NUMA CPU backends\n", __func__, n_backends);
++    return ctx;
++}
++
++static void ggml_backend_cpu_numa_comm_free(void * comm_ctx) {
++    delete (ggml_backend_cpu_numa_comm_context *) comm_ctx;
++}
++
++static bool ggml_backend_cpu_numa_comm_allreduce_tensor(void * comm_ctx, ggml_tensor ** tensors) {
++    auto * ctx = (ggml_backend_cpu_numa_comm_context *) comm_ctx;
++    if (!ctx || !tensors) {
++        return false;
++    }
++
++    const size_t n_backends = ctx->backends.size();
++    ggml_tensor * first = tensors[0];
++    if (!first || !first->buffer || !first->data || first->type != GGML_TYPE_F32 ||
++            !ggml_is_contiguous(first)) {
++        return false;
++    }
++
++    for (size_t i = 0; i < n_backends; ++i) {
++        ggml_tensor * tensor = tensors[i];
++        if (!tensor || !tensor->buffer || !tensor->data || tensor->type != GGML_TYPE_F32 ||
++                !ggml_is_contiguous(tensor) || !ggml_are_same_shape(first, tensor) ||
++                ggml_backend_buft_get_device(ggml_backend_buffer_get_type(tensor->buffer)) !=
++                    ggml_backend_get_device(ctx->backends[i])) {
++            return false;
++        }
++    }
++
++    const int64_t n_elements = ggml_nelements(first);
++    if (n_elements == 0) {
++        return true;
++    }
++
++    std::lock_guard<std::mutex> lock(ctx->mutex);
++    for (ggml_backend_t backend : ctx->backends) {
++        ggml_backend_synchronize(backend);
++    }
++
++    float * dst = (float *) first->data;
++    if (n_backends == 2) {
++        const float * src1 = (const float *) tensors[1]->data;
++        for (int64_t i = 0; i < n_elements; ++i) {
++            dst[i] += src1[i];
++        }
++    } else if (n_backends == 3) {
++        const float * src1 = (const float *) tensors[1]->data;
++        const float * src2 = (const float *) tensors[2]->data;
++        for (int64_t i = 0; i < n_elements; ++i) {
++            dst[i] = (dst[i] + src1[i]) + src2[i];
++        }
++    } else if (n_backends == 4) {
++        const float * src1 = (const float *) tensors[1]->data;
++        const float * src2 = (const float *) tensors[2]->data;
++        const float * src3 = (const float *) tensors[3]->data;
++        for (int64_t i = 0; i < n_elements; ++i) {
++            dst[i] = (dst[i] + src1[i]) + (src2[i] + src3[i]);
++        }
++    } else {
++        for (size_t j = 1; j < n_backends; ++j) {
++            const float * src = (const float *) tensors[j]->data;
++            for (int64_t i = 0; i < n_elements; ++i) {
++                dst[i] += src[i];
++            }
++        }
++    }
++
++    const size_t n_bytes = ggml_nbytes(first);
++    for (size_t i = 1; i < n_backends; ++i) {
++        memcpy(tensors[i]->data, dst, n_bytes);
++    }
++
++    if (!ctx->logged_first_reduce) {
++        GGML_LOG_INFO("%s: using direct F32 all-reduce for %lld elements\n",
++            __func__, (long long) n_elements);
++        ctx->logged_first_reduce = true;
++    }
++    return true;
++}
++
++static bool ggml_backend_cpu_read_int(const std::string & path, int & value) {
++    std::ifstream file(path);
++    return (file >> value).good() || file.eof();
++}
++
++static std::vector<int> ggml_backend_cpu_parse_cpu_list(const std::string & path) {
++    std::ifstream file(path);
++    std::string value;
++    if (!std::getline(file, value)) {
++        return {};
++    }
++
++    std::vector<int> cpus;
++    std::stringstream stream(value);
++    std::string token;
++    while (std::getline(stream, token, ',')) {
++        const size_t dash = token.find('-');
++        int first = 0;
++        int last  = 0;
++        try {
++            first = std::stoi(token.substr(0, dash));
++            last  = dash == std::string::npos ? first : std::stoi(token.substr(dash + 1));
++        } catch (const std::exception &) {
++            return {};
++        }
++        if (first < 0 || last < first) {
++            return {};
++        }
++        for (int cpu = first; cpu <= last; ++cpu) {
++            cpus.push_back(cpu);
++        }
++    }
++    return cpus;
++}
++
++static std::vector<int> ggml_backend_cpu_primary_cpus_for_node(int node) {
++    const std::string node_path = "/sys/devices/system/node/node" + std::to_string(node) + "/cpulist";
++    const std::vector<int> node_cpus = ggml_backend_cpu_parse_cpu_list(node_path);
++    if (node_cpus.empty()) {
++        return {};
++    }
++
++    cpu_set_t allowed;
++    CPU_ZERO(&allowed);
++    const bool have_allowed = sched_getaffinity(0, sizeof(allowed), &allowed) == 0;
++
++    std::set<std::pair<int, int>> cores_seen;
++    std::vector<int> primary_cpus;
++    for (int cpu : node_cpus) {
++        if (cpu < 0 || cpu >= CPU_SETSIZE || (have_allowed && !CPU_ISSET(cpu, &allowed))) {
++            continue;
++        }
++        const std::string topology = "/sys/devices/system/cpu/cpu" + std::to_string(cpu) + "/topology/";
++        int package_id = node;
++        int core_id    = cpu;
++        ggml_backend_cpu_read_int(topology + "physical_package_id", package_id);
++        ggml_backend_cpu_read_int(topology + "core_id", core_id);
++        if (cores_seen.emplace(package_id, core_id).second) {
++            primary_cpus.push_back(cpu);
++        }
++    }
++    std::sort(primary_cpus.begin(), primary_cpus.end());
++    return primary_cpus;
++}
++
++#endif // __linux__
++
++struct ggml_backend_cpu_device_registry {
++    std::vector<std::unique_ptr<ggml_backend_cpu_device_context>> contexts;
++    std::vector<std::unique_ptr<ggml_backend_device>>             devices;
++#if defined(__linux__)
++    std::vector<std::unique_ptr<ggml_backend_cpu_numa_buft_context>> buft_contexts;
++    std::vector<std::unique_ptr<ggml_backend_buffer_type>>           buffer_types;
++#endif
++
++    explicit ggml_backend_cpu_device_registry(ggml_backend_reg_t reg) {
++        add_device(reg, -1, {}, 0, 0, false);
++
++#if defined(__linux__)
++        if (!ggml_backend_cpu_env_flag("GGML_CPU_NUMA_DEVICES")) {
++            return;
++        }
++
++        const int poll = std::min(100, ggml_backend_cpu_env_int("GGML_CPU_NUMA_POLL", 50));
++        const bool huge_pages = ggml_backend_cpu_env_flag("GGML_CPU_NUMA_HUGEPAGES");
++        for (int node = 0; node < 64; ++node) {
++            std::vector<int> cpus = ggml_backend_cpu_primary_cpus_for_node(node);
++            if (cpus.empty()) {
++                continue;
++            }
++            const int default_threads = std::min<int>(10, cpus.size());
++            const int n_threads = std::min<int>(
++                ggml_backend_cpu_env_int("GGML_CPU_NUMA_THREADS", default_threads), cpus.size());
++            cpus.resize(n_threads);
++            add_device(reg, node, cpus, n_threads, poll, huge_pages);
++        }
++
++        GGML_LOG_INFO("%s: exposed %zu NUMA CPU devices\n", __func__, devices.size() - 1);
++#endif
++    }
++
++    void add_device(
++            ggml_backend_reg_t reg,
++            int node,
++            std::vector<int> cpus,
++            int n_threads,
++            int poll,
++            bool huge_pages) {
++        auto ctx = std::make_unique<ggml_backend_cpu_device_context>();
++        ctx->numa_node = node;
++        ctx->cpus       = std::move(cpus);
++        ctx->n_threads  = n_threads;
++        ctx->poll       = poll;
++        if (node >= 0) {
++            ctx->name = "CPU-NUMA" + std::to_string(node);
++            ctx->description += " / NUMA node " + std::to_string(node) + " / " +
++                std::to_string(n_threads) + " physical cores";
++        }
++
++        auto device = std::make_unique<ggml_backend_device>(ggml_backend_device {
++            /* .iface   = */ ggml_backend_cpu_device_i,
++            /* .reg     = */ reg,
++            /* .context = */ ctx.get(),
++        });
++
++#if defined(__linux__)
++        if (node >= 0) {
++            auto buft_ctx = std::make_unique<ggml_backend_cpu_numa_buft_context>(
++                ggml_backend_cpu_numa_buft_context { node, "CPU_NUMA" + std::to_string(node), huge_pages });
++            auto buft = std::make_unique<ggml_backend_buffer_type>(ggml_backend_buffer_type {
++                /* .iface   = */ {
++                    /* .get_name       = */ ggml_backend_cpu_numa_buft_get_name,
++                    /* .alloc_buffer   = */ ggml_backend_cpu_numa_buft_alloc_buffer,
++                    /* .get_alignment  = */ ggml_backend_cpu_numa_buft_get_alignment,
++                    /* .get_max_size   = */ nullptr,
++                    /* .get_alloc_size = */ nullptr,
++                    /* .is_host        = */ ggml_backend_cpu_numa_buft_is_host,
++                },
++                /* .device  = */ device.get(),
++                /* .context = */ buft_ctx.get(),
++            });
++            ctx->buffer_type = buft.get();
++            buft_contexts.push_back(std::move(buft_ctx));
++            buffer_types.push_back(std::move(buft));
++
++#ifdef GGML_USE_CPU_REPACK
++            if (ggml_backend_cpu_env_flag("GGML_CPU_NUMA_REPACK")) {
++                const std::string repack_name = ctx->name + "_REPACK";
++                ctx->extra_buffer_types.push_back(ggml_backend_cpu_repack_buffer_type_from(
++                    ctx->buffer_type, device.get(), repack_name.c_str()));
++                ctx->extra_buffer_types.push_back(nullptr);
++            }
++#endif
++        }
++#else
++        GGML_UNUSED(huge_pages);
++#endif
++
++        contexts.push_back(std::move(ctx));
++        devices.push_back(std::move(device));
++    }
++};
++
++static ggml_backend_cpu_device_registry & ggml_backend_cpu_devices(ggml_backend_reg_t reg) {
++    static ggml_backend_cpu_device_registry registry(reg);
++    return registry;
++}
++
+ static const char * ggml_backend_cpu_reg_get_name(ggml_backend_reg_t reg) {
+     return "CPU";
+ 
+@@ -511,22 +1155,13 @@ static const char * ggml_backend_cpu_reg_get_name(ggml_backend_reg_t reg) {
+ }
+ 
+ static size_t ggml_backend_cpu_reg_get_device_count(ggml_backend_reg_t reg) {
+-    return 1;
+-
+-    GGML_UNUSED(reg);
++    return ggml_backend_cpu_devices(reg).devices.size();
+ }
+ 
+ static ggml_backend_dev_t ggml_backend_cpu_reg_get_device(ggml_backend_reg_t reg, size_t index) {
+-    GGML_ASSERT(index == 0);
+-
+-    static ggml_backend_cpu_device_context ctx;
+-    static ggml_backend_device ggml_backend_cpu_device = {
+-        /* .iface   = */ ggml_backend_cpu_device_i,
+-        /* .reg     = */ reg,
+-        /* .context = */ &ctx,
+-    };
+-
+-    return &ggml_backend_cpu_device;
++    auto & registry = ggml_backend_cpu_devices(reg);
++    GGML_ASSERT(index < registry.devices.size());
++    return registry.devices[index].get();
+ }
+ 
+ // This is intended to replace the the ggml_cpu_has_* functions when loading the CPU backend dynamically,
+@@ -649,6 +1284,17 @@ static ggml_backend_feature * ggml_backend_cpu_get_features(ggml_backend_reg_t r
+ }
+ 
+ static void * ggml_backend_cpu_get_proc_address(ggml_backend_reg_t reg, const char * name) {
++#if defined(__linux__)
++    if (strcmp(name, "ggml_backend_comm_init") == 0) {
++        return (void *) ggml_backend_cpu_numa_comm_init;
++    }
++    if (strcmp(name, "ggml_backend_comm_free") == 0) {
++        return (void *) ggml_backend_cpu_numa_comm_free;
++    }
++    if (strcmp(name, "ggml_backend_comm_allreduce_tensor") == 0) {
++        return (void *) ggml_backend_cpu_numa_comm_allreduce_tensor;
++    }
++#endif
+     if (strcmp(name, "ggml_backend_set_n_threads") == 0) {
+         ggml_backend_set_n_threads_t fct = ggml_backend_cpu_set_n_threads;
+         return (void *)fct;
+diff --git a/ggml/src/ggml-cpu/repack.cpp b/ggml/src/ggml-cpu/repack.cpp
+index 9689ca3ced8fa4b00df712a624aade1c1797bce2..89ed93b3376e402783d3ef9f59a54b3eec942c1d 100644
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -11,10 +11,16 @@
+ 
+ #include "arch-fallback.h"
+ 
++#include <cinttypes>
+ #include <cmath>
++#include <cstdlib>
+ #include <cstring>
+ #include <cassert>
+ #include <cstdio>  // for GGML_ASSERT
++#include <memory>
++#include <mutex>
++#include <string>
++#include <vector>
+ 
+ #include "repack.h"
+ 
+@@ -1365,6 +1371,57 @@ void ggml_gemv_q8_0_4x8_q8_0_generic(int                        n,
+     }
+ }
+ 
++void ggml_gemv_q8_0_8x8_q8_0_generic(
++        int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
++        int nr, int nc) {
++    constexpr int ncols_interleaved = 8;
++    constexpr int values_per_subblock = 16;
++
++    assert(n % QK8_0 == 0);
++    assert(nc % ncols_interleaved == 0);
++
++    const int nb = n / QK8_0;
++    const block_q8_0x8 * b_ptr_start = (const block_q8_0x8 *) vx;
++    const block_q8_0 * a_ptr_start = (const block_q8_0 *) vy;
++
++    for (int y = 0; y < nr; ++y) {
++        const block_q8_0 * a_ptr = a_ptr_start + y * nb;
++        float * out = s + y * bs;
++
++        for (int x = 0; x < nc / ncols_interleaved; ++x) {
++            const block_q8_0x8 * b_ptr = b_ptr_start + x * nb;
++            float sumf[ncols_interleaved] = {};
++
++            for (int b = 0; b < nb; ++b) {
++                int isum[ncols_interleaved] = {};
++                for (int sb = 0; sb < QK8_0 / values_per_subblock; ++sb) {
++                    for (int row = 0; row < ncols_interleaved; ++row) {
++                        const int row_group = row / 4;
++                        const int row_in_group = row % 4;
++                        const int weight_offset =
++                            (sb * 2 + row_group) * 64 + row_in_group * values_per_subblock;
++                        for (int k = 0; k < values_per_subblock; ++k) {
++                            const int weight = (int) (uint8_t) b_ptr[b].qs[weight_offset + k] - 128;
++                            isum[row] += weight * a_ptr[b].qs[sb * values_per_subblock + k];
++                        }
++                    }
++                }
++
++                const float activation_scale = GGML_CPU_FP16_TO_FP32(a_ptr[b].d);
++                for (int row = 0; row < ncols_interleaved; ++row) {
++                    sumf[row] += isum[row] *
++                        GGML_CPU_FP16_TO_FP32(b_ptr[b].d[row]) * activation_scale;
++                }
++            }
++
++            for (int row = 0; row < ncols_interleaved; ++row) {
++                out[x * ncols_interleaved + row] = sumf[row];
++            }
++        }
++    }
++}
++
+ // Only enable these for RISC-V.
+ #if defined __riscv_zvfh
+ void ggml_gemv_q4_0_16x1_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+@@ -2383,6 +2440,65 @@ void ggml_gemm_q8_0_4x8_q8_0_generic(int                        n,
+     }
+ }
+ 
++void ggml_gemm_q8_0_8x8_q8_0_generic(
++        int n, float * GGML_RESTRICT s, size_t bs,
++        const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy,
++        int nr, int nc) {
++    constexpr int ncols_interleaved = 8;
++    constexpr int values_per_subblock = 16;
++
++    assert(n % QK8_0 == 0);
++    assert(nr % 4 == 0);
++    assert(nc % ncols_interleaved == 0);
++
++    const int nb = n / QK8_0;
++    const block_q8_0x8 * b_ptr_start = (const block_q8_0x8 *) vx;
++    const block_q8_0x4 * a_ptr_start = (const block_q8_0x4 *) vy;
++
++    for (int y = 0; y < nr / 4; ++y) {
++        const block_q8_0x4 * a_ptr = a_ptr_start + y * nb;
++        for (int x = 0; x < nc / ncols_interleaved; ++x) {
++            const block_q8_0x8 * b_ptr = b_ptr_start + x * nb;
++            float sumf[4][ncols_interleaved] = {};
++
++            for (int b = 0; b < nb; ++b) {
++                for (int m = 0; m < 4; ++m) {
++                    int isum[ncols_interleaved] = {};
++                    for (int sb = 0; sb < QK8_0 / values_per_subblock; ++sb) {
++                        for (int row = 0; row < ncols_interleaved; ++row) {
++                            const int row_group = row / 4;
++                            const int row_in_group = row % 4;
++                            const int weight_offset =
++                                (sb * 2 + row_group) * 64 + row_in_group * values_per_subblock;
++                            for (int half = 0; half < 2; ++half) {
++                                const int activation_offset =
++                                    (sb * 2 + half) * 32 + m * 8;
++                                for (int k = 0; k < 8; ++k) {
++                                    const int weight =
++                                        (int) (uint8_t) b_ptr[b].qs[weight_offset + half * 8 + k] - 128;
++                                    isum[row] += weight * a_ptr[b].qs[activation_offset + k];
++                                }
++                            }
++                        }
++                    }
++
++                    const float activation_scale = GGML_CPU_FP16_TO_FP32(a_ptr[b].d[m]);
++                    for (int row = 0; row < ncols_interleaved; ++row) {
++                        sumf[m][row] += isum[row] *
++                            GGML_CPU_FP16_TO_FP32(b_ptr[b].d[row]) * activation_scale;
++                    }
++                }
++            }
++
++            for (int m = 0; m < 4; ++m) {
++                for (int row = 0; row < ncols_interleaved; ++row) {
++                    s[(y * 4 + m) * bs + x * ncols_interleaved + row] = sumf[m][row];
++                }
++            }
++        }
++    }
++}
++
+ // Only enable these for RISC-V.
+ #if defined __riscv_zvfh
+ void ggml_gemm_q4_0_16x1_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+@@ -2739,6 +2855,71 @@ static block_q8_0x4 make_block_q8_0x4(block_q8_0 * in, unsigned int blck_size_in
+     return out;
+ }
+ 
++// Eight rows arranged as four-row by 16-value VNNI tiles. Cascade Lake VNNI
++// multiplies unsigned weights by signed activations, so bias each signed Q8
++// weight by 128 and remove that bias exactly in the compute kernel.
++static block_q8_0x8 make_block_q8_0x8_vnni(const block_q8_0 * in) {
++    block_q8_0x8 out = {};
++
++    for (int row = 0; row < 8; ++row) {
++        out.d[row] = in[row].d;
++    }
++
++    for (int half = 0; half < 2; ++half) {
++        for (int row_group = 0; row_group < 2; ++row_group) {
++            uint8_t * dst = (uint8_t *) out.qs + (half * 2 + row_group) * 64;
++            for (int row = 0; row < 4; ++row) {
++                for (int k = 0; k < 16; ++k) {
++                    dst[row * 16 + k] =
++                        ((const uint8_t *) in[row_group * 4 + row].qs)[half * 16 + k] ^ 0x80u;
++                }
++            }
++        }
++    }
++
++    return out;
++}
++
++static int repack_q8_0_to_q8_0_8_vnni(
++        struct ggml_tensor * t, const void * GGML_RESTRICT data, size_t data_size) {
++    GGML_ASSERT(t->type == GGML_TYPE_Q8_0);
++    constexpr int nrows_interleaved = 8;
++
++    const int64_t nrows = ggml_nrows(t);
++    const int64_t nblocks = t->ne[0] / QK8_0;
++    GGML_ASSERT(data_size == (size_t) nrows * nblocks * sizeof(block_q8_0));
++
++    if (t->ne[0] % QK8_0 != 0 || t->ne[1] % nrows_interleaved != 0) {
++        return -1;
++    }
++
++    if (const char * trace = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
++            trace != nullptr && strcmp(trace, "1") == 0) {
++        static std::once_flag trace_once;
++        std::call_once(trace_once, [t] {
++            fprintf(stderr, "q8_0_r8: repack ne=[%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64 "]\n",
++                    t->ne[0], t->ne[1], t->ne[2], t->ne[3]);
++        });
++    }
++
++    const block_q8_0 * src = (const block_q8_0 *) data;
++    block_q8_0x8 * dst = (block_q8_0x8 *) t->data;
++    const int64_t ngroups = nrows / nrows_interleaved;
++    for (int64_t group = 0; group < ngroups; ++group) {
++        const block_q8_0 * src_group = src + group * nrows_interleaved * nblocks;
++        block_q8_0x8 * dst_group = dst + group * nblocks;
++        block_q8_0 rows[nrows_interleaved];
++        for (int64_t block = 0; block < nblocks; ++block) {
++            for (int row = 0; row < nrows_interleaved; ++row) {
++                rows[row] = src_group[block + row * nblocks];
++            }
++            dst_group[block] = make_block_q8_0x8_vnni(rows);
++        }
++    }
++
++    return 0;
++}
++
+ static block_q4_0x4 make_block_q4_0x4(block_q4_0 * in, int blck_size_interleave) {
+     block_q4_0x4 out;
+ 
+@@ -3934,6 +4115,10 @@ template <> int repack<block_q8_0, 8, 4>(struct ggml_tensor * t, const void * da
+     return repack_q8_0_to_q8_0_4_bl(t, 8, data, data_size);
+ }
+ 
++template <> int repack<block_q8_0, 8, 8>(struct ggml_tensor * t, const void * data, size_t data_size) {
++    return repack_q8_0_to_q8_0_8_vnni(t, data, data_size);
++}
++
+ #if defined __riscv_zvfh
+ template <> int repack<block_q4_0, 1, 16>(struct ggml_tensor * t, const void * data, size_t data_size) {
+     return repack_q4_0_to_q4_0_16_bl(t, 1, data, data_size);
+@@ -4031,6 +4216,10 @@ template <> void gemv<block_q8_0, 8, 4, GGML_TYPE_Q8_0>(int n, float * s, size_t
+     ggml_gemv_q8_0_4x8_q8_0(n, s, bs, vx, vy, nr, nc);
+ }
+ 
++template <> void gemv<block_q8_0, 8, 8, GGML_TYPE_Q8_0>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemv_q8_0_8x8_q8_0(n, s, bs, vx, vy, nr, nc);
++}
++
+ #if defined __riscv_zvfh
+ template <> void gemv<block_q4_0, 1, 16, GGML_TYPE_Q8_0>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemv_q4_0_16x1_q8_0(n, s, bs, vx, vy, nr, nc);
+@@ -4128,6 +4317,10 @@ template <> void gemm<block_q8_0, 8, 4, GGML_TYPE_Q8_0>(int n, float * s, size_t
+     ggml_gemm_q8_0_4x8_q8_0(n, s, bs, vx, vy, nr, nc);
+ }
+ 
++template <> void gemm<block_q8_0, 8, 8, GGML_TYPE_Q8_0>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
++    ggml_gemm_q8_0_8x8_q8_0(n, s, bs, vx, vy, nr, nc);
++}
++
+ #if defined __riscv_zvfh
+ template <> void gemm<block_q4_0, 1, 16, GGML_TYPE_Q8_0>(int n, float * s, size_t bs, const void * vx, const void * vy, int nr, int nc) {
+     ggml_gemm_q4_0_16x1_q8_0(n, s, bs, vx, vy, nr, nc);
+@@ -4557,6 +4750,7 @@ static const ggml::cpu::tensor_traits * ggml_repack_get_optimal_repack_type(cons
+     // instance for Q8_0
+     static const ggml::cpu::repack::tensor_traits<block_q8_0, 4, 4, GGML_TYPE_Q8_0> q8_0_4x4_q8_0;
+     static const ggml::cpu::repack::tensor_traits<block_q8_0, 8, 4, GGML_TYPE_Q8_0> q8_0_4x8_q8_0;
++    static const ggml::cpu::repack::tensor_traits<block_q8_0, 8, 8, GGML_TYPE_Q8_0> q8_0_8x8_q8_0;
+ 
+     // instances for RISC-V
+     //
+@@ -4697,6 +4891,36 @@ static const ggml::cpu::tensor_traits * ggml_repack_get_optimal_repack_type(cons
+             }
+         }
+     } else if (cur->type == GGML_TYPE_Q8_0) {
++        static const bool x86_vnni_enabled = []() {
++            const char * value = getenv("GGML_CPU_Q8_0_REPACK");
++            return value != nullptr && strcmp(value, "1") == 0;
++        }();
++        static const bool x86_vnni_force = []() {
++            const char * value = getenv("GGML_CPU_Q8_0_REPACK_FORCE");
++            return value != nullptr && strcmp(value, "1") == 0;
++        }();
++        static const bool x86_vnni_ffn_enabled = []() {
++            const char * value = getenv("GGML_CPU_Q8_0_REPACK_FFN");
++            return value != nullptr && strcmp(value, "1") == 0;
++        }();
++        static const bool x86_vnni_output_enabled = []() {
++            const char * value = getenv("GGML_CPU_Q8_0_REPACK_OUTPUT");
++            return value != nullptr && strcmp(value, "1") == 0;
++        }();
++        const bool attention_matrix =
++            strstr(cur->name, ".attn_q.weight") != nullptr ||
++            strstr(cur->name, ".attn_k.weight") != nullptr ||
++            strstr(cur->name, ".attn_v.weight") != nullptr ||
++            strstr(cur->name, ".attn_output.weight") != nullptr;
++        const bool eligible_matrix = ggml_n_dims(cur) == 2 && (
++            attention_matrix ||
++            (x86_vnni_ffn_enabled && strstr(cur->name, ".ffn_") != nullptr) ||
++            (x86_vnni_output_enabled && strcmp(cur->name, "output.weight") == 0));
++        if (x86_vnni_enabled && ggml_cpu_has_avx512() && ggml_cpu_has_avx512_vnni() &&
++                (x86_vnni_force || eligible_matrix) &&
++                cur->ne[0] % QK8_0 == 0 && cur->ne[1] % 8 == 0) {
++            return &q8_0_8x8_q8_0;
++        }
+         if (ggml_cpu_has_neon() && ggml_cpu_has_matmul_int8()) {
+             if (cur->ne[1] % 4 == 0) {
+                 return &q8_0_4x8_q8_0;
+@@ -4726,6 +4950,17 @@ static const ggml::cpu::tensor_traits * ggml_repack_get_optimal_repack_type(cons
+ static enum ggml_status ggml_backend_cpu_repack_buffer_init_tensor(ggml_backend_buffer_t buffer, struct ggml_tensor * tensor) {
+     tensor->extra = (void *) const_cast<ggml::cpu::tensor_traits *>(ggml_repack_get_optimal_repack_type(tensor));
+ 
++    if (tensor->type == GGML_TYPE_Q8_0 && tensor->extra != nullptr) {
++        static std::once_flag trace_once;
++        if (const char * trace = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
++                trace != nullptr && strcmp(trace, "1") == 0) {
++            std::call_once(trace_once, [tensor] {
++                fprintf(stderr, "q8_0_r8: initialized local tensor %s ne=[%" PRId64 ",%" PRId64 "]\n",
++                        tensor->name, tensor->ne[0], tensor->ne[1]);
++            });
++        }
++    }
++
+     GGML_UNUSED(buffer);
+     return GGML_STATUS_SUCCESS;
+ }
+@@ -4736,90 +4971,172 @@ static void ggml_backend_cpu_repack_buffer_set_tensor(ggml_backend_buffer_t buff
+     GGML_ASSERT(size == ggml_nbytes(tensor));
+ 
+     auto tensor_traits = (ggml::cpu::repack::tensor_traits_base *) tensor->extra;
++    GGML_ASSERT(tensor_traits != nullptr);
++    if (tensor->type == GGML_TYPE_Q8_0 && tensor_traits != nullptr) {
++        static std::once_flag trace_once;
++        if (const char * trace = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
++                trace != nullptr && strcmp(trace, "1") == 0) {
++            std::call_once(trace_once, [tensor, size] {
++                fprintf(stderr, "q8_0_r8: uploading local tensor %s bytes=%zu\n", tensor->name, size);
++            });
++        }
++    }
+     auto OK            = tensor_traits->repack(tensor, data, size);
+ 
+     GGML_ASSERT(OK == 0);
+     GGML_UNUSED(buffer);
+ }
+ 
+-static const char * ggml_backend_cpu_repack_buffer_type_get_name(ggml_backend_buffer_type_t buft) {
+-    return "CPU_REPACK";
++static void ggml_backend_cpu_repack_buffer_set_tensor_2d(
++        ggml_backend_buffer_t buffer,
++        struct ggml_tensor * tensor,
++        const void * data,
++        size_t offset,
++        size_t size,
++        size_t n_copies,
++        size_t stride_tensor,
++        size_t stride_data) {
++    GGML_ASSERT(offset == 0);
++    GGML_ASSERT(n_copies > 0);
++    GGML_ASSERT(offset + (n_copies - 1) * stride_tensor + size == ggml_nbytes(tensor));
++
++    auto tensor_traits = (ggml::cpu::repack::tensor_traits_base *) tensor->extra;
++    GGML_ASSERT(tensor_traits != nullptr);
++
++    // Meta axis-0 tensor splits arrive as one strided copy per row. Gather the
++    // local shard into its ordinary contiguous layout before doing the one-shot
++    // layout conversion expected by the repack trait.
++    thread_local std::vector<uint8_t> staging;
++    staging.resize(ggml_nbytes(tensor));
++    for (size_t i = 0; i < n_copies; ++i) {
++        memcpy(staging.data() + i * stride_tensor, (const char *) data + i * stride_data, size);
++    }
++
++    if (tensor->type == GGML_TYPE_Q8_0) {
++        static std::once_flag trace_once;
++        if (const char * trace = std::getenv("GGML_CPU_Q8_0_REPACK_TRACE");
++                trace != nullptr && strcmp(trace, "1") == 0) {
++            std::call_once(trace_once, [tensor, n_copies, size] {
++                fprintf(stderr, "q8_0_r8: uploading strided local tensor %s rows=%zu bytes_per_row=%zu\n",
++                        tensor->name, n_copies, size);
++            });
++        }
++    }
+ 
+-    GGML_UNUSED(buft);
++    const auto OK = tensor_traits->repack(tensor, staging.data(), staging.size());
++    GGML_ASSERT(OK == 0);
++    GGML_UNUSED(buffer);
++}
++
++static const char * ggml_backend_cpu_repack_buffer_type_get_name(ggml_backend_buffer_type_t buft) {
++    auto * ctx = (ggml::cpu::repack::extra_buffer_type *) buft->context;
++    return ctx->name.c_str();
+ }
+ 
+ static ggml_backend_buffer_t ggml_backend_cpu_repack_buffer_type_alloc_buffer(ggml_backend_buffer_type_t buft, size_t size) {
+-    ggml_backend_buffer_t buffer = ggml_backend_buft_alloc_buffer(ggml_backend_cpu_buffer_type(), size);
++    auto * ctx = (ggml::cpu::repack::extra_buffer_type *) buft->context;
++    ggml_backend_buffer_t buffer = ggml_backend_buft_alloc_buffer(ctx->base_buft, size);
+ 
+     if (buffer == nullptr) {
+         return nullptr;
+     }
+ 
+-    buffer->buft              = buft;
+-    buffer->iface.init_tensor = ggml_backend_cpu_repack_buffer_init_tensor;
+-    buffer->iface.set_tensor  = ggml_backend_cpu_repack_buffer_set_tensor;
+-    buffer->iface.get_tensor  = nullptr;
+-    buffer->iface.cpy_tensor  = nullptr;
++    buffer->buft                = buft;
++    buffer->iface.init_tensor   = ggml_backend_cpu_repack_buffer_init_tensor;
++    buffer->iface.set_tensor    = ggml_backend_cpu_repack_buffer_set_tensor;
++    buffer->iface.set_tensor_2d = ggml_backend_cpu_repack_buffer_set_tensor_2d;
++    buffer->iface.get_tensor    = nullptr;
++    buffer->iface.cpy_tensor    = nullptr;
+     return buffer;
+ }
+ 
+ static size_t ggml_backend_cpu_repack_buffer_type_get_alignment(ggml_backend_buffer_type_t buft) {
+-    return TENSOR_ALIGNMENT;
+-
+-    GGML_UNUSED(buft);
++    auto * ctx = (ggml::cpu::repack::extra_buffer_type *) buft->context;
++    return ggml_backend_buft_get_alignment(ctx->base_buft);
+ }
+ 
+ namespace ggml::cpu::repack {
+-class extra_buffer_type : ggml::cpu::extra_buffer_type {
+-    bool supports_op(ggml_backend_dev_t, const struct ggml_tensor * op) override {
+-        if (    op->op == GGML_OP_MUL_MAT &&
+-                op->src[0]->buffer &&
+-                (ggml_n_dims(op->src[0]) == 2) &&
+-                op->src[0]->buffer->buft == ggml_backend_cpu_repack_buffer_type() &&
+-                ggml_repack_get_optimal_repack_type(op->src[0])
+-                ) {
+-            if (op->src[1]->buffer && !ggml_backend_buft_is_host(op->src[1]->buffer->buft)) {
++bool extra_buffer_type::supports_op(ggml_backend_dev_t dev, const struct ggml_tensor * op) {
++    if (op->op == GGML_OP_MUL_MAT &&
++        op->src[0]->buffer &&
++        ggml_n_dims(op->src[0]) == 2 &&
++        ggml_backend_cpu_is_repack_buffer_type(op->src[0]->buffer->buft) &&
++        ggml_backend_buft_get_device(op->src[0]->buffer->buft) == dev &&
++        ggml_repack_get_optimal_repack_type(op->src[0])) {
++        if (op->src[1]->buffer && !ggml_backend_buft_is_host(op->src[1]->buffer->buft)) {
++            ggml_backend_dev_t src1_dev = ggml_backend_buft_get_device(op->src[1]->buffer->buft);
++            if (src1_dev == nullptr || ggml_backend_dev_type(src1_dev) != GGML_BACKEND_DEVICE_TYPE_CPU) {
+                 return false;
+             }
+-            if (op->src[1]->type == GGML_TYPE_F32) {
+-                return true;
+-            }
+-            //if (op->src[1]->type == GGML_TYPE_Q8_0) {
+-            //    return true;
+-            //}
+-            // may be possible if Q8_0 packed...
+-        } else if (op->op == GGML_OP_MUL_MAT_ID
+-                && op->src[0]->buffer
+-                && (ggml_n_dims(op->src[0]) == 3)
+-                && op->src[0]->buffer->buft == ggml_backend_cpu_repack_buffer_type()
+-                && ggml_repack_get_optimal_repack_type(op->src[0])
+-                ) {
+-            if (op->src[1]->buffer && !ggml_backend_buft_is_host(op->src[1]->buffer->buft)) {
++        }
++        if (op->src[1]->type == GGML_TYPE_F32) {
++            return true;
++        }
++        // Q8_0 activations may be supported after adding a packed path.
++    } else if (op->op == GGML_OP_MUL_MAT_ID &&
++               op->src[0]->buffer &&
++               ggml_n_dims(op->src[0]) == 3 &&
++               ggml_backend_cpu_is_repack_buffer_type(op->src[0]->buffer->buft) &&
++               ggml_backend_buft_get_device(op->src[0]->buffer->buft) == dev &&
++               ggml_repack_get_optimal_repack_type(op->src[0])) {
++        if (op->src[1]->buffer && !ggml_backend_buft_is_host(op->src[1]->buffer->buft)) {
++            ggml_backend_dev_t src1_dev = ggml_backend_buft_get_device(op->src[1]->buffer->buft);
++            if (src1_dev == nullptr || ggml_backend_dev_type(src1_dev) != GGML_BACKEND_DEVICE_TYPE_CPU) {
+                 return false;
+             }
+-            if (op->src[1]->type == GGML_TYPE_F32) {
+-                return true;
+-            }
+-            //if (op->src[1]->type == GGML_TYPE_Q8_0) {
+-            //    return true;
+-            //}
+         }
+-        return false;
++        if (op->src[1]->type == GGML_TYPE_F32) {
++            return true;
++        }
+     }
++    return false;
++}
+ 
+-    ggml::cpu::tensor_traits * get_tensor_traits(const struct ggml_tensor * op) override {
+-        if (op->op == GGML_OP_MUL_MAT || op->op == GGML_OP_MUL_MAT_ID) {
+-            if (op->src[0]->buffer && op->src[0]->buffer->buft == ggml_backend_cpu_repack_buffer_type()) {
+-                return (ggml::cpu::tensor_traits *) op->src[0]->extra;
+-            }
++ggml::cpu::tensor_traits * extra_buffer_type::get_tensor_traits(const struct ggml_tensor * op) {
++    if (op->op == GGML_OP_MUL_MAT || op->op == GGML_OP_MUL_MAT_ID) {
++        if (op->src[0]->buffer && ggml_backend_cpu_is_repack_buffer_type(op->src[0]->buffer->buft)) {
++            return (ggml::cpu::tensor_traits *) op->src[0]->extra;
+         }
+-        return nullptr;
+     }
+-};
++    return nullptr;
++}
+ }  // namespace ggml::cpu::repack
+ 
+-ggml_backend_buffer_type_t ggml_backend_cpu_repack_buffer_type(void) {
+-    static struct ggml_backend_buffer_type ggml_backend_cpu_buffer_type_repack = {
++namespace {
++struct repack_buffer_type_bundle {
++    std::unique_ptr<ggml::cpu::repack::extra_buffer_type> context;
++    std::unique_ptr<ggml_backend_buffer_type> buft;
++};
++
++std::mutex & repack_buffer_types_mutex() {
++    static std::mutex mutex;
++    return mutex;
++}
++
++std::vector<std::unique_ptr<repack_buffer_type_bundle>> & repack_buffer_types() {
++    static std::vector<std::unique_ptr<repack_buffer_type_bundle>> bufts;
++    return bufts;
++}
++}  // namespace
++
++ggml_backend_buffer_type_t ggml_backend_cpu_repack_buffer_type_from(
++        ggml_backend_buffer_type_t base_buft,
++        ggml_backend_dev_t device,
++        const char * name) {
++    GGML_ASSERT(base_buft != nullptr);
++    GGML_ASSERT(device != nullptr);
++    GGML_ASSERT(name != nullptr);
++
++    std::lock_guard<std::mutex> lock(repack_buffer_types_mutex());
++    for (const auto & bundle : repack_buffer_types()) {
++        if (bundle->context->base_buft == base_buft && ggml_backend_buft_get_device(bundle->buft.get()) == device) {
++            return bundle->buft.get();
++        }
++    }
++
++    auto bundle = std::make_unique<repack_buffer_type_bundle>();
++    bundle->context = std::make_unique<ggml::cpu::repack::extra_buffer_type>(base_buft, name);
++    bundle->buft = std::make_unique<ggml_backend_buffer_type>(ggml_backend_buffer_type {
+         /* .iface    = */ {
+                            /* .get_name         = */ ggml_backend_cpu_repack_buffer_type_get_name,
+                            /* .alloc_buffer     = */ ggml_backend_cpu_repack_buffer_type_alloc_buffer,
+@@ -4828,9 +5145,22 @@ ggml_backend_buffer_type_t ggml_backend_cpu_repack_buffer_type(void) {
+                            /* .get_alloc_size   = */ nullptr,  // defaults to ggml_nbytes
+                            /* .is_host          = */ nullptr,
+                            },
+-        /* .device  = */ ggml_backend_reg_dev_get(ggml_backend_cpu_reg(), 0),
+-        /* .context = */ new ggml::cpu::repack::extra_buffer_type(),
+-    };
++        /* .device  = */ device,
++        /* .context = */ bundle->context.get(),
++    });
++
++    ggml_backend_buffer_type_t result = bundle->buft.get();
++    repack_buffer_types().push_back(std::move(bundle));
++    return result;
++}
+ 
+-    return &ggml_backend_cpu_buffer_type_repack;
++bool ggml_backend_cpu_is_repack_buffer_type(ggml_backend_buffer_type_t buft) {
++    return buft != nullptr && buft->iface.alloc_buffer == ggml_backend_cpu_repack_buffer_type_alloc_buffer;
++}
++
++ggml_backend_buffer_type_t ggml_backend_cpu_repack_buffer_type(void) {
++    return ggml_backend_cpu_repack_buffer_type_from(
++        ggml_backend_cpu_buffer_type(),
++        ggml_backend_reg_dev_get(ggml_backend_cpu_reg(), 0),
++        "CPU_REPACK");
+ }
+diff --git a/ggml/src/ggml-cpu/repack.h b/ggml/src/ggml-cpu/repack.h
+index cb21edf6239485805df7a2b552c81a5ba9fc9552..321180b35b1ee51321a3ecae416d3e4df2bbb271 100644
+--- a/ggml/src/ggml-cpu/repack.h
++++ b/ggml/src/ggml-cpu/repack.h
+@@ -6,9 +6,30 @@
+ #include "traits.h"
+ #include "ggml.h"
+ 
++#include <string>
++
+ // GGML internal header
+ 
+ ggml_backend_buffer_type_t ggml_backend_cpu_repack_buffer_type(void);
++ggml_backend_buffer_type_t ggml_backend_cpu_repack_buffer_type_from(
++        ggml_backend_buffer_type_t base_buft,
++        ggml_backend_dev_t device,
++        const char * name);
++bool ggml_backend_cpu_is_repack_buffer_type(ggml_backend_buffer_type_t buft);
++
++namespace ggml::cpu::repack {
++class extra_buffer_type : public ggml::cpu::extra_buffer_type {
++  public:
++    extra_buffer_type(ggml_backend_buffer_type_t base_buft, const char * name) :
++        base_buft(base_buft), name(name) {}
++
++    bool supports_op(ggml_backend_dev_t dev, const struct ggml_tensor * op) override;
++    ggml::cpu::tensor_traits * get_tensor_traits(const struct ggml_tensor * op) override;
++
++    ggml_backend_buffer_type_t base_buft;
++    std::string name;
++};
++}  // namespace ggml::cpu::repack
+ 
+ template <int K> constexpr int QK_0() {
+     if constexpr (K == 4) {
+@@ -157,6 +178,7 @@ void ggml_gemv_mxfp4_4x4_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const v
+ void ggml_gemv_mxfp4_8x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemv_q8_0_4x4_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemv_q8_0_4x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
++void ggml_gemv_q8_0_8x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_0_4x4_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_0_4x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_0_8x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+@@ -173,6 +195,7 @@ void ggml_gemm_mxfp4_4x4_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const v
+ void ggml_gemm_mxfp4_8x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q8_0_4x4_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q8_0_4x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
++void ggml_gemm_q8_0_8x8_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ #if defined __riscv_zvfh
+ void ggml_quantize_mat_q8_0_4x1(const float * GGML_RESTRICT x, void * GGML_RESTRICT vy, int64_t k);
+ void ggml_quantize_mat_q8_K_4x1(const float * GGML_RESTRICT x, void * GGML_RESTRICT vy, int64_t k);
+@@ -209,6 +232,7 @@ void ggml_gemv_mxfp4_4x4_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs,
+ void ggml_gemv_mxfp4_8x8_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemv_q8_0_4x4_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemv_q8_0_4x8_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
++void ggml_gemv_q8_0_8x8_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_0_4x4_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_0_4x8_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q4_0_8x8_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+@@ -225,6 +249,7 @@ void ggml_gemm_mxfp4_4x4_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs,
+ void ggml_gemm_mxfp4_8x8_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q8_0_4x4_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ void ggml_gemm_q8_0_4x8_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
++void ggml_gemm_q8_0_8x8_q8_0_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc);
+ #if defined __riscv_zvfh
+ void ggml_quantize_mat_q8_0_4x1_generic(const float * GGML_RESTRICT x, void * GGML_RESTRICT vy, int64_t k);
+ void ggml_quantize_mat_q8_K_4x1_generic(const float * GGML_RESTRICT x, void * GGML_RESTRICT vy, int64_t k);
+diff --git a/gguf-py/gguf/constants.py b/gguf-py/gguf/constants.py
+index c99feb3c795c7ed657853f3bb7bc1e97e22c7d50..1b0d439c7def666867870a7a14dfdd80eab839c1 100644
+--- a/gguf-py/gguf/constants.py
++++ b/gguf-py/gguf/constants.py
+@@ -1175,6 +1175,11 @@ class MODEL_TENSOR(IntEnum):
+     NEXTN_HNORM            = auto()
+     NEXTN_SHARED_HEAD_HEAD = auto()
+     NEXTN_SHARED_HEAD_NORM = auto()
++    # qwen4exp: the MTP head's own hyper-connection mixer, which stands in for the
++    # output norm the trunk does not have
++    NEXTN_HC_HEAD_NORM     = auto()
++    NEXTN_HC_HEAD_DOWN     = auto()
++    NEXTN_HC_HEAD_UP       = auto()
+     # eagle3
+     FC                     = auto()  # feature fusion layer
+     D2T                    = auto()  # draft to target vocabulary mapping
+@@ -1952,6 +1957,9 @@ TENSOR_NAMES: dict[MODEL_TENSOR, str] = {
+     MODEL_TENSOR.NEXTN_HNORM:               "blk.{bid}.nextn.hnorm",
+     MODEL_TENSOR.NEXTN_SHARED_HEAD_HEAD:    "blk.{bid}.nextn.shared_head_head",
+     MODEL_TENSOR.NEXTN_SHARED_HEAD_NORM:    "blk.{bid}.nextn.shared_head_norm",
++    MODEL_TENSOR.NEXTN_HC_HEAD_NORM:        "blk.{bid}.nextn.hc_head_norm",
++    MODEL_TENSOR.NEXTN_HC_HEAD_DOWN:        "blk.{bid}.nextn.hc_head_down",
++    MODEL_TENSOR.NEXTN_HC_HEAD_UP:          "blk.{bid}.nextn.hc_head_up",
+     MODEL_TENSOR.FC:                        "fc",
+     MODEL_TENSOR.DSPARK_MARKOV_W1:          "markov_w1",
+     MODEL_TENSOR.DSPARK_MARKOV_W2:          "markov_w2",
+@@ -2914,6 +2922,15 @@ MODEL_TENSORS: dict[MODEL_ARCH, list[MODEL_TENSOR]] = {
+         MODEL_TENSOR.PLE_NORM_QUERY,
+         MODEL_TENSOR.PLE_NORM_CONV,
+         MODEL_TENSOR.PLE_CONV1D,
++        # NextN/MTP draft head
++        MODEL_TENSOR.NEXTN_EH_PROJ,
++        MODEL_TENSOR.NEXTN_EMBED_TOKENS,
++        MODEL_TENSOR.NEXTN_ENORM,
++        MODEL_TENSOR.NEXTN_HNORM,
++        MODEL_TENSOR.NEXTN_SHARED_HEAD_HEAD,
++        MODEL_TENSOR.NEXTN_HC_HEAD_NORM,
++        MODEL_TENSOR.NEXTN_HC_HEAD_DOWN,
++        MODEL_TENSOR.NEXTN_HC_HEAD_UP,
+     ],
+     MODEL_ARCH.PLAMO: [
+         MODEL_TENSOR.TOKEN_EMBD,
+diff --git a/gguf-py/gguf/tensor_mapping.py b/gguf-py/gguf/tensor_mapping.py
+index 861acfe181feaa578f2501bfa7479a86b5966bfb..7bd73c38a661b717060ee9102acef96af2b1b840 100644
+--- a/gguf-py/gguf/tensor_mapping.py
++++ b/gguf-py/gguf/tensor_mapping.py
+@@ -2742,6 +2742,16 @@ class TensorNameMap:
+             MODEL_TENSOR.HC_HEAD_UP: (
+                 "model.hyper_connection_mixer.input_mix_weight_up",
+             ),
++            # the MTP head carries its own copy of the head mixer above
++            MODEL_TENSOR.NEXTN_HC_HEAD_NORM: (
++                "model.layers.{bid}.hyper_connection_mixer.hc_norm",
++            ),
++            MODEL_TENSOR.NEXTN_HC_HEAD_DOWN: (
++                "model.layers.{bid}.hyper_connection_mixer.input_mix_weight_down",
++            ),
++            MODEL_TENSOR.NEXTN_HC_HEAD_UP: (
++                "model.layers.{bid}.hyper_connection_mixer.input_mix_weight_up",
++            ),
+             MODEL_TENSOR.INDEXER_Q_NORM: (
+                 "model.layers.{bid}.self_attn.indexer.q_layernorm",
+             ),
+diff --git a/src/llama-arch.cpp b/src/llama-arch.cpp
+index 5e61f61f7f0d6d003bd00cb8aee43b9c5e1eea56..2ead4325e049cf5f93ebcc959f10d8f68dc246ee 100644
+--- a/src/llama-arch.cpp
++++ b/src/llama-arch.cpp
+@@ -574,6 +574,9 @@ static const std::map<llm_tensor, const char *> LLM_TENSOR_NAMES = {
+     { LLM_TENSOR_NEXTN_HNORM,                            "blk.%d.nextn.hnorm" },
+     { LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD,                 "blk.%d.nextn.shared_head_head" },
+     { LLM_TENSOR_NEXTN_SHARED_HEAD_NORM,                 "blk.%d.nextn.shared_head_norm" },
++    { LLM_TENSOR_NEXTN_HC_HEAD_NORM,                     "blk.%d.nextn.hc_head_norm" },
++    { LLM_TENSOR_NEXTN_HC_HEAD_DOWN,                     "blk.%d.nextn.hc_head_down" },
++    { LLM_TENSOR_NEXTN_HC_HEAD_UP,                       "blk.%d.nextn.hc_head_up" },
+     { LLM_TENSOR_ATTN_SUB_NORM,                          "blk.%d.attn_sub_norm" },
+     { LLM_TENSOR_FFN_SUB_NORM,                           "blk.%d.ffn_sub_norm" },
+     { LLM_TENSOR_DEC_OUTPUT_NORM,                        "dec.output_norm" },
+@@ -962,6 +965,9 @@ static const std::map<llm_tensor, llm_tensor_info> LLM_TENSOR_INFOS = {
+     {LLM_TENSOR_NEXTN_HNORM,                {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL}},
+     {LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD,     {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL_MAT}},
+     {LLM_TENSOR_NEXTN_SHARED_HEAD_NORM,     {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL}},
++    {LLM_TENSOR_NEXTN_HC_HEAD_NORM,         {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL}},
++    {LLM_TENSOR_NEXTN_HC_HEAD_DOWN,         {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL_MAT}},
++    {LLM_TENSOR_NEXTN_HC_HEAD_UP,           {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL_MAT}},
+     // Nemotron 3 Super
+     // latent projections feed ggml_mul_mat, the buft probe must use MUL_MAT to keep them on GPU
+     {LLM_TENSOR_FFN_LATENT_DOWN,            {LLM_TENSOR_LAYER_REPEATING, GGML_OP_MUL_MAT}},
+@@ -1139,6 +1145,12 @@ bool llm_arch_supports_sm_tensor(const llm_arch & arch) {
+         case LLM_ARCH_MINIMAX_M3:
+         case LLM_ARCH_MISTRAL4:
+         case LLM_ARCH_KIMI_LINEAR:
++        // qwen4exp: hybrid attention/SSM. Its ssm_* tensors collide by name with
++        // the Mamba-style split patterns without sharing their semantics, and its
++        // fused multi-input ops cannot be made split-consistent without mirroring
++        // most of the block. Tensor split here produces SILENTLY WRONG OUTPUT
++        // (fluent nonsense, no error) while running faster than the correct path.
++        case LLM_ARCH_QWEN4EXP:
+         case LLM_ARCH_BAILINGMOE3:
+         case LLM_ARCH_KIMI_K3:
+         case LLM_ARCH_QWEN3TTS:
+diff --git a/src/llama-arch.h b/src/llama-arch.h
+index ca7d55a5fd7815a2614af3eda77f68af52e56b9e..f013137665a7f727563dedf8c47df470064c81ae 100644
+--- a/src/llama-arch.h
++++ b/src/llama-arch.h
+@@ -686,6 +686,11 @@ enum llm_tensor {
+     LLM_TENSOR_NEXTN_HNORM,
+     LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD,
+     LLM_TENSOR_NEXTN_SHARED_HEAD_NORM,
++    // qwen4exp: the MTP head ends in its own hyper-connection mixer rather than a
++    // plain RMSNorm, mirroring the trunk's hc_head_* (which is its output norm)
++    LLM_TENSOR_NEXTN_HC_HEAD_NORM,
++    LLM_TENSOR_NEXTN_HC_HEAD_DOWN,
++    LLM_TENSOR_NEXTN_HC_HEAD_UP,
+     LLM_TENSOR_MASKED_EMBD_CENTROIDS,
+     LLM_TENSOR_MASKED_EMBD_ORDERING,
+     LLM_TENSOR_FC,
+diff --git a/src/llama-model.cpp b/src/llama-model.cpp
+index 65a6702cefe78c4df0e1db6088648dfaabd1cc16..d4e1f3e0c808fecfe742aeb7219e5ab5b66a5499 100644
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -1112,12 +1112,23 @@ static buft_list_t make_gpu_buft_list(ggml_backend_dev_t dev, llama_split_mode s
+         }
+     }
+ 
++    // Meta devices need a Meta buffer composed from matching per-device extra
++    // buffer types. Prefer it before the default so CPU tensor-parallel loads
++    // can opt into local repacking without losing the split.
++    if (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_META) {
++        ggml_backend_buffer_type_t * extra_bufts = ggml_backend_meta_device_get_extra_bufts(dev);
++        while (extra_bufts && *extra_bufts) {
++            buft_list.emplace_back(dev, *extra_bufts);
++            ++extra_bufts;
++        }
++    }
++
+     // add the device default buffer type
+     buft_list.emplace_back(dev, ggml_backend_dev_buffer_type(dev));
+ 
+     // add the device extra buffer type (if any)
+     ggml_backend_reg_t reg = ggml_backend_dev_backend_reg(dev);
+-    if (reg) {
++    if (reg && ggml_backend_dev_type(dev) != GGML_BACKEND_DEVICE_TYPE_META) {
+         auto ggml_backend_dev_get_extra_bufts_fn = (ggml_backend_dev_get_extra_bufts_t)
+             ggml_backend_reg_get_proc_address(reg, "ggml_backend_dev_get_extra_bufts");
+ 
+@@ -2429,7 +2440,7 @@ llama_memory_i * llama_model::create_memory(const llama_memory_params & params,
+                 const bool mtp_on_hybrid_qwen =
+                     params.ctx_type == LLAMA_CONTEXT_TYPE_MTP &&
+                     (arch == LLM_ARCH_QWEN3NEXT || arch == LLM_ARCH_QWEN35 || arch == LLM_ARCH_QWEN35MOE ||
+-                     arch == LLM_ARCH_BAILINGMOE3);
++                     arch == LLM_ARCH_BAILINGMOE3 || arch == LLM_ARCH_QWEN4EXP);
+ 
+                 const bool mtp_on_hybrid_nemotron =
+                     params.ctx_type == LLAMA_CONTEXT_TYPE_MTP && arch == LLM_ARCH_NEMOTRON_H_MOE;
+diff --git a/src/llama-model.h b/src/llama-model.h
+index 38066538ed102a12252c59cda567449006cb882d..c67d86f823d30172daef5b1827e8028a499ac94d 100644
+--- a/src/llama-model.h
++++ b/src/llama-model.h
+@@ -227,6 +227,12 @@ struct llama_layer_nextn {
+     struct ggml_tensor * shared_head_head_s    = nullptr;
+     struct ggml_tensor * shared_head_head_in_s = nullptr;
+     struct ggml_tensor * shared_head_norm      = nullptr;
++
++    // qwen4exp: the MTP head's own final hyper-connection mixer, which stands in for both
++    // the stream collapse and the output norm (the trunk has no separate output_norm either)
++    struct ggml_tensor * hc_head_norm          = nullptr;
++    struct ggml_tensor * hc_head_down          = nullptr;
++    struct ggml_tensor * hc_head_up            = nullptr;
+ };
+ 
+ struct llama_layer_switch_lora {
+diff --git a/src/models/models.h b/src/models/models.h
+index 9b87a40d5af9fe132b5962f481611d74f611d59d..f93518943ca83216a3fa8c5c10c7710a31e2c803 100644
+--- a/src/models/models.h
++++ b/src/models/models.h
+@@ -2285,7 +2285,12 @@ struct llama_model_qwen4exp : public llama_model_base {
+ 
+     struct graph : public llm_build_delta_net_base {
+         graph(const llama_model & model, const llm_graph_params & params);
+-    private:
++    protected:
++        // tag-dispatched ctor for graph_mtp: binds the members without building the trunk
++        struct no_build_t {};
++        graph(const llama_model & model, const llm_graph_params & params, no_build_t) :
++            llm_build_delta_net_base(params), model(model) {}
++
+         // HC replaces every layer norm: residual is [n_embd, hc, n_tokens]
+         ggml_tensor * build_hc_mix(
+                     ggml_tensor * x,
+@@ -2377,6 +2382,11 @@ struct llama_model_qwen4exp : public llama_model_base {
+         const llama_model & model;
+     };
+ 
++    // LLM_GRAPH_TYPE_DECODER_MTP draft head: one HC-wrapped dense-attention + MoE block
++    struct graph_mtp : public graph {
++        graph_mtp(const llama_model & model, const llm_graph_params & params);
++    };
++
+     std::unique_ptr<llm_graph_context> build_arch_graph(const llm_graph_params & params) const override;
+ };
+ 
+diff --git a/src/models/qwen4exp.cpp b/src/models/qwen4exp.cpp
+index abf6a0502fbfbcad3232228dc0f45c18fba2091d..f733acfb6355ee525c1d80e6016c0e605de13497 100644
+--- a/src/models/qwen4exp.cpp
++++ b/src/models/qwen4exp.cpp
+@@ -7,6 +7,11 @@
+ #include <cinttypes>
+ 
+ void llama_model_qwen4exp::load_arch_hparams(llama_model_loader & ml) {
++    // NextN/MTP: an extra decoder block appended past the trunk. Read this first, since
++    // n_layer() == n_layer_all - n_layer_nextn feeds every per-layer array below.
++    ml.get_key(LLM_KV_NEXTN_PREDICT_LAYERS, hparams.n_layer_nextn, false);
++    GGML_ASSERT(hparams.n_layer_nextn < hparams.n_layer_all && "n_layer_nextn must be < block_count");
++
+     ml.get_key(LLM_KV_EXPERT_FEED_FORWARD_LENGTH,        hparams.n_ff_exp, false);
+     ml.get_key(LLM_KV_EXPERT_SHARED_FEED_FORWARD_LENGTH, hparams.n_ff_shexp, false);
+     ml.get_key(LLM_KV_ATTENTION_LAYERNORM_RMS_EPS,       hparams.f_norm_rms_eps);
+@@ -112,20 +117,33 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+     const int64_t hc_dim = hc * n_embd;
+     const int64_t hc_lr  = hparams.hc_low_rank;
+ 
++    // A detached draft head ships as its own GGUF: the nextn metadata and the trailing block
++    // are there, the trunk is not. Probe a trunk tensor to spot that, and the MTP block to spot
++    // the reverse -- nextn metadata kept but the head stripped -- exactly as deepseek2 does.
++    // Either way the block index is unchanged: the head is always blk.<n_layer>.
++    const std::string mtp_probe = "blk." + std::to_string(n_layer) + ".nextn.eh_proj.weight";
++    const bool mtp_only   = hparams.n_layer_nextn > 0 && ml.get_weight("blk.0.hc_attn_norm.weight") == nullptr;
++    const bool trunk_only = hparams.n_layer_nextn > 0 && ml.get_weight(mtp_probe.c_str())          == nullptr;
++
++    const int trunk_flags = mtp_only ? TENSOR_NOT_REQUIRED : 0;
++
+     tok_embd = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, 0);
+ 
+-    // there is no output_norm: the final hyper-connection mixer carries it
+-    hc_head_norm = create_tensor(tn(LLM_TENSOR_HC_HEAD_NORM, "weight"), { hc_dim }, 0);
+-    hc_head_down = create_tensor(tn(LLM_TENSOR_HC_HEAD_DOWN, "weight"), { hc_dim, hc_lr }, 0);
+-    hc_head_up   = create_tensor(tn(LLM_TENSOR_HC_HEAD_UP,   "weight"), { hc_lr, hc_dim }, 0);
++    // there is no output_norm: the final hyper-connection mixer carries it.
++    // a detached head carries no trunk mixer, and the checkpoint's own head mixer is unindexed,
++    // so exports land it on these names instead of the per-block ones -- see below
++    hc_head_norm = create_tensor(tn(LLM_TENSOR_HC_HEAD_NORM, "weight"), { hc_dim }, trunk_flags);
++    hc_head_down = create_tensor(tn(LLM_TENSOR_HC_HEAD_DOWN, "weight"), { hc_dim, hc_lr }, trunk_flags);
++    hc_head_up   = create_tensor(tn(LLM_TENSOR_HC_HEAD_UP,   "weight"), { hc_lr, hc_dim }, trunk_flags);
+ 
+     output = create_tensor(tn(LLM_TENSOR_OUTPUT, "weight"), { n_embd, n_vocab }, TENSOR_NOT_REQUIRED);
+     if (output == NULL) {
+         output = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, TENSOR_DUPLICATED);
+     }
+ 
+-    // flat [ple_head_dim, n_rows] gather target; n_rows is padded, so read it back
+-    if (hparams.ple_n_heads > 0) {
++    // flat [ple_head_dim, n_rows] gather target; n_rows is padded, so read it back.
++    // the PLE layer is in the trunk, so a detached head describes no table and carries none
++    if (hparams.ple_n_heads > 0 && !mtp_only) {
+         const std::string ple_name = tn(LLM_TENSOR_PER_LAYER_TOKEN_EMBD, "weight").str();
+         const auto & ple_w = ml.require_weight(ple_name.c_str());
+         const int64_t ple_rows = ple_w.tensor->ne[1];
+@@ -140,9 +158,19 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+                                            { hparams.ple_head_dim, ple_rows }, TENSOR_READ_LAZY);
+     }
+ 
+-    for (int il = 0; il < n_layer; ++il) {
++    // MTP tensors sit in the trailing blocks; skip them entirely unless a draft head was asked for
++    int mtp_flags = trunk_only ? TENSOR_NOT_REQUIRED : 0;
++    if (!ml.load_mtp) {
++        mtp_flags |= TENSOR_SKIP;
++    }
++
++    for (int il = 0; il < (int) hparams.n_layer_all; ++il) {
+         auto & layer = layers[il];
+ 
++        // the MTP block is structurally a trunk block: is_recr()/is_ple() are both false past
++        // the trunk, so it takes the full-attention + MoE path below with no special casing
++        const int flags = il < n_layer ? trunk_flags : mtp_flags;
++
+         const int64_t n_ff_exp   = hparams.n_ff_exp   ? hparams.n_ff_exp   : n_ff / n_expert_used;
+         const int64_t n_ff_shexp = hparams.n_ff_shexp ? hparams.n_ff_shexp : n_ff;
+ 
+@@ -155,61 +183,100 @@ void llama_model_qwen4exp::load_arch_tensors(llama_model_loader & ml) {
+         const int64_t conv_dim   = key_dim * 2 + value_dim;
+ 
+         // two HC modules per layer: before the token mixer, before the MoE
+-        layer.hc_attn_norm   = create_tensor(tn(LLM_TENSOR_HC_ATTN_NORM,   "weight", il), { hc_dim }, 0);
+-        layer.hc_attn_down   = create_tensor(tn(LLM_TENSOR_HC_ATTN_DOWN,   "weight", il), { hc_dim, hc_lr }, 0);
+-        layer.hc_attn_up     = create_tensor(tn(LLM_TENSOR_HC_ATTN_UP,     "weight", il), { hc_lr, hc_dim }, 0);
+-        layer.hc_attn_inject = create_tensor(tn(LLM_TENSOR_HC_ATTN_INJECT, "weight", il), { hc_dim, hc }, 0);
+-        layer.hc_ffn_norm    = create_tensor(tn(LLM_TENSOR_HC_FFN_NORM,    "weight", il), { hc_dim }, 0);
+-        layer.hc_ffn_down    = create_tensor(tn(LLM_TENSOR_HC_FFN_DOWN,    "weight", il), { hc_dim, hc_lr }, 0);
+-        layer.hc_ffn_up      = create_tensor(tn(LLM_TENSOR_HC_FFN_UP,      "weight", il), { hc_lr, hc_dim }, 0);
+-        layer.hc_ffn_inject  = create_tensor(tn(LLM_TENSOR_HC_FFN_INJECT,  "weight", il), { hc_dim, hc }, 0);
++        layer.hc_attn_norm   = create_tensor(tn(LLM_TENSOR_HC_ATTN_NORM,   "weight", il), { hc_dim }, flags);
++        layer.hc_attn_down   = create_tensor(tn(LLM_TENSOR_HC_ATTN_DOWN,   "weight", il), { hc_dim, hc_lr }, flags);
++        layer.hc_attn_up     = create_tensor(tn(LLM_TENSOR_HC_ATTN_UP,     "weight", il), { hc_lr, hc_dim }, flags);
++        layer.hc_attn_inject = create_tensor(tn(LLM_TENSOR_HC_ATTN_INJECT, "weight", il), { hc_dim, hc }, flags);
++        layer.hc_ffn_norm    = create_tensor(tn(LLM_TENSOR_HC_FFN_NORM,    "weight", il), { hc_dim }, flags);
++        layer.hc_ffn_down    = create_tensor(tn(LLM_TENSOR_HC_FFN_DOWN,    "weight", il), { hc_dim, hc_lr }, flags);
++        layer.hc_ffn_up      = create_tensor(tn(LLM_TENSOR_HC_FFN_UP,      "weight", il), { hc_lr, hc_dim }, flags);
++        layer.hc_ffn_inject  = create_tensor(tn(LLM_TENSOR_HC_FFN_INJECT,  "weight", il), { hc_dim, hc }, flags);
+ 
+         if (!hparams.is_recr(il)) {
+             // full attention: wq holds [q|gate] interleaved per head
+-            create_tensor_qkv(layer, il, n_embd, n_embd_head_k * n_head * 2, n_embd_k_gqa, n_embd_v_gqa, 0);
+-            layer.wo = create_tensor(tn(LLM_TENSOR_ATTN_OUT, "weight", il), { n_embd_head_k * n_head, n_embd }, 0);
++            create_tensor_qkv(layer, il, n_embd, n_embd_head_k * n_head * 2, n_embd_k_gqa, n_embd_v_gqa, flags);
++            layer.wo = create_tensor(tn(LLM_TENSOR_ATTN_OUT, "weight", il), { n_embd_head_k * n_head, n_embd }, flags);
+ 
+-            layer.attn_q_norm = create_tensor(tn(LLM_TENSOR_ATTN_Q_NORM, "weight", il), { n_embd_head_k }, 0);
+-            layer.attn_k_norm = create_tensor(tn(LLM_TENSOR_ATTN_K_NORM, "weight", il), { n_embd_head_k }, 0);
++            layer.attn_q_norm = create_tensor(tn(LLM_TENSOR_ATTN_Q_NORM, "weight", il), { n_embd_head_k }, flags);
++            layer.attn_k_norm = create_tensor(tn(LLM_TENSOR_ATTN_K_NORM, "weight", il), { n_embd_head_k }, flags);
+ 
+             const int64_t idx_dim = hparams.indexer_head_size;
+-            layer.index_q_proj = create_tensor(tn(LLM_TENSOR_INDEXER_Q_PROJ, "weight", il), { n_embd, hparams.indexer_n_head * idx_dim }, 0);
+-            layer.index_k_proj = create_tensor(tn(LLM_TENSOR_INDEXER_K_PROJ, "weight", il), { n_embd, idx_dim }, 0);
+-            layer.index_q_norm = create_tensor(tn(LLM_TENSOR_INDEXER_Q_NORM, "weight", il), { idx_dim }, 0);
+-            layer.index_k_norm = create_tensor(tn(LLM_TENSOR_INDEXER_K_NORM, "weight", il), { idx_dim }, 0);
++            layer.index_q_proj = create_tensor(tn(LLM_TENSOR_INDEXER_Q_PROJ, "weight", il), { n_embd, hparams.indexer_n_head * idx_dim }, flags);
++            layer.index_k_proj = create_tensor(tn(LLM_TENSOR_INDEXER_K_PROJ, "weight", il), { n_embd, idx_dim }, flags);
++            layer.index_q_norm = create_tensor(tn(LLM_TENSOR_INDEXER_Q_NORM, "weight", il), { idx_dim }, flags);
++            layer.index_k_norm = create_tensor(tn(LLM_TENSOR_INDEXER_K_NORM, "weight", il), { idx_dim }, flags);
+         } else {
+-            layer.wqkv       = create_tensor(tn(LLM_TENSOR_ATTN_QKV,   "weight", il), { n_embd, key_dim * 2 + value_dim }, 0);
+-            layer.wqkv_gate  = create_tensor(tn(LLM_TENSOR_ATTN_GATE,  "weight", il), { n_embd, value_dim }, 0);
+-            layer.ssm_conv1d = create_tensor(tn(LLM_TENSOR_SSM_CONV1D, "weight", il), { hparams.ssm_d_conv, conv_dim }, 0);
+-            layer.ssm_dt     = create_tensor(tn(LLM_TENSOR_SSM_DT,     "bias",   il), { hparams.ssm_dt_rank }, 0);
+-            layer.ssm_a      = create_tensor(tn(LLM_TENSOR_SSM_A_NOSCAN,         il), { hparams.ssm_dt_rank }, 0);
+-            layer.ssm_beta   = create_tensor(tn(LLM_TENSOR_SSM_BETA,   "weight", il), { n_embd, n_v_heads }, 0);
+-            layer.ssm_alpha  = create_tensor(tn(LLM_TENSOR_SSM_ALPHA,  "weight", il), { n_embd, n_v_heads }, 0);
+-            layer.ssm_norm   = create_tensor(tn(LLM_TENSOR_SSM_NORM,   "weight", il), { head_v_dim }, 0);
+-            layer.ssm_out    = create_tensor(tn(LLM_TENSOR_SSM_OUT,    "weight", il), { value_dim, n_embd }, 0);
++            layer.wqkv       = create_tensor(tn(LLM_TENSOR_ATTN_QKV,   "weight", il), { n_embd, key_dim * 2 + value_dim }, flags);
++            layer.wqkv_gate  = create_tensor(tn(LLM_TENSOR_ATTN_GATE,  "weight", il), { n_embd, value_dim }, flags);
++            layer.ssm_conv1d = create_tensor(tn(LLM_TENSOR_SSM_CONV1D, "weight", il), { hparams.ssm_d_conv, conv_dim }, flags);
++            layer.ssm_dt     = create_tensor(tn(LLM_TENSOR_SSM_DT,     "bias",   il), { hparams.ssm_dt_rank }, flags);
++            layer.ssm_a      = create_tensor(tn(LLM_TENSOR_SSM_A_NOSCAN,         il), { hparams.ssm_dt_rank }, flags);
++            layer.ssm_beta   = create_tensor(tn(LLM_TENSOR_SSM_BETA,   "weight", il), { n_embd, n_v_heads }, flags);
++            layer.ssm_alpha  = create_tensor(tn(LLM_TENSOR_SSM_ALPHA,  "weight", il), { n_embd, n_v_heads }, flags);
++            layer.ssm_norm   = create_tensor(tn(LLM_TENSOR_SSM_NORM,   "weight", il), { head_v_dim }, flags);
++            layer.ssm_out    = create_tensor(tn(LLM_TENSOR_SSM_OUT,    "weight", il), { value_dim, n_embd }, flags);
+         }
+ 
+         if (hparams.is_ple(il)) {
+-            layer.ple_key        = create_tensor(tn(LLM_TENSOR_PLE_KEY,        "weight", il), { n_embd, hc_dim }, 0);
+-            layer.ple_value      = create_tensor(tn(LLM_TENSOR_PLE_VALUE,      "weight", il), { n_embd, n_embd }, 0);
+-            layer.ple_norm_key   = create_tensor(tn(LLM_TENSOR_PLE_NORM_KEY,   "weight", il), { hc_dim }, 0);
+-            layer.ple_norm_query = create_tensor(tn(LLM_TENSOR_PLE_NORM_QUERY, "weight", il), { hc_dim }, 0);
+-            layer.ple_norm_conv  = create_tensor(tn(LLM_TENSOR_PLE_NORM_CONV,  "weight", il), { hc_dim }, 0);
+-            layer.ple_conv1d     = create_tensor(tn(LLM_TENSOR_PLE_CONV1D,     "weight", il), { hparams.ple_conv_kernel, hc_dim }, 0);
++            layer.ple_key        = create_tensor(tn(LLM_TENSOR_PLE_KEY,        "weight", il), { n_embd, hc_dim }, flags);
++            layer.ple_value      = create_tensor(tn(LLM_TENSOR_PLE_VALUE,      "weight", il), { n_embd, n_embd }, flags);
++            layer.ple_norm_key   = create_tensor(tn(LLM_TENSOR_PLE_NORM_KEY,   "weight", il), { hc_dim }, flags);
++            layer.ple_norm_query = create_tensor(tn(LLM_TENSOR_PLE_NORM_QUERY, "weight", il), { hc_dim }, flags);
++            layer.ple_norm_conv  = create_tensor(tn(LLM_TENSOR_PLE_NORM_CONV,  "weight", il), { hc_dim }, flags);
++            layer.ple_conv1d     = create_tensor(tn(LLM_TENSOR_PLE_CONV1D,     "weight", il), { hparams.ple_conv_kernel, hc_dim }, flags);
++        }
++
++        layer.ffn_gate_inp  = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP,  "weight", il), { n_embd, n_expert }, flags);
++        layer.ffn_down_exps = create_tensor(tn(LLM_TENSOR_FFN_DOWN_EXPS, "weight", il), { n_ff_exp, n_embd, n_expert }, flags);
++        create_tensor_gate_up_exps(layer, il, n_embd, n_ff_exp, n_expert, flags);
++
++        layer.ffn_gate_inp_shexp = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP_SHEXP, "weight", il), { n_embd }, flags);
++        layer.ffn_gate_shexp     = create_tensor(tn(LLM_TENSOR_FFN_GATE_SHEXP,     "weight", il), { n_embd, n_ff_shexp }, flags);
++        layer.ffn_up_shexp       = create_tensor(tn(LLM_TENSOR_FFN_UP_SHEXP,       "weight", il), { n_embd, n_ff_shexp }, flags);
++        layer.ffn_down_shexp     = create_tensor(tn(LLM_TENSOR_FFN_DOWN_SHEXP,     "weight", il), { n_ff_shexp, n_embd }, flags);
++
++        if (il < n_layer) {
++            continue;
+         }
+ 
+-        layer.ffn_gate_inp  = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP,  "weight", il), { n_embd, n_expert }, 0);
+-        layer.ffn_down_exps = create_tensor(tn(LLM_TENSOR_FFN_DOWN_EXPS, "weight", il), { n_ff_exp, n_embd, n_expert }, 0);
+-        create_tensor_gate_up_exps(layer, il, n_embd, n_ff_exp, n_expert, 0);
++        // NextN/MTP head. enorm/hnorm gate the two inputs; eh_proj is the checkpoint's
++        // fc_embedding and fc_hidden fused side by side, so one matmul over
++        // concat(e, h) computes fc_embedding@e + fc_hidden@h.
++        layer.nextn.enorm   = create_tensor(tn(LLM_TENSOR_NEXTN_ENORM,   "weight", il), { n_embd }, flags);
++        layer.nextn.hnorm   = create_tensor(tn(LLM_TENSOR_NEXTN_HNORM,   "weight", il), { hc_dim }, flags);
++        layer.nextn.eh_proj = create_tensor(tn(LLM_TENSOR_NEXTN_EH_PROJ, "weight", il), { 2 * n_embd, n_embd }, flags);
++
++        // the head's own output mixer, mirroring the trunk's hc_head_*: it collapses the
++        // hc streams and stands in for the output norm, of which qwen4exp has none.
++        // it is unindexed in the checkpoint (mtp.hyper_connection_mixer.*), so a detached-head
++        // export -- which has no trunk mixer to collide with -- writes it to the model-level
++        // hc_head_* names instead. accept either spelling.
++        layer.nextn.hc_head_norm = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_NORM, "weight", il), { hc_dim }, flags | TENSOR_NOT_REQUIRED);
++        layer.nextn.hc_head_down = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_DOWN, "weight", il), { hc_dim, hc_lr }, flags | TENSOR_NOT_REQUIRED);
++        layer.nextn.hc_head_up   = create_tensor(tn(LLM_TENSOR_NEXTN_HC_HEAD_UP,   "weight", il), { hc_lr, hc_dim }, flags | TENSOR_NOT_REQUIRED);
++
++        // eh_proj is required whenever the head is loaded at all, so it tells the two apart
++        if (layer.nextn.eh_proj && !layer.nextn.hc_head_norm) {
++            if (!hc_head_norm) {
++                throw std::runtime_error(format("qwen4exp MTP head %d has no output mixer: "
++                        "neither blk.%d.nextn.hc_head_norm nor output_hc_norm is present", il, il));
++            }
++            layer.nextn.hc_head_norm = hc_head_norm;
++            layer.nextn.hc_head_down = hc_head_down;
++            layer.nextn.hc_head_up   = hc_head_up;
++        }
+ 
+-        layer.ffn_gate_inp_shexp = create_tensor(tn(LLM_TENSOR_FFN_GATE_INP_SHEXP, "weight", il), { n_embd }, 0);
+-        layer.ffn_gate_shexp     = create_tensor(tn(LLM_TENSOR_FFN_GATE_SHEXP,     "weight", il), { n_embd, n_ff_shexp }, 0);
+-        layer.ffn_up_shexp       = create_tensor(tn(LLM_TENSOR_FFN_UP_SHEXP,       "weight", il), { n_embd, n_ff_shexp }, 0);
+-        layer.ffn_down_shexp     = create_tensor(tn(LLM_TENSOR_FFN_DOWN_SHEXP,     "weight", il), { n_ff_shexp, n_embd }, 0);
++        // qwen4exp sets mtp_use_dedicated_embeddings=false, so these are absent and the
++        // head falls back to the trunk's embedding table and LM head
++        layer.nextn.embed_tokens     = create_tensor(tn(LLM_TENSOR_NEXTN_EMBED_TOKENS,     "weight", il), { n_embd, n_vocab }, flags | TENSOR_NOT_REQUIRED);
++        layer.nextn.shared_head_head = create_tensor(tn(LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD, "weight", il), { n_embd, n_vocab }, flags | TENSOR_NOT_REQUIRED);
+     }
+ }
+ 
+ std::unique_ptr<llm_graph_context> llama_model_qwen4exp::build_arch_graph(const llm_graph_params & params) const {
++    if (params.gtype == LLM_GRAPH_TYPE_DECODER_MTP) {
++        return std::make_unique<graph_mtp>(*this, params);
++    }
+     return std::make_unique<graph>(*this, params);
+ }
+ 
+@@ -349,7 +416,11 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+             cur = build_layer_attn(inp->get_attn(), mctx_hyb, cur, inp_pos, sections, il);
+         }
+ 
+-        if (il == n_layer - 1 && inp_out_ids) {
++        // an unmasked MTP export needs a hidden row for every token, so in that case the
++        // gather is deferred until after t_h_nextn is taken below
++        const bool gather_now = !cparams.embeddings_nextn || cparams.embeddings_nextn_masked;
++
++        if (il == n_layer - 1 && inp_out_ids && gather_now) {
+             // everything below is per token, so drop the rows that produce no output
+             cur    = ggml_get_rows(ctx0, cur,    inp_out_ids);
+             inject = ggml_get_rows(ctx0, inject, inp_out_ids);
+@@ -377,6 +448,23 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+         cb(res_hc, "l_last", il);
+     }
+ 
++    // The MTP head consumes the wide residual, before the head mixer collapses it. Export the
++    // combine result itself rather than a reshape of it: a pure view gets no backend assignment
++    // from the scheduler, and the readback in llama_context looks one up. It is contiguous, so
++    // [n_embd, hc, rows] already has the [n_embd_out, rows] layout the reader expects, and it
++    // carries exactly the right rows either way -- gathered above when masked, ungathered when not.
++    if (cparams.embeddings_nextn) {
++        cb(res_hc, "h_nextn", -1);
++        res->t_h_nextn = res_hc;
++
++        // deferred from the last layer: collapse to the output rows now that the export is taken
++        if (!cparams.embeddings_nextn_masked && inp_out_ids) {
++            res_hc = ggml_reshape_2d(ctx0, res_hc, n_embd*hc, res_hc->ne[2]);
++            res_hc = ggml_get_rows(ctx0, res_hc, inp_out_ids);
++            res_hc = ggml_reshape_3d(ctx0, res_hc, n_embd, hc, res_hc->ne[1]);
++        }
++    }
++
+     // the final mixer is the output norm: there is no separate one
+     ggml_tensor * cur = build_hc_mix(res_hc,
+             model.hc_head_norm, model.hc_head_down, model.hc_head_up,
+@@ -392,6 +480,198 @@ llama_model_qwen4exp::graph::graph(const llama_model & model, const llm_graph_pa
+     ggml_build_forward_expand(gf, cur);
+ }
+ 
++// LLM_GRAPH_TYPE_DECODER_MTP draft head for qwen4exp.
++//
++// The head folds the next token's embedding into the trunk's wide hyper-connection residual,
++// runs one trunk-style block over it, and collapses the result with its own mixer before
++// reusing the trunk's LM head. The wide post-block residual is exported as t_h_nextn so the
++// speculative driver can feed it straight back in for the next draft step.
++//
++// v1 simplification: the block attends densely. The trunk's QSA only prunes context past a
++// 2048-token budget, so dense is a numerical superset; drafts are verified by the target
++// either way. The indexer tensors are still loaded so the GGUF stays complete.
++// TODO: wire up QSA here for long-context draft fidelity.
++llama_model_qwen4exp::graph_mtp::graph_mtp(const llama_model & model, const llm_graph_params & params) :
++    graph(model, params, no_build_t{}) {
++    GGML_ASSERT(hparams.n_layer_nextn > 0 && "QWEN4EXP MTP requires n_layer_nextn > 0");
++    GGML_ASSERT(hparams.n_layer_nextn == 1 && "QWEN4EXP MTP currently only supports a single MTP block");
++    GGML_ASSERT(ubatch.token && "QWEN4EXP MTP requires token input");
++
++    const int64_t hc     = hparams.dsv4_hc_mult;
++    const int64_t hc_dim = hc * n_embd;
++    GGML_ASSERT(hparams.n_embd_out() == (uint32_t) hc_dim && "QWEN4EXP MTP hidden width mismatch");
++
++    const int il = hparams.n_layer();
++    const auto & layer = model.layers[il];
++
++    GGML_ASSERT(layer.nextn.eh_proj     && "MTP block missing nextn.eh_proj");
++    GGML_ASSERT(layer.nextn.enorm       && "MTP block missing nextn.enorm");
++    GGML_ASSERT(layer.nextn.hnorm       && "MTP block missing nextn.hnorm");
++    // resolved at load time to either blk.%d.nextn.hc_head_* or the model-level hc_head_*
++    GGML_ASSERT(layer.nextn.hc_head_norm && "MTP block missing its output mixer");
++
++    int sections[4];
++    std::copy(std::begin(hparams.rope_sections), std::begin(hparams.rope_sections) + 4, sections);
++
++    auto inp = std::make_unique<llm_graph_input_embd_h>(hc_dim);
++
++    inp->tokens = ggml_new_tensor_1d(ctx0, GGML_TYPE_I32, n_tokens);
++    ggml_set_input(inp->tokens);
++
++    inp->embd = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, hc_dim, n_tokens);
++    ggml_set_input(inp->embd);
++
++    inp->h = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, hc_dim, n_tokens);
++    ggml_set_input(inp->h);
++    ggml_set_name(inp->h, "mtp_h_input");
++
++    ggml_tensor * tok_embd_w = layer.nextn.embed_tokens ? layer.nextn.embed_tokens : model.tok_embd;
++    ggml_tensor * tok_embd   = ggml_get_rows(ctx0, tok_embd_w, inp->tokens);
++    cb(tok_embd, "mtp_tok_embd", il);
++
++    ggml_tensor * h_state = ggml_reshape_3d(ctx0, inp->h, n_embd, hc, n_tokens);
++    cb(h_state, "mtp_h_state", il);
++
++    res->add_input(std::move(inp));
++
++    ggml_tensor * inp_pos     = build_inp_pos();
++    ggml_tensor * inp_out_ids = build_inp_out_ids();
++
++    auto * inp_attn = build_attn_inp_kv();
++
++    // grouped RMSNorm over the wide stream: normalise each hc stream, then scale the flattened
++    // [hc_dim] vector with the head's gamma, exactly as build_hc_mix does
++    ggml_tensor * h_norm = ggml_rms_norm(ctx0, h_state, hparams.f_norm_rms_eps);
++    h_norm = ggml_reshape_2d(ctx0, h_norm, hc_dim, n_tokens);
++    h_norm = ggml_mul(ctx0, h_norm, layer.nextn.hnorm);
++    h_norm = ggml_reshape_3d(ctx0, h_norm, n_embd, hc, n_tokens);
++    cb(h_norm, "mtp_hnorm", il);
++
++    // the token embedding is shared across the streams, so broadcast it to hc copies
++    ggml_tensor * e_norm = build_norm(tok_embd, layer.nextn.enorm, nullptr, LLM_NORM_RMS, il);
++    e_norm = ggml_repeat_4d(ctx0,
++            ggml_reshape_3d(ctx0, e_norm, n_embd, 1, n_tokens),
++            n_embd, hc, n_tokens, 1);
++    cb(e_norm, "mtp_enorm", il);
++
++    // eh_proj holds fc_embedding and fc_hidden side by side, so this one matmul is
++    // fc_embedding @ e_norm + fc_hidden @ h_norm, applied to each stream independently.
++    // Keeping the streams distinct here is the point of the hyper-connection residual:
++    // pooling them before the projection would throw that away.
++    ggml_tensor * concat = ggml_concat(ctx0, e_norm, h_norm, /*dim=*/ 0);
++    cb(concat, "mtp_concat", il);
++
++    ggml_tensor * res_hc = build_lora_mm(layer.nextn.eh_proj, concat, layer.nextn.eh_proj_s);
++    cb(res_hc, "mtp_eh_proj", il);
++
++    ggml_tensor * inject = nullptr;
++    ggml_tensor * cur = build_hc_mix(res_hc,
++            layer.hc_attn_norm, layer.hc_attn_down, layer.hc_attn_up, layer.hc_attn_inject,
++            &inject, il);
++    cb(cur, "mtp_hc_attn_pre", il);
++
++    // ---- dense attention, mirroring the trunk's full-attention branch ----
++    const int64_t n_embd_head = hparams.n_embd_head_v();
++    GGML_ASSERT(n_embd_head == hparams.n_embd_head_k());
++
++    ggml_tensor * Qcur_full = build_lora_mm(layer.wq, cur, layer.wq_s);
++    cb(Qcur_full, "mtp_Qcur_full", il);
++
++    ggml_tensor * Qcur = ggml_view_3d(ctx0, Qcur_full, n_embd_head, n_head, n_tokens,
++        ggml_element_size(Qcur_full) * n_embd_head * 2,
++        ggml_element_size(Qcur_full) * n_embd_head * 2 * n_head, 0);
++    Qcur = build_norm(Qcur, layer.attn_q_norm, nullptr, LLM_NORM_RMS, il);
++    cb(Qcur, "mtp_Qcur_normed", il);
++
++    ggml_tensor * gate = ggml_view_3d(ctx0, Qcur_full, n_embd_head, n_head, n_tokens,
++        ggml_element_size(Qcur_full) * n_embd_head * 2,
++        ggml_element_size(Qcur_full) * n_embd_head * 2 * n_head,
++        ggml_element_size(Qcur_full) * n_embd_head);
++    gate = ggml_cont_2d(ctx0, gate, n_embd_head * n_head, n_tokens);
++    cb(gate, "mtp_gate", il);
++
++    ggml_tensor * Kcur = build_lora_mm(layer.wk, cur, layer.wk_s);
++    Kcur = ggml_reshape_3d(ctx0, Kcur, n_embd_head, n_head_kv, n_tokens);
++    Kcur = build_norm(Kcur, layer.attn_k_norm, nullptr, LLM_NORM_RMS, il);
++    cb(Kcur, "mtp_Kcur_normed", il);
++
++    ggml_tensor * Vcur = build_lora_mm(layer.wv, cur, layer.wv_s);
++    Vcur = ggml_reshape_3d(ctx0, Vcur, n_embd_head, n_head_kv, n_tokens);
++    cb(Vcur, "mtp_Vcur", il);
++
++    // IMRoPE, same convention and freq_base as the trunk
++    Qcur = ggml_rope_multi(ctx0, Qcur, inp_pos, nullptr,
++            n_rot, sections, rope_type, n_ctx_orig, freq_base, freq_scale,
++            ext_factor, attn_factor, beta_fast, beta_slow);
++    Kcur = ggml_rope_multi(ctx0, Kcur, inp_pos, nullptr,
++            n_rot, sections, rope_type, n_ctx_orig, freq_base, freq_scale,
++            ext_factor, attn_factor, beta_fast, beta_slow);
++    cb(Qcur, "mtp_Qcur", il);
++    cb(Kcur, "mtp_Kcur", il);
++
++    const float kq_scale = hparams.f_attention_scale == 0.0f
++            ? 1.0f / sqrtf(float(n_embd_head)) : hparams.f_attention_scale;
++
++    cur = build_attn(inp_attn,
++            nullptr, nullptr, nullptr,
++            Qcur, Kcur, Vcur, nullptr, nullptr, nullptr, kq_scale, il);
++    cb(cur, "mtp_attn_pregate", il);
++
++    cur = ggml_mul(ctx0, cur, ggml_sigmoid(ctx0, gate));
++    cb(cur, "mtp_attn_gated", il);
++
++    cur = build_lora_mm(layer.wo, cur, layer.wo_s);
++    cb(cur, "mtp_attn_out", il);
++
++    if (inp_out_ids) {
++        cur    = ggml_get_rows(ctx0, cur,    inp_out_ids);
++        inject = ggml_get_rows(ctx0, inject, inp_out_ids);
++
++        res_hc = ggml_reshape_2d(ctx0, res_hc, hc_dim, res_hc->ne[2]);
++        res_hc = ggml_get_rows(ctx0, res_hc, inp_out_ids);
++        res_hc = ggml_reshape_3d(ctx0, res_hc, n_embd, hc, res_hc->ne[1]);
++    }
++
++    res_hc = build_hc_combine(res_hc, cur, inject, il);
++    cb(res_hc, "mtp_hc_attn_post", il);
++
++    // ---- MoE, identical to the trunk's build_layer_ffn ----
++    cur = build_hc_mix(res_hc,
++            layer.hc_ffn_norm, layer.hc_ffn_down, layer.hc_ffn_up, layer.hc_ffn_inject,
++            &inject, il);
++    cb(cur, "mtp_hc_ffn_pre", il);
++
++    cur = build_layer_ffn(cur, il);
++    cb(cur, "mtp_ffn_out", il);
++
++    res_hc = build_hc_combine(res_hc, cur, inject, il);
++    cb(res_hc, "mtp_hc_ffn_post", il);
++
++    // The next draft step re-enters here, so export the wide stream before it is collapsed.
++    // As in the trunk, export the combine result rather than a reshape view of it.
++    cb(res_hc, "h_nextn", -1);
++    res->t_h_nextn = res_hc;
++
++    // the head's own mixer collapses the streams and doubles as the output norm
++    cur = build_hc_mix(res_hc,
++            layer.nextn.hc_head_norm, layer.nextn.hc_head_down, layer.nextn.hc_head_up,
++            nullptr, nullptr, -1);
++    cb(cur, "mtp_hc_head", -1);
++
++    // deliberately no res->t_embd: it would be n_embd wide while the context sizes its
++    // embedding buffer by n_embd_out (the wide stream). The driver reads t_h_nextn instead.
++
++    ggml_tensor * head_w = layer.nextn.shared_head_head ? layer.nextn.shared_head_head : model.output;
++    ggml_tensor * head_s = layer.nextn.shared_head_head ? layer.nextn.shared_head_head_s : model.output_s;
++    GGML_ASSERT(head_w && "QWEN4EXP MTP: missing LM head (nextn.shared_head_head or model.output)");
++
++    cur = build_lora_mm(head_w, cur, head_s);
++    cb(cur, "result_output", -1);
++    res->t_logits = cur;
++
++    ggml_build_forward_expand(gf, cur);
++}
++
+ std::pair<ggml_tensor *, ggml_tensor *> llama_model_qwen4exp::graph::build_qkvz(
+                 ggml_tensor * input,
+                         int   il) {
+diff --git a/tools/llama-bench/llama-bench.cpp b/tools/llama-bench/llama-bench.cpp
+index 1b4bbde4d4ffa8bc630a75b0744ad9040258fcab..e962eec4db1931d6495778021547185479da74db 100644
+--- a/tools/llama-bench/llama-bench.cpp
++++ b/tools/llama-bench/llama-bench.cpp
+@@ -163,7 +163,10 @@ static std::vector<ggml_backend_dev_t> parse_devices_arg(const std::string & val
+             throw std::invalid_argument("invalid device specification");
+         }
+         auto * dev = ggml_backend_dev_by_name(dev_name.c_str());
+-        if (!dev || ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU) {
++        const bool selectable_numa_cpu = dev &&
++            ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU &&
++            dev_name.rfind("CPU-NUMA", 0) == 0;
++        if (!dev || (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU && !selectable_numa_cpu)) {
+             throw std::invalid_argument(string_format("invalid device: %s", dev_name.c_str()));
+         }
+         devices.push_back(dev);

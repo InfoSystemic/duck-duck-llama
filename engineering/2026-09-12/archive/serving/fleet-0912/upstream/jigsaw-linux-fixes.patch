@@ -1,0 +1,36 @@
+diff --git a/src/llama-mmap.cpp b/src/llama-mmap.cpp
+index 20f54b3..5328678 100644
+--- a/src/llama-mmap.cpp
++++ b/src/llama-mmap.cpp
+@@ -1237,8 +1237,18 @@ void llama_prefetch_ranges(void * const * addrs, const size_t * sizes, size_t n)
+     GGML_UNUSED(addrs); GGML_UNUSED(sizes);
+ #endif
+ #elif defined(_POSIX_MAPPED_FILES)
++    static const long page_size = sysconf(_SC_PAGESIZE);
++    if (page_size <= 0) {
++        return;
++    }
+     for (size_t i = 0; i < n; i++) {
+-        posix_madvise(addrs[i], sizes[i], POSIX_MADV_WILLNEED);
++        const uintptr_t addr = reinterpret_cast<uintptr_t>(addrs[i]);
++        const size_t offset = addr % static_cast<size_t>(page_size);
++        if (sizes[i] == 0 || sizes[i] > SIZE_MAX - offset || sizes[i] > UINTPTR_MAX - addr) {
++            continue;
++        }
++        // POSIX requires a page-aligned start; retain the bytes before the original endpoint.
++        posix_madvise(reinterpret_cast<void *>(addr - offset), sizes[i] + offset, POSIX_MADV_WILLNEED);
+     }
+ #else
+     GGML_UNUSED(addrs); GGML_UNUSED(sizes);
+diff --git a/src/llama-moe-stream.cpp b/src/llama-moe-stream.cpp
+index b4ff307..5069f8b 100644
+--- a/src/llama-moe-stream.cpp
++++ b/src/llama-moe-stream.cpp
+@@ -5,6 +5,7 @@
+ #include "ggml-backend.h"
+ 
+ #include <algorithm>
++#include <cmath>
+ #include <cinttypes>
+ #include <cstdio>
+ #include <cstdlib>

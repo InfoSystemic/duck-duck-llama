@@ -1,0 +1,439 @@
+{
+  "passed": true,
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_deepseek_v41_lattice16b_model_0910b.py": "b0d4f4c0908541f09337739fd2cdf984ea2b890ab63d1fbed88ecdf5761bbf67",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-lattice16b-0910/kernel-check.json": "eac556f62b67336cf9865ae20a52bb8bc31d769dfb81953cf1b8eac82bd613b8",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_lattice16b_runtime_0910.py": "2620d1806ddba87988e08ced5aa6a77e0e957a14431e82504f780bd6d3326cd7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-lattice16b-0910/libdeepseek-v41-lattice16b.so": "d8aa2df7d56557ecf06f864c63b4b9c7b89ad990f092534ef005e0f5cd0e7f1f",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_lattice16_runtime_0910.py": "bb96d74a880c691493d99ab014803742deed66c6bad0af58f8d5a5e9c5708358",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_lattice16_0910.py": "b28b06872776ad7203b33a80d004e6a53f91dffbe854b80f3f193d3984d4e4a2",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_vnni_runtime_0910.py": "5b5901a6327ca85e6bf6e49a014b03a48d4114fe0d3c0e5b6380ba644df09cc7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_vnni_goal_0910.py": "3b784a67c72fa296db8798cff38e7b2282022d29f99b2ee665339f97f6b40c8c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_grouped_vnni_goal_0910.py": "150e512a796996852706b40d0a11f3d4840d4f5b074bd54381655aa0c49f5250",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-lattice16-0910/libdeepseek-v41-lattice16.so": "1e6b87dd32c326b139d0a56fbc841046645306e1663388bfccc3bb2179b73030",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-vnni-goal-0910/libdeepseek-v41-native-vnni.so": "186f045ef1bf88d160a5a15bfbd3ba876e1608044ba758e8afb4493ed867216c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_runtime_0910.py": "70ea414776e5ce388d07a5f3abb78138a465ce6a539600ae9761ae43315c59e0",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_grouped_moe_0910.py": "d54f4ed26ab73e1a3430edb0892cb634359f4d991ddc1fbcf991136835f9b715",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_hc_0910.py": "fc0c8d5caa5e5076b8cd67d7c6d0fa4f67cdcc7291b34e6ef80b929af8a33081",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_native_quant_0910.py": "909cbb2900f25546500ea0402d7bb76a20dee2568a9ff74fe50970f3b12d0071",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_sparse_script_0910.py": "162d1ee8cb53aa982541e66cd4e39b40f3ec62c4c5e8df03121739afccdb14d7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_quant_reuse_0910.py": "2517706f2bba0adf99d6c9ee14f8e8be2025d77623fd60b6c10be943cda647bf",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_grouped_goal_0910.py": "d6002cbb09e392382661f8ccde9e0c93b251d4546d947fc71a57a2b7c97fab23",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-goal-0910/libdeepseek-v41-native-grouped.so": "181b3de2597270b61e73ecd27106fa1961eb8945ba5605f50dc276153438ea4d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/goal_native_quant_0910/libgoal_native_quant_0910.so": "88ee0d562ad424b1ccc37b9a90e81444f545ba71b57dc9e533aa8c42c89d9933",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/goal_hc_0910/libgoal_hc_0910.so": "17cff8041c7bf0cb0e115e4b2bd0c052e91eab0dc0c006f11f76d385d8d35440"
+  },
+  "runs": [
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 79.30716660199687,
+        "prefill_seconds": 42.74726146017201,
+        "decode_seconds": 36.55345097579993,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41323525568
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "label": "baseline_warm",
+      "candidate": false,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "decode_tok_s": 0.24621478300252456,
+      "pack_stats": {
+        "packed_bytes": 0,
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "pack_count": 0,
+        "pack_seconds": 0.0,
+        "cap_fallback_calls": 0,
+        "dropped_entries": 0,
+        "activation_block_diagnostics": {},
+        "diagnostics_enabled": false
+      },
+      "grouped_native_calls": 0,
+      "grouped_fallback_calls": 0
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 8.261982958996668,
+        "prefill_seconds": 2.8120666439644992,
+        "decode_seconds": 5.4449053483549505,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41323525568
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "label": "baseline_before",
+      "candidate": false,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "decode_tok_s": 1.6529212950816743,
+      "pack_stats": {
+        "packed_bytes": 0,
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "pack_count": 0,
+        "pack_seconds": 0.0,
+        "cap_fallback_calls": 0,
+        "dropped_entries": 0,
+        "activation_block_diagnostics": {},
+        "diagnostics_enabled": false
+      },
+      "grouped_native_calls": 0,
+      "grouped_fallback_calls": 0
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 10.68555409181863,
+        "prefill_seconds": 2.8739099439699203,
+        "decode_seconds": 7.806369871133938,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41323525568
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "label": "candidate_warm",
+      "candidate": true,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "decode_tok_s": 1.1529046341091032,
+      "pack_stats": {
+        "packed_bytes": 19856793600,
+        "cache_hits": 3645,
+        "cache_misses": 2835,
+        "pack_count": 2835,
+        "pack_seconds": 2.4416499570943415,
+        "cap_fallback_calls": 0,
+        "dropped_entries": 0,
+        "activation_block_diagnostics": {
+          "2304x5120": {
+            "tasks": 4320,
+            "eligible_blocks": 681144,
+            "total_blocks": 691200
+          },
+          "5120x2304": {
+            "tasks": 2160,
+            "eligible_blocks": 132026,
+            "total_blocks": 155520
+          }
+        },
+        "diagnostics_enabled": true
+      },
+      "grouped_native_calls": 720,
+      "grouped_fallback_calls": 0
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 7.995072731049731,
+        "prefill_seconds": 2.8593781411182135,
+        "decode_seconds": 5.1304465683642775,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41323525568
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "label": "candidate_first",
+      "candidate": true,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "decode_tok_s": 1.7542332582696478,
+      "pack_stats": {
+        "packed_bytes": 19856793600,
+        "cache_hits": 10125,
+        "cache_misses": 2835,
+        "pack_count": 2835,
+        "pack_seconds": 2.4416499570943415,
+        "cap_fallback_calls": 0,
+        "dropped_entries": 0,
+        "activation_block_diagnostics": {
+          "2304x5120": {
+            "tasks": 4320,
+            "eligible_blocks": 681144,
+            "total_blocks": 691200
+          },
+          "5120x2304": {
+            "tasks": 2160,
+            "eligible_blocks": 132026,
+            "total_blocks": 155520
+          }
+        },
+        "diagnostics_enabled": false
+      },
+      "grouped_native_calls": 1440,
+      "grouped_fallback_calls": 0
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 7.956970732891932,
+        "prefill_seconds": 2.821107983123511,
+        "decode_seconds": 5.130471283337101,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41323525568
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "label": "candidate_second",
+      "candidate": true,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "decode_tok_s": 1.7542248076176685,
+      "pack_stats": {
+        "packed_bytes": 19856793600,
+        "cache_hits": 16605,
+        "cache_misses": 2835,
+        "pack_count": 2835,
+        "pack_seconds": 2.4416499570943415,
+        "cap_fallback_calls": 0,
+        "dropped_entries": 0,
+        "activation_block_diagnostics": {
+          "2304x5120": {
+            "tasks": 4320,
+            "eligible_blocks": 681144,
+            "total_blocks": 691200
+          },
+          "5120x2304": {
+            "tasks": 2160,
+            "eligible_blocks": 132026,
+            "total_blocks": 155520
+          }
+        },
+        "diagnostics_enabled": false
+      },
+      "grouped_native_calls": 2160,
+      "grouped_fallback_calls": 0
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 8.483894106000662,
+        "prefill_seconds": 2.8991620920132846,
+        "decode_seconds": 5.579283438855782,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41323525568
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "label": "baseline_after",
+      "candidate": false,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "decode_tok_s": 1.613110374949108,
+      "pack_stats": {
+        "packed_bytes": 19856793600,
+        "cache_hits": 16605,
+        "cache_misses": 2835,
+        "pack_count": 2835,
+        "pack_seconds": 2.4416499570943415,
+        "cap_fallback_calls": 0,
+        "dropped_entries": 0,
+        "activation_block_diagnostics": {
+          "2304x5120": {
+            "tasks": 4320,
+            "eligible_blocks": 681144,
+            "total_blocks": 691200
+          },
+          "5120x2304": {
+            "tasks": 2160,
+            "eligible_blocks": 132026,
+            "total_blocks": 155520
+          }
+        },
+        "diagnostics_enabled": false
+      },
+      "grouped_native_calls": 2160,
+      "grouped_fallback_calls": 0
+    }
+  ],
+  "affinity": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "measurement": "single-request decode after prefill",
+  "limitations": "short greeting; not broad quality or long-context evidence",
+  "torch_workers": 16,
+  "native_workers": 16,
+  "prefill_unchanged": true,
+  "component_control_ratios": [
+    1.1103733053710025,
+    1.2528026336049947
+  ],
+  "component_gate": "Each candidate arm faster than both controls by at least 20%; component ratios are not selected model speedups",
+  "baseline_decode_tok_s": 1.6327731996826809,
+  "candidate_decode_tok_s": 1.7542290329334809,
+  "speedup": 1.074386224170267
+}

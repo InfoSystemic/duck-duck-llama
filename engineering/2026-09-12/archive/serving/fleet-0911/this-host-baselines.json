@@ -1,0 +1,39 @@
+{
+  "spread": 0.05,
+  "note": "Last recorded this-host decode tok/s. Harness compares live server timings to these; tests must not hard-code a substitute rate.",
+  "models": {
+    "glm-5.3-flash": {
+      "baseline_tps": 15.20,
+      "port": 18131,
+      "model": "GLM-5.3-Flash",
+      "kind": "llama",
+      "prompt": "What is 17 * 23?",
+      "expect_substr": "391"
+    },
+    "qwen3.8-flash-next": {
+      "baseline_tps": 19.90,
+      "port": 18131,
+      "model": "Qwen3.8-Flash-Next",
+      "kind": "llama",
+      "prompt": "What is 17 * 23?",
+      "expect_substr": "391"
+    },
+    "glm-5.3-full": {
+      "baseline_tps": 7.89,
+      "baseline_tps_high": 9.64,
+      "port": 18131,
+      "model": "GLM-5.3",
+      "kind": "llama",
+      "prompt": "What is 17 * 23?",
+      "expect_substr": "391"
+    },
+    "deepseek-v4.1-flash": {
+      "baseline_tps": 1.800,
+      "port": 18170,
+      "model": "DeepSeek-V4.1-Flash",
+      "kind": "deepseek",
+      "prompt": "Hi.",
+      "expect_substr": "Hello"
+    }
+  }
+}

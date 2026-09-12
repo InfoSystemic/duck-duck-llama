@@ -1,0 +1,19 @@
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -705,6 +705,16 @@
+     };
+ 
+     auto get_split_granularity = [&](int64_t blck_size, uint32_t il, const std::vector<std::pair<int64_t, uint32_t>> & segments) -> std::vector<int64_t> {
++        if (ud->model->arch == LLM_ARCH_GLM_DSA &&
++                (std::regex_match(tensor_name, pattern_attn_q_a_weight) ||
++                 std::regex_match(tensor_name, pattern_attn_kv_a_weight) ||
++                 std::regex_match(tensor_name, pattern_ffn_shexp_gate_up_weight) ||
++                 std::regex_match(tensor_name, pattern_ffn_shexp_down_weight))) {
++            // Match shared gate/up to down, including K-quant repacking blocks.
++            GGML_ASSERT(segments.size() == 1);
++            return {std::lcm(blck_size, int64_t(256))};
++        }
++
+         if (ud->model->arch == LLM_ARCH_GLM_DSA && glm_attn_tp_tensor) {
+             if (std::regex_match(tensor_name, pattern_attn_q_b_weight)) {
+                 GGML_ASSERT(segments.size() == 1);

@@ -14,7 +14,8 @@ def digest(path):
 
 def verify(root):
     inventory = json.loads((root / 'archive-manifest.json').read_text())
-    report = {'archive_files': 0, 'patches': 0, 'python_files': 0, 'shell_files': 0, 'errors': []}
+    report = {'archive_files': 0, 'inherited_files': 0, 'patches': 0,
+              'python_files': 0, 'shell_files': 0, 'errors': []}
     for entry in inventory['files']:
         path = root / entry['path']
         if not path.is_file() or digest(path) != entry['sha256']:
@@ -35,6 +36,24 @@ def verify(root):
                 report['errors'].append(entry['path'] + ': ' + checked.stderr.strip())
             else:
                 report['shell_files'] += 1
+    prior_manifests = {}
+    for entry in inventory.get('inherited_files', []):
+        path = (root / entry['prior_path']).resolve()
+        prior_root = path
+        for _ in Path(entry['path']).parts:
+            prior_root = prior_root.parent
+        try:
+            if prior_root not in prior_manifests:
+                prior_inventory = json.loads((prior_root / 'archive-manifest.json').read_text())
+                prior_manifests[prior_root] = {row['path']: row for row in prior_inventory['files']}
+            prior_entry = prior_manifests[prior_root][entry['path']]
+            if prior_entry['original_sha256'] != entry['original_sha256']:
+                raise ValueError('Original-source hash differs from prior inventory')
+            if not path.is_file() or digest(path) != prior_entry['sha256']:
+                raise ValueError('Prior published file is missing or changed')
+            report['inherited_files'] += 1
+        except (OSError, KeyError, ValueError) as error:
+            report['errors'].append(f'Invalid inherited file: {entry["prior_path"]}: {error}')
     for name in ['source-bundles.json', 'selected-overlays.json', 'correctness-overlays.json', 'experimental-overlays.json']:
         if name == 'experimental-overlays.json' and not (root / name).exists():
             continue

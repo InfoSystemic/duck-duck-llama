@@ -51,6 +51,41 @@ def read_spec_metrics(host, port, timeout):
     return values if len(values) == len(METRIC_NAMES) else None
 
 
+def extract_decode_tps(data):
+    """Decode tok/s from the server's own timings, llama or DeepSeek native."""
+    if not isinstance(data, dict):
+        return None
+    tm = data.get("timings") or {}
+    tps = tm.get("predicted_per_second")
+    if isinstance(tps, (int, float)) and tps > 0:
+        return float(tps)
+    decode_s = tm.get("decode_seconds")
+    if isinstance(decode_s, (int, float)) and decode_s > 0:
+        n = tm.get("decode_tokens")
+        if not isinstance(n, (int, float)):
+            usage = data.get("usage") or {}
+            n = (usage.get("completion_tokens") or 0) - 1
+        if isinstance(n, (int, float)) and n > 0:
+            return float(n) / float(decode_s)
+    return None
+
+
+def is_degenerate_completion(text):
+    if not isinstance(text, str):
+        return True
+    stripped = text.strip()
+    if not stripped:
+        return True
+    compact = stripped.replace(" ", "").replace("\n", "").replace("\t", "")
+    if not compact:
+        return True
+    if set(compact) <= {"/", "-", ".", ",", ";", ":"}:
+        return True
+    if compact[:24] == "/" * min(24, len(compact)) and compact.count("/") / max(len(compact), 1) > 0.8:
+        return True
+    return False
+
+
 def validate_output(workload, content):
     if workload == "structured":
         expected = list(range(1, 61))
@@ -112,8 +147,8 @@ def run(args):
             if draft_acc is None and draft_n:
                 draft_acc = accepted_n / draft_n
             quality_ok, quality_detail = validate_output(name, content)
-            decode_tps = tm.get("predicted_per_second")
-            if not isinstance(decode_tps, (int, float)):
+            decode_tps = extract_decode_tps(d)
+            if decode_tps is None or is_degenerate_completion(content):
                 failures += 1
             if quality_ok is False:
                 failures += 1
