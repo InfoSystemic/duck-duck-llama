@@ -1,7 +1,8 @@
 # GLM-5.3 Full unequal tensor split correction
 
-This is an isolated, source-only candidate. The existing engine source, binaries,
-launchers, live services, and memory placement are unchanged.
+This is an isolated candidate with a built replacement library. The selected
+engine source and binaries remain unchanged. No full-model run with this library
+has completed.
 
 The original `llama-model.cpp` assigns split granularity 1 to GLM's `attn_q_a`,
 `attn_kv_a_mqa`, and shared-expert gate/up/down tensors. For the actual Full GGUF,
@@ -43,7 +44,25 @@ taskset -c 127 tools/deepseek-v41-cpu-reference-0910/venv/bin/python \
 
 `llama-model.parent.cpp` and `llama-model.patched.cpp` are reviewable snapshots.
 `llama-model.patch` is the proposed source change; it has not been applied to the
-engine. The checker records hashes and compile commands for reproduction.
+selected engine. The checker records hashes and compile commands for reproduction.
+
+`build_candidate.py` compiles the candidate translation unit and relinks the
+existing host object set into `build/candidate/libllama.so.0.1.2`. First it relinks
+the original object set and requires byte-for-byte identity with the selected
+library. The candidate loader check and server `--version` pass, and every source
+and link-input hash is unchanged. `build-verification.json` records that evidence.
+
+After the shared inference port becomes vacant, the foreground launcher can
+select this library and explicit split ratios. Its dry run validates the recorded
+dependency hashes, all model shards, the draft, the template and library resolution:
+
+```bash
+python3 serving/fleet-0912/glmfull/launch.py --arm split-candidate --tensor-split 1.41,1.43,1.43,1.00 --dry-run
+```
+
+The ratio above reproduces the corrected quantization-boundary case; it is not a
+validated memory-budget recommendation. Per-node placement and live-model quality
+must determine the eventual selected schedule.
 
 These results prove the metadata-level alignment fix for the inspected Full
 model. They do not prove a whole model loads or produces equivalent logits with
