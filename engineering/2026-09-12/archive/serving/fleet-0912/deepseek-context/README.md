@@ -1,6 +1,6 @@
 # Native DeepSeek-V4.1 context candidate
 
-Status: isolated, unpromoted engineering candidate. Four small tests pass without checkpoint loading or network calls. **No 4K/16K full-model generation or logit comparison has been run.** Existing selected runtime files, model weights, processes and endpoints were not changed. Stop here for the repository publication snapshot; do not treat the candidate as a validated service.
+Status: isolated, unpromoted engineering candidate. Four context tests and five interruption-recovery tests pass without checkpoint loading or network calls. **No 4K/16K full-model generation or logit comparison has been run.** The September 12 published snapshot preserves the earlier version; this working candidate now includes the cache-recovery correction.
 
 ## What prevents extending the existing endpoint
 
@@ -32,12 +32,15 @@ The context wrapper does not retain conversational KV across HTTP requests. As b
 
 ## Verification and remaining work
 
-Known unselected-candidate defect: recovery after an interrupted persistent row write can undercount the persistent-file cap. The current tests cover ordinary restart and corruption, but not that interruption path. Fix and test this accounting before using the wrapper for a bounded long-running service.
+The interrupted-write quota defect is corrected. A partially written row reserves a persistent slot before its write completes. Recovering a fully manifested partial updates the committed-row count without allocating a second slot. Uncommitted rows with missing or torn manifests are discarded only in the owned context directory and fetched again; committed corruption still fails integrity checks. A lifetime directory lock prevents a second cache instance from bypassing the quota. Calls within one runtime remain serialized by the existing HTTP model lock. Explicit `close()` releases the directory lock.
+
+`test_cache_recovery.py` reproduced three failures and two errors in the published parent. All five tests pass after the fix, covering recovery after restart and within the same process, missing/torn manifests, and competing cache writers. They compare the recovered native BF16 rows and check actual persistent-file counts. `recovery-verification.json` records the before/after evidence and source hashes.
 
 Run with the existing CPU-reference Python environment:
 
 ```sh
 taskset -c 15 /home/user/InfoSystemic/AI-Server/tools/deepseek-v41-cpu-reference-0910/venv/bin/python serving/fleet-0912/deepseek-context/test_context.py
+taskset -c 15 /home/user/InfoSystemic/AI-Server/tools/deepseek-v41-cpu-reference-0910/venv/bin/python serving/fleet-0912/deepseek-context/test_cache_recovery.py
 ```
 
 `test-result.json` and `test.log` record four passing tests:

@@ -37,6 +37,14 @@ class ContextRuntime(goal2.Goal2Runtime):
             def rows(self, prefix, ids):
                 return self.context_rows.rows(prefix, ids)
 
+            def close(self):
+                try:
+                    super().close()
+                finally:
+                    cache = getattr(self, 'context_rows', None)
+                    if cache is not None:
+                        cache.close()
+
         server.meta_model, goal2.ResidentStore = builder, ContextStore
         try:
             super().__init__(args)

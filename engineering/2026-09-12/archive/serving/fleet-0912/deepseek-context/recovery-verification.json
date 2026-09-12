@@ -1,0 +1,41 @@
+{
+  "checked_utc": "2026-09-12T09:26:36.480490+00:00",
+  "before": {
+    "tests": 5,
+    "failures": 3,
+    "errors": 2,
+    "reproduced": true
+  },
+  "after": {
+    "tests": 5,
+    "passed": true
+  },
+  "existing_context_tests": {
+    "passed": true,
+    "tests": 4,
+    "full_checkpoint_loaded": false,
+    "model_context_validated": false,
+    "network_requests": 0,
+    "limitations": "Policy/native-row/hash/cache tests only; full-model extended-context logits untested",
+    "sha256": {
+      "/home/user/InfoSystemic/AI-Server/serving/fleet-0912/deepseek-context/context_policy.py": "2074def713f051e0f2450d8382e49d7b4aaa92a13c5b22c5b21595a0483e2456",
+      "/home/user/InfoSystemic/AI-Server/serving/fleet-0912/deepseek-context/bounded_engram.py": "7c06789938a435db2e7ae4940d057701f909c073bb57ef3e2d6a3448be8396ef",
+      "/home/user/InfoSystemic/AI-Server/serving/fleet-0912/deepseek-context/context_server.py": "778a81383d0fd54671a74fe83f7af307464212b6cece576f7172224627a951a3",
+      "/home/user/InfoSystemic/AI-Server/serving/fleet-0912/deepseek-context/test_context.py": "357dafef22ffdc50c3c576cdc93b1041e708b558272834afb5ac23c3b9afc761",
+      "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+      "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-intake-0910/official/inference/model.py": "4e9ae23620edc8028ccc5d5fef552ab7fdc7dcd6f79608754fe9f67644056f65",
+      "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-intake-0910/official/inference/engram.py": "11f35ecbead8150c35aa002b3d180ef290b05a25afe883a11884f94d476d3897"
+    }
+  },
+  "model_loaded": false,
+  "network_requests": 0,
+  "scope": "Fault injection covers restart and same-process commit recovery, torn/missing manifests and a second cache writer. Native row equality is verified during recovery. Full-model long-context inference remains unvalidated.",
+  "sha256": {
+    "bounded_engram.py": "7c06789938a435db2e7ae4940d057701f909c073bb57ef3e2d6a3448be8396ef",
+    "context_server.py": "778a81383d0fd54671a74fe83f7af307464212b6cece576f7172224627a951a3",
+    "test_context.py": "357dafef22ffdc50c3c576cdc93b1041e708b558272834afb5ac23c3b9afc761",
+    "test_cache_recovery.py": "4e56bf108e912b1ad3cd25eb007ac083674394af8c9b061ff9242f2fedeaa6ab",
+    "recovery-before.log": "7b9f45cb11fe426c50c4d6391e1df09ecec33ca0970e3dd6f1d8dee02d541bd3",
+    "recovery-after.log": "864e9b38e1f4941bfa5f59ab875b19e95c46dd6e257a984c87be96def1984b2d"
+  }
+}

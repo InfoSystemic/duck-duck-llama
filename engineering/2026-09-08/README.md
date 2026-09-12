@@ -1,5 +1,7 @@
 # CPU inference engineering snapshot, September 8, 2026
 
+> Historical snapshot with September 9–10 follow-ups. Statements about active endpoints or selected runtimes describe those recorded runs. Start with the [model guides](../../docs/models/README.md) and [September 12 snapshot](../2026-09-12/README.md) for subsequent work and validation status.
+
 DeepSeek-V4.1-Flash is running its released native FP8/FP4 text checkpoint at `http://127.0.0.1:18170/v1`. The [CPU tuning follow-up](archive/serving/fleet-0903/DEEPSEEK-V41-CPU-TUNING-20260910.md) records the selected endpoint at 1.800 warm decode tok/s, repeated full-model kernel comparisons, and exact-logit validation. The fused CPU baseline reached 1.773–1.789 tok/s; the revised grouped FP4 kernel gained 7.4% in its matched model trial. Context remains 256 tokens, and cold prompts can fetch missing expert tensors and Engram rows. The over-10 tok/s goal, complete checkpoint residency, vision, DSpark, longer varied generation, and IMC bandwidth measurement remain open.
 
 DeepSeek-V4.1-Flash now has an integrated [native hash-to-Engram lookup](archive/serving/fleet-0903/DEEPSEEK-V41-ENGRAM-LOOKUP-20260910.md). Across eight variants, 267,583,488 BF16 values and 1,044,096 row IDs match the official CPU reference exactly. The 48 selected real checkpoint rows also match. This earlier component result preceded the real-model CPU endpoint described above; the published component counts are unchanged.

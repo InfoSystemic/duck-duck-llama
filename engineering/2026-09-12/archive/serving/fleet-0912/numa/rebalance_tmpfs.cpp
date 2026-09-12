@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <regex>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -34,6 +35,7 @@ static void on_signal(int) { interrupted = 1; }
 struct Options {
     bool apply = false;
     bool inventory = false;
+    bool deepseek_cache = false;
     uint64_t sample_pages = 4096;
     uint64_t batch_pages = 4096;
     uint64_t max_move_bytes = 64ULL << 30;
@@ -58,6 +60,7 @@ struct Mapping {
     struct stat original {};
     uint8_t *data = nullptr;
     uint64_t pages = 0;
+    std::string expected_sha256;
     size_t page_size;
     Mapping(const fs::path &p, uint64_t expected_size, size_t ps) : path(p), page_size(ps) {
         fd = open(path.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
@@ -140,6 +143,17 @@ static std::string sample_hash(const Mapping &file) {
     unsigned length = 0;
     EVP_DigestFinal_ex(ctx, digest, &length);
     EVP_MD_CTX_free(ctx);
+    static const char hex[] = "0123456789abcdef";
+    std::string result;
+    for (unsigned i = 0; i < length; ++i) { result += hex[digest[i] >> 4]; result += hex[digest[i] & 15]; }
+    return result;
+}
+
+static std::string full_hash(const Mapping &file) {
+    unsigned char digest[EVP_MAX_MD_SIZE];
+    unsigned length = 0;
+    require(EVP_Digest(file.data, file.original.st_size, digest, &length, EVP_sha256(), nullptr) == 1,
+            "full digest failed");
     static const char hex[] = "0123456789abcdef";
     std::string result;
     for (unsigned i = 0; i < length; ++i) { result += hex[digest[i] >> 4]; result += hex[digest[i] & 15]; }
@@ -274,6 +288,35 @@ struct Runner {
             struct stat st {};
             require(lstat(fixture.c_str(), &st) == 0 && st.st_size >= (2 << 20) && st.st_size <= (8 << 20), "fixture must be 2-8 MiB");
             files.emplace_back(new Mapping(fixture, st.st_size, ps));
+        } else if (options.deepseek_cache) {
+            const fs::path root = "/dev/shm/deepseek-v41-native-fb2764-0910";
+            const std::string revision = "fb2764a5cf321eaa5070ca8f9e892818f477c16d";
+            require(!fs::is_symlink(root), "cache root must not be a symlink");
+            const auto owner = json::parse(contents(root / "owner.json"));
+            require(owner.at("task") == "deepseek-v41-native-0910" && owner.at("revision") == revision,
+                    "DeepSeek cache ownership or checkpoint revision differs");
+            std::istringstream manifest(contents(root / "tensors.jsonl"));
+            std::string line;
+            std::vector<std::string> names;
+            while (std::getline(manifest, line)) {
+                if (line.empty()) continue;
+                const auto record = json::parse(line);
+                const std::string name = record.at("name");
+                const uint64_t size = record.at("bytes");
+                if (size < (1ULL << 20)) continue;
+                require(record.at("revision") == revision &&
+                        std::regex_match(name, std::regex("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*")),
+                        "invalid native cache tensor record");
+                require(std::find(names.begin(), names.end(), name) == names.end(), "duplicate native cache tensor");
+                names.push_back(name);
+                const std::string hash = record.at("sha256");
+                require(std::regex_match(hash, std::regex("[0-9a-f]{64}")), "invalid cache content digest");
+                files.emplace_back(new Mapping(root / (name + ".bin"), size, ps));
+                files.back()->expected_sha256 = hash;
+            }
+            require(!files.empty() && files.size() <= 12000, "unexpected native cache inventory size");
+            report["target"] = "manifested native DeepSeek cache tensors at least 1 MiB";
+            report["checkpoint_revision"] = revision;
         } else {
             const std::string directory = "/home/user/.local/share/ai-models/GLM-5.3-Flash-621d456e93e9/UD-Q4_K_XL/";
             const std::array<uint64_t, 6> sizes = {9429859ULL, 49198039200ULL, 49988626304ULL, 48700701344ULL, 49026026752ULL, 2784497888ULL};
@@ -296,6 +339,12 @@ struct Runner {
                                       {"device", file->original.st_dev}, {"pages", file->pages}, {"query_status_errors", json::object()},
                                       {"move_status_errors", json::object()}});
             auto &record = report["files"].back();
+            if (!file->expected_sha256.empty()) {
+                record["manifest_sha256"] = file->expected_sha256;
+                record["full_sha256_before"] = full_hash(*file);
+                require(record["full_sha256_before"] == file->expected_sha256,
+                        "native cache file does not match its recorded full digest: " + file->path.string());
+            }
             record["sample_sha256_before"] = sample_hash(*file);
             before.push_back(inventory(*file, record, options.apply || options.inventory, "before"));
         }
@@ -321,6 +370,11 @@ struct Runner {
         for (size_t i = 0; i < report["files"].size(); ++i) {
             auto &record = report["files"][i];
             files[i]->stable();
+            if (!files[i]->expected_sha256.empty()) {
+                record["full_sha256_after"] = full_hash(*files[i]);
+                record["full_bytes_unchanged"] = record["full_sha256_after"] == files[i]->expected_sha256;
+                require(record["full_bytes_unchanged"].get<bool>(), "full native cache digest changed");
+            }
             record["sample_sha256_after"] = sample_hash(*files[i]);
             record["sample_bytes_unchanged"] = record["sample_sha256_before"] == record["sample_sha256_after"];
             require(record["sample_bytes_unchanged"].get<bool>(), "sample content digest changed");
@@ -338,6 +392,7 @@ int main(int argc, char **argv) {
             if (arg == "--apply") runner.options.apply = true;
             else if (arg == "--inspect") {}
             else if (arg == "--inventory") runner.options.inventory = true;
+            else if (arg == "--deepseek-cache") runner.options.deepseek_cache = true;
             else if (arg == "--fixture") runner.options.fixture = value();
             else if (arg == "--json") runner.options.output = value();
             else if (arg == "--sample-pages") runner.options.sample_pages = std::stoull(value());
@@ -354,6 +409,7 @@ int main(int argc, char **argv) {
         require(runner.options.batch_pages > 0 && runner.options.batch_pages <= 65536, "batch-pages must be 1..65536");
         require(runner.options.max_seconds > 0 && runner.options.max_seconds <= 7200, "max-seconds must be 1..7200");
         require(runner.options.max_move_bytes <= (256ULL << 30), "max-move-gib must be 0..256");
+        require(!runner.options.deepseek_cache || runner.options.fixture.empty(), "choose one target inventory");
         signal(SIGINT, on_signal); signal(SIGTERM, on_signal);
         runner.run();
         runner.report["completed"] = true;

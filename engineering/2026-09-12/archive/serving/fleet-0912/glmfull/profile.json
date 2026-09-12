@@ -1,6 +1,6 @@
 {
   "model": "GLM-5.3",
-  "source_recipe": "Live PID 4097083 on 2026-09-12, v5b settings; runtime measurement pending",
+  "source_recipe": "September 12 v5b baseline; two NUMA_REPACK=1 loads failed on node 3. NUMA_REPACK=0 PID 873660 is under observation. Split-candidate build passes; model validation pending.",
   "command": [
     "/home/user/InfoSystemic/AI-Server/engines/llama.cpp-sr950-glm/build-dev2/bin/llama-server",
     "--host",
@@ -117,6 +117,19 @@
     "tuned": {
       "spec_type": "draft-mtp",
       "unary": false
+    },
+    "no-numa-repack": {
+      "spec_type": "draft-mtp",
+      "unary": false,
+      "runtime_env": {
+        "GGML_CPU_NUMA_REPACK": "0"
+      }
+    },
+    "split-candidate": {
+      "spec_type": "draft-mtp",
+      "unary": false,
+      "library_directory": "/home/user/InfoSystemic/AI-Server/serving/fleet-0912/glmfull-split/build/candidate",
+      "build_verification": "/home/user/InfoSystemic/AI-Server/serving/fleet-0912/glmfull-split/build-verification.json"
     }
   }
 }

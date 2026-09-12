@@ -62,6 +62,7 @@ class ContextTests(unittest.TestCase):
                                                        prefix + '.scale': {'shape': [12, 8], 'kind': 'scale'}})
             store._fetch = lambda meta, offset, size: raw[meta['kind']][offset:offset + size]
             rows = BoundedEngram(store, root / 'new', memory_rows=3, persistent_rows=2, fetch_rows=2)
+            self.addCleanup(rows.close)
             ids = torch.tensor([[0, 1, 2, 3, 4, 5, 0, 2, 11, 0]])
             self.assertTrue(torch.equal(rows.rows(prefix, ids), weight.float().bfloat16()[ids]))
             self.assertLessEqual(len(rows.memory), 3)
@@ -70,7 +71,9 @@ class ContextTests(unittest.TestCase):
             self.assertFalse(list(legacy.iterdir()))
             self.assertGreater(rows.evicted, 0)
             self.assertGreater(rows.unpersisted, 0)
+            rows.close()
             restarted = BoundedEngram(store, root / 'new', memory_rows=3, persistent_rows=2, fetch_rows=2)
+            self.addCleanup(restarted.close)
             before = store.downloaded_bytes
             self.assertTrue(torch.equal(restarted.rows(prefix, torch.tensor([0, 1])), weight.float().bfloat16()[:2]))
             self.assertEqual(before, store.downloaded_bytes)

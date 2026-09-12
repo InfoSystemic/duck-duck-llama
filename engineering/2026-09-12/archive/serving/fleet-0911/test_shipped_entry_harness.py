@@ -170,6 +170,7 @@ class TestLaunchScriptsWidenAffinity(unittest.TestCase):
         self.assertIn("--split-mode tensor", text)
         self.assertIn("draft-mtp", text)
         self.assertIn('SPLIT=${GLM_FULL_TENSOR_SPLIT:-1,1,1,1}', text)
+        self.assertIn("FULL_NUMA_REPACK_OVERRIDE", text)
         self.assertNotIn("ngram-mod,draft-mtp", text)
         self.assertNotIn("glm-flash-q8-r8-ordered-k-runtime-0908", text)
 

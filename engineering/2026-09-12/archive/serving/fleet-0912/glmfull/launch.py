@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Run a fixed baseline or candidate recipe in the foreground."""
 import argparse
+import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -28,6 +30,7 @@ def main():
     parser.add_argument("--port", type=int, default=18131)
     parser.add_argument("--ctx-size", type=int, default=4096)
     parser.add_argument("--parallel", type=int, default=1)
+    parser.add_argument("--tensor-split", help="Four nonnegative ratios; requires the split-candidate arm")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
@@ -40,6 +43,16 @@ def main():
                           ("--parallel", args.parallel)):
         replace_value(command, option, value)
     recipe = config["arms"][args.arm]
+    if args.tensor_split is not None:
+        if args.arm != "split-candidate":
+            parser.error("Unequal splits require the reviewed split-candidate library")
+        try:
+            ratios = [float(value) for value in args.tensor_split.split(",")]
+        except ValueError:
+            parser.error("--tensor-split must contain four finite nonnegative numbers")
+        if len(ratios) != 4 or any(not math.isfinite(value) or value < 0 for value in ratios) or sum(ratios) <= 0:
+            parser.error("--tensor-split must contain four finite nonnegative ratios with positive sum")
+        replace_value(command, "--tensor-split", args.tensor_split)
     replace_value(command, "--spec-type", recipe["spec_type"])
     # No caller environment enters the inference process.
     environment = {
@@ -47,12 +60,28 @@ def main():
         "PATH": "/usr/local/bin:/usr/bin:/bin", "LANG": "C.UTF-8",
         "LC_ALL": "C.UTF-8", "TMPDIR": "/tmp",
         **config["runtime_env"],
+        **recipe.get("runtime_env", {}),
     }
+    if "library_directory" in recipe:
+        environment["LD_LIBRARY_PATH"] = recipe["library_directory"] + ":" + environment["LD_LIBRARY_PATH"]
     if recipe["unary"]:
         environment["GGML_CPU_PARALLEL_UNARY"] = "4096"
         environment["LD_LIBRARY_PATH"] = str(HERE / "build") + ":" + environment["LD_LIBRARY_PATH"]
 
     errors = []
+    if "build_verification" in recipe:
+        try:
+            verified = json.loads(Path(recipe["build_verification"]).read_text())
+            if not verified["passed"] or not verified["baseline_relink_byte_identical"]:
+                raise ValueError("candidate build did not pass")
+            candidate_library = Path(recipe["library_directory"]) / "libllama.so.0"
+            expected = {**verified["source_and_link_inputs_sha256"],
+                        str(candidate_library): verified["candidate_library_sha256"]}
+            for path, digest in expected.items():
+                if hashlib.sha256(Path(path).read_bytes()).hexdigest() != digest:
+                    raise ValueError(f"candidate dependency changed: {path}")
+        except (OSError, ValueError, KeyError) as error:
+            errors.append(f"candidate build preflight failed: {error}")
     required = [Path(command[0]), Path("/usr/bin/taskset")]
     for option in ("--model", "--spec-draft-model", "--chat-template-file"):
         model = Path(command[command.index(option) + 1])
@@ -90,6 +119,10 @@ def main():
                              if "libggml-cpu.so.0 =>" in line), "")
             if recipe["unary"] and str(HERE / "build" / "libggml-cpu.so.0") not in cpu_line:
                 errors.append("loader did not select the candidate CPU library")
+            if "library_directory" in recipe:
+                llama_line = next((line for line in loader.splitlines() if "libllama.so.0 =>" in line), "")
+                if str(Path(recipe["library_directory"]) / "libllama.so.0") not in llama_line:
+                    errors.append("loader did not select the split-candidate library")
         except (OSError, subprocess.SubprocessError) as error:
             errors.append(f"library preflight failed: {error}")
 

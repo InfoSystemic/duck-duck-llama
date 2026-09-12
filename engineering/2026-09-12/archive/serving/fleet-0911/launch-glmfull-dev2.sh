@@ -22,6 +22,8 @@ done
 for i in $(seq 240); do ss -ltn 2>/dev/null | grep -qE ':(18131|18132|18133) ' || break; sleep 1; done
 sleep 3
 
+# Preserve non-GGML override across the env scrub (names starting GGML_ get unset).
+FULL_NUMA_REPACK_OVERRIDE="${FULL_NUMA_REPACK_OVERRIDE:-${GGML_CPU_NUMA_REPACK_OVERRIDE:-}}"
 # Drop Qwen/Flash knobs that would otherwise leak (GGML_Q4E_*, X16_Q8_EXPERTS, UNARY).
 while read -r v; do unset "$v"; done < <(env | grep -oE '^(GGML|LLAMA|OMP|GOMP|KMP)[A-Z0-9_]*' | sort -u)
 # v5b kernel/env flags (MTP-only profile). Do not source ngram composite.
@@ -31,6 +33,12 @@ source /home/user/InfoSystemic/AI-Server/serving/glm-sr950/model.glm53-q4-fast-v
 set +a
 unset GGML_CPU_PARALLEL_UNARY GGML_GLM_DSA_DENSE GGML_CPU_X16_DUAL || true
 export GGML_CPU_NUMA_THREADS="${GGML_CPU_NUMA_THREADS:-15}"
+# v5b defaults NUMA_REPACK=1 (~628 GB load peak). That OOMs on this box while
+# the DeepSeek shm cache is still resident. Override 0 is the runnable exclusive load.
+if [ -n "${FULL_NUMA_REPACK_OVERRIDE:-}" ]; then
+  export GGML_CPU_NUMA_REPACK="$FULL_NUMA_REPACK_OVERRIDE"
+fi
+echo "GGML_CPU_NUMA_REPACK=${GGML_CPU_NUMA_REPACK:-}"
 
 echo "--- per-node free before Full load ---"
 numactl -H | grep free
@@ -41,17 +49,24 @@ echo "draft=$DR"
 # Even 1,1,1,1 is the pinned Full split. Fractional 1.41,1.43,1.43,1.00 aborted
 # at ggml-backend-meta.cpp:949 (split size not divisible by Q4_K block granularity).
 SPLIT=${GLM_FULL_TENSOR_SPLIT:-1,1,1,1}
+CTX=${GLM_FULL_CTX:-4096}
+SPEC_ARGS=(--spec-type draft-mtp --spec-draft-model "$DR" --spec-draft-ngl all
+  --spec-draft-device CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3
+  --spec-draft-n-max 2 --spec-draft-n-default 2 --spec-draft-n-min 0 --spec-draft-p-min 0)
+if [ "${GLM_FULL_SKIP_MTP:-0}" = 1 ]; then
+  SPEC_ARGS=()
+  echo "MTP disabled for this exclusive load"
+fi
+echo "split=$SPLIT ctx=$CTX skip_mtp=${GLM_FULL_SKIP_MTP:-0}"
 
-nohup taskset -c 0-127 "$BIN" --host 127.0.0.1 --port 18131 --load-mode mmap --fit off --ctx-size 4096 \
+nohup taskset -c 0-127 "$BIN" --host 127.0.0.1 --port 18131 --load-mode mmap --fit off --ctx-size "$CTX" \
   --flash-attn on --batch-size 512 --ubatch-size 256 --parallel 1 --gpu-layers 999 \
   --device CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3 --split-mode tensor \
   --tensor-split "$SPLIT" \
   --cache-type-k q8_0 --cache-type-v q8_0 \
   --jinja --chat-template-file /home/user/InfoSystemic/AI-Server/serving/glm-sr950/chat-template-glm-5.3-llamacpp.jinja \
   --reasoning-format deepseek --reasoning-preserve --no-webui --metrics --verbosity 2 \
-  --spec-type draft-mtp --spec-draft-model "$DR" --spec-draft-ngl all \
-  --spec-draft-device CPU-NUMA0,CPU-NUMA1,CPU-NUMA2,CPU-NUMA3 \
-  --spec-draft-n-max 2 --spec-draft-n-default 2 --spec-draft-n-min 0 --spec-draft-p-min 0 \
+  "${SPEC_ARGS[@]}" \
   --threads 15 --threads-batch 15 --no-cache-prompt \
   --model "$M" --alias glm-sr950,glm-5.3,glm53,GLM-5.3,GLM-5.3-Full \
   > "$LOG" 2>&1 &

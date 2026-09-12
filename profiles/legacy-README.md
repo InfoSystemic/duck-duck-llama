@@ -1,0 +1,22 @@
+# SR950 launch profiles
+
+Use the [September 8 parameterized profiles](20260908/README.md) with the matching current source bundles. The shell launchers below are historical starting points, including the earlier single-socket Qwen/Flash workarounds; they do not describe the repaired and tuned four-socket engines.
+
+These launchers capture measured starting points for a four-socket Xeon Gold
+6242 host. They use environment variables for every path and contain no
+machine-specific directories, credentials, or network addresses.
+
+| Profile | Placement | Starting point |
+| --- | --- | --- |
+| [`launch-glm53-full.sh`](launch-glm53-full.sh) | four `CPU-NUMA` devices | 16 cores/socket, poll 50, direct collective, 32K, Q8_0 KV, MTP default 2 |
+| [`launch-glm53-flash.sh`](launch-glm53-flash.sh) | one NUMA node, preferred memory | 32 cores, mmap, Flash Attention off, F16 KV |
+| [`launch-qwen38-27b.sh`](launch-qwen38-27b.sh) | four `CPU-NUMA` devices | plain Q4_0, 16 cores/node, poll 100, hugepages off, MTP depth 2 (prose) or ngram-mod (replay) |
+| [`launch-qwen38-flash-next.sh`](launch-qwen38-flash-next.sh) | **one NUMA node (default)** | tensor-split corrupts `qwen4exp`; 32 threads, F16 KV, speculation off |
+
+Set `LLAMA_SERVER` and `MODEL` before running a script. Full GLM and Qwen-27B
+also require `MTP_MODEL`. `PORT` defaults to 8080, `HOST` to 127.0.0.1, and
+additional llama-server arguments can be appended on the command line.
+
+These are benchmark profiles, not universal defaults. Re-sweep thread count,
+context, batch geometry, speculative depth, and confidence threshold after any
+model, quant, compiler, firmware, or llama.cpp change.

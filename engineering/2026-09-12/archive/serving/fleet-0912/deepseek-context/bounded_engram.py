@@ -1,10 +1,12 @@
 """Bound Engram memory and new persistent rows while preserving native row bytes."""
 from collections import OrderedDict
 from concurrent.futures import as_completed
+import fcntl
 import hashlib
 import json
 import os
 from pathlib import Path
+import stat
 import time
 
 import torch
@@ -18,7 +20,7 @@ class BoundedEngram:
             raise ValueError('Persistent row limit must be between 0 and 100000')
         self.store, self.directory = store, Path(directory)
         self.memory_rows, self.persistent_rows, self.fetch_rows = memory_rows, persistent_rows, fetch_rows
-        if self.directory == store.rows_dir:
+        if self.directory.resolve() == Path(store.rows_dir).resolve():
             raise ValueError('Context row directory must differ from the selected legacy row directory')
         self.directory.mkdir(parents=True, exist_ok=True)
         if self.directory.is_symlink() or self.directory.stat().st_uid != os.getuid():
@@ -32,38 +34,96 @@ class BoundedEngram:
             raise ValueError('A new context cache directory must be empty')
         else:
             marker.write_text(json.dumps(owner) + '\n')
-        self.persisted = sum(1 for _ in self.directory.glob('*.bin'))
-        if self.persisted > persistent_rows:
-            raise ValueError('Existing context rows exceed the requested persistent limit')
+        self._lock_file = None
+        fd = os.open(self.directory / 'context-cache.lock', os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+        try:
+            info = os.fstat(fd)
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_nlink != 1:
+                raise ValueError('Expected an owned regular cache lock')
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise RuntimeError('Context row cache is already in use') from None
+            self._lock_file = os.fdopen(fd, 'rb')
+            fd = None
+            # A pending write consumes the same quota slot as its committed row.
+            # Count each stem once across data, manifest and partial files.
+            self._slots = {path.stem for suffix in ('*.bin', '*.part', '*.json')
+                           for path in self.directory.glob(suffix) if path != marker}
+            self.persisted = sum(1 for _ in self.directory.glob('*.bin'))
+            if len(self._slots) > persistent_rows:
+                raise ValueError('Existing context rows and pending writes exceed the requested persistent limit')
+        except BaseException:
+            self.close()
+            raise
+        finally:
+            if fd is not None:
+                os.close(fd)
         self.memory = OrderedDict()
         self.hits = self.disk_hits = self.fetched = self.evicted = self.unpersisted = 0
+        self.recovered = self.discarded_partials = 0
+
+    def close(self):
+        if self._lock_file is not None:
+            self._lock_file.close()
+            self._lock_file = None
+
+    def _discard_pending(self, path):
+        if path.exists() or path.is_symlink():
+            raise RuntimeError('Cannot discard a committed Engram row')
+        pending = [p for p in (path.with_suffix('.part'), path.with_suffix('.json'))
+                   if p.exists() or p.is_symlink()]
+        for item in pending:
+            info = item.lstat()
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_nlink != 1:
+                raise RuntimeError('Unexpected partial Engram file ownership or type')
+        for item in pending:
+            item.unlink()
+        self._slots.discard(path.stem)
+        self.discarded_partials += 1
+
+    @staticmethod
+    def _validate(raw, metadata, prefix, row):
+        if (not isinstance(metadata, dict) or metadata.get('prefix') != prefix
+                or metadata.get('row') != row or len(raw) != 264
+                or hashlib.sha256(raw).hexdigest() != metadata.get('sha256')):
+            raise RuntimeError('Engram row integrity mismatch')
 
     def _read(self, directory, prefix, row):
         path = directory / f'{prefix}.{row}.bin'
         record = path.with_suffix('.json')
+        partial = path.with_suffix('.part')
+        if path.is_symlink() or record.is_symlink() or partial.is_symlink():
+            raise RuntimeError('Symlinked Engram cache record')
         if not record.exists():
             if path.exists():
                 raise RuntimeError('Unmanifested Engram row')
+            if directory == self.directory and partial.exists():
+                self._discard_pending(path)
             return None
-        if path.is_symlink() or record.is_symlink():
-            raise RuntimeError('Symlinked Engram cache record')
-        metadata = json.loads(record.read_text())
-        partial = path.with_suffix('.part')
+        try:
+            metadata = json.loads(record.read_text())
+        except json.JSONDecodeError:
+            if directory == self.directory and not path.exists():
+                self._discard_pending(path)
+                return None
+            raise RuntimeError('Invalid committed Engram manifest') from None
         if not path.exists() and directory == self.directory and partial.exists():
-            if partial.is_symlink():
-                raise RuntimeError('Symlinked partial Engram row')
             raw = partial.read_bytes()
-            if len(raw) != 264 or hashlib.sha256(raw).hexdigest() != metadata['sha256']:
-                raise RuntimeError('Invalid partial Engram row')
+            self._validate(raw, metadata, prefix, row)
             partial.rename(path)
+            self._slots.add(path.stem)
+            self.persisted += 1
+            self.recovered += 1
+        elif not path.exists() and directory == self.directory:
+            self._discard_pending(path)
+            return None
         raw = path.read_bytes()
-        if (metadata.get('prefix') != prefix or metadata.get('row') != row or len(raw) != 264
-                or hashlib.sha256(raw).hexdigest() != metadata.get('sha256')):
-            raise RuntimeError('Engram row integrity mismatch')
+        self._validate(raw, metadata, prefix, row)
         return raw
 
     def _persist(self, prefix, row, raw):
-        if self.persisted >= self.persistent_rows:
+        if len(self._slots) >= self.persistent_rows:
             self.unpersisted += 1
             return
         path = self.directory / f'{prefix}.{row}.bin'
@@ -71,6 +131,7 @@ class BoundedEngram:
         if path.exists() or partial.exists() or record.exists():
             raise RuntimeError('Unexpected existing context cache output')
         with partial.open('xb') as handle:
+            self._slots.add(path.stem)
             handle.write(raw)
         with record.open('x') as handle:
             json.dump({'prefix': prefix, 'row': row, 'sha256': hashlib.sha256(raw).hexdigest()}, handle)
@@ -89,6 +150,8 @@ class BoundedEngram:
         self.memory[prefix, row] = value
 
     def rows(self, prefix, ids):
+        if self._lock_file is None:
+            raise RuntimeError('Context row cache is closed')
         store = self.store
         w, s = store.catalog.tensors[prefix + '.weight'], store.catalog.tensors[prefix + '.scale']
         if w['shape'][1] != 256 or s['shape'] != [w['shape'][0], 8]:
@@ -147,5 +210,7 @@ class BoundedEngram:
     def metrics(self):
         return dict(memory_rows=len(self.memory), memory_limit=self.memory_rows,
                     persisted_rows=self.persisted, persistent_limit=self.persistent_rows,
+                    reserved_rows=len(self._slots), recovered_rows=self.recovered,
+                    discarded_partial_rows=self.discarded_partials,
                     hits=self.hits, disk_hits=self.disk_hits, fetched=self.fetched,
                     evicted=self.evicted, unpersisted=self.unpersisted)
