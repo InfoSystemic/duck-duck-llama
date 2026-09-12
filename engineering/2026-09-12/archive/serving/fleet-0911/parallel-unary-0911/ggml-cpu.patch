@@ -1,0 +1,104 @@
+--- ggml-cpu.parent.c	2026-09-11 13:48:54.220608229 -0600
++++ ggml-cpu.patched.c	2026-09-11 14:21:44.761064080 -0600
+@@ -2686,6 +2686,9 @@
+ static void clear_numa_thread_affinity(void) {}
+ #endif
+ 
++// Opt-in knob (GGML_CPU_PARALLEL_UNARY=<min_elements>); set in ggml_cpu_init below.
++static int64_t ggml_cpu_parallel_unary = 0;
++
+ static int ggml_get_n_tasks(struct ggml_tensor * node, int n_threads) {
+     int n_tasks = 0;
+ 
+@@ -2757,7 +2760,13 @@
+                 case GGML_UNARY_OP_ROUND:
+                 case GGML_UNARY_OP_TRUNC:
+                     {
+-                        n_tasks = 1;
++                        // Upstream hard-codes these elementwise ops to a single task, but the
++                        // implementation already honours ith/nth (get_thread_range), so for large
++                        // tensors that is pure serialisation: measured 56.2 us/op on ne=[128,16,4]
++                        // in GLM-5.3-Flash's KDA path (0.58 GB/s) with 14 workers idle. Elementwise
++                        // => no reduction => splitting is bit-exact.
++                        n_tasks = (ggml_cpu_parallel_unary > 0 &&
++                                   ggml_nelements(node) >= ggml_cpu_parallel_unary) ? n_threads : 1;
+                     } break;
+ 
+                 case GGML_UNARY_OP_GELU:
+@@ -3939,6 +3948,7 @@
+     const bool profile_ops = profile_graph_index >= ggml_cpu_op_profile_skip &&
+         profile_graph_index < ggml_cpu_op_profile_skip + ggml_cpu_op_profile_count;
+     int64_t * profile_node_us = profile_ops ? calloc(cgraph->n_nodes, sizeof(int64_t)) : NULL;
++    int64_t * profile_barrier_us = profile_ops ? calloc(cgraph->n_nodes, sizeof(int64_t)) : NULL;
+     int profile_cpu = -1;
+ #if defined(__linux__)
+     if (profile_ops) {
+@@ -3996,6 +4006,8 @@
+             tp->ec    = GGML_STATUS_ABORTED;
+         }
+ 
++        const int64_t profile_mid_us = profile_ops ? ggml_time_us() : 0;
++
+         if (node_n + 1 < cgraph->n_nodes) {
+             bool need_barrier = true;
+             if (single) {
+@@ -4014,7 +4026,8 @@
+             }
+         }
+         if (profile_ops) {
+-            profile_node_us[measured_node_n] = ggml_time_us() - profile_start_us;
++            profile_node_us[measured_node_n]    = profile_mid_us - profile_start_us;
++            profile_barrier_us[measured_node_n] = ggml_time_us() - profile_mid_us;
+         }
+     }
+ 
+@@ -4028,23 +4041,25 @@
+ 
+     if (profile_ops) {
+         int64_t profile_total_us = 0;
++        int64_t profile_barrier_total_us = 0;
+         for (int node_n = 0; node_n < cgraph->n_nodes; ++node_n) {
+             profile_total_us += profile_node_us[node_n];
++            profile_barrier_total_us += profile_barrier_us[node_n];
+         }
+-        GGML_LOG_WARN("CPU_OP_PROFILE index=%d cpu=%d graph=%p nodes=%d total=%.3f ms first='%s' last='%s'\n",
++        GGML_LOG_WARN("CPU_OP_PROFILE index=%d cpu=%d graph=%p nodes=%d total=%.3f ms barrier=%.3f ms first='%s' last='%s'\n",
+             profile_graph_index, profile_cpu, (const void *) cgraph, cgraph->n_nodes,
+-            profile_total_us / 1000.0, profile_first, profile_last);
++            profile_total_us / 1000.0, profile_barrier_total_us / 1000.0, profile_first, profile_last);
+         for (int node_n = 0; node_n < cgraph->n_nodes; ++node_n) {
+-            if (profile_node_us[node_n] < 5) {
++            if (profile_node_us[node_n] + profile_barrier_us[node_n] < 5) {
+                 continue;
+             }
+             const struct ggml_tensor * node = cgraph->nodes[node_n];
+             const struct ggml_tensor * src0 = node->src[0];
+             GGML_LOG_WARN(
+-                "CPU_OP_PROFILE cpu=%d graph=%p node=%d op=%s time=%.3f ms name='%s' "
++                "CPU_OP_PROFILE cpu=%d graph=%p node=%d op=%s time=%.3f ms bar=%.3f ms name='%s' "
+                 "src0_type=%s src0_ne=[%" PRId64 ",%" PRId64 ",%" PRId64 "] src0_name='%s'\n",
+                 profile_cpu, (const void *) cgraph, node_n, ggml_op_name(node->op),
+-                profile_node_us[node_n] / 1000.0, node->name,
++                profile_node_us[node_n] / 1000.0, profile_barrier_us[node_n] / 1000.0, node->name,
+                 src0 != NULL ? ggml_type_name(src0->type) : "none",
+                 src0 != NULL ? src0->ne[0] : 0,
+                 src0 != NULL ? src0->ne[1] : 0,
+@@ -4052,6 +4067,7 @@
+                 src0 != NULL ? src0->name : "");
+         }
+         free(profile_node_us);
++        free(profile_barrier_us);
+         if (ggml_cpu_op_profile_arm_file != NULL &&
+                 profile_graph_index + 1 >= ggml_cpu_op_profile_skip + ggml_cpu_op_profile_count) {
+             atomic_store_explicit(&ggml_cpu_op_profile_arm_state, 2, memory_order_release);
+@@ -4873,6 +4889,10 @@
+             const char * env = getenv("GGML_CPU_IQ3_XXS_MOE_2ROW_VALIDATE");
+             ggml_cpu_iq3_xxs_moe_2row_validate = (env != NULL && atoi(env) == 1);
+         }
++        {
++            const char * env = getenv("GGML_CPU_PARALLEL_UNARY");
++            ggml_cpu_parallel_unary = env != NULL && *env ? (int64_t) atoll(env) : 0;
++        }
+         ggml_cpu_op_profile_filter = getenv("GGML_CPU_OP_PROFILE");
+         ggml_cpu_op_profile_arm_file = getenv("GGML_CPU_OP_PROFILE_ARM_FILE");
+         {

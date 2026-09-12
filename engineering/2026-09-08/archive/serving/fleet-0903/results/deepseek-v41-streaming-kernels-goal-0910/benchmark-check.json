@@ -1,0 +1,3055 @@
+{
+  "passed": true,
+  "started": 1789056893.6125908,
+  "workers": 16,
+  "cpus": [
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "omp_wait_policy": "PASSIVE",
+  "component_only": true,
+  "full_checkpoint_loaded": false,
+  "model_tok_s_measured": false,
+  "max_prepared_buffers_bytes": 1073741824,
+  "timing_scope": "Weights, packing, output allocation and native descriptors are outside timers. Native internal scratch and normal wrapper metadata are included.",
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_deepseek_v41_streaming_kernels_goal_0910.py": "5dc111aad7ae5c05abc7235552658ceb8420a205108cacbe60c9dc1be5ee2188",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-goal-0910/libdeepseek-v41-native-grouped.so": "181b3de2597270b61e73ecd27106fa1961eb8945ba5605f50dc276153438ea4d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-vnni-goal-0910/libdeepseek-v41-native-vnni.so": "186f045ef1bf88d160a5a15bfbd3ba876e1608044ba758e8afb4493ed867216c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-vnni-goal-0910/libdeepseek-v41-native-grouped-vnni.so": "f1dc92da3d91c28bbcb249149a08ecc842872cccdf63bc772ed146107c0f73ba",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-fp8-vnni-goal-0910/libdeepseek-v41-native-fp8-vnni.so": "0cf54bae2e15e15e411f5181cc1387d4b96b5d8284618ed1bc8008e9f7f85255",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-goal-0910/kernel-check.json": "053b6c7d4f4781c547593e0afca73d0a80a5aa75bf332ebc0980a75a1954ec96",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-vnni-goal-0910/kernel-check.json": "25491b08eedd426d541288af43a04da5ad96125fc419fa349824dc9c1246d21a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-vnni-goal-0910/kernel-check.json": "59e4b3d4c221f90ff0739bfb4e82afb8b93d4cb503946b6d08cfef379b0d0697",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-fp8-vnni-goal-0910/kernel-check.json": "9ec5e142f65cfd0e5dc556b3a41a9369a55b882681975864d0f94651aa85ea76",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_native_grouped_goal_0910.py": "7988f0dd27ec6e334b1f410aad73d1dd8b16efddbc14e576b13b7bd63388eafc",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-grouped-goal-0910.cpp": "f2559869f333f867f7ea105a1dfe8b64b1273746002160335621b32e4eb0aac9",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-goal-0910.cpp": "9ccb9c9ad62ac81990cd476800cd64796c4650597d319f7b606a4f67beef051c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_grouped_goal_0910.py": "d6002cbb09e392382661f8ccde9e0c93b251d4546d947fc71a57a2b7c97fab23",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-goal-0910/libdeepseek-v41-native-grouped-lut.so": "4acd300c92c21f05230d40895fc104f1cb7eee7c0c1d74d484d884aeb4be3c2c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_native_vnni_goal_0910.py": "9aa63f2a5eb20a6fc72e4a9690642adbd938412e5f13af20e458d8a0d37fd971",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-vnni-goal-0910.cpp": "d48d3fc6666cf85a18a6e86b2e036d4dc6fd6134146cb11d0e8c78d8c019af8d",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-0910b.cpp": "67e9391f008082251946fb1f7486179f03a7efbf7dbb3c96d6078446d195a9b7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_vnni_goal_0910.py": "3b784a67c72fa296db8798cff38e7b2282022d29f99b2ee665339f97f6b40c8c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_native_grouped_vnni_goal_0910.py": "f984876bd1ca2df4c50c87bb01b81d56b1a02eac62aac1d926ee31560e684c29",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-grouped-vnni-goal-0910.cpp": "e19d4bf5de30135dcb8ba2c3e60b3156b822e9c48425fe9d8d9b371a554cabc9",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_grouped_vnni_goal_0910.py": "150e512a796996852706b40d0a11f3d4840d4f5b074bd54381655aa0c49f5250",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_native_fp8_vnni_goal_0910.py": "958e74c013970549247c3f4cd58370c1bdbc5c7a6787f5a513ad74a4fb64e9e8",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-fp8-vnni-goal-0910.cpp": "4e4fab3a63718b2fa147df2a30f1ff6d2a6c492b9b665f00ef4b5c759c638d1c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_fp8_vnni_goal_0910.py": "0ab37100b81bad73fee10b32fe7e4a993f4546e0e961b240ec4c5f75af902103",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1"
+  },
+  "phases": [
+    {
+      "name": "mixed_gate_up",
+      "matrix_shape": [
+        2304,
+        5120
+      ],
+      "groups": 4,
+      "tasks_per_group": 14,
+      "native_weight_bytes": 377487360,
+      "packed_weight_bytes": 283115520,
+      "prepared_buffer_bytes": 731757696,
+      "rss_bytes": 972029952,
+      "packing_seconds": 0.08850334887392819,
+      "pack_cache_entries": 48,
+      "timed_cache_misses": 0,
+      "numa_before": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 5898240,
+            "pages": [
+              1134260224,
+              1137209344,
+              1140158464
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 5898240,
+            "pages": [
+              1488920576,
+              1491865600,
+              1494814720
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 11796480,
+            "pages": [
+              1842819072,
+              1848717312,
+              1854615552
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 5898240,
+            "pages": [
+              1140527104,
+              1143476224,
+              1146425344
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 5898240,
+            "pages": [
+              1495187456,
+              1498136576,
+              1501085696
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 5898240,
+            "pages": [
+              1824018432,
+              1826967552,
+              1829916672
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=56 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      },
+      "baseline_bit_differences": [
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        }
+      ],
+      "timings": [
+        {
+          "workload": "single_matrix_hot",
+          "comparison": "grouping_native_only",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.00025027139872690896,
+          "candidate_seconds_per_projection": 0.0002424124695608043,
+          "speedup": 1.0324196572079944,
+          "logical_weight_bytes_per_epoch": 5898240,
+          "baseline_logical_weight_GB_s": 23.567375377304057,
+          "candidate_logical_weight_GB_s": 24.33142160832838,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.037447852082550526,
+              "seconds_per_epoch": 0.000292561344394926
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.032837977167218924,
+              "seconds_per_epoch": 0.00025654669661889784
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.02921961504034698,
+              "seconds_per_epoch": 0.00022827824250271078
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.026621625991538167,
+              "seconds_per_epoch": 0.00020798145305889193
+            }
+          ]
+        },
+        {
+          "workload": "single_matrix_hot",
+          "comparison": "vnni_native_only",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.0002175870695282356,
+          "candidate_seconds_per_projection": 7.448868745996151e-05,
+          "speedup": 2.9210753598684502,
+          "logical_weight_bytes_per_epoch": 5898240,
+          "baseline_logical_weight_GB_s": 27.1074931648666,
+          "candidate_logical_weight_GB_s": 79.18303035169426,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.0258935559540987,
+              "seconds_per_epoch": 0.0002022934058913961
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.00928141106851399,
+              "seconds_per_epoch": 7.251102397276554e-05
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.009787692921236157,
+              "seconds_per_epoch": 7.646635094715748e-05
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.02980873384512961,
+              "seconds_per_epoch": 0.00023288073316507507
+            }
+          ]
+        },
+        {
+          "workload": "single_matrix_hot",
+          "comparison": "vnni_preallocated_wrappers",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.00020897302329103695,
+          "candidate_seconds_per_projection": 9.205010974255856e-05,
+          "speedup": 2.2702093878593184,
+          "logical_weight_bytes_per_epoch": 5898240,
+          "baseline_logical_weight_GB_s": 28.224887151034395,
+          "candidate_logical_weight_GB_s": 64.07640378154814,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.027086195070296526,
+              "seconds_per_epoch": 0.0002116108989866916
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.011775803053751588,
+              "seconds_per_epoch": 9.199846135743428e-05
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.011789025040343404,
+              "seconds_per_epoch": 9.210175812768284e-05
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.026410898892208934,
+              "seconds_per_epoch": 0.0002063351475953823
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "grouping_native_only",
+          "epochs": 4,
+          "projections_per_epoch": 56,
+          "baseline_seconds_per_projection": 0.000223168377228181,
+          "candidate_seconds_per_projection": 0.00023185747340903617,
+          "speedup": 0.9625239762467086,
+          "logical_weight_bytes_per_epoch": 377487360,
+          "baseline_logical_weight_GB_s": 30.205201104247223,
+          "candidate_logical_weight_GB_s": 29.073230270191512,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.05012064706534147,
+              "seconds_per_epoch": 0.012530161766335368
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.049725512973964214,
+              "seconds_per_epoch": 0.012431378243491054
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.05414663511328399,
+              "seconds_per_epoch": 0.013536658778320998
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.04985878593288362,
+              "seconds_per_epoch": 0.012464696483220905
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "vnni_native_only",
+          "epochs": 4,
+          "projections_per_epoch": 56,
+          "baseline_seconds_per_projection": 0.00017825770087906027,
+          "candidate_seconds_per_projection": 9.955598216038197e-05,
+          "speedup": 1.7905272692894734,
+          "logical_weight_bytes_per_epoch": 377487360,
+          "baseline_logical_weight_GB_s": 37.815172534167665,
+          "candidate_logical_weight_GB_s": 67.70909761531352,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.040110873989760876,
+              "seconds_per_epoch": 0.010027718497440219
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.02228460507467389,
+              "seconds_per_epoch": 0.005571151268668473
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.022316474933177233,
+              "seconds_per_epoch": 0.005579118733294308
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.03974857600405812,
+              "seconds_per_epoch": 0.00993714400101453
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "vnni_preallocated_wrappers",
+          "epochs": 4,
+          "projections_per_epoch": 56,
+          "baseline_seconds_per_projection": 0.0002226160624039559,
+          "candidate_seconds_per_projection": 0.0001256525559126333,
+          "speedup": 1.7716795395609914,
+          "logical_weight_bytes_per_epoch": 377487360,
+          "baseline_logical_weight_GB_s": 30.28014080158274,
+          "candidate_logical_weight_GB_s": 53.646705913190104,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.043195624835789204,
+              "seconds_per_epoch": 0.010798906208947301
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.026376812951639295,
+              "seconds_per_epoch": 0.006594203237909824
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.02991553209722042,
+              "seconds_per_epoch": 0.007478883024305105
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.05653637112118304,
+              "seconds_per_epoch": 0.01413409278029576
+            }
+          ]
+        }
+      ],
+      "numa_after": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 5898240,
+            "pages": [
+              1134260224,
+              1137209344,
+              1140158464
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 5898240,
+            "pages": [
+              1488920576,
+              1491865600,
+              1494814720
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 11796480,
+            "pages": [
+              1842819072,
+              1848717312,
+              1854615552
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 5898240,
+            "pages": [
+              1140527104,
+              1143476224,
+              1146425344
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 5898240,
+            "pages": [
+              1495187456,
+              1498136576,
+              1501085696
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 5898240,
+            "pages": [
+              1824018432,
+              1826967552,
+              1829916672
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1855008768,
+                "mapping": "3e51e000-6e913000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=197532 dirty=197532 active=39 N3=197532 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      }
+    },
+    {
+      "name": "mixed_down",
+      "matrix_shape": [
+        5120,
+        2304
+      ],
+      "groups": 8,
+      "tasks_per_group": 7,
+      "native_weight_bytes": 377487360,
+      "packed_weight_bytes": 283115520,
+      "prepared_buffer_bytes": 732190656,
+      "rss_bytes": 972660736,
+      "packing_seconds": 0.08498913259245455,
+      "pack_cache_entries": 48,
+      "timed_cache_misses": 0,
+      "numa_before": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 5898240,
+            "pages": [
+              1280245760,
+              1283194880,
+              1286144000
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 5898240,
+            "pages": [
+              1501085696,
+              1504034816,
+              1506983936
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 11796480,
+            "pages": [
+              1854988288,
+              1860886528,
+              1866784768
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 5898240,
+            "pages": [
+              1286144000,
+              1289093120,
+              1292042240
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 5898240,
+            "pages": [
+              1507352576,
+              1510301696,
+              1513250816
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 5898240,
+            "pages": [
+              1847984128,
+              1850933248,
+              1853882368
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=64 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      },
+      "baseline_bit_differences": [
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        },
+        {
+          "serial_native": 0,
+          "grouped_baseline_native": 0,
+          "grouped_vnni_native": 0,
+          "grouped_baseline_wrapper": 0,
+          "grouped_vnni_wrapper": 0
+        }
+      ],
+      "timings": [
+        {
+          "workload": "single_matrix_hot",
+          "comparison": "grouping_native_only",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.00022732716024620458,
+          "candidate_seconds_per_projection": 0.00021578172618319513,
+          "speedup": 1.053505152022037,
+          "logical_weight_bytes_per_epoch": 5898240,
+          "baseline_logical_weight_GB_s": 25.946041791099514,
+          "candidate_logical_weight_GB_s": 27.334288701502423,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.02986048604361713,
+              "seconds_per_epoch": 0.00023328504721575882
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.02621725481003523,
+              "seconds_per_epoch": 0.00020482230320340022
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.029022867092862725,
+              "seconds_per_epoch": 0.00022674114916299004
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.028335266979411244,
+              "seconds_per_epoch": 0.00022136927327665035
+            }
+          ]
+        },
+        {
+          "workload": "single_matrix_hot",
+          "comparison": "vnni_native_only",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.0002407490355835762,
+          "candidate_seconds_per_projection": 7.875254323153058e-05,
+          "speedup": 3.0570318837295174,
+          "logical_weight_bytes_per_epoch": 5898240,
+          "baseline_logical_weight_GB_s": 24.49953739462612,
+          "candidate_logical_weight_GB_s": 74.89586695199566,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.029559940099716187,
+              "seconds_per_epoch": 0.0002309370320290327
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.010100906016305089,
+              "seconds_per_epoch": 7.891332825238351e-05
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.01005974505096674,
+              "seconds_per_epoch": 7.859175821067765e-05
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.03207181300967932,
+              "seconds_per_epoch": 0.00025056103913811967
+            }
+          ]
+        },
+        {
+          "workload": "single_matrix_hot",
+          "comparison": "vnni_preallocated_wrappers",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.00027564342690311605,
+          "candidate_seconds_per_projection": 0.00011137239835079527,
+          "speedup": 2.4749707376769243,
+          "logical_weight_bytes_per_epoch": 5898240,
+          "baseline_logical_weight_GB_s": 21.398079635953483,
+          "candidate_logical_weight_GB_s": 52.95962094146537,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.039051419124007225,
+              "seconds_per_epoch": 0.00030508921190630645
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.014424568973481655,
+              "seconds_per_epoch": 0.00011269194510532543
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.014086765004321933,
+              "seconds_per_epoch": 0.0001100528515962651
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.031513298163190484,
+              "seconds_per_epoch": 0.00024619764189992566
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "grouping_native_only",
+          "epochs": 4,
+          "projections_per_epoch": 56,
+          "baseline_seconds_per_projection": 0.00021668339676190435,
+          "candidate_seconds_per_projection": 0.0001823650870522085,
+          "speedup": 1.1881846479741542,
+          "logical_weight_bytes_per_epoch": 377487360,
+          "baseline_logical_weight_GB_s": 31.109193482381478,
+          "candidate_logical_weight_GB_s": 36.96346610662329,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.04848921694792807,
+              "seconds_per_epoch": 0.012122304236982018
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.040605016984045506,
+              "seconds_per_epoch": 0.010151254246011376
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.041094542015343904,
+              "seconds_per_epoch": 0.010273635503835976
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.04858494480140507,
+              "seconds_per_epoch": 0.012146236200351268
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "vnni_native_only",
+          "epochs": 4,
+          "projections_per_epoch": 56,
+          "baseline_seconds_per_projection": 0.0002007080048705185,
+          "candidate_seconds_per_projection": 0.00012710034362888628,
+          "speedup": 1.5791303086996793,
+          "logical_weight_bytes_per_epoch": 377487360,
+          "baseline_logical_weight_GB_s": 33.58533566528347,
+          "candidate_logical_weight_GB_s": 53.03562147690143,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.04276485019363463,
+              "seconds_per_epoch": 0.010691212548408657
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.027859447058290243,
+              "seconds_per_epoch": 0.006964861764572561
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.029081506887450814,
+              "seconds_per_epoch": 0.0072703767218627036
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.04715233598835766,
+              "seconds_per_epoch": 0.011788083997089416
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "vnni_preallocated_wrappers",
+          "epochs": 4,
+          "projections_per_epoch": 56,
+          "baseline_seconds_per_projection": 0.00022834575221557834,
+          "candidate_seconds_per_projection": 0.0001502955731536661,
+          "speedup": 1.5193112306914838,
+          "logical_weight_bytes_per_epoch": 377487360,
+          "baseline_logical_weight_GB_s": 29.520346443413437,
+          "candidate_logical_weight_GB_s": 44.85059388538143,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.05258714500814676,
+              "seconds_per_epoch": 0.01314678625203669
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.036766030825674534,
+              "seconds_per_epoch": 0.009191507706418633
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.030566385947167873,
+              "seconds_per_epoch": 0.007641596486791968
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.04971175198443234,
+              "seconds_per_epoch": 0.012427937996108085
+            }
+          ]
+        }
+      ],
+      "numa_after": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 5898240,
+            "pages": [
+              1280245760,
+              1283194880,
+              1286144000
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 5898240,
+            "pages": [
+              1501085696,
+              1504034816,
+              1506983936
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 11796480,
+            "pages": [
+              1854988288,
+              1860886528,
+              1866784768
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 5898240,
+            "pages": [
+              1286144000,
+              1289093120,
+              1292042240
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 5898240,
+            "pages": [
+              1507352576,
+              1510301696,
+              1513250816
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 5898240,
+            "pages": [
+              1847984128,
+              1850933248,
+              1853882368
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1867206656,
+                "mapping": "3e51e000-6f4b5000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=200510 dirty=200510 active=47 N3=200510 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      }
+    },
+    {
+      "name": "fp8_small",
+      "matrix_shape": [
+        1280,
+        5120
+      ],
+      "distinct_matrices": 48,
+      "native_weight_bytes": 314572800,
+      "packed_weight_bytes": 314572800,
+      "prepared_buffer_bytes": 631057920,
+      "rss_bytes": 886874112,
+      "packing_seconds": 0.05169860180467367,
+      "timed_cache_misses": 0,
+      "numa_before": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 6553600,
+            "pages": [
+              1280245760,
+              1283522560,
+              1286799360
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 6553600,
+            "pages": [
+              1459998720,
+              1463275520,
+              1466552320
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 6553600,
+            "pages": [
+              1761468416,
+              1764745216,
+              1768022016
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 6553600,
+            "pages": [
+              1286799360,
+              1290076160,
+              1293352960
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 6553600,
+            "pages": [
+              1466552320,
+              1469829120,
+              1473105920
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 6553600,
+            "pages": [
+              1768022016,
+              1771298816,
+              1774575616
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      },
+      "baseline_bit_differences": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        0,
+        1
+      ],
+      "timings": [
+        {
+          "workload": "single_matrix_repeated",
+          "comparison": "fp8_native_only",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.00021319290590327,
+          "candidate_seconds_per_projection": 0.00011941788670810638,
+          "speedup": 1.7852677834132025,
+          "logical_weight_bytes_per_epoch": 6553600,
+          "baseline_logical_weight_GB_s": 30.740234869604446,
+          "candidate_logical_weight_GB_s": 54.879550967259966,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.032272664830088615,
+              "seconds_per_epoch": 0.0002521301939850673
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.015272437129169703,
+              "seconds_per_epoch": 0.0001193159150716383
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.01529854186810553,
+              "seconds_per_epoch": 0.00011951985834457446
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.022304719081148505,
+              "seconds_per_epoch": 0.0001742556178214727
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "fp8_native_only",
+          "epochs": 4,
+          "projections_per_epoch": 48,
+          "baseline_seconds_per_projection": 0.0001912675567533976,
+          "candidate_seconds_per_projection": 0.0001572612266803238,
+          "speedup": 1.2162410327766355,
+          "logical_weight_bytes_per_epoch": 314572800,
+          "baseline_logical_weight_GB_s": 34.26404410262633,
+          "candidate_logical_weight_GB_s": 41.67333638648244,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.03521435591392219,
+              "seconds_per_epoch": 0.008803588978480548
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.030265052104368806,
+              "seconds_per_epoch": 0.0075662630260922015
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.03012325894087553,
+              "seconds_per_epoch": 0.0075308147352188826
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.03823238587938249,
+              "seconds_per_epoch": 0.009558096469845623
+            }
+          ]
+        }
+      ],
+      "numa_after": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 6553600,
+            "pages": [
+              1280245760,
+              1283522560,
+              1286799360
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 6553600,
+            "pages": [
+              1459998720,
+              1463275520,
+              1466552320
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 6553600,
+            "pages": [
+              1761468416,
+              1764745216,
+              1768022016
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 6553600,
+            "pages": [
+              1286799360,
+              1290076160,
+              1293352960
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 6553600,
+            "pages": [
+              1466552320,
+              1469829120,
+              1473105920
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 6553600,
+            "pages": [
+              1768022016,
+              1771298816,
+              1774575616
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1781264384,
+                "mapping": "3e51e000-6a2bf000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=179528 dirty=179528 active=14 N3=179528 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      }
+    },
+    {
+      "name": "fp8_dense",
+      "matrix_shape": [
+        5120,
+        8192
+      ],
+      "distinct_matrices": 8,
+      "native_weight_bytes": 335544320,
+      "packed_weight_bytes": 335544320,
+      "prepared_buffer_bytes": 672876544,
+      "rss_bytes": 1028685824,
+      "packing_seconds": 0.07237517880275846,
+      "timed_cache_misses": 0,
+      "numa_before": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 41943040,
+            "pages": [
+              1167069184,
+              1188040704,
+              1209012224
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 41943040,
+            "pages": [
+              136710462451712,
+              136710483423232,
+              136710504394752
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 41943040,
+            "pages": [
+              136710210768896,
+              136710231740416,
+              136710252711936
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 41943040,
+            "pages": [
+              1213861888,
+              1234833408,
+              1255804928
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 41943040,
+            "pages": [
+              136710420504576,
+              136710441476096,
+              136710462447616
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 41943040,
+            "pages": [
+              136710168821760,
+              136710189793280,
+              136710210764800
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=97 N3=143468 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      },
+      "baseline_bit_differences": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "timings": [
+        {
+          "workload": "single_matrix_repeated",
+          "comparison": "fp8_native_only",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.0011918154095837963,
+          "candidate_seconds_per_projection": 0.0007683475150770391,
+          "speedup": 1.5511410998242088,
+          "logical_weight_bytes_per_epoch": 41943040,
+          "baseline_logical_weight_GB_s": 35.19256393458386,
+          "candidate_logical_weight_GB_s": 54.58863232712419,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.15236009191721678,
+              "seconds_per_epoch": 0.001190313218103256
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.09585772291757166,
+              "seconds_per_epoch": 0.0007488884602935286
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.10083924094215035,
+              "seconds_per_epoch": 0.0007878065698605496
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.15274465293623507,
+              "seconds_per_epoch": 0.0011933176010643365
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "fp8_native_only",
+          "epochs": 4,
+          "projections_per_epoch": 8,
+          "baseline_seconds_per_projection": 0.0014470270107267424,
+          "candidate_seconds_per_projection": 0.0007581835452583618,
+          "speedup": 1.9085444675980767,
+          "logical_weight_bytes_per_epoch": 335544320,
+          "baseline_logical_weight_GB_s": 28.985664876383257,
+          "candidate_logical_weight_GB_s": 55.32043033947316,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.0401321928948164,
+              "seconds_per_epoch": 0.0100330482237041
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.024298395961523056,
+              "seconds_per_epoch": 0.006074598990380764
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.024225350935012102,
+              "seconds_per_epoch": 0.0060563377337530255
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.05247753579169512,
+              "seconds_per_epoch": 0.01311938394792378
+            }
+          ]
+        }
+      ],
+      "numa_after": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 41943040,
+            "pages": [
+              1167069184,
+              1188040704,
+              1209012224
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 41943040,
+            "pages": [
+              136710462451712,
+              136710483423232,
+              136710504394752
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 41943040,
+            "pages": [
+              136710210768896,
+              136710231740416,
+              136710252711936
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 41943040,
+            "pages": [
+              1213861888,
+              1234833408,
+              1255804928
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 41943040,
+            "pages": [
+              136710420504576,
+              136710441476096,
+              136710462447616
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 41943040,
+            "pages": [
+              136710168821760,
+              136710189793280,
+              136710210764800
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143468 dirty=143468 active=77 N3=143468 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      }
+    },
+    {
+      "name": "fp8_head",
+      "matrix_shape": [
+        32768,
+        1280
+      ],
+      "distinct_matrices": 8,
+      "native_weight_bytes": 335544320,
+      "packed_weight_bytes": 335544320,
+      "prepared_buffer_bytes": 673261888,
+      "rss_bytes": 1028718592,
+      "packing_seconds": 0.06506313639692962,
+      "timed_cache_misses": 0,
+      "numa_before": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 41943040,
+            "pages": [
+              1167069184,
+              1188040704,
+              1209012224
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 41943040,
+            "pages": [
+              136710462451712,
+              136710483423232,
+              136710504394752
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 41943040,
+            "pages": [
+              136710210768896,
+              136710231740416,
+              136710252711936
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 41943040,
+            "pages": [
+              1213861888,
+              1234833408,
+              1255804928
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 41943040,
+            "pages": [
+              136710420504576,
+              136710441476096,
+              136710462447616
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 41943040,
+            "pages": [
+              136710168821760,
+              136710189793280,
+              136710210764800
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=96 N3=143476 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      },
+      "baseline_bit_differences": [
+        1,
+        0,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "timings": [
+        {
+          "workload": "single_matrix_repeated",
+          "comparison": "fp8_native_only",
+          "epochs": 128,
+          "projections_per_epoch": 1,
+          "baseline_seconds_per_projection": 0.001263386389837251,
+          "candidate_seconds_per_projection": 0.0007824043987056939,
+          "speedup": 1.6147485774967907,
+          "logical_weight_bytes_per_epoch": 41943040,
+          "baseline_logical_weight_GB_s": 33.19890125253216,
+          "candidate_logical_weight_GB_s": 53.607878571982724,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.160087781958282,
+              "seconds_per_epoch": 0.001250685796549078
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.09862484014593065,
+              "seconds_per_epoch": 0.0007705065636400832
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.10167068592272699,
+              "seconds_per_epoch": 0.0007943022337713046
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.16333913384005427,
+              "seconds_per_epoch": 0.001276086983125424
+            }
+          ]
+        },
+        {
+          "workload": "streaming",
+          "comparison": "fp8_native_only",
+          "epochs": 4,
+          "projections_per_epoch": 8,
+          "baseline_seconds_per_projection": 0.0012213613408675883,
+          "candidate_seconds_per_projection": 0.0007768274335830938,
+          "speedup": 1.572242802026307,
+          "logical_weight_bytes_per_epoch": 335544320,
+          "baseline_logical_weight_GB_s": 34.34122122303786,
+          "candidate_logical_weight_GB_s": 53.99273788071432,
+          "arms": [
+            {
+              "variant": "baseline",
+              "seconds": 0.04018431389704347,
+              "seconds_per_epoch": 0.010046078474260867
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.025732358917593956,
+              "seconds_per_epoch": 0.006433089729398489
+            },
+            {
+              "variant": "candidate",
+              "seconds": 0.023984596831724048,
+              "seconds_per_epoch": 0.005996149207931012
+            },
+            {
+              "variant": "baseline",
+              "seconds": 0.037982811918482184,
+              "seconds_per_epoch": 0.009495702979620546
+            }
+          ]
+        }
+      ],
+      "numa_after": {
+        "query_only_move_pages": {
+          "return_code": 0,
+          "errno": 0,
+          "error_name": null
+        },
+        "samples": [
+          {
+            "label": "native_first",
+            "bytes": 41943040,
+            "pages": [
+              1167069184,
+              1188040704,
+              1209012224
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_middle",
+            "bytes": 41943040,
+            "pages": [
+              136710462451712,
+              136710483423232,
+              136710504394752
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "native_last",
+            "bytes": 41943040,
+            "pages": [
+              136710210768896,
+              136710231740416,
+              136710252711936
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_first",
+            "bytes": 41943040,
+            "pages": [
+              1213861888,
+              1234833408,
+              1255804928
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 1045553152,
+                "mapping_end": 1335615488,
+                "mapping": "3e51e000-4f9be000 rw-p 00000000 00:00 0                                  [heap]",
+                "numa_mapping_aggregate": "3e51e000 default heap anon=70759 dirty=70759 active=0 N3=70759 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_middle",
+            "bytes": 41943040,
+            "pages": [
+              136710420504576,
+              136710441476096,
+              136710462447616
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              }
+            ]
+          },
+          {
+            "label": "packed_last",
+            "bytes": 41943040,
+            "pages": [
+              136710168821760,
+              136710189793280,
+              136710210764800
+            ],
+            "page_node_status": [
+              3,
+              3,
+              3
+            ],
+            "mapping_coverage": [
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              },
+              {
+                "mapping_start": 136710168821760,
+                "mapping_end": 136710757130240,
+                "mapping": "7c56510cc000-7c56741da000 rw-p 00000000 00:00 0 ",
+                "numa_mapping_aggregate": "7c56510cc000 default anon=143476 dirty=143476 active=86 N3=143476 kernelpagesize_kB=4"
+              }
+            ]
+          }
+        ],
+        "limitation": "numa_maps records describe entire containing mappings; they do not identify sampled page nodes when move_pages fails."
+      }
+    }
+  ],
+  "finished": 1789056918.7558954,
+  "total_timed_section_seconds": 3.0653894667048007
+}

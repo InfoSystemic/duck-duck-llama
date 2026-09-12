@@ -1,0 +1,232 @@
+{
+  "passed": true,
+  "cpu_affinity": [
+    32
+  ],
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_goal_exact16_packed_numa_0910.py": "30076922748bf1781e3605bc8e5fb766634eff1f03ed11418f28655ab716b6f6",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_exact16_packed_numa_0910.py": "e08d8e6609a6de5114d69f4373e3623640f739237fb226eb4e60e58c8861e3df",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_numa_0910.py": "92d37cac2c5bcc0d9684808f414d188c17fe18b2caee6890f356aa0a843f7359",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/goal_exact16_runtime_0910.py": "f1948cc04edc2f4ff901d60d9c20745716e8816f8930f4808b8563e306616ecf",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_grouped_int16_exact_goal_0910.py": "2c0c792f1956eb6ccef3be99a0707071c12336e8e9f02f003f35a9d68c5461f3",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-grouped-int16-exact-goal-0910.cpp": "bba19076a79ca481dc963f433a3aa3543b3d7c6767184dab62f26db878c9272a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-ragged-int16-exact-goal-0910.cpp": "7f36f3da45c810338edf7b0d952c6617a91110b350f8369b48df9b2e9f14f7d5",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-ragged-int16-exact-goal-0910/libdeepseek-v41-ragged-int16-exact.so": "221772afa2898fb020408ca0affbc48fd5c996015cf12006d15b8ef9c7ca618b"
+  },
+  "cases": [
+    {
+      "shape": [
+        256,
+        640
+      ],
+      "native_bytes_unchanged": true,
+      "pack_bytes_unchanged": true,
+      "class_and_object_identity_preserved": true,
+      "old_packed_tensors_released": true,
+      "weight_pages_by_node": {
+        "0": 5,
+        "1": 5,
+        "2": 5,
+        "3": 5
+      },
+      "scale_pages_by_node": {
+        "1": 1,
+        "3": 1
+      },
+      "placement_metadata": {
+        "packed_object_id": 125434638002192,
+        "data_bytes": 87040,
+        "allocated_bytes": 90112,
+        "padding_bytes": 3072,
+        "packed": {
+          "address": 125434762018816,
+          "data_bytes": 81920,
+          "allocated_bytes": 81920,
+          "page_size": 4096,
+          "nodes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "requested_byte_boundaries": [
+            0,
+            20480,
+            40960,
+            61440,
+            81920
+          ],
+          "actual_byte_boundaries": [
+            0,
+            20480,
+            40960,
+            61440,
+            81920
+          ],
+          "boundary_policy": "strict"
+        },
+        "scales": {
+          "address": 125435154612224,
+          "data_bytes": 5120,
+          "allocated_bytes": 8192,
+          "page_size": 4096,
+          "nodes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "requested_byte_boundaries": [
+            0,
+            1280,
+            2560,
+            3840,
+            5120
+          ],
+          "actual_byte_boundaries": [
+            0,
+            0,
+            4096,
+            4096,
+            8192
+          ],
+          "boundary_policy": "nearest_page"
+        }
+      },
+      "exact_values": 1280,
+      "eviction_releases_all_packed_references": true
+    },
+    {
+      "shape": [
+        256,
+        2048
+      ],
+      "native_bytes_unchanged": true,
+      "pack_bytes_unchanged": true,
+      "class_and_object_identity_preserved": true,
+      "old_packed_tensors_released": true,
+      "weight_pages_by_node": {
+        "0": 16,
+        "1": 16,
+        "2": 16,
+        "3": 16
+      },
+      "scale_pages_by_node": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "placement_metadata": {
+        "packed_object_id": 125434656896112,
+        "data_bytes": 278528,
+        "allocated_bytes": 278528,
+        "padding_bytes": 0,
+        "packed": {
+          "address": 125434761838592,
+          "data_bytes": 262144,
+          "allocated_bytes": 262144,
+          "page_size": 4096,
+          "nodes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "requested_byte_boundaries": [
+            0,
+            65536,
+            131072,
+            196608,
+            262144
+          ],
+          "actual_byte_boundaries": [
+            0,
+            65536,
+            131072,
+            196608,
+            262144
+          ],
+          "boundary_policy": "strict"
+        },
+        "scales": {
+          "address": 125435115528192,
+          "data_bytes": 16384,
+          "allocated_bytes": 16384,
+          "page_size": 4096,
+          "nodes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "requested_byte_boundaries": [
+            0,
+            4096,
+            8192,
+            12288,
+            16384
+          ],
+          "actual_byte_boundaries": [
+            0,
+            4096,
+            8192,
+            12288,
+            16384
+          ],
+          "boundary_policy": "nearest_page"
+        }
+      },
+      "exact_values": 1280,
+      "eviction_releases_all_packed_references": true
+    }
+  ],
+  "exact_values": 2560,
+  "metrics": {
+    "nodes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "reserve_bytes": 100000000000,
+    "padding_cap_bytes": 16777216,
+    "padding_bytes": 0,
+    "relocated_cache_entries": 0,
+    "relocated_data_bytes": 0,
+    "relocated_allocated_bytes": 0,
+    "candidate_packed_bytes": 0,
+    "candidate_cap_bytes": 4194304,
+    "relocated_entries": 4,
+    "relocated_total_bytes": 548864,
+    "reused_entries": 6,
+    "evicted_entries": 4,
+    "provider_fallbacks": 1,
+    "fallbacks_by_reason": {
+      "padding_cap": 1,
+      "memory_reserve": 1,
+      "clone_failed": 1,
+      "strict_row_boundary": 1
+    },
+    "last_failure": {
+      "reason": "strict_row_boundary",
+      "requested_boundaries": [
+        0,
+        0,
+        768,
+        1536,
+        2304
+      ]
+    },
+    "last_mem_available_bytes": 278151950336
+  },
+  "padding_cap_and_memory_reserve_checked": true,
+  "second_clone_failure_atomic": true,
+  "scale_eviction_clear_uninstall_release_verified": true,
+  "source_alias_cache_hit_verified": true,
+  "invalid_page_quarters_rejected": true,
+  "no_tensor_references_in_ledger": true,
+  "maximum_fixture_owned_pack_bytes": 278528,
+  "full_model_loaded": false,
+  "performance_measured": false
+}

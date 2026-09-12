@@ -243,9 +243,8 @@
     "manifest_files_not_staged": []
   },
   "latest_follow_up": {
-    "experiment": "deepseek-native-resident-experts-0910",
-    "updated_utc": "2026-09-10T12:39:56.621975+00:00",
-    "source_bundles_unchanged": true,
+    "experiment": "deepseek-native-cpu-tuning-0910",
+    "updated_utc": "2026-09-10T17:01:57.974523+00:00",
     "source_freshness_audit": {
       "source_bundles": [
         {
@@ -310,9 +309,9 @@
       "passed": true
     },
     "archive": {
-      "archive_files": 4725,
+      "archive_files": 5015,
       "patches": 13,
-      "python_files": 1303,
+      "python_files": 1413,
       "shell_files": 29,
       "errors": [],
       "passed": true
@@ -321,44 +320,41 @@
       "passed": true,
       "checked_links": 132,
       "documents": 3,
-      "missing": [],
       "scope": "Local targets; external URLs and fragments excluded"
     },
-    "evidence": [
-      "archive/serving/fleet-0903/results/deepseek-v41-resident-audit-0910.json",
-      "archive/serving/fleet-0903/results/deepseek-v41-resident-trial-0910/trial/result.json",
-      "archive/serving/fleet-0903/results/deepseek-v41-resident-trial-0910/result.json"
-    ],
     "official_model_revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
     "real_released_text_backbone_executed": true,
     "native_precision_preserved": true,
-    "full_checkpoint_resident": false,
-    "deepseek_endpoint_retained": true,
+    "current_endpoint_warm_decode_tok_s": 1.7997116773313822,
     "endpoint": "http://127.0.0.1:18170/v1",
-    "model": "DeepSeek-V4.1-Flash",
+    "cpu_optimizations": [
+      "native_quant",
+      "quant_reuse",
+      "grouped_moe",
+      "native_hc",
+      "scripted_sparse_attention",
+      "exact16_grouped_moe",
+      "native_sparse_attention"
+    ],
+    "lattice16b_promoted": false,
+    "matched_lattice16b_decode_tok_s": 1.7542290329334809,
+    "matched_lattice16b_speedup": 1.074386224170267,
+    "exact_lattice16b_logit_steps": 60,
+    "full_checkpoint_resident": false,
     "context": 256,
     "vision": false,
     "dspark": false,
-    "retained_expert_mappings_promoted": true,
-    "matched_demand_decode_tok_s": 0.6587040953901847,
-    "matched_resident_decode_tok_s": 1.0936681959743362,
-    "matched_speedup": 1.6603330746357354,
-    "current_endpoint_warm_decode_tok_s": 1.0959514930737535,
-    "exact_logit_steps": 60,
-    "decode_tokens_measured_per_request": 9,
-    "measured_requests_per_configuration": 2,
-    "physical_workers": 16,
-    "cached_tensor_bytes": 38841841088,
-    "temporary_ram_cache": true,
-    "deepseek_imc_bandwidth_measured": false,
-    "whole_server_tuning_complete": false,
     "broad_quality_evaluation": false,
+    "deepseek_imc_bandwidth_measured": false,
+    "deepseek_over_10_tok_s_reached": false,
     "selected_flash_preserved": true,
-    "selected_flash_quant": "UD-Q4_K_XL",
-    "retained_qwen_quant": "UD-Q6_K_XL",
-    "glm_or_qwen_candidate_promoted": false,
     "qwen_40_tok_s_reached": false,
-    "all_models_250_gb_s_reached": false
+    "all_models_250_gb_s_reached": false,
+    "evidence": [
+      "archive/serving/fleet-0903/results/deepseek-v41-tuning-audit-0910.json",
+      "archive/serving/fleet-0903/results/deepseek-v41-lattice16b-model-0910b/trial/result.json",
+      "archive/serving/fleet-0903/results/deepseek-v41-lattice16b-promoted-0910/result.json"
+    ]
   },
   "previous_follow_ups": [
     {
@@ -3364,6 +3360,124 @@
       "qwen_40_tok_s_reached": false,
       "all_models_250_gb_s_reached": false,
       "diagnostic_patch_formatting": "Zero-context relative-header diagnostics; exact unchanged Flash candidate reconstruction checked."
+    },
+    {
+      "experiment": "deepseek-native-resident-experts-0910",
+      "updated_utc": "2026-09-10T12:39:56.621975+00:00",
+      "source_bundles_unchanged": true,
+      "source_freshness_audit": {
+        "source_bundles": [
+          {
+            "name": "qwen-flash-next-goal-source",
+            "recorded_files": 32,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-goal-source",
+            "recorded_files": 28,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-full-sr950-source",
+            "recorded_files": 35,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-numa-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-flash-next-bringup-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "glm-flash-bringup-source",
+            "recorded_files": 19,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "qwen-dense-server-source",
+            "recorded_files": 2,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          },
+          {
+            "name": "sr950-numa-source",
+            "recorded_files": 6,
+            "new_paths": [],
+            "removed_changes": [],
+            "changed_contents": []
+          }
+        ],
+        "earlier_serving_files": 51,
+        "issues": [],
+        "passed": true
+      },
+      "archive": {
+        "archive_files": 4725,
+        "patches": 13,
+        "python_files": 1303,
+        "shell_files": 29,
+        "errors": [],
+        "passed": true
+      },
+      "links": {
+        "passed": true,
+        "checked_links": 132,
+        "documents": 3,
+        "missing": [],
+        "scope": "Local targets; external URLs and fragments excluded"
+      },
+      "evidence": [
+        "archive/serving/fleet-0903/results/deepseek-v41-resident-audit-0910.json",
+        "archive/serving/fleet-0903/results/deepseek-v41-resident-trial-0910/trial/result.json",
+        "archive/serving/fleet-0903/results/deepseek-v41-resident-trial-0910/result.json"
+      ],
+      "official_model_revision": "fb2764a5cf321eaa5070ca8f9e892818f477c16d",
+      "real_released_text_backbone_executed": true,
+      "native_precision_preserved": true,
+      "full_checkpoint_resident": false,
+      "deepseek_endpoint_retained": true,
+      "endpoint": "http://127.0.0.1:18170/v1",
+      "model": "DeepSeek-V4.1-Flash",
+      "context": 256,
+      "vision": false,
+      "dspark": false,
+      "retained_expert_mappings_promoted": true,
+      "matched_demand_decode_tok_s": 0.6587040953901847,
+      "matched_resident_decode_tok_s": 1.0936681959743362,
+      "matched_speedup": 1.6603330746357354,
+      "current_endpoint_warm_decode_tok_s": 1.0959514930737535,
+      "exact_logit_steps": 60,
+      "decode_tokens_measured_per_request": 9,
+      "measured_requests_per_configuration": 2,
+      "physical_workers": 16,
+      "cached_tensor_bytes": 38841841088,
+      "temporary_ram_cache": true,
+      "deepseek_imc_bandwidth_measured": false,
+      "whole_server_tuning_complete": false,
+      "broad_quality_evaluation": false,
+      "selected_flash_preserved": true,
+      "selected_flash_quant": "UD-Q4_K_XL",
+      "retained_qwen_quant": "UD-Q6_K_XL",
+      "glm_or_qwen_candidate_promoted": false,
+      "qwen_40_tok_s_reached": false,
+      "all_models_250_gb_s_reached": false
     }
   ]
 }

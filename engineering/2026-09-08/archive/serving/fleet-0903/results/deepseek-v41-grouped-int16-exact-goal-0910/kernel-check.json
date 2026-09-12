@@ -1,0 +1,163 @@
+{
+  "passed": true,
+  "workers": 1,
+  "cases": [
+    {
+      "label": "hostile_subnormal_cancellation",
+      "tasks": 2,
+      "values": 2,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 0,
+      "fallback_unique_blocks": 2,
+      "baseline_values": [
+        10752.0,
+        -10752.0
+      ],
+      "old_vnni_values": [
+        10816.0,
+        -10816.0
+      ]
+    },
+    {
+      "label": "eligible_cancellation",
+      "tasks": 2,
+      "values": 2,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 2,
+      "fallback_unique_blocks": 0
+    },
+    {
+      "label": "all_fp8_codes_0",
+      "tasks": 32,
+      "values": 1056,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 8,
+      "fallback_unique_blocks": 24
+    },
+    {
+      "label": "all_fp8_codes_32",
+      "tasks": 32,
+      "values": 1056,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 32,
+      "fallback_unique_blocks": 0
+    },
+    {
+      "label": "all_fp8_codes_64",
+      "tasks": 32,
+      "values": 1056,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 32,
+      "fallback_unique_blocks": 0
+    },
+    {
+      "label": "all_fp8_codes_96",
+      "tasks": 32,
+      "values": 1056,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 31,
+      "fallback_unique_blocks": 1
+    },
+    {
+      "label": "all_fp8_codes_128",
+      "tasks": 32,
+      "values": 1056,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 8,
+      "fallback_unique_blocks": 24
+    },
+    {
+      "label": "all_fp8_codes_160",
+      "tasks": 32,
+      "values": 1056,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 32,
+      "fallback_unique_blocks": 0
+    },
+    {
+      "label": "all_fp8_codes_192",
+      "tasks": 32,
+      "values": 1056,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 32,
+      "fallback_unique_blocks": 0
+    },
+    {
+      "label": "all_fp8_codes_224",
+      "tasks": 32,
+      "values": 1056,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 31,
+      "fallback_unique_blocks": 1
+    },
+    {
+      "label": "mixed_modes_and_k",
+      "tasks": 4,
+      "values": 260,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 4,
+      "fallback_unique_blocks": 1
+    },
+    {
+      "label": "special_scale_codes",
+      "tasks": 1,
+      "values": 33,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 6,
+      "fallback_unique_blocks": 1
+    },
+    {
+      "label": "full_width_up14",
+      "tasks": 14,
+      "values": 32256,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 154,
+      "fallback_unique_blocks": 6
+    },
+    {
+      "label": "full_width_down7",
+      "tasks": 7,
+      "values": 35840,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 68,
+      "fallback_unique_blocks": 4
+    },
+    {
+      "label": "whole_call_cap_fallback",
+      "tasks": 3,
+      "values": 99,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 0,
+      "fallback_unique_blocks": 0
+    },
+    {
+      "label": "transient_packs_not_retained",
+      "tasks": 3,
+      "values": 99,
+      "baseline_bits_exact": true,
+      "eligible_unique_blocks": 2,
+      "fallback_unique_blocks": 0
+    }
+  ],
+  "exact_baseline_values": 77039,
+  "exact_eligible_fp8_codes": 206,
+  "ineligible_fp8_codes": 50,
+  "lossless_packs_checked": 23,
+  "sums_metadata_bytes": 0,
+  "no_retained_bridge_packs": true,
+  "source_buffers_preserved": true,
+  "input_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_grouped_int16_exact_goal_0910.py": "22960b6865dd1fa3c58f10fdfb586e6749444a2c47d6dd7f72623756fd2f1865",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-grouped-int16-exact-goal-0910.cpp": "bba19076a79ca481dc963f433a3aa3543b3d7c6767184dab62f26db878c9272a",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_grouped_int16_exact_goal_0910.py": "2c0c792f1956eb6ccef3be99a0707071c12336e8e9f02f003f35a9d68c5461f3",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-0910b.cpp": "67e9391f008082251946fb1f7486179f03a7efbf7dbb3c96d6078446d195a9b7",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-grouped-int16-exact-goal-0910/libdeepseek-v41-grouped-int16-exact.so": "dce4c47d55c2acf70862fc123382c1e4b3ffc8e27026b18cf95298f182d83c11"
+  },
+  "read_only_external_source": {
+    "path": "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-0910d.cpp",
+    "sha256": "688b97aac8b67b826f47effe06cc7b0808d02a351ebbd491472ab4204a4463ef"
+  },
+  "full_checkpoint_loaded": false,
+  "model_speed_measured": false,
+  "kernel_speed_measured": false
+}

@@ -1,6 +1,14 @@
 # llama-llama-duck
 
-DeepSeek-V4.1-Flash is running its released native FP8/FP4 text checkpoint at the local chat endpoint. The [retained-expert tuning follow-up](engineering/2026-09-08/archive/serving/fleet-0903/DEEPSEEK-V41-RESIDENT-EXPERTS-20260910.md) raises matched warm decode from 0.659 to 1.094 tok/s (1.660×), with all 60 compared step logits exact. The selected HTTP endpoint measures 1.096 tok/s on the same short cached greeting, using 16 physical cores. This supersedes the speed in the [initial CPU endpoint report](engineering/2026-09-08/archive/serving/fleet-0903/DEEPSEEK-V41-CPU-RUN-20260910.md). Context remains 256 tokens; cold prompts can fetch missing weights and Engram rows. Vision, DSpark, whole-server tuning, and IMC measurements remain open.
+**Latest publication: September 12, 2026.** The [new source and tuning snapshot](engineering/2026-09-12/README.md) adds durable GLM/Qwen launch profiles, September 11 performance experiments, a GLM Full tensor-split correction, a tested NUMA page-relocation utility, and Linux fixes plus CPU builds for a genuine DeepSeek-V4.1 engine port. It includes source reconstruction hashes, benchmark controllers, and the distinction between component validation, historical model measurements, and unselected candidates.
+
+The four-model optimization objective remains open. Full's latest observed load failed on NUMA node 3; the new split and memory-placement fixes require model-scale validation. The new DeepSeek engine compiles but has not run the full checkpoint here. GLM Flash and Qwen candidate launchers pass build and library checks; fresh matched model comparisons remain pending. Start with the new snapshot for current status.
+
+## September 10 and earlier reports
+
+The reports below describe the runtime state at their recorded measurement dates.
+
+DeepSeek-V4.1-Flash is running its released native FP8/FP4 text checkpoint at `http://127.0.0.1:18170/v1`. The [CPU tuning follow-up](engineering/2026-09-08/archive/serving/fleet-0903/DEEPSEEK-V41-CPU-TUNING-20260910.md) records the selected endpoint at 1.800 warm decode tok/s, repeated full-model kernel comparisons, and exact-logit validation. The fused CPU baseline reached 1.773–1.789 tok/s; the revised grouped FP4 kernel gained 7.4% in its matched model trial. Context remains 256 tokens, and cold prompts can fetch missing expert tensors and Engram rows. The over-10 tok/s goal, complete checkpoint residency, vision, DSpark, longer varied generation, and IMC bandwidth measurement remain open.
 
 DeepSeek-V4.1-Flash now has an integrated [native hash-to-Engram lookup](engineering/2026-09-08/archive/serving/fleet-0903/DEEPSEEK-V41-ENGRAM-LOOKUP-20260910.md). Across eight variants, 267,583,488 BF16 values and 1,044,096 row IDs match the official CPU reference exactly. The 48 selected real checkpoint rows also match. This earlier component result preceded the real-model CPU endpoint described above; the published component counts are unchanged.
 

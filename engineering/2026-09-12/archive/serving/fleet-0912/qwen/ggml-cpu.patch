@@ -1,0 +1,54 @@
+--- ggml-cpu.parent.c	2026-09-11 15:44:56.090258998 -0600
++++ ggml-cpu.patched.c	2026-09-11 15:44:56.093259009 -0600
+@@ -2679,6 +2679,9 @@
+ static void clear_numa_thread_affinity(void) {}
+ #endif
+ 
++// Opt-in (GGML_CPU_PARALLEL_UNARY=<min_elements>); set in ggml_cpu_init below.
++static int64_t ggml_cpu_parallel_unary = 0;
++
+ static int ggml_get_n_tasks(struct ggml_tensor * node, int n_threads) {
+     int n_tasks = 0;
+ 
+@@ -2749,7 +2752,12 @@
+                 case GGML_UNARY_OP_ROUND:
+                 case GGML_UNARY_OP_TRUNC:
+                     {
+-                        n_tasks = 1;
++                        // Upstream pins these elementwise ops to one task regardless of size, but
++                        // the implementation already honours ith/nth (get_thread_range). On
++                        // Qwen3.8-Flash-Next's SSM path they are ~0.13 ms/layer on ne=[10240,4,1].
++                        // Elementwise => no reduction => splitting is bit-exact.
++                        n_tasks = (ggml_cpu_parallel_unary > 0 &&
++                                   ggml_nelements(node) >= ggml_cpu_parallel_unary) ? n_threads : 1;
+                     } break;
+ 
+                 case GGML_UNARY_OP_SIGMOID:
+@@ -2817,6 +2825,12 @@
+                 n_tasks = 1;
+             } break;
+         case GGML_OP_SCALE:
++            {
++                // SCALE has no internal ggml_barrier, so widening it is safe. cache_s_l* is
++                // ne=[196608,1,1] here -- one row -- so it also needs the column split in ops.cpp.
++                n_tasks = (ggml_cpu_parallel_unary > 0 &&
++                           ggml_nelements(node) >= ggml_cpu_parallel_unary) ? n_threads : 1;
++            } break;
+         case GGML_OP_SET:
+         case GGML_OP_RESHAPE:
+         case GGML_OP_VIEW:
+@@ -4768,6 +4782,14 @@
+ #endif
+ 
+         {
++
++            const char * env = getenv("GGML_CPU_PARALLEL_UNARY");
++
++            ggml_cpu_parallel_unary = env != NULL && *env ? (int64_t) atoll(env) : 0;
++
++        }
++
++        {
+             const char * env = getenv("GGML_CPU_DISABLE_FUSION");
+             ggml_cpu_disable_fusion = (env != NULL && atoi(env) == 1);
+         }

@@ -1,0 +1,297 @@
+{
+  "passed": true,
+  "component_only": true,
+  "full_checkpoint_loaded": false,
+  "model_tok_s_measured": false,
+  "matrices_hot_repeated": true,
+  "repeats": 128,
+  "cases": [
+    {
+      "n": 2304,
+      "k": 5120,
+      "workers": 1,
+      "pack_seconds": 0.00817219796590507,
+      "native_weight_bytes": 5898240,
+      "native_scale_bytes": 368640,
+      "packed_weight_bytes": 5898240,
+      "sum_metadata_bytes": 737280,
+      "packed_scale_bytes": 368640,
+      "packed_total_bytes": 7004160,
+      "extra_resident_bytes_with_original_retained": 7004160,
+      "bf16_bit_differences": 0,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.001993704250708106
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.0004474752568057738
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.0005015684073441662
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0023056761783664115
+        }
+      ],
+      "baseline_seconds": 0.0021496902145372587,
+      "vnni_seconds": 0.00047452183207497,
+      "speedup": 4.530224047094271
+    },
+    {
+      "n": 2304,
+      "k": 5120,
+      "workers": 4,
+      "pack_seconds": 0.005916188936680555,
+      "native_weight_bytes": 5898240,
+      "native_scale_bytes": 368640,
+      "packed_weight_bytes": 5898240,
+      "sum_metadata_bytes": 737280,
+      "packed_scale_bytes": 368640,
+      "packed_total_bytes": 7004160,
+      "extra_resident_bytes_with_original_retained": 7004160,
+      "bf16_bit_differences": 0,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0006249008602026151
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.00016200773461605422
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.00016008507009246387
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0006099607981013833
+        }
+      ],
+      "baseline_seconds": 0.0006174308291519992,
+      "vnni_seconds": 0.00016104640235425904,
+      "speedup": 3.833869121731862
+    },
+    {
+      "n": 2304,
+      "k": 5120,
+      "workers": 8,
+      "pack_seconds": 0.002303594956174493,
+      "native_weight_bytes": 5898240,
+      "native_scale_bytes": 368640,
+      "packed_weight_bytes": 5898240,
+      "sum_metadata_bytes": 737280,
+      "packed_scale_bytes": 368640,
+      "packed_total_bytes": 7004160,
+      "extra_resident_bytes_with_original_retained": 7004160,
+      "bf16_bit_differences": 0,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00038994090573396534
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.00010559407746768557
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.00010637859486450907
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0003668556637421716
+        }
+      ],
+      "baseline_seconds": 0.00037839828473806847,
+      "vnni_seconds": 0.00010598633616609732,
+      "speedup": 3.5702553595687903
+    },
+    {
+      "n": 2304,
+      "k": 5120,
+      "workers": 16,
+      "pack_seconds": 0.0014884450938552618,
+      "native_weight_bytes": 5898240,
+      "native_scale_bytes": 368640,
+      "packed_weight_bytes": 5898240,
+      "sum_metadata_bytes": 737280,
+      "packed_scale_bytes": 368640,
+      "packed_total_bytes": 7004160,
+      "extra_resident_bytes_with_original_retained": 7004160,
+      "bf16_bit_differences": 0,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00045185277303971816
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.00010176489195146132
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.00010141011807718314
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00034010939816653263
+        }
+      ],
+      "baseline_seconds": 0.0003959810856031254,
+      "vnni_seconds": 0.00010158750501432223,
+      "speedup": 3.8979310058584304
+    },
+    {
+      "n": 5120,
+      "k": 2304,
+      "workers": 1,
+      "pack_seconds": 0.005910891806706786,
+      "native_weight_bytes": 5898240,
+      "native_scale_bytes": 368640,
+      "packed_weight_bytes": 5898240,
+      "sum_metadata_bytes": 737280,
+      "packed_scale_bytes": 368640,
+      "packed_total_bytes": 7004160,
+      "extra_resident_bytes_with_original_retained": 7004160,
+      "bf16_bit_differences": 0,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0021227444922260474
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.0004634258057194529
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.00046932665645726956
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0021177389917284017
+        }
+      ],
+      "baseline_seconds": 0.0021202417419772246,
+      "vnni_seconds": 0.00046637623108836124,
+      "speedup": 4.546204546122155
+    },
+    {
+      "n": 5120,
+      "k": 2304,
+      "workers": 4,
+      "pack_seconds": 0.004030716139823198,
+      "native_weight_bytes": 5898240,
+      "native_scale_bytes": 368640,
+      "packed_weight_bytes": 5898240,
+      "sum_metadata_bytes": 737280,
+      "packed_scale_bytes": 368640,
+      "packed_total_bytes": 7004160,
+      "extra_resident_bytes_with_original_retained": 7004160,
+      "bf16_bit_differences": 0,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0006147497097117594
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.0001553191559651168
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 0.000157468164616148
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0006631579453824088
+        }
+      ],
+      "baseline_seconds": 0.0006389538275470841,
+      "vnni_seconds": 0.0001563936602906324,
+      "speedup": 4.0855481376910765
+    },
+    {
+      "n": 5120,
+      "k": 2304,
+      "workers": 8,
+      "pack_seconds": 0.0022293981164693832,
+      "native_weight_bytes": 5898240,
+      "native_scale_bytes": 368640,
+      "packed_weight_bytes": 5898240,
+      "sum_metadata_bytes": 737280,
+      "packed_scale_bytes": 368640,
+      "packed_total_bytes": 7004160,
+      "extra_resident_bytes_with_original_retained": 7004160,
+      "bf16_bit_differences": 0,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0003598934763431316
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 9.899971882987302e-05
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 9.846797547652386e-05
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0003240029764128849
+        }
+      ],
+      "baseline_seconds": 0.00034194822637800826,
+      "vnni_seconds": 9.873384715319844e-05,
+      "speedup": 3.463333357682609
+    },
+    {
+      "n": 5120,
+      "k": 2304,
+      "workers": 16,
+      "pack_seconds": 0.0015121109317988157,
+      "native_weight_bytes": 5898240,
+      "native_scale_bytes": 368640,
+      "packed_weight_bytes": 5898240,
+      "sum_metadata_bytes": 737280,
+      "packed_scale_bytes": 368640,
+      "packed_total_bytes": 7004160,
+      "extra_resident_bytes_with_original_retained": 7004160,
+      "bf16_bit_differences": 0,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00027129064983455464
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 9.897882046061568e-05
+        },
+        {
+          "variant": "vnni",
+          "seconds_per_call": 9.979434253182262e-05
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0002630995622894261
+        }
+      ],
+      "baseline_seconds": 0.00026719510606199037,
+      "vnni_seconds": 9.938658149621915e-05,
+      "speedup": 2.688442464158554
+    }
+  ],
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_deepseek_v41_native_vnni_goal_0910.py": "55a5cb726e0f9709197f65200cdf87e8cdb3442b9dc7eb5284d40ac76e343c38",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-vnni-goal-0910/libdeepseek-v41-native-vnni.so": "186f045ef1bf88d160a5a15bfbd3ba876e1608044ba758e8afb4493ed867216c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_vnni_goal_0910.py": "3b784a67c72fa296db8798cff38e7b2282022d29f99b2ee665339f97f6b40c8c",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-vnni-goal-0910.cpp": "d48d3fc6666cf85a18a6e86b2e036d4dc6fd6134146cb11d0e8c78d8c019af8d"
+  }
+}

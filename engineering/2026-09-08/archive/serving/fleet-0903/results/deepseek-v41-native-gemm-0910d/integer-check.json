@@ -1,0 +1,133 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "index": 0,
+      "m": 256,
+      "n": 67,
+      "k": 32,
+      "integer_blocks": 206,
+      "total_blocks": 256,
+      "exact_values": 51456
+    },
+    {
+      "index": 1,
+      "m": 1,
+      "n": 67,
+      "k": 32,
+      "integer_blocks": 1,
+      "total_blocks": 1,
+      "exact_values": 201
+    },
+    {
+      "index": 2,
+      "m": 1,
+      "n": 67,
+      "k": 32,
+      "integer_blocks": 0,
+      "total_blocks": 1,
+      "exact_values": 201
+    },
+    {
+      "index": 3,
+      "m": 1,
+      "n": 2304,
+      "k": 5120,
+      "integer_blocks": 156,
+      "total_blocks": 160,
+      "exact_values": 6912,
+      "timings": [
+        {
+          "path": "baseline",
+          "seconds_per_call": 0.0002595614595338702
+        },
+        {
+          "path": "vnni",
+          "seconds_per_call": 0.00032563688000664115
+        },
+        {
+          "path": "vnni",
+          "seconds_per_call": 0.0003432562109082937
+        },
+        {
+          "path": "baseline",
+          "seconds_per_call": 0.00026813718024641274
+        }
+      ],
+      "speedup": 0.7889132761985606,
+      "controls_stable_within_5_percent": true
+    },
+    {
+      "index": 4,
+      "m": 1,
+      "n": 5120,
+      "k": 2304,
+      "integer_blocks": 72,
+      "total_blocks": 72,
+      "exact_values": 15360,
+      "timings": [
+        {
+          "path": "baseline",
+          "seconds_per_call": 0.0002540401788428426
+        },
+        {
+          "path": "vnni",
+          "seconds_per_call": 0.0002862088312394917
+        },
+        {
+          "path": "vnni",
+          "seconds_per_call": 0.00028573355870321394
+        },
+        {
+          "path": "baseline",
+          "seconds_per_call": 0.00025359492981806396
+        }
+      ],
+      "speedup": 0.8875633588056987,
+      "controls_stable_within_5_percent": true
+    },
+    {
+      "index": 5,
+      "m": 6,
+      "n": 2304,
+      "k": 5120,
+      "integer_blocks": 943,
+      "total_blocks": 960,
+      "exact_values": 41472,
+      "timings": [
+        {
+          "path": "baseline",
+          "seconds_per_call": 0.0011803036299534143
+        },
+        {
+          "path": "vnni",
+          "seconds_per_call": 0.0012467202893458307
+        },
+        {
+          "path": "vnni",
+          "seconds_per_call": 0.0012509088101796805
+        },
+        {
+          "path": "baseline",
+          "seconds_per_call": 0.0012703375215642155
+        }
+      ],
+      "speedup": 0.9811869792769439,
+      "controls_stable_within_5_percent": false
+    }
+  ],
+  "exact_product_bound": 344064,
+  "exact_32_product_sum_bound": 11010048,
+  "exact_integer_limit": 16777216,
+  "source_sha256": {
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_native_gemm_0910d.py": "29a2ff13dfc42c0c6efac304d32a22e8c21b7830911f4f075b85ccc17847347e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910d/libdeepseek-v41-native-gemm.so": "7bc4d6a0274456a25de0f58da5958a465f61785e74fa705081d77e00fece1987",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+    "/home/kwebb/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-0910d.cpp": "688b97aac8b67b826f47effe06cc7b0808d02a351ebbd491472ab4204a4463ef"
+  },
+  "component_only": true,
+  "full_checkpoint_loaded": false,
+  "exact_values": 115602,
+  "nan_and_signed_zero_bits_match": true,
+  "mixed_eligibility_fallback_tested": true
+}
