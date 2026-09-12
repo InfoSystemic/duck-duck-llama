@@ -1,0 +1,161 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "tasks": 3,
+      "n": 33,
+      "k": 32,
+      "shared_activation": true,
+      "checks": [
+        {
+          "workers": 1,
+          "preallocated": false,
+          "exact_values": 99
+        },
+        {
+          "workers": 1,
+          "preallocated": true,
+          "exact_values": 99
+        },
+        {
+          "workers": 4,
+          "preallocated": false,
+          "exact_values": 99
+        },
+        {
+          "workers": 4,
+          "preallocated": true,
+          "exact_values": 99
+        }
+      ],
+      "source_and_packed_buffers_preserved": true,
+      "native_calls": 4,
+      "fallback_calls": 0
+    },
+    {
+      "tasks": 7,
+      "n": 65,
+      "k": 96,
+      "shared_activation": false,
+      "checks": [
+        {
+          "workers": 1,
+          "preallocated": false,
+          "exact_values": 455
+        },
+        {
+          "workers": 1,
+          "preallocated": true,
+          "exact_values": 455
+        },
+        {
+          "workers": 4,
+          "preallocated": false,
+          "exact_values": 455
+        },
+        {
+          "workers": 4,
+          "preallocated": true,
+          "exact_values": 455
+        }
+      ],
+      "source_and_packed_buffers_preserved": true,
+      "native_calls": 4,
+      "fallback_calls": 0
+    },
+    {
+      "tasks": 14,
+      "n": 2304,
+      "k": 5120,
+      "shared_activation": true,
+      "checks": [
+        {
+          "workers": 1,
+          "preallocated": false,
+          "exact_values": 32256
+        },
+        {
+          "workers": 1,
+          "preallocated": true,
+          "exact_values": 32256
+        },
+        {
+          "workers": 4,
+          "preallocated": false,
+          "exact_values": 32256
+        },
+        {
+          "workers": 4,
+          "preallocated": true,
+          "exact_values": 32256
+        }
+      ],
+      "source_and_packed_buffers_preserved": true,
+      "native_calls": 4,
+      "fallback_calls": 0
+    },
+    {
+      "tasks": 7,
+      "n": 5120,
+      "k": 2304,
+      "shared_activation": false,
+      "checks": [
+        {
+          "workers": 1,
+          "preallocated": false,
+          "exact_values": 35840
+        },
+        {
+          "workers": 1,
+          "preallocated": true,
+          "exact_values": 35840
+        },
+        {
+          "workers": 4,
+          "preallocated": false,
+          "exact_values": 35840
+        },
+        {
+          "workers": 4,
+          "preallocated": true,
+          "exact_values": 35840
+        }
+      ],
+      "source_and_packed_buffers_preserved": true,
+      "native_calls": 4,
+      "fallback_calls": 0
+    }
+  ],
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_native_grouped_vnni_goal_0910.py": "f984876bd1ca2df4c50c87bb01b81d56b1a02eac62aac1d926ee31560e684c29",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-vnni-goal-0910/libdeepseek-v41-native-grouped-vnni.so": "f1dc92da3d91c28bbcb249149a08ecc842872cccdf63bc772ed146107c0f73ba",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-grouped-vnni-goal-0910.cpp": "e19d4bf5de30135dcb8ba2c3e60b3156b822e9c48425fe9d8d9b371a554cabc9",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-vnni-goal-0910.cpp": "d48d3fc6666cf85a18a6e86b2e036d4dc6fd6134146cb11d0e8c78d8c019af8d",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-0910b.cpp": "67e9391f008082251946fb1f7486179f03a7efbf7dbb3c96d6078446d195a9b7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_grouped_vnni_goal_0910.py": "150e512a796996852706b40d0a11f3d4840d4f5b074bd54381655aa0c49f5250",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_vnni_goal_0910.py": "3b784a67c72fa296db8798cff38e7b2282022d29f99b2ee665339f97f6b40c8c"
+  },
+  "exact_standalone_values": 274600,
+  "independent_integer_oracle_values": 7880,
+  "workers": [
+    1,
+    4
+  ],
+  "cpu_affinity": [
+    0
+  ],
+  "whole_call_cap_fallback_exact": true,
+  "no_packed_tensor_retention": true,
+  "hostile_native_values": [
+    10816.0,
+    -10816.0
+  ],
+  "hostile_fallback_values": [
+    10752.0,
+    -10752.0
+  ],
+  "fp32_reduction_changed": true,
+  "full_checkpoint_loaded": false,
+  "model_tok_s_measured": false,
+  "component_only": true
+}

@@ -1,0 +1,300 @@
+{
+  "passed": true,
+  "started": 1789054566.4143138,
+  "selected_flash_pid": 3437776,
+  "deepseek_pid": 127893,
+  "deepseek_start": "119666113",
+  "input_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/probe_deepseek_v41_thread_wait_0910b.py": "24c6392f7a776539de30c8f49be7276d7c018d12535d25bcfa4b8e851638ec2e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e"
+  },
+  "peer_preserved": true,
+  "deepseek_preserved": true,
+  "arms": [
+    {
+      "passed": true,
+      "component_only": true,
+      "fresh_request_thread": true,
+      "workers": 16,
+      "wait_policy": "PASSIVE",
+      "spin_count": 0,
+      "measurements": [
+        {
+          "component": "gemm",
+          "seconds_per_call": [
+            0.00022912546992301941,
+            0.00022099558031186462,
+            0.00022390221944078802,
+            0.00022414673818275333,
+            0.0002415000693872571
+          ],
+          "median_seconds": 0.00022414673818275333,
+          "output_sha256": "4b36aab4fa40ac1cee0d38804d10bd12118f58ecf256be48654edefde2134346"
+        },
+        {
+          "component": "expert",
+          "seconds_per_call": [
+            0.0016763580893166363,
+            0.0013130932883359493,
+            0.0013686938397586346,
+            0.0012990846391767263,
+            0.001300668530166149
+          ],
+          "median_seconds": 0.0013130932883359493,
+          "output_sha256": "cb6ff8e19b5a3db59dfe00cfdf4797c0112e58057d93851682833234e9f76ce0"
+        }
+      ],
+      "source_sha256": {
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e"
+      }
+    },
+    {
+      "passed": true,
+      "component_only": true,
+      "fresh_request_thread": true,
+      "workers": 16,
+      "wait_policy": "PASSIVE",
+      "spin_count": 1000,
+      "measurements": [
+        {
+          "component": "gemm",
+          "seconds_per_call": [
+            0.0002515248488634825,
+            0.00020960228983312845,
+            0.00021434308029711247,
+            0.00021718092961236834,
+            0.00021113185910508038
+          ],
+          "median_seconds": 0.00021434308029711247,
+          "output_sha256": "4b36aab4fa40ac1cee0d38804d10bd12118f58ecf256be48654edefde2134346"
+        },
+        {
+          "component": "expert",
+          "seconds_per_call": [
+            0.0015359096392057836,
+            0.0014125025691464543,
+            0.0015872692596167325,
+            0.0014229228999465705,
+            0.0012139252806082368
+          ],
+          "median_seconds": 0.0014229228999465705,
+          "output_sha256": "cb6ff8e19b5a3db59dfe00cfdf4797c0112e58057d93851682833234e9f76ce0"
+        }
+      ],
+      "source_sha256": {
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e"
+      }
+    },
+    {
+      "passed": true,
+      "component_only": true,
+      "fresh_request_thread": true,
+      "workers": 16,
+      "wait_policy": "PASSIVE",
+      "spin_count": 10000,
+      "measurements": [
+        {
+          "component": "gemm",
+          "seconds_per_call": [
+            0.00023643274093046785,
+            0.00022119875997304915,
+            0.00022107250057160855,
+            0.0002064316510222852,
+            0.000208754469640553
+          ],
+          "median_seconds": 0.00022107250057160855,
+          "output_sha256": "4b36aab4fa40ac1cee0d38804d10bd12118f58ecf256be48654edefde2134346"
+        },
+        {
+          "component": "expert",
+          "seconds_per_call": [
+            0.001491433079354465,
+            0.001515513979829848,
+            0.0014634404494427145,
+            0.0015421776100993157,
+            0.0014048112602904439
+          ],
+          "median_seconds": 0.001491433079354465,
+          "output_sha256": "cb6ff8e19b5a3db59dfe00cfdf4797c0112e58057d93851682833234e9f76ce0"
+        }
+      ],
+      "source_sha256": {
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e"
+      }
+    },
+    {
+      "passed": true,
+      "component_only": true,
+      "fresh_request_thread": true,
+      "workers": 16,
+      "wait_policy": "PASSIVE",
+      "spin_count": 100000,
+      "measurements": [
+        {
+          "component": "gemm",
+          "seconds_per_call": [
+            0.0002280266908928752,
+            0.00019142186967656017,
+            0.00019615287892520427,
+            0.0002041282202117145,
+            0.00019808873999863864
+          ],
+          "median_seconds": 0.00019808873999863864,
+          "output_sha256": "4b36aab4fa40ac1cee0d38804d10bd12118f58ecf256be48654edefde2134346"
+        },
+        {
+          "component": "expert",
+          "seconds_per_call": [
+            0.0013370198593474925,
+            0.0012470025895163417,
+            0.0012483805580995977,
+            0.0013540581800043582,
+            0.0012533113593235611
+          ],
+          "median_seconds": 0.0012533113593235611,
+          "output_sha256": "cb6ff8e19b5a3db59dfe00cfdf4797c0112e58057d93851682833234e9f76ce0"
+        }
+      ],
+      "source_sha256": {
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e"
+      }
+    },
+    {
+      "passed": true,
+      "component_only": true,
+      "fresh_request_thread": true,
+      "workers": 16,
+      "wait_policy": "PASSIVE",
+      "spin_count": 10000,
+      "measurements": [
+        {
+          "component": "gemm",
+          "seconds_per_call": [
+            0.00023596549173817037,
+            0.00023922092048451305,
+            0.0001944662700407207,
+            0.00019165017176419496,
+            0.00021085232961922884
+          ],
+          "median_seconds": 0.00021085232961922884,
+          "output_sha256": "4b36aab4fa40ac1cee0d38804d10bd12118f58ecf256be48654edefde2134346"
+        },
+        {
+          "component": "expert",
+          "seconds_per_call": [
+            0.001325776888988912,
+            0.0012692755693569778,
+            0.0012334582395851612,
+            0.0016751497914083303,
+            0.0012070230185054242
+          ],
+          "median_seconds": 0.0012692755693569778,
+          "output_sha256": "cb6ff8e19b5a3db59dfe00cfdf4797c0112e58057d93851682833234e9f76ce0"
+        }
+      ],
+      "source_sha256": {
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e"
+      }
+    },
+    {
+      "passed": true,
+      "component_only": true,
+      "fresh_request_thread": true,
+      "workers": 16,
+      "wait_policy": "PASSIVE",
+      "spin_count": 1000,
+      "measurements": [
+        {
+          "component": "gemm",
+          "seconds_per_call": [
+            0.00024244633968919515,
+            0.00020355105167254805,
+            0.0002026755316182971,
+            0.00020217190962284803,
+            0.00020372875034809111
+          ],
+          "median_seconds": 0.00020355105167254805,
+          "output_sha256": "4b36aab4fa40ac1cee0d38804d10bd12118f58ecf256be48654edefde2134346"
+        },
+        {
+          "component": "expert",
+          "seconds_per_call": [
+            0.0013275466696359218,
+            0.0014943712600506843,
+            0.0012241779803298413,
+            0.0016794074210338295,
+            0.0013081242400221527
+          ],
+          "median_seconds": 0.0013275466696359218,
+          "output_sha256": "cb6ff8e19b5a3db59dfe00cfdf4797c0112e58057d93851682833234e9f76ce0"
+        }
+      ],
+      "source_sha256": {
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e"
+      }
+    },
+    {
+      "passed": true,
+      "component_only": true,
+      "fresh_request_thread": true,
+      "workers": 16,
+      "wait_policy": "PASSIVE",
+      "spin_count": 0,
+      "measurements": [
+        {
+          "component": "gemm",
+          "seconds_per_call": [
+            0.00025008555967360736,
+            0.00021534190978854894,
+            0.00021446228958666325,
+            0.00021478813141584396,
+            0.00021727049024775625
+          ],
+          "median_seconds": 0.00021534190978854894,
+          "output_sha256": "4b36aab4fa40ac1cee0d38804d10bd12118f58ecf256be48654edefde2134346"
+        },
+        {
+          "component": "expert",
+          "seconds_per_call": [
+            0.00184023629873991,
+            0.001320285659749061,
+            0.0013308403687551618,
+            0.0013296244596131147,
+            0.0013174906210042536
+          ],
+          "median_seconds": 0.0013296244596131147,
+          "output_sha256": "cb6ff8e19b5a3db59dfe00cfdf4797c0112e58057d93851682833234e9f76ce0"
+        }
+      ],
+      "source_sha256": {
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+        "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e"
+      }
+    }
+  ],
+  "component_only": true,
+  "finished": 1789054585.2298782
+}

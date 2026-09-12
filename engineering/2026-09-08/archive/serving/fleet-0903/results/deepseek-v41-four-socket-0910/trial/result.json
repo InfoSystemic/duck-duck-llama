@@ -1,0 +1,723 @@
+{
+  "passed": true,
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/benchmark_deepseek_v41_four_socket_0910.py": "c712dceefe3a491dfcfe8b51703303b1f3e7f3ff9f70224fcecdc58cbad9396a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_runtime_0910.py": "70ea414776e5ce388d07a5f3abb78138a465ce6a539600ae9761ae43315c59e0",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_grouped_moe_0910.py": "d54f4ed26ab73e1a3430edb0892cb634359f4d991ddc1fbcf991136835f9b715",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_hc_0910.py": "fc0c8d5caa5e5076b8cd67d7c6d0fa4f67cdcc7291b34e6ef80b929af8a33081",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_native_quant_0910.py": "909cbb2900f25546500ea0402d7bb76a20dee2568a9ff74fe50970f3b12d0071",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_sparse_script_0910.py": "162d1ee8cb53aa982541e66cd4e39b40f3ec62c4c5e8df03121739afccdb14d7",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_quant_reuse_0910.py": "2517706f2bba0adf99d6c9ee14f8e8be2025d77623fd60b6c10be943cda647bf",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_grouped_goal_0910.py": "d6002cbb09e392382661f8ccde9e0c93b251d4546d947fc71a57a2b7c97fab23",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-goal-0910/libdeepseek-v41-native-grouped.so": "181b3de2597270b61e73ecd27106fa1961eb8945ba5605f50dc276153438ea4d",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/goal_native_quant_0910/libgoal_native_quant_0910.so": "88ee0d562ad424b1ccc37b9a90e81444f545ba71b57dc9e533aa8c42c89d9933",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/goal_hc_0910/libgoal_hc_0910.so": "17cff8041c7bf0cb0e115e4b2bd0c052e91eab0dc0c006f11f76d385d8d35440"
+  },
+  "runs": [
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 87.0350782899186,
+        "prefill_seconds": 47.64938774402253,
+        "decode_seconds": 39.379280868917704,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41229522368
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "thread_affinities": {
+        "0": 17,
+        "4": 2,
+        "8": 2,
+        "12": 2,
+        "16": 2,
+        "20": 2,
+        "24": 2,
+        "28": 2,
+        "32": 2,
+        "36": 2,
+        "40": 2,
+        "44": 2,
+        "48": 2,
+        "52": 2,
+        "56": 2,
+        "60": 2
+      },
+      "numa_policy_counts": {
+        "interleave:0-3": 11049,
+        "local": 1
+      },
+      "label": "warmup",
+      "config": {
+        "quant": true,
+        "reuse": true,
+        "grouped": true,
+        "hc": true,
+        "sparse": true
+      },
+      "decode_tok_s": 0.22854658087735047,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "tokens_match": true,
+      "logits_max_abs": 0.0,
+      "calls": {
+        "grouped": 360,
+        "quant": 4724,
+        "hc": 720
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 10.512858162866905,
+        "prefill_seconds": 3.7927903700619936,
+        "decode_seconds": 6.714030928909779,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41229522368
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "thread_affinities": {
+        "0": 17,
+        "4": 2,
+        "8": 2,
+        "12": 2,
+        "16": 2,
+        "20": 2,
+        "24": 2,
+        "28": 2,
+        "32": 2,
+        "36": 2,
+        "40": 2,
+        "44": 2,
+        "48": 2,
+        "52": 2,
+        "56": 2,
+        "60": 2
+      },
+      "numa_policy_counts": {
+        "interleave:0-3": 11050,
+        "local": 1
+      },
+      "label": "fused16_before",
+      "config": {
+        "quant": true,
+        "reuse": true,
+        "grouped": true,
+        "hc": true,
+        "sparse": true
+      },
+      "decode_tok_s": 1.3404763986485562,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "tokens_match": true,
+      "logits_max_abs": 0.0,
+      "calls": {
+        "grouped": 720,
+        "quant": 9448,
+        "hc": 1440
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 11.947283804183826,
+        "prefill_seconds": 4.695616781944409,
+        "decode_seconds": 7.246262775734067,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41229522368
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "thread_affinities": {
+        "0": 17,
+        "4": 2,
+        "8": 2,
+        "12": 2,
+        "16": 2,
+        "20": 2,
+        "24": 2,
+        "28": 2,
+        "32": 2,
+        "36": 2,
+        "40": 2,
+        "44": 2,
+        "48": 2,
+        "52": 2,
+        "56": 2,
+        "60": 2
+      },
+      "numa_policy_counts": {
+        "interleave:0-3": 11050,
+        "local": 1
+      },
+      "label": "fused32",
+      "config": {
+        "quant": true,
+        "reuse": true,
+        "grouped": true,
+        "hc": true,
+        "sparse": true,
+        "native_workers": 32
+      },
+      "decode_tok_s": 1.242019545597872,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "tokens_match": true,
+      "logits_max_abs": 0.0,
+      "calls": {
+        "grouped": 1080,
+        "quant": 14172,
+        "hc": 2160
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 25.14233831805177,
+        "prefill_seconds": 13.691302889026701,
+        "decode_seconds": 11.445660090772435,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41229522368
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "thread_affinities": {
+        "0": 17,
+        "4": 2,
+        "8": 2,
+        "12": 2,
+        "16": 2,
+        "20": 2,
+        "24": 2,
+        "28": 2,
+        "32": 2,
+        "36": 2,
+        "40": 2,
+        "44": 2,
+        "48": 2,
+        "52": 2,
+        "56": 2,
+        "60": 2
+      },
+      "numa_policy_counts": {
+        "interleave:0-3": 11050,
+        "local": 1
+      },
+      "label": "fused64",
+      "config": {
+        "quant": true,
+        "reuse": true,
+        "grouped": true,
+        "hc": true,
+        "sparse": true,
+        "native_workers": 64
+      },
+      "decode_tok_s": 0.7863242424310554,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "tokens_match": true,
+      "logits_max_abs": 0.0,
+      "calls": {
+        "grouped": 1440,
+        "quant": 18896,
+        "hc": 2880
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 15.794666352914646,
+        "prefill_seconds": 7.277819613926113,
+        "decode_seconds": 8.511169577017426,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41229522368
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "thread_affinities": {
+        "0": 17,
+        "4": 2,
+        "8": 2,
+        "12": 2,
+        "16": 2,
+        "20": 2,
+        "24": 2,
+        "28": 2,
+        "32": 2,
+        "36": 2,
+        "40": 2,
+        "44": 2,
+        "48": 2,
+        "52": 2,
+        "56": 2,
+        "60": 2
+      },
+      "numa_policy_counts": {
+        "interleave:0-3": 11050,
+        "local": 1
+      },
+      "label": "fused48",
+      "config": {
+        "quant": true,
+        "reuse": true,
+        "grouped": true,
+        "hc": true,
+        "sparse": true,
+        "native_workers": 48
+      },
+      "decode_tok_s": 1.057433989366462,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "tokens_match": true,
+      "logits_max_abs": 0.0,
+      "calls": {
+        "grouped": 1800,
+        "quant": 23620,
+        "hc": 3600
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 20.35527463699691,
+        "prefill_seconds": 9.765293994918466,
+        "decode_seconds": 10.584519405150786,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41229522368
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "thread_affinities": {
+        "0": 17,
+        "4": 2,
+        "8": 2,
+        "12": 2,
+        "16": 2,
+        "20": 2,
+        "24": 2,
+        "28": 2,
+        "32": 2,
+        "36": 2,
+        "40": 2,
+        "44": 2,
+        "48": 2,
+        "52": 2,
+        "56": 2,
+        "60": 2
+      },
+      "numa_policy_counts": {
+        "interleave:0-3": 11050,
+        "local": 1
+      },
+      "label": "fused64_repeat",
+      "config": {
+        "quant": true,
+        "reuse": true,
+        "grouped": true,
+        "hc": true,
+        "sparse": true,
+        "native_workers": 64
+      },
+      "decode_tok_s": 0.8502984080335565,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "tokens_match": true,
+      "logits_max_abs": 0.0,
+      "calls": {
+        "grouped": 2160,
+        "quant": 28344,
+        "hc": 4320
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 11.877146534854546,
+        "prefill_seconds": 4.665861388901249,
+        "decode_seconds": 7.205876901047304,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41229522368
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "thread_affinities": {
+        "0": 17,
+        "4": 2,
+        "8": 2,
+        "12": 2,
+        "16": 2,
+        "20": 2,
+        "24": 2,
+        "28": 2,
+        "32": 2,
+        "36": 2,
+        "40": 2,
+        "44": 2,
+        "48": 2,
+        "52": 2,
+        "56": 2,
+        "60": 2
+      },
+      "numa_policy_counts": {
+        "interleave:0-3": 11050,
+        "local": 1
+      },
+      "label": "fused32_repeat",
+      "config": {
+        "quant": true,
+        "reuse": true,
+        "grouped": true,
+        "hc": true,
+        "sparse": true,
+        "native_workers": 32
+      },
+      "decode_tok_s": 1.2489805368021119,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "tokens_match": true,
+      "logits_max_abs": 0.0,
+      "calls": {
+        "grouped": 2520,
+        "quant": 33068,
+        "hc": 5040
+      }
+    },
+    {
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 6,
+        "completion_tokens": 10,
+        "total_tokens": 16
+      },
+      "timings": {
+        "total_seconds": 10.660760049941018,
+        "prefill_seconds": 3.9448474019300193,
+        "decode_seconds": 6.710419099079445,
+        "downloaded_bytes": 0,
+        "cache_bytes": 41229522368
+      },
+      "token_ids": [
+        19923,
+        3,
+        1730,
+        588,
+        342,
+        1694,
+        440,
+        4316,
+        33,
+        1
+      ],
+      "thread_affinities": {
+        "0": 17,
+        "4": 2,
+        "8": 2,
+        "12": 2,
+        "16": 2,
+        "20": 2,
+        "24": 2,
+        "28": 2,
+        "32": 2,
+        "36": 2,
+        "40": 2,
+        "44": 2,
+        "48": 2,
+        "52": 2,
+        "56": 2,
+        "60": 2
+      },
+      "numa_policy_counts": {
+        "interleave:0-3": 11050,
+        "local": 1
+      },
+      "label": "fused16_after",
+      "config": {
+        "quant": true,
+        "reuse": true,
+        "grouped": true,
+        "hc": true,
+        "sparse": true
+      },
+      "decode_tok_s": 1.341197899432935,
+      "logits_sha256": [
+        "07854212f179925d89c19724e1bace98d4c128e620be7582b403e07d510a342d",
+        "b498cf766da3b7bd343d2a92297a30b82f714f3cfaf50e71794fe82d620f4edb",
+        "387ba94563ddc71e0b9821d83949b4d2b6a6707a480c1026697d240839cce5ce",
+        "9cad97549e0d93e503020fd3cbc844addb54baac9fc3db98030c475867b0e6cb",
+        "13f31aee5711a2757d401f794354e6c0de3b84cb79ada768328406c99ab48b3b",
+        "cd7765bb14a6b853a3d53e887030570a2733ebfaf53120d30012017fe0a44d9a",
+        "0e3cdb620e278fb8959c4e62666d25578aa54c501b767527d7ce33fedb729333",
+        "3b6adbe7e0df3feb87ff4c1e2b735eb23a4d05016552484dc486ace47ff037d5",
+        "ac33c0244d04ee27b1f6c1bae20098ae3a2933d3216a3d209adabaecbaf477d8",
+        "b33463eb1f5803374121fcc0dfdc07b56ce65a15b133f33c1c066154207c54de"
+      ],
+      "exact_golden": true,
+      "tokens_match": true,
+      "logits_max_abs": 0.0,
+      "calls": {
+        "grouped": 2880,
+        "quant": 37792,
+        "hc": 5760
+      }
+    }
+  ],
+  "affinity": [
+    0
+  ],
+  "wait_policy": "PASSIVE",
+  "proc_bind": "spread",
+  "places": "cores",
+  "requested_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "requested_memory_policy": "interleave:0-3",
+  "cached_weight_pages_relocated": false,
+  "measurement": "single-request decode forward passes after prefill",
+  "over_10_tok_s": false
+}

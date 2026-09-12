@@ -1,0 +1,517 @@
+{
+  "passed": true,
+  "component_only": true,
+  "model_tok_s_measured": false,
+  "expanded_weight_bytes_per_native_byte": 2,
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_fp8_bf16_0910.py": "b458d70757cb5923065e9a06fca6d2bed1fcc8c001a2eb65ba28523a351a82cd",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-fp8-bf16-0910/libdeepseek-v41-fp8-bf16.so": "8198813d7140a35c7702a63b9c136eba2003dcedc71a050e4688b1e3c81baa0a",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_fp8_bf16_0910.py": "d89e073d1cd76a6457df34bbb0ed2e2458d8bab19d176a411925e3b239045277",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-fp8-bf16-0910.cpp": "caafbd52ecea62f33c6d0647019b890952b9f12cd233b972786f56c90c5436a2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-0910b.cpp": "67e9391f008082251946fb1f7486179f03a7efbf7dbb3c96d6078446d195a9b7"
+  },
+  "cases": [
+    {
+      "m": 1,
+      "n": 33,
+      "k": 32,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    },
+    {
+      "m": 3,
+      "n": 67,
+      "k": 96,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    },
+    {
+      "m": 6,
+      "n": 129,
+      "k": 128,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    },
+    {
+      "m": 1,
+      "n": 512,
+      "k": 5120,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    },
+    {
+      "m": 1,
+      "n": 1280,
+      "k": 5120,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    },
+    {
+      "m": 1,
+      "n": 2304,
+      "k": 5120,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    },
+    {
+      "m": 1,
+      "n": 32768,
+      "k": 1280,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    },
+    {
+      "m": 1,
+      "n": 5120,
+      "k": 8192,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    },
+    {
+      "m": 6,
+      "n": 512,
+      "k": 5120,
+      "workers": [
+        1,
+        16
+      ],
+      "tiles": [
+        1,
+        2,
+        4
+      ],
+      "exact": true
+    }
+  ],
+  "benchmarks": [
+    {
+      "n": 512,
+      "k": 5120,
+      "workers": 16,
+      "tile": 1,
+      "pack_seconds": 0.0010846119839698076,
+      "source_weight_bytes": 2621440,
+      "expanded_bytes": 5242880,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00026195196915068664
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.00033171007089549676
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.00031114552984945476
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0002393906888755737
+        }
+      ],
+      "speedup": 0.7798682277097629,
+      "control_ratio": 1.094244602332213
+    },
+    {
+      "n": 512,
+      "k": 5120,
+      "workers": 16,
+      "tile": 2,
+      "pack_seconds": 0.0010846119839698076,
+      "source_weight_bytes": 2621440,
+      "expanded_bytes": 5242880,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00012082860121154226
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 9.130382022703998e-05
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 9.085284364118706e-05
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00012407310168782715
+        }
+      ],
+      "speedup": 1.344456456869085,
+      "control_ratio": 1.026852090016374
+    },
+    {
+      "n": 512,
+      "k": 5120,
+      "workers": 16,
+      "tile": 4,
+      "pack_seconds": 0.0010846119839698076,
+      "source_weight_bytes": 2621440,
+      "expanded_bytes": 5242880,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00017184403259307146
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 9.79386950348271e-05
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 9.654134373704437e-05
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0001496457425673725
+        }
+      ],
+      "speedup": 1.6530733806442581,
+      "control_ratio": 1.1483389346389523
+    },
+    {
+      "n": 1280,
+      "k": 5120,
+      "workers": 16,
+      "tile": 1,
+      "pack_seconds": 0.000722553813830018,
+      "source_weight_bytes": 6553600,
+      "expanded_bytes": 13107200,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00025538051522744354
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.00020707917065010406
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0002088187975459732
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0002239162968180608
+        }
+      ],
+      "speedup": 1.1524384553365679,
+      "control_ratio": 1.1405177687220704
+    },
+    {
+      "n": 1280,
+      "k": 5120,
+      "workers": 16,
+      "tile": 2,
+      "pack_seconds": 0.000722553813830018,
+      "source_weight_bytes": 6553600,
+      "expanded_bytes": 13107200,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00036715834357892163
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.00022583244572160766
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0002232900314993458
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0003736431481229374
+        }
+      ],
+      "speedup": 1.6494420325736874,
+      "control_ratio": 1.0176621467479245
+    },
+    {
+      "n": 1280,
+      "k": 5120,
+      "workers": 16,
+      "tile": 4,
+      "pack_seconds": 0.000722553813830018,
+      "source_weight_bytes": 6553600,
+      "expanded_bytes": 13107200,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00037190238981565926
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.00015958365474944003
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.00015081660058058333
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.00036757648376806173
+        }
+      ],
+      "speedup": 2.382339772232124,
+      "control_ratio": 1.0117687236225024
+    },
+    {
+      "n": 32768,
+      "k": 1280,
+      "workers": 16,
+      "tile": 1,
+      "pack_seconds": 0.009560916805639863,
+      "source_weight_bytes": 41943040,
+      "expanded_bytes": 83886080,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.001048729891408584
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.000980960352535476
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0010234828678221675
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0011914329461433226
+        }
+      ],
+      "speedup": 1.117598550460414,
+      "control_ratio": 1.136072267896426
+    },
+    {
+      "n": 32768,
+      "k": 1280,
+      "workers": 16,
+      "tile": 2,
+      "pack_seconds": 0.009560916805639863,
+      "source_weight_bytes": 41943040,
+      "expanded_bytes": 83886080,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0010095500474562868
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0012062286023137858
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.001158175422460772
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0010708528661780292
+        }
+      ],
+      "speedup": 0.8798846947626386,
+      "control_ratio": 1.0607229120301702
+    },
+    {
+      "n": 32768,
+      "k": 1280,
+      "workers": 16,
+      "tile": 4,
+      "pack_seconds": 0.009560916805639863,
+      "source_weight_bytes": 41943040,
+      "expanded_bytes": 83886080,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0009490538832324091
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0014445231099671219
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0013283482421684312
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0009449389362998772
+        }
+      ],
+      "speedup": 0.683043884482275,
+      "control_ratio": 1.0043547225904828
+    },
+    {
+      "n": 5120,
+      "k": 8192,
+      "workers": 16,
+      "tile": 1,
+      "pack_seconds": 0.01377513399347663,
+      "source_weight_bytes": 41943040,
+      "expanded_bytes": 83886080,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.001159067171101924
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0010655395617504837
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0011426070941524813
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0010465825071150903
+        }
+      ],
+      "speedup": 0.9988691975330191,
+      "control_ratio": 1.1074780662032067
+    },
+    {
+      "n": 5120,
+      "k": 8192,
+      "workers": 16,
+      "tile": 2,
+      "pack_seconds": 0.01377513399347663,
+      "source_weight_bytes": 41943040,
+      "expanded_bytes": 83886080,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0010688893344195094
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0009105028912017588
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.000833741531096166
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0011259207585680997
+        }
+      ],
+      "speedup": 1.2583156723506068,
+      "control_ratio": 1.0533557799784417
+    },
+    {
+      "n": 5120,
+      "k": 8192,
+      "workers": 16,
+      "tile": 4,
+      "pack_seconds": 0.01377513399347663,
+      "source_weight_bytes": 41943040,
+      "expanded_bytes": 83886080,
+      "repeated_hot_matrices": true,
+      "arms": [
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0010622521476761904
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0009687471010693116
+        },
+        {
+          "variant": "expanded",
+          "seconds_per_call": 0.0009590959853085224
+        },
+        {
+          "variant": "baseline",
+          "seconds_per_call": 0.0009846545781329041
+        }
+      ],
+      "speedup": 1.0617600261517992,
+      "control_ratio": 1.0788068945867557
+    }
+  ],
+  "exact_values": 286624,
+  "all_fp8_codes_preserved": true,
+  "hostile_formats_exact": true,
+  "cache_cap_checked": true
+}

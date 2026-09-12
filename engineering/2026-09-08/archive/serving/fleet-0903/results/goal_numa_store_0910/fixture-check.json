@@ -1,0 +1,229 @@
+{
+  "passed": true,
+  "component_only": true,
+  "full_checkpoint_loaded": false,
+  "production_model_copied": false,
+  "performance_trial": false,
+  "cpu_affinity": [
+    0
+  ],
+  "torch_threads": 1,
+  "verified": {
+    "activation_exact_bytes_scales_unchanged_and_idempotent": true,
+    "release_unmaps_and_clears_accounting": true,
+    "resident_eviction_dispatch_releases_copy_storage": true,
+    "partial_group_copy_limit_fallback_and_release_all": true,
+    "memory_reserve_fallback_preserves_native_storage": true,
+    "common_dense_head_hc_copy_embedding_scale_meta_expert_skip": true,
+    "common_alias_deduplication_and_idempotence": true,
+    "common_and_expert_accounting_share_cap_and_release_independently": true
+  },
+  "sample_stats": {
+    "nodes": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "copy_limit_bytes": 1048576,
+    "min_weight_bytes": 1,
+    "reserve_bytes": 0,
+    "copied_bytes": 49152,
+    "common_copied_bytes": 49152,
+    "expert_copied_bytes": 0,
+    "per_prefix_copied_bytes": {},
+    "current_expert_groups": {},
+    "copy_misses": 0,
+    "counters": {
+      "skipped_scale_parameters": 2,
+      "skipped_embedding_parameters": 1,
+      "skipped_meta_or_non_cpu": 1,
+      "copied_weights": 6,
+      "copied_bytes_total": 98304,
+      "deduplicated_aliases": 1,
+      "common_copy_passes": 2,
+      "full_expert_groups": 1,
+      "released_copy_bytes": 49152,
+      "released_expert_groups": 1
+    },
+    "placements": {
+      "@common": [
+        {
+          "names": [
+            "hc_attn_fn"
+          ],
+          "address": 123845770231808,
+          "data_bytes": 16384,
+          "allocated_bytes": 16384,
+          "page_size": 4096,
+          "nodes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "requested_byte_boundaries": [
+            0,
+            4096,
+            8192,
+            12288,
+            16384
+          ],
+          "actual_byte_boundaries": [
+            0,
+            4096,
+            8192,
+            12288,
+            16384
+          ],
+          "boundary_policy": "strict",
+          "actual_sample": {
+            "verified": true,
+            "sampled": true,
+            "pages": [
+              {
+                "expected_node": 0,
+                "actual_node": 0,
+                "byte_offset": 0
+              },
+              {
+                "expected_node": 1,
+                "actual_node": 1,
+                "byte_offset": 4096
+              },
+              {
+                "expected_node": 2,
+                "actual_node": 2,
+                "byte_offset": 8192
+              },
+              {
+                "expected_node": 3,
+                "actual_node": 3,
+                "byte_offset": 12288
+              }
+            ]
+          }
+        },
+        {
+          "names": [
+            "dense.weight",
+            "alias.weight"
+          ],
+          "address": 123845770215424,
+          "data_bytes": 16384,
+          "allocated_bytes": 16384,
+          "page_size": 4096,
+          "nodes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "requested_byte_boundaries": [
+            0,
+            4096,
+            8192,
+            12288,
+            16384
+          ],
+          "actual_byte_boundaries": [
+            0,
+            4096,
+            8192,
+            12288,
+            16384
+          ],
+          "boundary_policy": "strict",
+          "actual_sample": {
+            "verified": true,
+            "sampled": true,
+            "pages": [
+              {
+                "expected_node": 0,
+                "actual_node": 0,
+                "byte_offset": 0
+              },
+              {
+                "expected_node": 1,
+                "actual_node": 1,
+                "byte_offset": 4096
+              },
+              {
+                "expected_node": 2,
+                "actual_node": 2,
+                "byte_offset": 8192
+              },
+              {
+                "expected_node": 3,
+                "actual_node": 3,
+                "byte_offset": 12288
+              }
+            ]
+          }
+        },
+        {
+          "names": [
+            "head.weight"
+          ],
+          "address": 123845770199040,
+          "data_bytes": 16384,
+          "allocated_bytes": 16384,
+          "page_size": 4096,
+          "nodes": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "requested_byte_boundaries": [
+            0,
+            4096,
+            8192,
+            12288,
+            16384
+          ],
+          "actual_byte_boundaries": [
+            0,
+            4096,
+            8192,
+            12288,
+            16384
+          ],
+          "boundary_policy": "strict",
+          "actual_sample": {
+            "verified": true,
+            "sampled": true,
+            "pages": [
+              {
+                "expected_node": 0,
+                "actual_node": 0,
+                "byte_offset": 0
+              },
+              {
+                "expected_node": 1,
+                "actual_node": 1,
+                "byte_offset": 4096
+              },
+              {
+                "expected_node": 2,
+                "actual_node": 2,
+                "byte_offset": 8192
+              },
+              {
+                "expected_node": 3,
+                "actual_node": 3,
+                "byte_offset": 12288
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "placements_sampled": true
+  },
+  "sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_numa_store_0910_check.py": "53970cc79ee566c35c51d96ba2c8fd297173424dff7191b3c6ded6db6896afa2",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_numa_store_0910.py": "35a990f9b2603c88c89feb3636999f19a26d47e20c28b1822917fefc6502dc43",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/goal_numa_0910.py": "92d37cac2c5bcc0d9684808f414d188c17fe18b2caee6890f356aa0a843f7359"
+  }
+}

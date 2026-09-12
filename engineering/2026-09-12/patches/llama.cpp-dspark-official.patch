@@ -1,0 +1,2323 @@
+diff --git a/common/common.h b/common/common.h
+index 919c0ea103a47923b6775990fa4121e5cdf184b5..843f388410276deb01984e7470a0e2944f36643f 100644
+--- a/common/common.h
++++ b/common/common.h
+@@ -325,6 +325,10 @@ struct common_params_speculative_draft {
+     int32_t n_max = 3; // maximum number of tokens to draft during speculative decoding
+     int32_t n_min = 0; // minimum number of draft tokens to use for speculative decoding
+ 
++    // Select the draft block length online using measured complete-cycle utility.
++    // This is a server-side policy; the draft/target acceptance algorithm is unchanged.
++    bool adaptive = false;
++
+     float p_split = 0.1f; // speculative decoding split probability
+     float p_min   = 0.0f; // minimum speculative decoding probability (greedy)
+ 
+diff --git a/common/fit.cpp b/common/fit.cpp
+index c82d066ad444cde075ef65862048df672ea02892..4da221e5a7e851c5041fb3beab0f619e5a0c3502 100644
+--- a/common/fit.cpp
++++ b/common/fit.cpp
+@@ -4,6 +4,7 @@
+ 
+ #include "../src/llama-ext.h"
+ 
++#include <algorithm>
+ #include <array>
+ #include <cassert>
+ #include <stdexcept>
+@@ -953,6 +954,45 @@ void common_memory_breakdown_print(const struct llama_context * ctx) {
+     }
+ }
+ 
++void common_model_residency_log(const char * role, const llama_context * ctx) {
++    struct device_residency {
++        ggml_backend_dev_t dev;
++        size_t model_bytes = 0;
++    };
++
++    std::vector<device_residency> devices;
++    for (const auto & [buft, memory] : llama_get_memory_breakdown(ctx)) {
++        if (ggml_backend_buft_is_host(buft)) {
++            continue;
++        }
++        ggml_backend_dev_t dev = ggml_backend_buft_get_device(buft);
++        if (dev == nullptr) {
++            continue;
++        }
++        const enum ggml_backend_dev_type type = ggml_backend_dev_type(dev);
++        if (type != GGML_BACKEND_DEVICE_TYPE_GPU && type != GGML_BACKEND_DEVICE_TYPE_IGPU) {
++            continue;
++        }
++        const auto it = std::find_if(devices.begin(), devices.end(), [dev](const device_residency & item) {
++            return item.dev == dev;
++        });
++        if (it == devices.end()) {
++            devices.push_back({dev, memory.model});
++        } else {
++            it->model_bytes += memory.model;
++        }
++    }
++
++    for (const auto & item : devices) {
++        const enum ggml_backend_dev_type type = ggml_backend_dev_type(item.dev);
++        LOG_INF("wildspeed_model_residency role=%s device=%s device_type=%s model_bytes=%zu\n",
++                role,
++                ggml_backend_dev_name(item.dev),
++                type == GGML_BACKEND_DEVICE_TYPE_IGPU ? "IGPU" : "GPU",
++                item.model_bytes);
++    }
++}
++
+ void common_fit_print(
+         const char * path_model,
+         llama_model_params * mparams,
+diff --git a/common/fit.h b/common/fit.h
+index 208fc30694e0375db281c8d5466bf1402ce0ea36..14d37991dbff41c6accc7eedaa1432380faaea80 100644
+--- a/common/fit.h
++++ b/common/fit.h
+@@ -34,6 +34,9 @@ void common_fit_print(
+ 
+ void common_memory_breakdown_print(const llama_context * ctx);
+ 
++// Log exact per-GPU model-buffer allocation bytes for benchmark provenance.
++void common_model_residency_log(const char * role, const llama_context * ctx);
++
+ struct common_device_memory_data {
+     int64_t total;
+     int64_t free;
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index 514fe852180f58a7b3f6d5d5c324d08745d8fd4d..9e6680b5f4a27cd534b688c8dfcaa6773b38f3bc 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -13,6 +13,7 @@
+ 
+ #include <algorithm>
+ #include <cassert>
++#include <cstdlib>
+ #include <cstring>
+ #include <iomanip>
+ #include <map>
+@@ -376,7 +377,8 @@ struct common_speculative_impl_draft_simple : public common_speculative_impl {
+                 continue;
+             }
+ 
+-            if (dp.result->size() < (size_t) params.n_min) {
++            const int32_t n_min = dp.n_min >= 0 ? dp.n_min : params.n_min;
++            if (dp.result->size() < (size_t) n_min) {
+                 dp.result->clear();
+             }
+         }
+@@ -842,7 +844,8 @@ struct common_speculative_impl_draft_eagle3 : public common_speculative_impl {
+                 continue;
+             }
+ 
+-            if (dp.result->size() < (size_t) params.n_min) {
++            const int32_t n_min = dp.n_min >= 0 ? dp.n_min : params.n_min;
++            if (dp.result->size() < (size_t) n_min) {
+                 dp.result->clear();
+             }
+         }
+@@ -1134,6 +1137,15 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+         std::vector<int32_t> i_block_beg(n_seq, -1);
+         std::vector<int32_t> n_block    (n_seq,  0);
+ 
++        // DFlash requires equal block sizes across sequences.
++        int32_t n_draft_batch = params.n_max;
++        for (const auto & dp : dparams) {
++            if (dp.drafting && dp.n_max > 0) {
++                n_draft_batch = std::min(n_draft_batch, dp.n_max);
++            }
++        }
++        GGML_ASSERT(n_draft_batch > 0);
++
+         for (llama_seq_id seq_id = 0; seq_id < (llama_seq_id) n_seq; ++seq_id) {
+             auto & dp = dparams[seq_id];
+             if (!dp.drafting) {
+@@ -1144,7 +1156,7 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+ 
+             const int32_t n = (int32_t) dp.n_past;
+ 
+-            const int32_t n_draft = params.n_max;
++            const int32_t n_draft = n_draft_batch;
+ 
+             const int32_t n_block_tokens = n_draft + (is_dspark ? 0 : 1);
+             i_block_beg[seq_id] = batch.n_tokens;
+@@ -1158,6 +1170,16 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+             return;
+         }
+ 
++        if (is_dspark && std::getenv("LLAMA_DSPARK_BLOCK_TELEMETRY") != nullptr) {
++            static uint32_t logged_n_draft = 0;
++            const uint32_t bit = n_draft_batch < 32 ? 1u << n_draft_batch : 0;
++            if (bit != 0 && (logged_n_draft & bit) == 0) {
++                logged_n_draft |= bit;
++                LOG_INF("%s: DSpark block telemetry: requested=%d active_sequences=%d decoder_rows=%d\n",
++                        __func__, n_draft_batch, batch.n_tokens / n_draft_batch, batch.n_tokens);
++            }
++        }
++
+         // decode all sequence's noise block in a single batch
+         int ret = llama_decode(ctx_dft, batch);
+         if (ret != 0) {
+@@ -1181,12 +1203,13 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+             if (is_dspark) {
+                 // DSpark predicts the next token from position 0 and optionally truncates
+                 // at the first position below the confidence threshold.
+-                const float * conf = params.p_min > 0.0f ? llama_get_embeddings_nextn(ctx_dft) : nullptr;
++                const float p_min = dp.p_min >= 0.0f ? dp.p_min : params.p_min;
++                const float * conf = p_min > 0.0f ? llama_get_embeddings_nextn(ctx_dft) : nullptr;
+ 
+                 for (int32_t i = 0; i < n_block_tokens; ++i) {
+                     const int32_t idx = beg + i;
+ 
+-                    if (conf && conf[(size_t) idx * n_embd_dec] < params.p_min) {
++                    if (conf && conf[(size_t) idx * n_embd_dec] < p_min) {
+                         break;
+                     }
+ 
+@@ -1231,7 +1254,8 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+                 }
+             }
+ 
+-            if (result.size() < (size_t) params.n_min) {
++            const int32_t n_min = dp.n_min >= 0 ? dp.n_min : params.n_min;
++            if (result.size() < (size_t) n_min) {
+                 result.clear();
+             }
+         }
+@@ -1662,7 +1686,8 @@ struct common_speculative_impl_draft_mtp : public common_speculative_impl {
+                 continue;
+             }
+ 
+-            if (dp.result->size() < (size_t) params.n_min) {
++            const int32_t n_min = dp.n_min >= 0 ? dp.n_min : params.n_min;
++            if (dp.result->size() < (size_t) n_min) {
+                 dp.result->clear();
+             }
+         }
+diff --git a/common/speculative.h b/common/speculative.h
+index 062bf209314a0569c76a2287e99992e50965d7ca..672281ff2f8ffc5c45e08ae4c1378b202ee98ac3 100644
+--- a/common/speculative.h
++++ b/common/speculative.h
+@@ -40,6 +40,12 @@ struct common_speculative_draft_params {
+     // can be used to constraint the max draft based on the remaining context size
+     int32_t n_max = -1;
+ 
++    // Minimum draft-size override (-1 uses the server default).
++    int32_t n_min = -1;
++
++    // DSpark confidence threshold override (-1 uses the server default)
++    float p_min = -1.0f;
++
+     llama_pos   n_past;
+     llama_token id_last;
+ 
+diff --git a/examples/speculative-simple/speculative-simple.cpp b/examples/speculative-simple/speculative-simple.cpp
+index d87ba48beb14d54c037d329aa1aa96b6baf13f6f..a0b4baab1a298b7a682a14e158beda363c5070e4 100644
+--- a/examples/speculative-simple/speculative-simple.cpp
++++ b/examples/speculative-simple/speculative-simple.cpp
+@@ -182,6 +182,8 @@ int main(int argc, char ** argv) {
+             common_speculative_get_draft_params(spec, seq_id) = {
+                 /* .drafting   = */ true,
+                 /* .n_max      = */ -1,
++                /* .n_min      = */ -1,
++                /* .p_min      = */ -1.0f,
+                 /* .n_past     = */ n_past,
+                 /* .id_last    = */ id_last,
+                 /* .prompt     = */ &prompt_tgt,
+diff --git a/ggml/src/ggml-cpu/arch-fallback.h b/ggml/src/ggml-cpu/arch-fallback.h
+index 152e0bac99b047ce14cdd0377b705d3ea17c0f7a..d93af5b2605c39876c06e836c32c11cc9320ab1c 100644
+--- a/ggml/src/ggml-cpu/arch-fallback.h
++++ b/ggml/src/ggml-cpu/arch-fallback.h
+@@ -1,6 +1,13 @@
+ 
+ #pragma once
+ 
++// The fused Q2_K helper currently has an x86 implementation only. On every
++// other architecture, expose the generic implementation under the public
++// internal name without changing the existing per-architecture dot kernels.
++#if !defined(__x86_64__) && !defined(__i386__) && !defined(_M_IX86) && !defined(_M_X64)
++#define ggml_vec_dot_q2_K_q8_K_rows_2_generic ggml_vec_dot_q2_K_q8_K_rows_2
++#endif
++
+ // Rename `_generic` functions if no native implementation is available.
+ // This effectively selects the generic implementation.
+ 
+diff --git a/ggml/src/ggml-cpu/arch/x86/quants.c b/ggml/src/ggml-cpu/arch/x86/quants.c
+index ea54cfe44ce403fe06c8b4aa10b5a882779e7e71..57423840cdbc89f744333dd68bc5e5b0d1bf06e3 100644
+--- a/ggml/src/ggml-cpu/arch/x86/quants.c
++++ b/ggml/src/ggml-cpu/arch/x86/quants.c
+@@ -1763,6 +1763,88 @@ void ggml_vec_dot_q2_K_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const voi
+ #endif
+ }
+ 
++void ggml_vec_dot_q2_K_q8_K_rows_2(
++        int n, float * GGML_RESTRICT s, const void * GGML_RESTRICT vx,
++        const void * GGML_RESTRICT vy0, const void * GGML_RESTRICT vy1) {
++    assert(n % QK_K == 0);
++
++#if defined __AVX2__
++    const block_q2_K * GGML_RESTRICT x = vx;
++    const block_q8_K * y[2] = { vy0, vy1 };
++    const int nb = n / QK_K;
++
++    const __m256i m3 = _mm256_set1_epi8(3);
++    const __m128i m4 = _mm_set1_epi8(0xF);
++    __m256 acc[2] = { _mm256_setzero_ps(), _mm256_setzero_ps() };
++
++    for (int i = 0; i < nb; ++i) {
++        const __m128i mins_and_scales = _mm_loadu_si128((const __m128i *) x[i].scales);
++        const __m128i scales8 = _mm_and_si128(mins_and_scales, m4);
++        const __m128i mins8 = _mm_and_si128(_mm_srli_epi16(mins_and_scales, 4), m4);
++        const __m256i mins = _mm256_cvtepi8_epi16(mins8);
++
++        const __m256i all_scales = _mm256_cvtepi8_epi16(scales8);
++        const __m128i l_scales = _mm256_extracti128_si256(all_scales, 0);
++        const __m128i h_scales = _mm256_extracti128_si256(all_scales, 1);
++        const __m256i scales[2] = {
++            MM256_SET_M128I(l_scales, l_scales),
++            MM256_SET_M128I(h_scales, h_scales),
++        };
++
++        float d[2];
++        __m256i sumi[2] = { _mm256_setzero_si256(), _mm256_setzero_si256() };
++        for (int row = 0; row < 2; ++row) {
++            d[row] = y[row][i].d * GGML_CPU_FP16_TO_FP32(x[i].d);
++            const float dmin = -y[row][i].d * GGML_CPU_FP16_TO_FP32(x[i].dmin);
++            const __m256i prod = _mm256_madd_epi16(
++                    mins, _mm256_loadu_si256((const __m256i *) y[row][i].bsums));
++            acc[row] = _mm256_fmadd_ps(
++                    _mm256_broadcast_ss(&dmin), _mm256_cvtepi32_ps(prod), acc[row]);
++        }
++
++        for (int j = 0; j < QK_K/128; ++j) {
++            const __m256i q2bits = _mm256_loadu_si256((const __m256i *) (x[i].qs + 32*j));
++            const __m256i q2_0 = _mm256_and_si256(q2bits, m3);
++            const __m256i q2_1 = _mm256_and_si256(_mm256_srli_epi16(q2bits, 2), m3);
++            const __m256i q2_2 = _mm256_and_si256(_mm256_srli_epi16(q2bits, 4), m3);
++            const __m256i q2_3 = _mm256_and_si256(_mm256_srli_epi16(q2bits, 6), m3);
++
++            for (int row = 0; row < 2; ++row) {
++                const int8_t * q8 = y[row][i].qs + 128*j;
++                const __m256i q8_0 = _mm256_loadu_si256((const __m256i *) (q8 +  0));
++                const __m256i q8_1 = _mm256_loadu_si256((const __m256i *) (q8 + 32));
++                const __m256i q8_2 = _mm256_loadu_si256((const __m256i *) (q8 + 64));
++                const __m256i q8_3 = _mm256_loadu_si256((const __m256i *) (q8 + 96));
++
++                __m256i p0 = _mm256_maddubs_epi16(q2_0, q8_0);
++                __m256i p1 = _mm256_maddubs_epi16(q2_1, q8_1);
++                __m256i p2 = _mm256_maddubs_epi16(q2_2, q8_2);
++                __m256i p3 = _mm256_maddubs_epi16(q2_3, q8_3);
++
++                p0 = _mm256_madd_epi16(_mm256_shuffle_epi8(scales[j], get_scale_shuffle_q3k(0)), p0);
++                p1 = _mm256_madd_epi16(_mm256_shuffle_epi8(scales[j], get_scale_shuffle_q3k(1)), p1);
++                p2 = _mm256_madd_epi16(_mm256_shuffle_epi8(scales[j], get_scale_shuffle_q3k(2)), p2);
++                p3 = _mm256_madd_epi16(_mm256_shuffle_epi8(scales[j], get_scale_shuffle_q3k(3)), p3);
++
++                p0 = _mm256_add_epi32(p0, p1);
++                p2 = _mm256_add_epi32(p2, p3);
++                sumi[row] = _mm256_add_epi32(sumi[row], _mm256_add_epi32(p0, p2));
++            }
++        }
++
++        for (int row = 0; row < 2; ++row) {
++            acc[row] = _mm256_fmadd_ps(
++                    _mm256_broadcast_ss(&d[row]), _mm256_cvtepi32_ps(sumi[row]), acc[row]);
++        }
++    }
++
++    s[0] = hsum_float_8(acc[0]);
++    s[1] = hsum_float_8(acc[1]);
++#else
++    ggml_vec_dot_q2_K_q8_K_rows_2_generic(n, s, vx, vy0, vy1);
++#endif
++}
++
+ void ggml_vec_dot_q3_K_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc) {
+     assert(n % QK_K == 0);
+     assert(nrc == 1);
+diff --git a/ggml/src/ggml-cpu/arch/x86/repack.cpp b/ggml/src/ggml-cpu/arch/x86/repack.cpp
+index af1cebad131d17118c26634faccb9a6e0c08a6f9..08e22c6443578835ab55614aadab267fc5528024 100644
+--- a/ggml/src/ggml-cpu/arch/x86/repack.cpp
++++ b/ggml/src/ggml-cpu/arch/x86/repack.cpp
+@@ -517,6 +517,72 @@ void ggml_quantize_mat_q8_K_4x8(const float * GGML_RESTRICT x, void * GGML_RESTR
+ 
+ #if defined(__AVX2__) || defined(__AVX512F__)
+ 
++#if defined(__AVX2__)
++static inline __m256 load_mxfp4_e8m0_8_gather_repacked(const uint8_t * e) {
++    const __m128i order = _mm_setr_epi8(0, 4, 1, 5, 2, 6, 3, 7,
++                                       -1, -1, -1, -1, -1, -1, -1, -1);
++    const __m128i packed = _mm_shuffle_epi8(
++            _mm_loadl_epi64((const __m128i *) e), order);
++    const __m256i index = _mm256_cvtepu8_epi32(packed);
++    return _mm256_i32gather_ps(ggml_table_f32_e8m0_half, index, sizeof(float));
++}
++
++static inline __m256 load_mxfp4_e8m0_8_bits_repacked(const uint8_t * e) {
++    const __m128i order = _mm_setr_epi8(0, 4, 1, 5, 2, 6, 3, 7,
++                                       -1, -1, -1, -1, -1, -1, -1, -1);
++    const __m128i packed = _mm_shuffle_epi8(
++            _mm_loadl_epi64((const __m128i *) e), order);
++    const __m256i exponent = _mm256_cvtepu8_epi32(packed);
++
++    // E8M0 values are powers of two.  MXFP4 consumes half of the encoded
++    // scale, so normal values map directly to exponent (e - 1).  Preserve
++    // the exact denormal encodings for e=0 and e=1 without a table lookup.
++    const __m256i normal = _mm256_slli_epi32(
++            _mm256_sub_epi32(exponent, _mm256_set1_epi32(1)), 23);
++    const __m256i denormal = _mm256_sllv_epi32(
++            _mm256_set1_epi32(0x00200000), exponent);
++    const __m256i is_denormal = _mm256_cmpgt_epi32(
++            _mm256_set1_epi32(2), exponent);
++    return _mm256_castsi256_ps(
++            _mm256_blendv_epi8(normal, denormal, is_denormal));
++}
++
++static void verify_mxfp4_e8m0_8_bits_repacked() {
++    static constexpr int order[8] = { 0, 4, 1, 5, 2, 6, 3, 7 };
++    alignas(32) float actual[8];
++
++    for (int base = 0; base < 256; base += 8) {
++        uint8_t encoded[8];
++        for (int lane = 0; lane < 8; ++lane) {
++            encoded[lane] = (uint8_t) (base + lane);
++        }
++        _mm256_store_ps(actual, load_mxfp4_e8m0_8_bits_repacked(encoded));
++
++        for (int lane = 0; lane < 8; ++lane) {
++            const float expected = ggml_e8m0_to_fp32_half(encoded[order[lane]]);
++            uint32_t actual_bits;
++            uint32_t expected_bits;
++            memcpy(&actual_bits, &actual[lane], sizeof(actual_bits));
++            memcpy(&expected_bits, &expected, sizeof(expected_bits));
++            GGML_ASSERT(actual_bits == expected_bits);
++        }
++    }
++}
++
++static int mxfp4_gather_scale_mode() {
++    static const int mode = [] {
++        const char * value = std::getenv("GGML_CPU_MXFP4_GATHER_SCALE");
++        const int selected = value != nullptr ? std::atoi(value) : 0;
++        if (selected == 3 || selected == 4) {
++            verify_mxfp4_e8m0_8_bits_repacked();
++        }
++        return selected;
++    }();
++    return mode;
++}
++
++#endif
++
+ // GEMV for 8x blocks of 32 4-bit quants with a single scale factor per block
+ template<typename block_tx8>
+ static void gemv_q4_b32_8x8_q8_0_lut_avx(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc, __m256i signextendlut) {
+@@ -528,6 +594,11 @@ static void gemv_q4_b32_8x8_q8_0_lut_avx(int n, float * GGML_RESTRICT s, size_t
+ 
+     const int qk = QK8_0;
+     const int nb = n / qk;
++    const int mxfp4_gather_mode = mxfp4_gather_scale_mode();
++    const bool use_mxfp4_gather_scale =
++            mxfp4_gather_mode == 1 || (mxfp4_gather_mode == 2 && n >= 4096);
++    const bool use_mxfp4_bits_scale =
++            mxfp4_gather_mode == 3 || (mxfp4_gather_mode == 4 && n >= 4096);
+ 
+     UNUSED(bs);
+ 
+@@ -582,17 +653,22 @@ static void gemv_q4_b32_8x8_q8_0_lut_avx(int n, float * GGML_RESTRICT s, size_t
+                     const __m128i changemask = _mm_set_epi8(15, 14, 7, 6, 13, 12, 5, 4, 11, 10, 3, 2, 9, 8, 1, 0);
+                     col_scale_f32 = GGML_F32Cx8_REARRANGE_LOAD(b_ptr[b].d, changemask);
+                 } else if constexpr (std::is_same_v<block_tx8, block_mxfp4x8>) {
+-                    // Load 8 E8M0 exponents and convert to float via LUT
+-                    // Rearranged to match changemask order: 0,4,1,5,2,6,3,7
+-                    col_scale_f32 = _mm256_set_ps(
+-                        GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[7]),
+-                        GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[3]),
+-                        GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[6]),
+-                        GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[2]),
+-                        GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[5]),
+-                        GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[1]),
+-                        GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[4]),
+-                        GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[0]));
++                    if (use_mxfp4_bits_scale) {
++                        col_scale_f32 = load_mxfp4_e8m0_8_bits_repacked(b_ptr[b].e);
++                    } else if (use_mxfp4_gather_scale) {
++                        col_scale_f32 = load_mxfp4_e8m0_8_gather_repacked(b_ptr[b].e);
++                    } else {
++                        // Rearranged to match accumulator order: 0,4,1,5,2,6,3,7
++                        col_scale_f32 = _mm256_set_ps(
++                            GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[7]),
++                            GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[3]),
++                            GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[6]),
++                            GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[2]),
++                            GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[5]),
++                            GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[1]),
++                            GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[4]),
++                            GGML_CPU_E8M0_TO_FP32_HALF(b_ptr[b].e[0]));
++                    }
+                 }
+ 
+                 // Load and convert to FP32 scale from block_q8_0
+diff --git a/ggml/src/ggml-cpu/ggml-cpu-impl.h b/ggml/src/ggml-cpu/ggml-cpu-impl.h
+index 5d1ca5ffcc368b9f0249d6cf6ccc4549bb9a3ab4..c94e5d6030c90e3b58400b08c5a56433c9617203 100644
+--- a/ggml/src/ggml-cpu/ggml-cpu-impl.h
++++ b/ggml/src/ggml-cpu/ggml-cpu-impl.h
+@@ -534,6 +534,10 @@ void ggml_barrier(struct ggml_threadpool * tp);
+ void ggml_threadpool_chunk_set(struct ggml_threadpool * tp, int value);
+ int  ggml_threadpool_chunk_add(struct ggml_threadpool * tp, int value);
+ 
++int  ggml_cpu_numa_node_count(void);
++int  ggml_cpu_numa_thread_node(int thread_n);
++bool ggml_cpu_numa_bind_range(void * ptr, size_t size, int node);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/ggml/src/ggml-cpu/ggml-cpu.c b/ggml/src/ggml-cpu/ggml-cpu.c
+index 491316f7491252248d6f74a60440d3efa7aa6177..347e0bc5df23f03fa1077324b8d63c9e8cfdad83 100644
+--- a/ggml/src/ggml-cpu/ggml-cpu.c
++++ b/ggml/src/ggml-cpu/ggml-cpu.c
+@@ -35,6 +35,7 @@
+ #include <stdarg.h>
+ #include <signal.h>
+ #if defined(__gnu_linux__)
++#include <linux/mempolicy.h>
+ #include <syscall.h>
+ #endif
+ 
+@@ -202,6 +203,18 @@ typedef void * thread_ret_t;
+ 
+ typedef pthread_t ggml_thread_t;
+ 
++static bool ggml_cpu_moe_q2_rows_enabled(void) {
++    static atomic_int state = -1;
++
++    int enabled = atomic_load_explicit(&state, memory_order_relaxed);
++    if (enabled < 0) {
++        const char * value = getenv("GGML_CPU_MOE_Q2_ROWS");
++        enabled = value != NULL && value[0] != '\0' && strcmp(value, "0") != 0;
++        atomic_store_explicit(&state, enabled, memory_order_relaxed);
++    }
++    return enabled != 0;
++}
++
+ #define GGML_THREADPOOL_N_THREADS_MASK (0xffffU)
+ #define GGML_THREADPOOL_N_THREADS_BITS (16)
+ 
+@@ -725,6 +738,43 @@ bool ggml_is_numa(void) {
+     return g_state.numa.n_nodes > 1;
+ }
+ 
++int ggml_cpu_numa_node_count(void) {
++    return g_state.numa.numa_strategy == GGML_NUMA_STRATEGY_DISTRIBUTE ? (int) g_state.numa.n_nodes : 0;
++}
++
++int ggml_cpu_numa_thread_node(int thread_n) {
++    const int n_nodes = ggml_cpu_numa_node_count();
++    return n_nodes > 0 ? thread_n % n_nodes : -1;
++}
++
++bool ggml_cpu_numa_bind_range(void * ptr, size_t size, int node) {
++#if defined(__gnu_linux__) && defined(SYS_mbind)
++    const int n_nodes = ggml_cpu_numa_node_count();
++    if (node < 0 || node >= n_nodes || size == 0) {
++        return false;
++    }
++
++    const long page_size = sysconf(_SC_PAGESIZE);
++    if (page_size <= 0) {
++        return false;
++    }
++
++    const uintptr_t first = ((uintptr_t) ptr + (uintptr_t) page_size - 1) & ~((uintptr_t) page_size - 1);
++    const uintptr_t last  = ((uintptr_t) ptr + size) & ~((uintptr_t) page_size - 1);
++    if (last <= first) {
++        return false;
++    }
++
++    const unsigned long node_mask = 1UL << node;
++    return syscall(SYS_mbind, (void *) first, last - first, MPOL_BIND, &node_mask, sizeof(node_mask) * CHAR_BIT, 0) == 0;
++#else
++    UNUSED(ptr);
++    UNUSED(size);
++    UNUSED(node);
++    return false;
++#endif
++}
++
+ #if defined(__ARM_ARCH)
+ #if defined(__aarch64__) && defined(__ARM_FEATURE_SVE)
+ #include <arm_sve.h>
+@@ -1488,6 +1538,49 @@ static void ggml_compute_forward_mul_mat_id_one_chunk(
+ 
+     float tmp[16];
+ 
++    if (type == GGML_TYPE_Q2_K && ir1_end - ir1_start >= 2 && ggml_cpu_moe_q2_rows_enabled()) {
++        for (int64_t iir1 = ir1_start; iir1 < ir1_end; iir1 += blck_1) {
++            const int64_t ir1_block_end = MIN(iir1 + blck_1, ir1_end);
++            for (int64_t iir0 = ir0_start; iir0 < ir0_end; iir0 += blck_0) {
++                const int64_t ir0_block_end = MIN(iir0 + blck_0, ir0_end);
++                for (int64_t ir1 = iir1; ir1 < ir1_block_end; ir1 += 2) {
++                    const int n_rows = (int) MIN((int64_t) 2, ir1_block_end - ir1);
++                    const char * src1_cols[2] = { NULL, NULL };
++                    float * dst_cols[2] = { NULL, NULL };
++
++                    for (int row = 0; row < n_rows; ++row) {
++                        const struct mmid_row_mapping mapping = MMID_MATRIX_ROW(cur_a, ir1 + row);
++                        const int64_t i11 = mapping.i1 % ne11;
++                        const int64_t i12 = mapping.i2;
++
++                        src1_cols[row] = (const char *) wdata +
++                            (src1_cont || src1->type != vec_dot_type
++                                ? (i11 + i12*ne11)*row_size
++                                : (i11*nb11 + i12*nb12));
++                        dst_cols[row] = (float *) ((char *) dst->data + mapping.i1*nb1 + mapping.i2*nb2);
++                    }
++
++                    if (n_rows == 2) {
++                        for (int64_t ir0 = iir0; ir0 < ir0_block_end; ++ir0) {
++                            const char * weight_row = src0_cur + ir0*nb01;
++                            float result[2];
++                            ggml_vec_dot_q2_K_q8_K_rows_2(
++                                    ne00, result, weight_row, src1_cols[0], src1_cols[1]);
++                            dst_cols[0][ir0] = result[0];
++                            dst_cols[1][ir0] = result[1];
++                        }
++                    } else {
++                        for (int64_t ir0 = iir0; ir0 < ir0_block_end; ++ir0) {
++                            vec_dot(ne00, &tmp[ir0 - iir0], 0, src0_cur + ir0*nb01, 0, src1_cols[0], 0, 1);
++                        }
++                        memcpy(&dst_cols[0][iir0], tmp, (ir0_block_end - iir0)*sizeof(float));
++                    }
++                }
++            }
++        }
++        return;
++    }
++
+     for (int64_t iir1 = ir1_start; iir1 < ir1_end; iir1 += blck_1) {
+         for (int64_t iir0 = ir0_start; iir0 < ir0_end; iir0 += blck_0) {
+             for (int64_t ir1 = iir1; ir1 < iir1 + blck_1 && ir1 < ir1_end; ++ir1) {
+@@ -2178,8 +2271,29 @@ static void set_numa_thread_affinity(int thread_n) {
+ 
+     cpu_set_t * cpus = CPU_ALLOC(g_state.numa.total_cpus);
+     CPU_ZERO_S(setsize, cpus);
++    size_t n_allowed = 0;
+     for (size_t i = 0; i < node->n_cpus; ++i) {
+-        CPU_SET_S(node->cpus[i], setsize, cpus);
++        const unsigned cpu = node->cpus[i];
++
++        // Respect an affinity mask inherited from taskset, a cpuset cgroup, or
++        // the service manager.  Using the complete NUMA-node mask here can
++        // otherwise silently re-enable SMT siblings or administratively
++        // excluded CPUs.
++        if (CPU_ISSET_S(cpu, sizeof(g_state.numa.cpuset), &g_state.numa.cpuset)) {
++            CPU_SET_S(cpu, setsize, cpus);
++            ++n_allowed;
++        }
++    }
++
++    // A node may have no CPUs in the inherited mask (for example, a process
++    // deliberately confined to one socket).  Keep the inherited mask rather
++    // than attempting to install an empty affinity set.
++    if (n_allowed == 0) {
++        for (unsigned cpu = 0; cpu < g_state.numa.total_cpus; ++cpu) {
++            if (CPU_ISSET_S(cpu, sizeof(g_state.numa.cpuset), &g_state.numa.cpuset)) {
++                CPU_SET_S(cpu, setsize, cpus);
++            }
++        }
+     }
+ 
+     rv = pthread_setaffinity_np(pthread_self(), setsize, cpus);
+@@ -2197,18 +2311,12 @@ static void clear_numa_thread_affinity(void) {
+ 
+     size_t setsize = CPU_ALLOC_SIZE(g_state.numa.total_cpus);
+ 
+-    cpu_set_t * cpus = CPU_ALLOC(g_state.numa.total_cpus);
+-    CPU_ZERO_S(setsize, cpus);
+-    for (unsigned i = 0; i < g_state.numa.total_cpus; ++i) {
+-        CPU_SET_S(i, setsize, cpus);
+-    }
+-
+-    int rv = pthread_setaffinity_np(pthread_self(), setsize, cpus);
++    // Restore the mask captured before GGML applied its per-node affinity.
++    // Restoring every online CPU would discard taskset/cgroup restrictions.
++    int rv = pthread_setaffinity_np(pthread_self(), setsize, &g_state.numa.cpuset);
+     if (rv) {
+         fprintf(stderr, "warning: pthread_setaffinity_np() failed: %s\n", strerror(rv));
+     }
+-
+-    CPU_FREE(cpus);
+ }
+ #else
+ // TODO: Windows etc.
+diff --git a/ggml/src/ggml-cpu/quants.c b/ggml/src/ggml-cpu/quants.c
+index 5e36459f8cbc5900b375d2189414307393471a6b..7aefa554513b81d7a01ea359a7c1baaa50bee6dd 100644
+--- a/ggml/src/ggml-cpu/quants.c
++++ b/ggml/src/ggml-cpu/quants.c
+@@ -614,6 +614,13 @@ void ggml_vec_dot_q2_K_q8_K_generic(int n, float * GGML_RESTRICT s, size_t bs, c
+     *s = sumf;
+ }
+ 
++void ggml_vec_dot_q2_K_q8_K_rows_2_generic(
++        int n, float * GGML_RESTRICT s, const void * GGML_RESTRICT vx,
++        const void * GGML_RESTRICT vy0, const void * GGML_RESTRICT vy1) {
++    ggml_vec_dot_q2_K_q8_K_generic(n, &s[0], 0, vx, 0, vy0, 0, 1);
++    ggml_vec_dot_q2_K_q8_K_generic(n, &s[1], 0, vx, 0, vy1, 0, 1);
++}
++
+ void ggml_vec_dot_q3_K_q8_K_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc) {
+     assert(n % QK_K == 0);
+     assert(nrc == 1);
+diff --git a/ggml/src/ggml-cpu/quants.h b/ggml/src/ggml-cpu/quants.h
+index 93ea7eeffe5b00ad2c612aac49b7983c12949525..f698ee3bcba3503a25f3436fa369cff8a24f269d 100644
+--- a/ggml/src/ggml-cpu/quants.h
++++ b/ggml/src/ggml-cpu/quants.h
+@@ -50,6 +50,7 @@ void ggml_vec_dot_mxfp4_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const vo
+ void ggml_vec_dot_nvfp4_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
+ 
+ void ggml_vec_dot_q2_K_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
++void ggml_vec_dot_q2_K_q8_K_rows_2(int n, float * GGML_RESTRICT s, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy0, const void * GGML_RESTRICT vy1);
+ void ggml_vec_dot_q3_K_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
+ void ggml_vec_dot_q4_K_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
+ void ggml_vec_dot_q5_K_q8_K(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
+@@ -87,6 +88,7 @@ void ggml_vec_dot_tq1_0_q8_K_generic(int n, float * GGML_RESTRICT s, size_t bs,
+ void ggml_vec_dot_tq2_0_q8_K_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
+ 
+ void ggml_vec_dot_q2_K_q8_K_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
++void ggml_vec_dot_q2_K_q8_K_rows_2_generic(int n, float * GGML_RESTRICT s, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy0, const void * GGML_RESTRICT vy1);
+ void ggml_vec_dot_q3_K_q8_K_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
+ void ggml_vec_dot_q4_K_q8_K_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy, size_t by, int nrc);
+ void ggml_vec_dot_q5_K_q8_K_generic(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, size_t bx, const void * GGML_RESTRICT vy,  size_t by, int nrc);
+diff --git a/ggml/src/ggml-cpu/repack.cpp b/ggml/src/ggml-cpu/repack.cpp
+index 9689ca3ced8fa4b00df712a624aade1c1797bce2..0059571b21dd02810c2ec2daca13e6b9dbda0391 100644
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -14,7 +14,12 @@
+ #include <cmath>
+ #include <cstring>
+ #include <cassert>
++#include <atomic>
++#include <chrono>
++#include <cinttypes>
++#include <cstdlib>
+ #include <cstdio>  // for GGML_ASSERT
++#include <type_traits>
+ 
+ #include "repack.h"
+ 
+@@ -24,6 +29,102 @@
+ 
+ #define UNUSED GGML_UNUSED
+ 
++static bool ggml_cpu_moe_numa_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_MOE_NUMA");
++        return value != nullptr && value[0] != '\0' && std::strcmp(value, "0") != 0;
++    }();
++    return enabled;
++}
++
++static bool ggml_cpu_moe_numa_rows_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_MOE_NUMA_ROWS");
++        return value != nullptr && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++
++static bool ggml_cpu_moe_small_gemm_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_MOE_SMALL_GEMM");
++        return value != nullptr && value[0] != '\0' && std::strcmp(value, "0") != 0;
++    }();
++    return enabled;
++}
++
++static bool ggml_cpu_moe_telemetry_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_MOE_TELEMETRY");
++        return value != nullptr && value[0] != '\0' && std::strcmp(value, "0") != 0;
++    }();
++    return enabled;
++}
++
++static char * ggml_cpu_align_ptr(char * ptr, size_t alignment) {
++    const uintptr_t value = (uintptr_t) ptr;
++    return (char *) ((value + alignment - 1) & ~(alignment - 1));
++}
++
++static bool ggml_cpu_moe_bind_experts(
++        struct ggml_tensor * tensor, size_t data_size, int64_t row_group) {
++    if (!ggml_cpu_moe_numa_enabled() || std::strstr(tensor->name, "_exps.weight") == nullptr) {
++        return true;
++    }
++
++    const int n_nodes = ggml_cpu_numa_node_count();
++    if (n_nodes < 2 || tensor->ne[2] < n_nodes || tensor->ne[3] != 1) {
++        GGML_LOG_ERROR("%s: GGML_CPU_MOE_NUMA requires --numa distribute and a 3D expert tensor: %s\n", __func__, tensor->name);
++        return false;
++    }
++
++    const size_t expert_size = tensor->nb[2];
++    if (expert_size == 0 || expert_size * tensor->ne[2] > data_size) {
++        GGML_LOG_ERROR("%s: invalid expert layout for %s\n", __func__, tensor->name);
++        return false;
++    }
++
++    const bool partition_rows = ggml_cpu_moe_numa_rows_enabled();
++    if (partition_rows &&
++        (n_nodes != 2 || row_group <= 0 || tensor->ne[1] % (n_nodes * row_group) != 0 ||
++         tensor->nb[1] * tensor->ne[1] != expert_size)) {
++        GGML_LOG_ERROR(
++                "%s: GGML_CPU_MOE_NUMA_ROWS requires two nodes and an evenly "
++                "row-group-aligned expert tensor: %s\n",
++                __func__, tensor->name);
++        return false;
++    }
++
++    for (int64_t expert = 0; expert < tensor->ne[2]; ++expert) {
++        char * expert_data = (char *) tensor->data + expert * expert_size;
++        if (partition_rows) {
++            const size_t stripe_size = expert_size / n_nodes;
++            for (int node = 0; node < n_nodes; ++node) {
++                if (!ggml_cpu_numa_bind_range(
++                            expert_data + node * stripe_size, stripe_size, node)) {
++                    GGML_LOG_ERROR(
++                            "%s: failed to bind output-row stripe %d of expert %" PRId64
++                            " from %s to NUMA node %d\n",
++                            __func__, node, expert, tensor->name, node);
++                    return false;
++                }
++            }
++        } else if (!ggml_cpu_numa_bind_range(expert_data, expert_size, expert % n_nodes)) {
++            GGML_LOG_ERROR(
++                    "%s: failed to bind expert %" PRId64 " of %s to NUMA node %d\n",
++                    __func__, expert, tensor->name, (int) (expert % n_nodes));
++            return false;
++        }
++    }
++
++    GGML_LOG_INFO(
++            "%s: bound %" PRId64 " experts from %s across %d NUMA nodes "
++            "with %s partitioning\n",
++            __func__, tensor->ne[2], tensor->name, n_nodes,
++            partition_rows ? "output-row" : "expert");
++    return true;
++}
++
+ static inline int nearest_int(float fval) {
+     assert(fabsf(fval) <= 4194303.f);
+     float val = fval + 12582912.f;
+@@ -2739,6 +2840,33 @@ static block_q8_0x4 make_block_q8_0x4(block_q8_0 * in, unsigned int blck_size_in
+     return out;
+ }
+ 
++static block_q8_Kx4 make_block_q8_Kx4(const block_q8_K * in, unsigned int blck_size_interleave) {
++    GGML_ASSERT(blck_size_interleave == 4 || blck_size_interleave == 8);
++
++    block_q8_Kx4 out;
++    for (int row = 0; row < 4; ++row) {
++        out.d[row] = in[row].d;
++    }
++
++    const int n_chunks = QK_K * 4 / blck_size_interleave;
++    for (int chunk = 0; chunk < n_chunks; ++chunk) {
++        const int src_id     = chunk % 4;
++        const int src_offset = (chunk / 4) * blck_size_interleave;
++        const int dst_offset = chunk * blck_size_interleave;
++        memcpy(&out.qs[dst_offset], &in[src_id].qs[src_offset], blck_size_interleave);
++    }
++
++    // The x4 kernels consume four consecutive Q8_K sums per row.
++    for (int group = 0; group < QK_K / 16; ++group) {
++        for (int row = 0; row < 4; ++row) {
++            const int dst = (group / 4) * 16 + row * 4 + group % 4;
++            out.bsums[dst] = in[row].bsums[group];
++        }
++    }
++
++    return out;
++}
++
+ static block_q4_0x4 make_block_q4_0x4(block_q4_0 * in, int blck_size_interleave) {
+     block_q4_0x4 out;
+ 
+@@ -4157,6 +4285,13 @@ class tensor_traits_base : public ggml::cpu::tensor_traits {
+ 
+ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PARAM_TYPE> class tensor_traits : public tensor_traits_base {
+ 
++    static constexpr bool small_gemm_supported =
++        (INTER_SIZE == 4 || INTER_SIZE == 8) &&
++        ((std::is_same<BLOC_TYPE, block_mxfp4>::value && PARAM_TYPE == GGML_TYPE_Q8_0) ||
++         (std::is_same<BLOC_TYPE, block_q2_K>::value && PARAM_TYPE == GGML_TYPE_Q8_K));
++    static constexpr size_t small_gemm_alignment =
++        alignof(block_q8_0x4) > alignof(block_q8_Kx4) ? alignof(block_q8_0x4) : alignof(block_q8_Kx4);
++
+     bool work_size(int /* n_threads */, const struct ggml_tensor * op, size_t & size) override {
+         // not realy a GGML_TYPE_Q8_0 but same size.
+         switch (op->op) {
+@@ -4177,6 +4312,19 @@ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PAR
+ 
+                     size += sizeof_mmid_row_mapping*ne02*(ne12 + 1);
+ 
++                    if (small_gemm_supported && ggml_cpu_moe_small_gemm_enabled()) {
++                        const int64_t ne01 = op->src[0]->ne[1];
++                        const int64_t n_ids = op->src[2]->ne[0];
++                        const size_t max_packed_rows = 4*n_ids*ne12;
++
++                        size = GGML_PAD(size, alignof(int64_t));
++                        size += (ne02 + 1)*sizeof(int64_t);
++                        size = GGML_PAD(size, small_gemm_alignment);
++                        size += max_packed_rows*ggml_row_size(PARAM_TYPE, op->src[1]->ne[0]);
++                        size = GGML_PAD(size, alignof(float));
++                        size += max_packed_rows*ne01*sizeof(float);
++                    }
++
+                     return true;
+                 }
+             default:
+@@ -4416,6 +4564,26 @@ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PAR
+         const int n_ids = ids->ne[0]; // n_expert_used
+         const int n_as  = ne02;       // n_expert
+ 
++        int worker_ith = ith;
++        int worker_nth = nth;
++        int worker_node = -1;
++        const int n_nodes = ggml_cpu_moe_numa_enabled() ? ggml_cpu_numa_node_count() : 0;
++        const bool partition_numa_rows =
++            n_nodes == 2 && ggml_cpu_moe_numa_rows_enabled() &&
++            std::strstr(src0->name, "_exps.weight") != nullptr;
++        if (n_nodes > 1) {
++            worker_node = ggml_cpu_numa_thread_node(ith);
++            worker_ith = 0;
++            worker_nth = 0;
++            for (int thread = 0; thread < nth; ++thread) {
++                if (ggml_cpu_numa_thread_node(thread) == worker_node) {
++                    worker_ith += thread < ith;
++                    worker_nth += 1;
++                }
++            }
++            GGML_ASSERT(worker_node >= 0 && worker_nth > 0);
++        }
++
+         const size_t nbw1 = ggml_row_size(PARAM_TYPE, ne10);
+         const size_t nbw2 = nbw1*ne11;
+         const size_t nbw3 = nbw2*ne12;
+@@ -4437,6 +4605,25 @@ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PAR
+         auto * matrix_row_counts = (int64_t *) (wdata_src1_end);                                        // [n_as]
+         struct mmid_row_mapping * matrix_rows = (struct mmid_row_mapping *) (matrix_row_counts + n_as); // [n_as][ne12]
+ 
++        const bool use_small_gemm = small_gemm_supported && ggml_cpu_moe_small_gemm_enabled();
++        const size_t max_packed_rows = use_small_gemm ? 4*n_ids*ne12 : 0;
++        int64_t * small_gemm_offsets = nullptr;
++        char * small_gemm_src = nullptr;
++        float * small_gemm_dst = nullptr;
++        if (use_small_gemm) {
++            char * cursor = (char *) (matrix_rows + n_as*ne12);
++            cursor = ggml_cpu_align_ptr(cursor, alignof(int64_t));
++            small_gemm_offsets = (int64_t *) cursor;
++            cursor += (n_as + 1)*sizeof(int64_t);
++            cursor = ggml_cpu_align_ptr(cursor, small_gemm_alignment);
++            small_gemm_src = cursor;
++            cursor += max_packed_rows*nbw1;
++            cursor = ggml_cpu_align_ptr(cursor, alignof(float));
++            small_gemm_dst = (float *) cursor;
++            cursor += max_packed_rows*ne01*sizeof(float);
++            GGML_ASSERT(cursor <= wdata + params->wsize);
++        }
++
+         // src1: float32 => param type
+         for (int64_t i12 = 0; i12 < ne12; ++i12) {
+             for (int64_t i11 = ith; i11 < ne11; i11 += nth) {
+@@ -4464,15 +4651,141 @@ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PAR
+                     matrix_row_counts[i02] += 1;
+                 }
+             }
++
++            int64_t assignments = 0;
++            int64_t unique_experts = 0;
++            int64_t max_rows = 0;
++            int64_t gemm_groups = 0;
++            int64_t gemv_rows = 0;
++            int64_t owner0_rows = 0;
++            int64_t owner1_rows = 0;
++            if (use_small_gemm) {
++                small_gemm_offsets[0] = 0;
++            }
++            for (int expert = 0; expert < n_as; ++expert) {
++                const int64_t rows = matrix_row_counts[expert];
++                const int64_t groups = rows/4 + (rows % 4 >= 2);
++                assignments += rows;
++                unique_experts += rows > 0;
++                max_rows = MAX(max_rows, rows);
++                gemm_groups += groups;
++                gemv_rows += rows % 4 == 1;
++                if (n_nodes == 2 && !partition_numa_rows) {
++                    owner0_rows += expert % 2 == 0 ? rows : 0;
++                    owner1_rows += expert % 2 == 1 ? rows : 0;
++                }
++                if (use_small_gemm) {
++                    small_gemm_offsets[expert + 1] = small_gemm_offsets[expert] + 4*groups;
++                }
++            }
++            if (partition_numa_rows) {
++                owner0_rows = assignments * (ne01 / n_nodes);
++                owner1_rows = assignments * (ne01 - ne01 / n_nodes);
++            }
++
++            // Gate/up/down use the same routed rows. Emit one gate record per
++            // layer on the first graph after a request gap, then layer 0 on
++            // every graph so speculative cycles remain fully correlatable.
++            if (ggml_cpu_moe_telemetry_enabled() &&
++                std::strstr(src0->name, ".ffn_gate_exps.weight") != nullptr) {
++                static std::atomic<int64_t> last_layer0_epoch_us { 0 };
++                static std::atomic<bool> capture_all_layers { false };
++                const bool is_layer0 =
++                    std::strstr(src0->name, "blk.0.ffn_gate_exps.weight") != nullptr;
++                bool emit = capture_all_layers.load(std::memory_order_relaxed);
++                int64_t epoch_us = 0;
++                if (is_layer0) {
++                    epoch_us = std::chrono::duration_cast<std::chrono::microseconds>(
++                            std::chrono::system_clock::now().time_since_epoch()).count();
++                    const int64_t previous =
++                        last_layer0_epoch_us.exchange(epoch_us, std::memory_order_relaxed);
++                    capture_all_layers.store(
++                            previous == 0 || epoch_us - previous >= 750000,
++                            std::memory_order_relaxed);
++                    emit = true;
++                } else if (emit) {
++                    epoch_us = std::chrono::duration_cast<std::chrono::microseconds>(
++                            std::chrono::system_clock::now().time_since_epoch()).count();
++                }
++                if (emit) {
++                    GGML_LOG("moe_block epoch_us=%" PRId64 " tensor=%s positions=%" PRId64 " assignments=%" PRId64 " unique=%" PRId64 " reused=%" PRId64 " max_rows=%" PRId64 " gemm_groups=%" PRId64 " gemv_rows=%" PRId64 " numa_nodes=%d numa_partition=%s output_rows=%" PRId64 " owner0_rows=%" PRId64 " owner1_rows=%" PRId64 "\n",
++                            epoch_us, src0->name, ids->ne[1], assignments, unique_experts, assignments - unique_experts, max_rows,
++                            use_small_gemm ? gemm_groups : 0, use_small_gemm ? gemv_rows : assignments,
++                            n_nodes, n_nodes == 2 ? (partition_numa_rows ? "output" : "expert") : "none",
++                            ne01, n_nodes == 2 ? owner0_rows : -1, n_nodes == 2 ? owner1_rows : -1);
++                }
++            }
+         }
+ 
+         ggml_barrier(params->threadpool);
+ 
++        const bool run_small_gemm = use_small_gemm && small_gemm_offsets[n_as] > 0;
++        if (run_small_gemm) {
++            for (int expert = ith; expert < n_as; expert += nth) {
++                const int64_t rows = matrix_row_counts[expert];
++                int64_t group = 0;
++                for (int64_t first_row = 0; first_row < rows;) {
++                    const int64_t group_rows = MIN((int64_t) 4, rows - first_row);
++                    if (group_rows == 1) {
++                        break;
++                    }
++
++                    if constexpr (PARAM_TYPE == GGML_TYPE_Q8_0) {
++                        GGML_ASSERT(ne10 % QK8_0 == 0);
++                        const int64_t n_blocks = ne10/QK8_0;
++                        const block_q8_0 * row_blocks[4];
++                        for (int64_t packed_row = 0; packed_row < 4; ++packed_row) {
++                            const int64_t row = first_row + MIN(packed_row, group_rows - 1);
++                            const mmid_row_mapping mapping = MMID_MATRIX_ROW(expert, row);
++                            const int64_t i11 = mapping.i1 % ne11;
++                            const int64_t i12 = mapping.i2;
++                            row_blocks[packed_row] = (const block_q8_0 *) (wdata + i11*nbw1 + i12*nbw2);
++                        }
++
++                        auto * packed = (block_q8_0x4 *) (small_gemm_src + (small_gemm_offsets[expert] + 4*group)*nbw1);
++                        for (int64_t block = 0; block < n_blocks; ++block) {
++                            block_q8_0 unpacked[4];
++                            for (int64_t packed_row = 0; packed_row < 4; ++packed_row) {
++                                unpacked[packed_row] = row_blocks[packed_row][block];
++                            }
++                            packed[block] = make_block_q8_0x4(unpacked, INTER_SIZE);
++                        }
++                    } else {
++                        static_assert(PARAM_TYPE == GGML_TYPE_Q8_K, "unsupported small-GEMM parameter type");
++                        GGML_ASSERT(ne10 % QK_K == 0);
++                        const int64_t n_blocks = ne10/QK_K;
++                        const block_q8_K * row_blocks[4];
++                        for (int64_t packed_row = 0; packed_row < 4; ++packed_row) {
++                            const int64_t row = first_row + MIN(packed_row, group_rows - 1);
++                            const mmid_row_mapping mapping = MMID_MATRIX_ROW(expert, row);
++                            const int64_t i11 = mapping.i1 % ne11;
++                            const int64_t i12 = mapping.i2;
++                            row_blocks[packed_row] = (const block_q8_K *) (wdata + i11*nbw1 + i12*nbw2);
++                        }
++
++                        auto * packed = (block_q8_Kx4 *) (small_gemm_src + (small_gemm_offsets[expert] + 4*group)*nbw1);
++                        for (int64_t block = 0; block < n_blocks; ++block) {
++                            block_q8_K unpacked[4];
++                            for (int64_t packed_row = 0; packed_row < 4; ++packed_row) {
++                                unpacked[packed_row] = row_blocks[packed_row][block];
++                            }
++                            packed[block] = make_block_q8_Kx4(unpacked, INTER_SIZE);
++                        }
++                    }
++
++                    first_row += group_rows;
++                    group += 1;
++                }
++            }
++            ggml_barrier(params->threadpool);
++        }
++
+         // compute each matrix multiplication in sequence
+         for (int cur_a = 0; cur_a < n_as; ++cur_a) {
+             const int64_t cne1 = matrix_row_counts[cur_a];
+ 
+-            if (cne1 == 0) {
++            if (cne1 == 0 ||
++                (worker_node >= 0 && !partition_numa_rows && cur_a % n_nodes != worker_node)) {
+                 continue;
+             }
+ 
+@@ -4481,21 +4794,55 @@ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PAR
+             //const int64_t nr0 = ne01; // src0 rows
+             const int64_t nr1 = cne1; // src1 rows
+ 
+-            int64_t src0_cur_start = (ith * ne01) / nth;
+-            int64_t src0_cur_end   = ((ith + 1) * ne01) / nth;
++            const int64_t numa_row_start =
++                partition_numa_rows ? (worker_node * ne01) / n_nodes : 0;
++            const int64_t numa_row_end =
++                partition_numa_rows ? ((worker_node + 1) * ne01) / n_nodes : ne01;
++            const int64_t numa_row_count = numa_row_end - numa_row_start;
++            int64_t src0_cur_start =
++                numa_row_start + (worker_ith * numa_row_count) / worker_nth;
++            int64_t src0_cur_end =
++                numa_row_start + ((worker_ith + 1) * numa_row_count) / worker_nth;
+ 
+             // Align boundaries to NB_COLS - round up to ensure all data is included
+             src0_cur_start = (src0_cur_start % NB_COLS) ? src0_cur_start + NB_COLS - (src0_cur_start % NB_COLS) : src0_cur_start;
+             src0_cur_end   = (src0_cur_end   % NB_COLS) ? src0_cur_end   + NB_COLS - (src0_cur_end   % NB_COLS) : src0_cur_end;
+-            if (src0_cur_end > ne01) {
+-                src0_cur_end = ne01;
++            if (src0_cur_end > numa_row_end) {
++                src0_cur_end = numa_row_end;
+             }
+ 
+             if (src0_cur_start >= src0_cur_end) {
+                 return;
+             }
+ 
+-            for (int ir1 = 0; ir1 < nr1; ir1++) {
++            int64_t ir1 = 0;
++            int64_t group = 0;
++            if (run_small_gemm) {
++                while (ir1 < nr1) {
++                    const int64_t group_rows = MIN((int64_t) 4, nr1 - ir1);
++                    if (group_rows == 1) {
++                        break;
++                    }
++
++                    const auto * packed = small_gemm_src + (small_gemm_offsets[cur_a] + 4*group)*nbw1;
++                    float * grouped_output = small_gemm_dst + (small_gemm_offsets[cur_a] + 4*group)*ne01;
++                    gemm<BLOC_TYPE, INTER_SIZE, NB_COLS, PARAM_TYPE>(
++                            ne00, grouped_output + src0_cur_start, ne01,
++                            src0_cur + src0_cur_start*nb01, packed, 4, src0_cur_end - src0_cur_start);
++
++                    for (int64_t row = 0; row < group_rows; ++row) {
++                        const mmid_row_mapping mapping = MMID_MATRIX_ROW(cur_a, ir1 + row);
++                        float * output = (float *) ((char *) dst->data + mapping.i1*nb1 + mapping.i2*nb2);
++                        memcpy(output + src0_cur_start, grouped_output + row*ne01 + src0_cur_start,
++                                (src0_cur_end - src0_cur_start)*sizeof(float));
++                    }
++
++                    ir1 += group_rows;
++                    group += 1;
++                }
++            }
++
++            for (; ir1 < nr1; ir1++) {
+                 struct mmid_row_mapping row_mapping = MMID_MATRIX_ROW(cur_a, ir1);
+ 
+                 const int id = row_mapping.i1;  // selected expert index
+@@ -4519,6 +4866,9 @@ template <typename BLOC_TYPE, int64_t INTER_SIZE, int64_t NB_COLS, ggml_type PAR
+     int repack(struct ggml_tensor * t, const void * data, size_t data_size) override {
+         GGML_LOG_DEBUG("%s: repack tensor %s with %s_%dx%d\n", __func__, t->name, ggml_type_name(t->type),
+                        (int) NB_COLS, (int) INTER_SIZE);
++        if (!ggml_cpu_moe_bind_experts(t, data_size, NB_COLS)) {
++            return -1;
++        }
+         return ggml::cpu::repack::repack<BLOC_TYPE, INTER_SIZE, NB_COLS>(t, data, data_size);
+     }
+ };
+diff --git a/include/llama.h b/include/llama.h
+index 6e53e2297235ee0e4c4e3589cb85e90727752e8b..03ed5bc8a8d82eb3b0e2a1947d1124f758e72d97 100644
+--- a/include/llama.h
++++ b/include/llama.h
+@@ -427,7 +427,7 @@ extern "C" {
+         enum ggml_type token_embedding_type;                        // token embeddings tensor type
+         bool allow_requantize;                                      // allow quantizing non-f32/f16 tensors
+         bool quantize_output_tensor;                                // quantize output.weight
+-        bool only_copy;                                             // only copy tensors - ftype, allow_requantize and quantize_output_tensor are ignored
++        bool only_copy;                                             // copy tensors except explicit tt_overrides - ftype and quantize_output_tensor are ignored
+         bool pure;                                                  // quantize all tensors to the default type
+         bool keep_split;                                            // quantize to the same number of shards
+         bool dry_run;                                               // calculate and show the final quantization size without performing quantization
+diff --git a/src/llama-quant.cpp b/src/llama-quant.cpp
+index fd6e787bd7d234e0e1d9fd4c5f40bf4d9dd48d1f..e4825570269b58e6974b62434ebdd4d684ead33e 100644
+--- a/src/llama-quant.cpp
++++ b/src/llama-quant.cpp
+@@ -286,9 +286,31 @@ static void llama_tensor_dequantize_impl(
+ // do we allow this tensor to be quantized?
+ //
+ 
+-static bool tensor_allows_quantization(const llama_model_quantize_params * params, llm_arch arch, const ggml_tensor * tensor) {
++static bool tensor_type_override(
++        const quantize_state_impl & qs,
++        const ggml_tensor * tensor,
++        ggml_type & override_type) {
++    const std::string tensor_name(tensor->name);
++    for (const auto & [pattern, qtype] : qs.tensor_type_patterns) {
++        if (std::regex_search(tensor_name, pattern)) {
++            override_type = qtype;
++            return true;
++        }
++    }
++    return false;
++}
++
++static bool tensor_allows_quantization(const quantize_state_impl & qs, const ggml_tensor * tensor) {
++    const llama_model_quantize_params * params = qs.params;
++    const llm_arch arch = qs.model.arch;
++
+     // trivial checks first -- no string ops needed
+-    if (params->only_copy)       return false;
++    if (params->only_copy) {
++        ggml_type override_type;
++        if (!tensor_type_override(qs, tensor, override_type)) {
++            return false;
++        }
++    }
+ 
+     // quantize only 2D and 3D tensors (experts)
+     if (ggml_n_dims(tensor) < 2) return false;
+@@ -672,7 +694,7 @@ static ggml_type llama_tensor_get_type_impl(quantize_state_impl & qs, ggml_type
+ 
+ // outer wrapper: determine the ggml_type that this tensor should be quantized to
+ static ggml_type llama_tensor_get_type(quantize_state_impl & qs, const llama_model_quantize_params * params, const ggml_tensor * tensor, ggml_type default_type, const tensor_metadata & tm) {
+-    if (!tensor_allows_quantization(params, qs.model.arch, tensor)) {
++    if (!tensor_allows_quantization(qs, tensor)) {
+         return tensor->type;
+     }
+     if (params->token_embedding_type < GGML_TYPE_COUNT && tm.category == tensor_category::TOKEN_EMBD) {
+@@ -682,33 +704,31 @@ static ggml_type llama_tensor_get_type(quantize_state_impl & qs, const llama_mod
+         return params->output_tensor_type;
+     }
+ 
+-    ggml_type new_type = default_type;
++    ggml_type new_type = params->only_copy ? tensor->type : default_type;
++
++    // Manual overrides also apply in COPY mode, allowing a mixed model to be
++    // preserved byte-for-byte except for explicitly selected tensors.
++    bool manual = false;
++    ggml_type override_type;
++    if (tensor_type_override(qs, tensor, override_type)) {
++        if (override_type != new_type) {
++            LLAMA_LOG_WARN("%s: %-36s - applying manual override: %s -> %s\n",
++                           __func__, tensor->name, ggml_type_name(new_type), ggml_type_name(override_type));
++            new_type = override_type;
++        }
++        manual = true;
++    }
+ 
+     // get more optimal quantization type based on the tensor shape, layer, etc.
+     if (ggml_is_quantized(default_type)) {
+-        // if the user provided tensor types - use those
+-        bool manual = false;
+-        if (!qs.tensor_type_patterns.empty()) {
+-            const std::string tensor_name(tensor->name);
+-            for (const auto & [pattern, qtype] : qs.tensor_type_patterns) {
+-                if (std::regex_search(tensor_name, pattern)) {
+-                    if (qtype != new_type) {
+-                        LLAMA_LOG_WARN("%s: %-36s - applying manual override: %s -> %s\n",
+-                                       __func__, tensor_name.c_str(), ggml_type_name(new_type), ggml_type_name(qtype));
+-                        new_type = qtype;
+-                    }
+-                    manual = true;
+-                    break;
+-                }
+-            }
+-        }
+-
+         // if not manual - use the standard logic for choosing the quantization type based on the selected mixture
+         if (!manual && !params->pure) {
+             new_type = llama_tensor_get_type_impl(qs, new_type, tensor, params->ftype, tm.category);
+         }
++    }
+ 
+-        // incompatible tensor shapes are handled here - fallback to a compatible type
++    // incompatible tensor shapes are handled here - fallback to a compatible type
++    if (ggml_is_quantized(new_type)) {
+         new_type = tensor_type_fallback(qs, tensor, new_type);
+     }
+ 
+@@ -1042,7 +1062,7 @@ static void llama_model_quantize_impl(const std::string & fname_inp, const std::
+         }
+         gguf_add_tensor(ctx_outs[i_split].get(), tensor);
+ 
+-        metadata[i].allows_quantization = tensor_allows_quantization(params, model->arch, tensor);
++        metadata[i].allows_quantization = tensor_allows_quantization(qs, tensor);
+ 
+         if (metadata[i].allows_quantization) {
+             metadata[i].target_type = llama_tensor_get_type(qs, params, tensor, default_type, metadata[i]);
+@@ -1378,7 +1398,7 @@ llama_model * llama_quant_model_from_metadata(const llama_quant_model_desc * des
+ bool llama_quant_tensor_allows_quantization(
+         const quantize_state_impl * qs,
+         const ggml_tensor * tensor) {
+-    return tensor_allows_quantization(qs->params, qs->model.arch, tensor);
++    return tensor_allows_quantization(*qs, tensor);
+ }
+ 
+ void llama_quant_compute_types(
+diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
+index 8f3fb45dab65e93d2fce2cc264d745e1a7aa1c3d..21a75ec50c5e8d0d4a7c1811efe93a1be30e02a3 100644
+--- a/tests/test-backend-ops.cpp
++++ b/tests/test-backend-ops.cpp
+@@ -18,6 +18,7 @@
+ #include "ggml.h"
+ #include "ggml-alloc.h"
+ #include "ggml-backend.h"
++#include "ggml-cpu.h"
+ #include "ggml-cpp.h"
+ 
+ #include <algorithm>
+@@ -1116,6 +1117,28 @@ static std::unique_ptr<printer> create_printer(output_formats format) {
+ 
+ static std::mutex g_test_output_mutex;
+ 
++static ggml_backend_buffer_type_t test_weight_buffer_type(ggml_backend_t backend) {
++    const char * force_repack = std::getenv("GGML_TEST_CPU_REPACK");
++    if (force_repack == nullptr || force_repack[0] == '\0' || std::strcmp(force_repack, "0") == 0) {
++        return ggml_backend_get_default_buffer_type(backend);
++    }
++
++    ggml_backend_dev_t dev = ggml_backend_get_device(backend);
++    ggml_backend_reg_t reg = ggml_backend_dev_backend_reg(dev);
++    auto get_extra_bufts = (ggml_backend_dev_get_extra_bufts_t)
++        ggml_backend_reg_get_proc_address(reg, "ggml_backend_dev_get_extra_bufts");
++    if (get_extra_bufts == nullptr) {
++        return nullptr;
++    }
++    for (ggml_backend_buffer_type_t * bufts = get_extra_bufts(dev);
++         bufts != nullptr && *bufts != nullptr; ++bufts) {
++        if (std::strcmp(ggml_backend_buft_name(*bufts), "CPU_REPACK") == 0) {
++            return *bufts;
++        }
++    }
++    return nullptr;
++}
++
+ static void print_test_result_locked(printer * output_printer, const test_result & result) {
+     if (output_printer == nullptr) {
+         return;
+@@ -1381,7 +1404,14 @@ struct test_case {
+ 
+         ggml_backend_buffer_ptr buf_weights(nullptr);
+         if (ctx_weights) {
+-            buf_weights.reset(ggml_backend_alloc_ctx_tensors(ctx_weights.get(), backend1));
++            ggml_backend_buffer_type_t buft = test_weight_buffer_type(backend1);
++            if (buft == nullptr) {
++                printf("failed to find requested weight buffer type [%s] ",
++                        ggml_backend_name(backend1));
++                return test_status_t::FAIL;
++            }
++            buf_weights.reset(
++                    ggml_backend_alloc_ctx_tensors_from_buft(ctx_weights.get(), buft));
+             if (buf_weights == NULL) {
+                 printf("failed to allocate weight tensors [%s] ", ggml_backend_name(backend1));
+                 return test_status_t::FAIL;
+@@ -1541,7 +1571,13 @@ struct test_case {
+ 
+         ggml_backend_buffer_ptr buf_weights(nullptr);
+         if (ctx_weights) {
+-            buf_weights.reset(ggml_backend_alloc_ctx_tensors(ctx_weights.get(), backend));
++            ggml_backend_buffer_type_t buft = test_weight_buffer_type(backend);
++            if (buft == nullptr) {
++                printf("failed to find requested weight buffer type\n");
++                return false;
++            }
++            buf_weights.reset(
++                    ggml_backend_alloc_ctx_tensors_from_buft(ctx_weights.get(), buft));
+             if (buf_weights == NULL) {
+                 printf("failed to allocate weight tensors\n");
+                 return false;
+@@ -1567,12 +1603,23 @@ struct test_case {
+         ggml_cgraph * gf = ggml_new_graph_custom(ctx.get(), graph_nodes, false);
+         ggml_build_forward_expand(gf, out);
+ 
+-        // warmup run
+-        ggml_status status = ggml_backend_graph_compute(backend, gf);
+-        if (status != GGML_STATUS_SUCCESS) {
+-            fprintf(stderr, "%s: ggml_backend_graph_compute failed. status=%s \n", __func__, ggml_status_to_string(status));
+-            return false;
+-        }
++        // Warm up long enough to settle thread-pool startup and CPU frequency
++        // when requested.  The default remains one graph execution.
++        const char * warmup_ms_env = std::getenv("GGML_TEST_PERF_WARMUP_MS");
++        const int64_t warmup_ms = warmup_ms_env != nullptr ? std::max<int64_t>(0, std::atoll(warmup_ms_env)) : 0;
++        const char * warmup_iters_env = std::getenv("GGML_TEST_PERF_WARMUP_ITERS");
++        const int64_t warmup_iters = warmup_iters_env != nullptr ? std::max<int64_t>(0, std::atoll(warmup_iters_env)) : 0;
++        const int64_t warmup_start_us = ggml_time_us();
++        int64_t warmup_done = 0;
++        ggml_status status;
++        do {
++            status = ggml_backend_graph_compute(backend, gf);
++            if (status != GGML_STATUS_SUCCESS) {
++                fprintf(stderr, "%s: ggml_backend_graph_compute failed. status=%s \n", __func__, ggml_status_to_string(status));
++                return false;
++            }
++            warmup_done += 1;
++        } while (warmup_iters > 0 ? warmup_done < warmup_iters : ggml_time_us() - warmup_start_us < warmup_ms*1000);
+ 
+         // determine number of runs
+         int n_runs;
+@@ -1592,6 +1639,10 @@ struct test_case {
+             size_t target_size = is_cpu ? target_size_cpu : target_size_gpu;
+             n_runs = (int)std::min<int64_t>(ggml_graph_size(gf) - ggml_graph_n_nodes(gf), target_size / op_size(out)) + 1;
+         }
++        const char * inner_runs_env = std::getenv("GGML_TEST_PERF_INNER_RUNS");
++        if (inner_runs_env != nullptr) {
++            n_runs = (int)std::max<int64_t>(1, std::atoll(inner_runs_env));
++        }
+ 
+         // duplicate the op
+         for (int i = 1; i < n_runs; i++) {
+@@ -1621,7 +1672,28 @@ struct test_case {
+         int64_t total_time_us = 0;
+         int64_t total_mem = 0;
+         int total_runs = 0;
++        const char * flush_mb_env = std::getenv("GGML_TEST_PERF_FLUSH_MB");
++        const int64_t flush_mb = flush_mb_env != nullptr
++                ? std::clamp<int64_t>(std::atoll(flush_mb_env), 0, 4096)
++                : 0;
++        std::vector<uint8_t> flush_buffer((size_t)flush_mb * 1024 * 1024, 1);
++        auto flush_last_level_cache = [&flush_buffer]() {
++            const volatile uint8_t * ptr = flush_buffer.data();
++            uint64_t sum = 0;
++            for (size_t i = 0; i < flush_buffer.size(); i += 64) {
++                sum += ptr[i];
++            }
++            if (sum == UINT64_MAX) {
++                fprintf(stderr, "unreachable cache flush sum: %" PRIu64 "\n", sum);
++            }
++        };
++        const char * duration_ms_env = std::getenv("GGML_TEST_PERF_DURATION_MS");
++        const int64_t duration_ms = duration_ms_env != nullptr ? std::max<int64_t>(1, std::atoll(duration_ms_env)) : 1000;
++        const char * outer_iters_env = std::getenv("GGML_TEST_PERF_OUTER_ITERS");
++        const int64_t outer_iters = outer_iters_env != nullptr ? std::max<int64_t>(0, std::atoll(outer_iters_env)) : 0;
++        int64_t outer_done = 0;
+         do {
++            flush_last_level_cache();
+             int64_t start_time = ggml_time_us();
+             ggml_status status = ggml_backend_graph_compute(backend, gf);
+             if (status != GGML_STATUS_SUCCESS) {
+@@ -1633,7 +1705,8 @@ struct test_case {
+             total_time_us += end_time - start_time;
+             total_mem += mem;
+             total_runs += n_runs;
+-        } while (total_time_us < 1000*1000); // run for at least 1 second
++            outer_done += 1;
++        } while (outer_iters > 0 ? outer_done < outer_iters : total_time_us < duration_ms*1000);
+ 
+         // Create test result
+         double avg_time_us      = (double) total_time_us / total_runs;
+@@ -4404,19 +4477,28 @@ struct test_mul_mat_hadamard : public test_mul_mat {
+     }
+ };
+ 
+-static void init_mul_mat_id_tensors(ggml_context * ctx, int n_mats) {
++static void init_mul_mat_id_tensors(
++        ggml_context * ctx, int n_mats, uint32_t route_seed = 0, bool repeat_routes = false) {
+     std::random_device rd;
+-    std::default_random_engine rng(rd());
++    std::default_random_engine rng(route_seed != 0 ? route_seed : rd());
+     for (ggml_tensor * t = ggml_get_first_tensor(ctx); t != NULL; t = ggml_get_next_tensor(ctx, t)) {
+         if (t->type == GGML_TYPE_I32) {
+             if (ggml_is_view_op(t->op)) { continue; }
+             // ids
++            std::vector<int32_t> first_row;
+             for (int64_t r = 0; r < ggml_nrows(t); r++) {
+                 std::vector<int32_t> data(t->ne[0]);
+-                for (int i = 0; i < t->ne[0]; i++) {
+-                    data[i] = i % n_mats;
++                if (repeat_routes && r > 0) {
++                    data = first_row;
++                } else {
++                    for (int i = 0; i < t->ne[0]; i++) {
++                        data[i] = i % n_mats;
++                    }
++                    std::shuffle(data.begin(), data.end(), rng);
++                    if (r == 0) {
++                        first_row = data;
++                    }
+                 }
+-                std::shuffle(data.begin(), data.end(), rng);
+                 ggml_backend_tensor_set(t, data.data(), r * t->nb[1], t->ne[0] * sizeof(int32_t));
+             }
+         } else {
+@@ -4435,6 +4517,9 @@ struct test_mul_mat_id : public test_case {
+     const int64_t m;
+     const int64_t n;
+     const int64_t k;
++    const uint32_t route_seed;
++    const bool expert_tensor;
++    const bool repeat_routes;
+ 
+     std::string vars() override {
+         return VARS_TO_STR8(type_a, type_b, n_mats, n_used, b, m, n, k);
+@@ -4459,16 +4544,28 @@ struct test_mul_mat_id : public test_case {
+ 
+     test_mul_mat_id(ggml_type type_a = GGML_TYPE_F32, ggml_type type_b = GGML_TYPE_F32,
+             int n_mats = 8, int n_used = 2, bool b = false,
+-            int64_t m = 32, int64_t n = 32, int64_t k = 32)
++            int64_t m = 32, int64_t n = 32, int64_t k = 32, uint32_t route_seed = 0,
++            bool expert_tensor = false, bool repeat_routes = false)
+         : type_a(type_a), type_b(type_b), n_mats(n_mats), n_used(n_used), b(b),
+-            m(m), n(n), k(k) {
++        m(m), n(n), k(k), route_seed(route_seed), expert_tensor(expert_tensor), repeat_routes(repeat_routes) {
+             GGML_ASSERT(n_used <= n_mats);
+         }
+ 
+-    ggml_tensor * build_graph(ggml_context * ctx) override {
++    bool use_weight_context() override {
++        return expert_tensor;
++    }
++
++    ggml_tensor * build_graph_impl(
++            ggml_context * ctx, ggml_context * weight_ctx) {
+         // C^T = A * B^T: (k, m) * (k, n) => (m, n)
+-        ggml_tensor * as = ggml_new_tensor_3d(ctx, type_a, k, m, n_mats);
+-        ggml_set_name(as, "as");
++        ggml_tensor * as = ggml_new_tensor_3d(weight_ctx, type_a, k, m, n_mats);
++        ggml_set_name(
++                as,
++                expert_tensor
++                    ? (m == 4096
++                            ? "blk.0.ffn_down_exps.weight"
++                            : "blk.0.ffn_gate_exps.weight")
++                    : "as");
+ 
+         ggml_tensor * ids = ggml_new_tensor_2d(ctx, GGML_TYPE_I32, n_mats, n);
+         ggml_set_name(ids, "ids");
+@@ -4486,8 +4583,18 @@ struct test_mul_mat_id : public test_case {
+         return out;
+     }
+ 
++    ggml_tensor * build_graph(ggml_context * ctx) override {
++        return build_graph_impl(ctx, ctx);
++    }
++
++    ggml_tensor * build_graph(
++            ggml_context * ctx, ggml_context * ctx_weights) override {
++        GGML_ASSERT(!expert_tensor || ctx_weights != nullptr);
++        return build_graph_impl(ctx, expert_tensor ? ctx_weights : ctx);
++    }
++
+     void initialize_tensors(ggml_context * ctx) override {
+-        init_mul_mat_id_tensors(ctx, n_mats);
++        init_mul_mat_id_tensors(ctx, n_mats, route_seed, repeat_routes);
+     }
+ };
+ 
+@@ -9027,6 +9134,28 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+     test_cases.emplace_back(new test_mul_mat_id(GGML_TYPE_MXFP4, GGML_TYPE_F32, 32, 2, false, 2880, 32, 2880));
+     test_cases.emplace_back(new test_mul_mat_id(GGML_TYPE_Q4_0, GGML_TYPE_F32, 32, 2, false, 2880, 32, 2880));
+ 
++    // DeepSeek-V4-Flash routed-expert singleton decode shapes.
++    test_cases.emplace_back(new test_mul_mat_id(
++            GGML_TYPE_MXFP4, GGML_TYPE_F32, 1, 1, false, 2048, 1, 4096, 0xD54F0731));
++    test_cases.emplace_back(new test_mul_mat_id(
++            GGML_TYPE_MXFP4, GGML_TYPE_F32, 1, 1, false, 4096, 1, 2048, 0xD54F0731));
++    // DeepSeek Q2 draft: two positions routed to one expert exercise the
++    // optional two-row kernel against the scalar CPU reference.
++    test_cases.emplace_back(new test_mul_mat_id(
++            GGML_TYPE_Q2_K, GGML_TYPE_F32, 1, 1, false, 2048, 2, 4096, 0xD54F0731));
++    test_cases.emplace_back(new test_mul_mat_id(
++            GGML_TYPE_Q2_K, GGML_TYPE_F32, 1, 1, false, 4096, 2, 2048, 0xD54F0731));
++    // Production-named two-expert fixtures exercise guarded NUMA output-row
++    // partitioning against the scalar CPU reference when test NUMA is enabled.
++    for (int bs : {1, 2, 3}) {
++        test_cases.emplace_back(new test_mul_mat_id(
++                GGML_TYPE_MXFP4, GGML_TYPE_F32, 2, 2, false,
++                2048, bs, 4096, 0xD54F0731, true));
++        test_cases.emplace_back(new test_mul_mat_id(
++                GGML_TYPE_MXFP4, GGML_TYPE_F32, 2, 2, false,
++                4096, bs, 2048, 0xD54F0731, true));
++    }
++
+     for (ggml_type type_a : all_types) {
+         test_cases.emplace_back(new test_mul_mat_id(type_a, GGML_TYPE_F32, 4, 2, false, 64, 16, 3*ggml_blck_size(type_a)));
+     }
+@@ -9923,6 +10052,41 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
+         }
+     }
+ 
++    // DeepSeek-V4-Flash-0731 routed experts.  Decode and short speculative
++    // verification use 1-3 positions, 6 selected experts out of 256, and the
++    // two projection shapes below (gate/up and down, respectively).
++    for (int bs : {1, 2, 3}) {
++        test_cases.emplace_back(new test_mul_mat_id(
++                GGML_TYPE_MXFP4, GGML_TYPE_F32, 256, 6, false,
++                2048, bs, 4096, 0xD54F0731, true));
++        test_cases.emplace_back(new test_mul_mat_id(
++                GGML_TYPE_MXFP4, GGML_TYPE_F32, 256, 6, false,
++                4096, bs, 2048, 0xD54F0731, true));
++    }
++    // The Q2 draft has the same routed-expert shapes. Keep these multi-GiB
++    // fixtures opt-in so ordinary backend tests and perf sweeps stay lean.
++    // Captured n = 2 draft telemetry reused the same six experts for both
++    // positions, so repeat the route row to exercise that production pattern.
++    const char * deepseek_q2 = std::getenv("GGML_TEST_DEEPSEEK_Q2");
++    if (deepseek_q2 != nullptr && deepseek_q2[0] != '\0' && std::strcmp(deepseek_q2, "0") != 0) {
++        for (int bs : {1, 2, 3}) {
++            test_cases.emplace_back(new test_mul_mat_id(
++                    GGML_TYPE_Q2_K, GGML_TYPE_F32, 256, 6, false,
++                    2048, bs, 4096, 0xD54F0731, true, true));
++            test_cases.emplace_back(new test_mul_mat_id(
++                    GGML_TYPE_Q2_K, GGML_TYPE_F32, 256, 6, false,
++                    4096, bs, 2048, 0xD54F0731, true, true));
++        }
++    }
++    // Single-expert versions isolate the same AVX2 inner loops from the 4+ GiB
++    // allocation and repacking cost of the complete 256-expert fixture.
++    for (int bs : {1, 2, 3}) {
++        test_cases.emplace_back(new test_mul_mat_id(
++                GGML_TYPE_MXFP4, GGML_TYPE_F32, 1, 1, false, 2048, bs, 4096, 0xD54F0731));
++        test_cases.emplace_back(new test_mul_mat_id(
++                GGML_TYPE_MXFP4, GGML_TYPE_F32, 1, 1, false, 4096, bs, 2048, 0xD54F0731));
++    }
++
+     for (int K : {3, 5}) {
+         for (int IC : {256, 2560}) {
+             for (int IW_IH : {32, 64, 256}) {
+@@ -10433,7 +10597,7 @@ static void show_test_coverage() {
+ 
+ static void usage(char ** argv) {
+     printf("Usage: %s [mode] [-o <op,..>] [-b <backend>] [-p <params regex>] [--output <console|sql|csv>] [--list-ops]", argv[0]);
+-    printf(" [--show-coverage] [--test-file <path>] [-j <n>]\n");
++    printf(" [--show-coverage] [--test-file <path>] [-j <n>] [-t <n>]\n");
+     printf("    valid modes:\n");
+     printf("      - test (default, compare with CPU backend for correctness)\n");
+     printf("      - grad (compare gradients from backpropagation with method of finite differences)\n");
+@@ -10446,6 +10610,7 @@ static void usage(char ** argv) {
+     printf("    --show-coverage shows test coverage\n");
+     printf("    --test-file reads test operators from a test file generated by test-export-graph-ops\n");
+     printf("    -j <n> runs tests using <n> parallel worker threads (default: 1, test mode only)\n");
++    printf("    -t <n> sets backend compute threads (default: hardware concurrency)\n");
+ }
+ 
+ int main(int argc, char ** argv) {
+@@ -10456,6 +10621,7 @@ int main(int argc, char ** argv) {
+     const char * params_filter = nullptr;
+     const char * test_file_path = nullptr;
+     int parallel_workers = 1;
++    int backend_threads = N_THREADS;
+ 
+     for (int i = 1; i < argc; i++) {
+         if (strcmp(argv[i], "test") == 0) {
+@@ -10521,12 +10687,28 @@ int main(int argc, char ** argv) {
+                 usage(argv);
+                 return 1;
+             }
++        } else if (strcmp(argv[i], "-t") == 0) {
++            if (i + 1 < argc) {
++                backend_threads = atoi(argv[++i]);
++                if (backend_threads < 1) {
++                    usage(argv);
++                    return 1;
++                }
++            } else {
++                usage(argv);
++                return 1;
++            }
+         } else {
+             usage(argv);
+             return 1;
+         }
+     }
+ 
++    const char * test_numa = std::getenv("GGML_TEST_NUMA_DISTRIBUTE");
++    if (test_numa != nullptr && test_numa[0] != '\0' && std::strcmp(test_numa, "0") != 0) {
++        ggml_numa_init(GGML_NUMA_STRATEGY_DISTRIBUTE);
++    }
++
+     // load and enumerate backends
+     ggml_backend_load_all();
+ 
+@@ -10563,8 +10745,24 @@ int main(int argc, char ** argv) {
+         ggml_backend_reg_t reg = ggml_backend_dev_backend_reg(dev);
+         auto ggml_backend_set_n_threads_fn = (ggml_backend_set_n_threads_t) ggml_backend_reg_get_proc_address(reg, "ggml_backend_set_n_threads");
+         if (ggml_backend_set_n_threads_fn) {
+-            // TODO: better value for n_threads
+-            ggml_backend_set_n_threads_fn(backend.get(), N_THREADS);
++            ggml_backend_set_n_threads_fn(backend.get(), backend_threads);
++        }
++
++        ggml_threadpool_t test_threadpool = nullptr;
++        const char * test_cpu_strict = std::getenv("GGML_TEST_CPU_STRICT");
++        if (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_CPU &&
++            test_cpu_strict != nullptr && test_cpu_strict[0] != '\0' && std::strcmp(test_cpu_strict, "0") != 0) {
++            GGML_ASSERT(backend_threads <= GGML_MAX_N_THREADS);
++            ggml_threadpool_params params = ggml_threadpool_params_default(backend_threads);
++            params.strict_cpu = true;
++            for (int cpu = 0; cpu < backend_threads; ++cpu) {
++                params.cpumask[cpu] = true;
++            }
++            test_threadpool = ggml_threadpool_new(&params);
++            GGML_ASSERT(test_threadpool != nullptr);
++            ggml_backend_cpu_set_threadpool(backend.get(), test_threadpool);
++            std::fprintf(stderr, "GGML_TEST_CPU_STRICT: pinned %d workers to CPUs 0-%d\n",
++                         backend_threads, backend_threads - 1);
+         }
+ 
+         size_t free, total;  // NOLINT
+@@ -10575,6 +10773,11 @@ int main(int argc, char ** argv) {
+ 
+         bool ok = test_backend(backend.get(), dev, mode, op_names_filter, params_filter, output_printer.get(), test_file_path, parallel_workers);
+ 
++        if (test_threadpool != nullptr) {
++            ggml_backend_cpu_set_threadpool(backend.get(), nullptr);
++            ggml_threadpool_free(test_threadpool);
++        }
++
+         if (ok) {
+             n_ok++;
+         }
+diff --git a/tests/test-quant-type-selection.cpp b/tests/test-quant-type-selection.cpp
+index 9a5f5e53e11965a7ca97f08543a4e89c77a230b2..bd1b57ddeea316f1c2ff0ec8a94fdbab9db6f1e7 100644
+--- a/tests/test-quant-type-selection.cpp
++++ b/tests/test-quant-type-selection.cpp
+@@ -281,6 +281,52 @@ static mock_tensors build_mock_tensors(const quantize_state_impl * qs, const ggu
+     return { std::move(ctx), std::move(result) };
+ }
+ 
++static bool test_copy_with_tensor_override() {
++    llama_quant_model_desc desc = {};
++    desc.architecture = "llama";
++    desc.n_embd       = 4096;
++    desc.n_ff         = 4096;
++    desc.n_layer      = 43;
++    desc.n_head       = 32;
++    desc.n_head_kv    = 8;
++    desc.n_expert     = 256;
++
++    llama_model * model = llama_quant_model_from_metadata(&desc);
++
++    const llama_model_tensor_override overrides[] = {
++        { "^blk\\.28\\.ffn_(gate|down|up)_exps\\.weight$", GGML_TYPE_Q2_K },
++        { nullptr, GGML_TYPE_COUNT },
++    };
++    llama_model_quantize_params qparams = llama_model_quantize_default_params();
++    qparams.only_copy        = true;
++    qparams.allow_requantize = true;
++    qparams.tt_overrides     = overrides;
++
++    quantize_state_impl * qs = llama_quant_init(model, &qparams);
++
++    struct ggml_init_params params = { 2 * ggml_tensor_overhead(), nullptr, true };
++    ggml_context_ptr ctx(ggml_init(params));
++    ggml_tensor * selected = ggml_new_tensor_3d(ctx.get(), GGML_TYPE_MXFP4, 4096, 2048, 256);
++    ggml_tensor * copied   = ggml_new_tensor_3d(ctx.get(), GGML_TYPE_MXFP4, 4096, 2048, 256);
++    ggml_set_name(selected, "blk.28.ffn_gate_exps.weight");
++    ggml_set_name(copied,   "blk.27.ffn_gate_exps.weight");
++
++    ggml_tensor * tensors[] = { selected, copied };
++    ggml_type result_types[2] = { GGML_TYPE_COUNT, GGML_TYPE_COUNT };
++    llama_quant_compute_types(qs, LLAMA_FTYPE_ALL_F32, tensors, result_types, 2);
++
++    const bool pass =
++        llama_quant_tensor_allows_quantization(qs, selected) &&
++        !llama_quant_tensor_allows_quantization(qs, copied) &&
++        result_types[0] == GGML_TYPE_Q2_K &&
++        result_types[1] == GGML_TYPE_MXFP4;
++
++    printf("  %s  COPY preserves unselected tensors and applies explicit override\n", pass ? "PASS" : "FAIL");
++    llama_quant_free(qs);
++    llama_model_free(model);
++    return pass;
++}
++
+ // ---------------------------------------------------------------------------
+ // Generate mode: regenerate all snapshot files
+ // Use this when either adding new models or modifying quants
+@@ -516,5 +562,9 @@ int main(int argc, char ** argv) {
+     // suppress llama log warnings during test (e.g. tensor type fallback messages)
+     llama_log_set([](enum ggml_log_level, const char *, void *) {}, nullptr);
+ 
++    if (!test_copy_with_tensor_override()) {
++        return 1;
++    }
++
+     return run_remote_tests(snapshot_dir, argv[0]);
+ }
+diff --git a/tools/quantize/quantize.cpp b/tools/quantize/quantize.cpp
+index 15ef64c4b0edc8ab0934277df3f7f449aa0861d9..e19e14eb89e0337221f52ce3960fce03b18788f1 100644
+--- a/tools/quantize/quantize.cpp
++++ b/tools/quantize/quantize.cpp
+@@ -71,7 +71,7 @@ static const std::vector<quant_option> QUANT_OPTIONS = {
+     { "BF16",     LLAMA_FTYPE_MOSTLY_BF16,     "14.00G, -0.0050 ppl @ Mistral-7B",  },
+     { "F32",      LLAMA_FTYPE_ALL_F32,         "26.00G              @ 7B",          },
+     // Note: Ensure COPY comes after F32 to avoid ftype 0 from matching.
+-    { "COPY",     LLAMA_FTYPE_ALL_F32,         "only copy tensors, no quantizing",  },
++    { "COPY",     LLAMA_FTYPE_ALL_F32,         "copy tensors except explicit --tensor-type overrides", },
+ };
+ 
+ static const char * const LLM_KV_QUANTIZE_IMATRIX_FILE       = "quantize.imatrix.file";
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index 4655b518e21f5ccafbd32274e3c022b5b300715f..dee26029be05da165152596d2fe658d32fd34e4b 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -11,6 +11,7 @@
+ #include "common.h"
+ #include "fit.h"
+ #include "llama.h"
++#include "../../src/llama-ext.h"
+ #include "log.h"
+ #include "sampling.h"
+ #include "speculative.h"
+@@ -18,6 +19,7 @@
+ #include "mtmd-helper.h"
+ 
+ #include <algorithm>
++#include <chrono>
+ #include <cstddef>
+ #include <cinttypes>
+ #include <exception>
+@@ -213,6 +215,21 @@ struct server_slot {
+     std::vector<int32_t> spec_i_batch;
+     common_prompt_checkpoint spec_ckpt;
+     bool spec_is_replay = false;
++    int32_t spec_cycle_n = 0;
++    int32_t spec_cycle_drafted = 0;
++    int64_t spec_cycle_start_us = 0;
++    double spec_cycle_draft_ms = 0.0;
++    double spec_cycle_verify_ms = 0.0;
++    double spec_cycle_recovery_ms = 0.0;
++    std::vector<int32_t> spec_cycles_per_n;
++    std::vector<int32_t> spec_drafted_per_n;
++    std::vector<int32_t> spec_accepted_per_n;
++    std::vector<int32_t> spec_emitted_per_n;
++    std::vector<double> spec_ms_per_n;
++    std::vector<double> spec_draft_ms_per_n;
++    std::vector<double> spec_verify_ms_per_n;
++    std::vector<double> spec_recovery_ms_per_n;
++    std::vector<double> spec_utility_ewma;
+ 
+     // TODO: move members that belong to the task (such as `generated_text`, `has_new_line`) to task_results_state
+     //       see https://github.com/ggml-org/llama.cpp/pull/18283#issuecomment-3710175837
+@@ -329,11 +346,29 @@ struct server_slot {
+     int32_t n_draft_accepted = 0;   // Draft tokens actually accepted
+     int32_t n_draft_verif_steps = 0; // Total draft token verification steps by the target model
+     std::vector<int32_t> n_accepted_per_pos; // Accepted tokens per draft position
++    double t_spec_draft = 0.0;      // Draft generation wall time, ms
++    double t_spec_verify = 0.0;     // Target decode and sampling wall time, ms
++    double t_spec_recovery = 0.0;   // Draft replay and target rollback wall time, ms
+ 
+     void reset() {
+         SLT_DBG(*this, "%s", "\n");
+ 
+         spec_is_replay = false;
++        spec_cycle_n = 0;
++        spec_cycle_drafted = 0;
++        spec_cycle_start_us = 0;
++        spec_cycle_draft_ms = 0.0;
++        spec_cycle_verify_ms = 0.0;
++        spec_cycle_recovery_ms = 0.0;
++        spec_cycles_per_n.clear();
++        spec_drafted_per_n.clear();
++        spec_accepted_per_n.clear();
++        spec_emitted_per_n.clear();
++        spec_ms_per_n.clear();
++        spec_draft_ms_per_n.clear();
++        spec_verify_ms_per_n.clear();
++        spec_recovery_ms_per_n.clear();
++        spec_utility_ewma.clear();
+ 
+         n_prompt_tokens_cache = 0;
+ 
+@@ -359,6 +394,9 @@ struct server_slot {
+         n_draft_accepted = 0;
+         n_draft_verif_steps = 0;
+         n_accepted_per_pos.clear();
++        t_spec_draft = 0.0;
++        t_spec_verify = 0.0;
++        t_spec_recovery = 0.0;
+ 
+         task_prev = std::move(task);
+         task.reset();
+@@ -398,12 +436,12 @@ struct server_slot {
+ 
+     bool need_embd() const {
+         GGML_ASSERT(task);
+-        return task->need_embd() || (spec && common_speculative_need_embd(spec));
++        return task->need_embd() || (can_speculate() && common_speculative_need_embd(spec));
+     }
+ 
+     bool need_embd_nextn() const {
+         GGML_ASSERT(task);
+-        return spec && common_speculative_need_embd_nextn(spec);
++        return can_speculate() && common_speculative_need_embd_nextn(spec);
+     }
+ 
+     // if the context does not have a memory module then all embeddings have to be computed within a single ubatch
+@@ -420,7 +458,13 @@ struct server_slot {
+     bool can_batch_with(server_slot & other_slot) const {
+         GGML_ASSERT(task);
+ 
++        bool spec_compatible = can_speculate() == other_slot.can_speculate();
++        if (spec_compatible && can_speculate()) {
++            spec_compatible = get_n_draft_max() == other_slot.get_n_draft_max();
++        }
++
+         return task->type == other_slot.task->type
++            && spec_compatible
+             && inp_embd.size() == other_slot.inp_embd.size()
+             && are_lora_equal(lora, other_slot.lora);
+     }
+@@ -448,7 +492,7 @@ struct server_slot {
+     }
+ 
+     bool can_speculate() const {
+-        return !!spec;
++        return spec && task && common_speculative_n_max(&task->params.speculative) > 0;
+     }
+ 
+     void add_token(const completion_token_output & token) {
+@@ -460,6 +504,101 @@ struct server_slot {
+         generated_token_probs.push_back(token);
+     }
+ 
++    int select_adaptive_n(int n_max) const {
++        const int n_min = std::clamp(task->params.speculative.draft.n_min, 1, n_max);
++        const int n_center = std::clamp(2, n_min, n_max);
++        constexpr int n_warmup = 2;
++
++        for (int radius = 0; radius <= n_max - n_min; ++radius) {
++            const int candidates[2] = { n_center - radius, n_center + radius };
++            for (int i = 0; i < 2; ++i) {
++                const int n = candidates[i];
++                if (n < n_min || n > n_max || (i == 1 && radius == 0)) {
++                    continue;
++                }
++                const int cycles = n < (int) spec_cycles_per_n.size() ? spec_cycles_per_n[n] : 0;
++                if (cycles < n_warmup) {
++                    return n;
++                }
++            }
++        }
++
++        int total_cycles = 0;
++        for (int n = n_min; n <= n_max; ++n) {
++            total_cycles += n < (int) spec_cycles_per_n.size() ? spec_cycles_per_n[n] : 0;
++        }
++
++        // Periodically re-sample every block length so workload changes do not
++        // permanently lock the controller to an early local optimum.
++        if (total_cycles > 0 && total_cycles % 8 == 0) {
++            return n_min + (total_cycles / 8) % (n_max - n_min + 1);
++        }
++
++        int best_n = n_center;
++        double best_utility = -1.0;
++        for (int n = n_min; n <= n_max; ++n) {
++            const double utility = n < (int) spec_utility_ewma.size() ? spec_utility_ewma[n] : 0.0;
++            if (utility > best_utility) {
++                best_utility = utility;
++                best_n = n;
++            }
++        }
++        return best_n;
++    }
++
++    void record_spec_cycle(int emitted, int accepted) {
++        if (!task || spec_cycle_n <= 0 || spec_cycle_start_us <= 0) {
++            return;
++        }
++
++        const int n = spec_cycle_n;
++        const int64_t end_us = ggml_time_us();
++        const double elapsed_ms = std::max(0.001, (end_us - spec_cycle_start_us) / 1e3);
++        const double utility = emitted / elapsed_ms;
++        const size_t size = (size_t) n + 1;
++        if (spec_cycles_per_n.size() < size) {
++            spec_cycles_per_n.resize(size, 0);
++            spec_drafted_per_n.resize(size, 0);
++            spec_accepted_per_n.resize(size, 0);
++            spec_emitted_per_n.resize(size, 0);
++            spec_ms_per_n.resize(size, 0.0);
++            spec_draft_ms_per_n.resize(size, 0.0);
++            spec_verify_ms_per_n.resize(size, 0.0);
++            spec_recovery_ms_per_n.resize(size, 0.0);
++            spec_utility_ewma.resize(size, 0.0);
++        }
++
++        const int prior_cycles = spec_cycles_per_n[n];
++        spec_cycles_per_n[n] += 1;
++        spec_drafted_per_n[n] += spec_cycle_drafted;
++        spec_accepted_per_n[n] += accepted;
++        spec_emitted_per_n[n] += emitted;
++        spec_ms_per_n[n] += elapsed_ms;
++        spec_draft_ms_per_n[n] += spec_cycle_draft_ms;
++        spec_verify_ms_per_n[n] += spec_cycle_verify_ms;
++        spec_recovery_ms_per_n[n] += spec_cycle_recovery_ms;
++        spec_utility_ewma[n] = prior_cycles == 0 ? utility : 0.75 * spec_utility_ewma[n] + 0.25 * utility;
++
++        if (std::getenv("LLAMA_SPEC_CYCLE_TELEMETRY") != nullptr) {
++            const double accounted_ms = spec_cycle_draft_ms + spec_cycle_verify_ms + spec_cycle_recovery_ms;
++            const int64_t epoch_us = std::chrono::duration_cast<std::chrono::microseconds>(
++                    std::chrono::system_clock::now().time_since_epoch()).count();
++            SLT_INF(*this, "spec_cycle epoch_us=%" PRId64 " monotonic_start_us=%" PRId64
++                    " requested=%d drafted=%d emitted=%d accepted=%d total_ms=%.3f"
++                    " draft_ms=%.3f verification_ms=%.3f recovery_ms=%.3f overhead_ms=%.3f utility=%.9f\n",
++                    epoch_us, spec_cycle_start_us, n, spec_cycle_drafted, emitted, accepted, elapsed_ms,
++                    spec_cycle_draft_ms, spec_cycle_verify_ms, spec_cycle_recovery_ms,
++                    std::max(0.0, elapsed_ms - accounted_ms), utility);
++        }
++
++        spec_cycle_n = 0;
++        spec_cycle_drafted = 0;
++        spec_cycle_start_us = 0;
++        spec_cycle_draft_ms = 0.0;
++        spec_cycle_verify_ms = 0.0;
++        spec_cycle_recovery_ms = 0.0;
++    }
++
+     int get_n_draft_max() const {
+         GGML_ASSERT(task);
+ 
+@@ -472,6 +611,14 @@ struct server_slot {
+         //       also, need to leave space for 1 extra token to allow context shifts
+         int n_draft_max = n_ctx - prompt.n_tokens() - 2;
+ 
++        const int request_n_max = common_speculative_n_max(&task->params.speculative);
++        n_draft_max = std::min(n_draft_max, request_n_max);
++
++        if (task->params.speculative.draft.adaptive && n_draft_max > 0) {
++            const int adaptive_n = spec_cycle_n > 0 ? spec_cycle_n : select_adaptive_n(request_n_max);
++            n_draft_max = std::min(n_draft_max, adaptive_n);
++        }
++
+         if (n_remaining > 0) {
+             n_draft_max = std::min(n_draft_max, n_remaining - 1);
+         }
+@@ -561,6 +708,18 @@ struct server_slot {
+         if (n_draft_total > 0) {
+             timings.draft_n          = n_draft_total;
+             timings.draft_n_accepted = n_draft_accepted;
++            timings.draft_cycles     = n_draft_verif_steps;
++            timings.draft_ms         = t_spec_draft;
++            timings.verification_ms  = t_spec_verify;
++            timings.recovery_ms      = t_spec_recovery;
++            timings.draft_cycles_per_block  = spec_cycles_per_n;
++            timings.draft_drafted_per_block = spec_drafted_per_n;
++            timings.draft_accepted_per_block = spec_accepted_per_n;
++            timings.draft_emitted_per_block = spec_emitted_per_n;
++            timings.draft_ms_per_block      = spec_ms_per_n;
++            timings.draft_phase_ms_per_block = spec_draft_ms_per_n;
++            timings.verify_phase_ms_per_block = spec_verify_ms_per_n;
++            timings.recovery_phase_ms_per_block = spec_recovery_ms_per_n;
+         }
+ 
+         return timings;
+@@ -1238,6 +1397,14 @@ private:
+             load_progress_callback(1.0f, &load_progress_spec);
+         }
+ 
++        // Emit exact model-buffer allocations after both contexts are live.  The
++        // benchmark harness records these separately from nvidia-smi's aggregate
++        // process usage so target and draft placement remain independently auditable.
++        common_model_residency_log("target", ctx_tgt);
++        if (has_draft) {
++            common_model_residency_log("draft", ctx_dft);
++        }
++
+         if (has_mmproj) {
+             if (callback_state) {
+                 callback_state(SERVER_STATE_LOADING, {{"stage", "mmproj_model"}});
+@@ -2977,7 +3144,7 @@ private:
+ 
+             generating.push_back(&slot);
+ 
+-            if (spec) {
++            if (slot.can_speculate()) {
+                 common_speculative_get_draft_params(spec.get(), slot.id).drafting = false;
+ 
+                 const bool use_ckpt_tgt = ctx_tgt_seq_rm_type == COMMON_CONTEXT_SEQ_RM_TYPE_FULL;
+@@ -3010,12 +3177,21 @@ private:
+                         common_speculative_get_draft_params(spec.get(), slot.id) = {
+                             /* .drafting = */ true,
+                             /* .n_max    = */ n_draft_max,
++                            /* .n_min    = */ slot.task->params.speculative.draft.n_min,
++                            /* .p_min    = */ slot.task->params.speculative.draft.p_min,
+                             /* .n_past   = */ slot.prompt.n_tokens(),
+                             /* .id_last  = */ slot.sampled,
+                             /* .prompt   = */ &slot.spec_prompt,
+                             /* .result   = */ &slot.spec_draft,
+                         };
+ 
++                        slot.spec_cycle_n = n_draft_max;
++                        slot.spec_cycle_drafted = 0;
++                        slot.spec_cycle_start_us = ggml_time_us();
++                        slot.spec_cycle_draft_ms = 0.0;
++                        slot.spec_cycle_verify_ms = 0.0;
++                        slot.spec_cycle_recovery_ms = 0.0;
++
+                         drafting.push_back(&slot);
+                     }
+                 }
+@@ -3024,7 +3200,27 @@ private:
+ 
+         // generate the actual drafts (if any)
+         {
+-            common_speculative_draft(spec.get());
++            if (!drafting.empty()) {
++                const int64_t t_start = ggml_time_us();
++                common_speculative_draft(spec.get());
++                const double elapsed_ms = (ggml_time_us() - t_start) / 1e3;
++
++                iterate(drafting, [&](server_slot & slot) {
++                    slot.t_spec_draft += elapsed_ms;
++                    if (slot.spec_cycle_n > 0) {
++                        slot.spec_cycle_draft_ms += elapsed_ms;
++                        slot.spec_cycle_drafted = (int32_t) slot.spec_draft.size();
++                    }
++                    if (slot.spec_draft.empty()) {
++                        slot.spec_cycle_n = 0;
++                        slot.spec_cycle_drafted = 0;
++                        slot.spec_cycle_start_us = 0;
++                        slot.spec_cycle_draft_ms = 0.0;
++                        slot.spec_cycle_verify_ms = 0.0;
++                        slot.spec_cycle_recovery_ms = 0.0;
++                    }
++                });
++            }
+         }
+ 
+         // make checkpoints if needed
+@@ -3636,8 +3832,26 @@ private:
+             }
+         }
+ 
++        std::vector<server_slot *> verifying;
++        iterate(slots, [&](server_slot & slot) {
++            if (slot.state == SLOT_STATE_GENERATING && slot.can_speculate() && !slot.spec_i_batch.empty()) {
++                verifying.push_back(&slot);
++            }
++        });
++
++        const int64_t t_verify_start = ggml_time_us();
+         const int ret = llama_decode(ctx_tgt, batch_view);
+ 
++        if (ret == 0 && !verifying.empty()) {
++            const double elapsed_ms = (ggml_time_us() - t_verify_start) / 1e3;
++            iterate(verifying, [&](server_slot & slot) {
++                slot.t_spec_verify += elapsed_ms;
++                if (slot.spec_cycle_n > 0) {
++                    slot.spec_cycle_verify_ms += elapsed_ms;
++                }
++            });
++        }
++
+         metrics.on_decoded(slots);
+ 
+         if (ret != 0) {
+@@ -3693,11 +3907,26 @@ private:
+         // TODO: avoid restoring the draft context and re-evaluating the drafted tokens when not needed [TAG_SPEC_AVOID_DRAFT_REEVAL]
+         //       for now, always re-evaluate for simplicity
+         //       ref: https://github.com/ggml-org/llama.cpp/pull/22728#issuecomment-4400925384
+-        if (!common_speculative_process(spec.get(), batch_view)) {
+-            SRV_ERR("%s", "failed to process speculative batch\n");
++        if (batch.slot_batched && batch.slot_batched->can_speculate()) {
++            const int64_t t_recovery_start = ggml_time_us();
++            const bool processed = common_speculative_process(spec.get(), batch_view);
++
++            if (!verifying.empty()) {
++                const double elapsed_ms = (ggml_time_us() - t_recovery_start) / 1e3;
++                iterate(verifying, [&](server_slot & slot) {
++                    slot.t_spec_recovery += elapsed_ms;
++                    if (slot.spec_cycle_n > 0) {
++                        slot.spec_cycle_recovery_ms += elapsed_ms;
++                    }
++                });
++            }
++
++            if (!processed) {
++                SRV_ERR("%s", "failed to process speculative batch\n");
+ 
+-            // TODO: handle error
+-            throw std::runtime_error("failed to process speculative batch");
++                // TODO: handle error
++                throw std::runtime_error("failed to process speculative batch");
++            }
+         }
+ 
+         // handle `n_cmpl > 1` tasks - when the main prompt is processed, activate all child tasks too
+@@ -3850,6 +4079,7 @@ private:
+ 
+             // save the original draft size
+             const size_t n_draft = slot.spec_draft.size();
++            int64_t t_recovery_start = 0;
+ 
+             GGML_ASSERT(n_draft > 0);
+ 
+@@ -3859,11 +4089,18 @@ private:
+                 common_sampler_ptr smpl_save(common_sampler_clone(slot.smpl.get()));
+ 
+                 GGML_ASSERT(slot.spec_i_batch.size() == n_draft + 1);
++                const int64_t t_verify_sample_start = ggml_time_us();
+                 auto accepted = common_sampler_sample_and_accept_n(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft);
++                const double verify_sample_ms = (ggml_time_us() - t_verify_sample_start) / 1e3;
++                slot.t_spec_verify += verify_sample_ms;
++                if (slot.spec_cycle_n > 0) {
++                    slot.spec_cycle_verify_ms += verify_sample_ms;
++                }
+                 slot.spec_i_batch.clear();
+ 
+                 GGML_ASSERT(accepted.size() >= 1);
+ 
++                t_recovery_start = ggml_time_us();
+                 const uint32_t n_rollback = slot.spec_draft.size() + 1 - accepted.size();
+ 
+                 const bool use_ckpt_tgt =
+@@ -3895,6 +4132,11 @@ private:
+ 
+                         slot.prompt.tokens.keep_first(ckpt.n_tokens);
+                         slot.smpl = std::move(smpl_save);
++                        const double recovery_ms = (ggml_time_us() - t_recovery_start) / 1e3;
++                        slot.t_spec_recovery += recovery_ms;
++                        if (slot.spec_cycle_n > 0) {
++                            slot.spec_cycle_recovery_ms += recovery_ms;
++                        }
+ 
+                         return;
+                     }
+@@ -3940,6 +4182,12 @@ private:
+             SLT_DBG(slot, "add accepted tokens: sampled=%d, ids.size=%zu, n_draft=%zu\n", slot.sampled, ids.size(), n_draft);
+ 
+             slot.mem.seq_rm(slot.id, slot.prompt.tokens.pos_next(), -1);
++            const double recovery_ms = (ggml_time_us() - t_recovery_start) / 1e3;
++            slot.t_spec_recovery += recovery_ms;
++            if (slot.spec_cycle_n > 0) {
++                slot.spec_cycle_recovery_ms += recovery_ms;
++            }
++            slot.record_spec_cycle((int) ids.size(), (int) n_accepted);
+ 
+             for (size_t i = 0; i < ids.size(); ++i) {
+                 completion_token_output result;
+diff --git a/tools/server/server-schema.cpp b/tools/server/server-schema.cpp
+index 674d3ba337bcdc0c3b44da27139eb64cecf89e95..2d25bd8ab9420013553a5ea2ed1148113bda13e8 100644
+--- a/tools/server/server-schema.cpp
++++ b/tools/server/server-schema.cpp
+@@ -194,16 +194,18 @@ std::vector<std::unique_ptr<field>> make_llama_cmpl_schema(const common_params &
+     // Speculative decoding params
+     //
+ 
+-    // TODO: to keep things simple, we disable speculative parameter adjustments for now
+-#if 0
+-    // TODO: for now, be able to adjust only the draft-model based speculative parameters
++    // Per-request controls avoid reloading the target and draft models while tuning.
++    // They also allow callers to disable speculation for low-acceptance requests.
+     add((new field_num("speculative.n_max", params.speculative.draft.n_max))
+         ->set_hard_limits(0, INT32_MAX)
+         ->set_desc("Maximum number of tokens to draft during speculative decoding"));
+ 
+     add((new field_num("speculative.n_min", params.speculative.draft.n_min))
+         ->set_hard_limits(0, INT32_MAX)
+-        ->set_desc("Minimum number of draft tokens to use for speculative decoding");
++        ->set_desc("Minimum number of draft tokens to use for speculative decoding"));
++
++    add((new field_bool("speculative.adaptive", params.speculative.draft.adaptive))
++        ->set_desc("Adapt the draft block length online using measured emitted-tokens-per-cycle utility"));
+ 
+     add((new field_num("speculative.p_min", params.speculative.draft.p_min))
+         ->set_hard_limits(0.0f, 1.0f)
+@@ -224,7 +226,6 @@ std::vector<std::unique_ptr<field>> make_llama_cmpl_schema(const common_params &
+ 
+     add((new field_num("speculative.ngram_min_hits", params.speculative.ngram_simple.min_hits))
+         ->set_desc("Minimum hits at ngram lookup for mgram to be proposed"));
+-#endif
+ 
+     add((new field_json("lora"))
+         ->set_desc("A list of LoRA adapters to apply to this request. Each entry must have `id` and `scale` fields. Adapters not listed default to scale 0.0")
+diff --git a/tools/server/server-task.cpp b/tools/server/server-task.cpp
+index 070f1ade241c7ef46757e24add9d7702df58b31e..c47853d1d277267df63d7ee77e07e422120aeda8 100644
+--- a/tools/server/server-task.cpp
++++ b/tools/server/server-task.cpp
+@@ -259,6 +259,49 @@ json result_timings::to_json() const {
+     if (draft_n > 0) {
+         base["draft_n"] = draft_n;
+         base["draft_n_accepted"] = draft_n_accepted;
++        base["draft_cycles"] = draft_cycles;
++        base["draft_ms"] = draft_ms;
++        base["verification_ms"] = verification_ms;
++        base["recovery_ms"] = recovery_ms;
++
++        if (draft_cycles > 0) {
++            base["draft_ms_per_cycle"] = draft_ms / draft_cycles;
++            base["verification_ms_per_cycle"] = verification_ms / draft_cycles;
++            base["recovery_ms_per_cycle"] = recovery_ms / draft_cycles;
++        }
++
++        json block_stats = json::array();
++        for (size_t n = 1; n < draft_cycles_per_block.size(); ++n) {
++            const int32_t cycles = draft_cycles_per_block[n];
++            if (cycles <= 0) {
++                continue;
++            }
++            const int32_t drafted = n < draft_drafted_per_block.size() ? draft_drafted_per_block[n] : 0;
++            const int32_t emitted = n < draft_emitted_per_block.size() ? draft_emitted_per_block[n] : 0;
++            const int32_t accepted = n < draft_accepted_per_block.size() ? draft_accepted_per_block[n] : 0;
++            const double ms = n < draft_ms_per_block.size() ? draft_ms_per_block[n] : 0.0;
++            const double draft_phase_ms = n < draft_phase_ms_per_block.size() ? draft_phase_ms_per_block[n] : 0.0;
++            const double verify_phase_ms = n < verify_phase_ms_per_block.size() ? verify_phase_ms_per_block[n] : 0.0;
++            const double recovery_phase_ms = n < recovery_phase_ms_per_block.size() ? recovery_phase_ms_per_block[n] : 0.0;
++            const double accounted_ms = draft_phase_ms + verify_phase_ms + recovery_phase_ms;
++            block_stats.push_back({
++                {"n", n},
++                {"cycles", cycles},
++                {"drafted", drafted},
++                {"emitted", emitted},
++                {"accepted", accepted},
++                {"acceptance", drafted > 0 ? (double) accepted / drafted : 0.0},
++                {"ms", ms},
++                {"draft_ms", draft_phase_ms},
++                {"verification_ms", verify_phase_ms},
++                {"recovery_ms", recovery_phase_ms},
++                {"overhead_ms", std::max(0.0, ms - accounted_ms)},
++                {"tokens_per_ms", ms > 0.0 ? emitted / ms : 0.0},
++            });
++        }
++        if (!block_stats.empty()) {
++            base["draft_block_stats"] = std::move(block_stats);
++        }
+     }
+ 
+     return base;
+diff --git a/tools/server/server-task.h b/tools/server/server-task.h
+index 411d9180795516068f62e1688fab2fc2be76daa5..c9e1ce7c3b1cf39c2619be0fdac2391c4d0b4136 100644
+--- a/tools/server/server-task.h
++++ b/tools/server/server-task.h
+@@ -275,6 +275,18 @@ struct result_timings {
+     // Optional speculative metrics - only included when > 0
+     int32_t draft_n = 0;
+     int32_t draft_n_accepted = 0;
++    int32_t draft_cycles = 0;
++    double draft_ms = 0.0;
++    double verification_ms = 0.0;
++    double recovery_ms = 0.0;
++    std::vector<int32_t> draft_cycles_per_block;
++    std::vector<int32_t> draft_drafted_per_block;
++    std::vector<int32_t> draft_accepted_per_block;
++    std::vector<int32_t> draft_emitted_per_block;
++    std::vector<double> draft_ms_per_block;
++    std::vector<double> draft_phase_ms_per_block;
++    std::vector<double> verify_phase_ms_per_block;
++    std::vector<double> recovery_phase_ms_per_block;
+ 
+     json to_json() const;
+ };

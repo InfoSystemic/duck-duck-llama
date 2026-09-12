@@ -1,0 +1,36 @@
+{
+  "purpose": "Same two fixes as parallel-unary-0911, ported to the q4e runtime for Qwen3.8-Flash-Next: GGML_CPU_PARALLEL_UNARY=<min_elems> widens the elementwise UNARY ops upstream pins to n_tasks=1, widens SCALE, and adds a COLUMN-split path for single-row tensors (Qwen's cache_s_l* is ne=[196608,1,1]).",
+  "simpler_than_glm": "In the q4e library BOTH ggml-cpu.c.o and ops.cpp.o come from unmodified build-goal -- only repack.cpp/repack-x86.cpp are private. So the tree sources are patched directly, with no private layer to preserve for these two files.",
+  "loaded_library": "results/qwen-q6-q8-wide-batch-0907/private-cpu/libggml-cpu.so.0.22.0 (first dir on the pinned LD_LIBRARY_PATH that carries the soname)",
+  "verification": {
+    "ggml_cpu_c_baseline_text_identical": true,
+    "ops_cpp_baseline_text_identical": true,
+    "baseline_relink_byte_identical_to_qwen_production": true,
+    "numerics": "greedy output byte-identical on 3 prompts, knob on vs off"
+  },
+  "measured": {
+    "off": {
+      "tok_s": 15.9,
+      "gb_s": 181.6,
+      "pct": 47.8
+    },
+    "on": {
+      "tok_s": 16.44,
+      "gb_s": 186.3,
+      "pct": 49.0
+    },
+    "delta": "+3.4% tok/s, +2.6% GB/s",
+    "pinned_reference": "16.43 tok/s / 181.2 GB/s / 47.7%"
+  },
+  "usage": "LD_LIBRARY_PATH=<this build dir>:<pinned qwen LD_LIBRARY_PATH>  GGML_CPU_PARALLEL_UNARY=4096",
+  "files": {
+    "build.sh": "a9147422ea6bfa5968c40d05709f96177f2de9171ac209917bef879adfd56b82",
+    "ggml-cpu.parent.c": "751d7d235c142bd51efa777e32127178e9d4b9e8d36c5adad5bcb1d284e5938c",
+    "ggml-cpu.patch": "a83fea78a2d0334d5cfbd12b77f7d9c25095afea9991c3d1aeffdf00f0e08956",
+    "ggml-cpu.patched.c": "3854c4d71bd1058538e123926650dcb5ef2b1a8974326e49d20a48a0c66be5ff",
+    "ops.parent.cpp": "d7c5d60b88b0377e2a9dc9e69bcae928272b31adb9d1ec2e93572cf8f1b37110",
+    "ops.patch": "e7ad904ed765fe7af52020f36e3262e78f8c070f1224d0d8c41092cc31c9d3ca",
+    "ops.patched.cpp": "dae6bef2ee8df272242a904d1bdfce5dc92d01f28128a11672ead847e8b5b95c",
+    "relink.sh": "0692cbf19584b648e6a0c801d7f86c33266971526b54b1f4186f2fa8c0cd0f4b"
+  }
+}

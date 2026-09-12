@@ -1,0 +1,109 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "tasks": 1,
+      "n": 33,
+      "k": 32,
+      "shared_activations": false,
+      "modes": [
+        8
+      ],
+      "exact_values": 264,
+      "input_buffers_preserved": true
+    },
+    {
+      "tasks": 3,
+      "n": 129,
+      "k": 128,
+      "shared_activations": true,
+      "modes": [
+        4,
+        4,
+        8
+      ],
+      "exact_values": 3096,
+      "input_buffers_preserved": true
+    },
+    {
+      "tasks": 7,
+      "n": 65,
+      "k": 96,
+      "shared_activations": false,
+      "modes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        8
+      ],
+      "exact_values": 3640,
+      "input_buffers_preserved": true
+    },
+    {
+      "tasks": 14,
+      "n": 2304,
+      "k": 5120,
+      "shared_activations": true,
+      "modes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        8,
+        8
+      ],
+      "exact_values": 258048,
+      "input_buffers_preserved": true
+    },
+    {
+      "tasks": 7,
+      "n": 5120,
+      "k": 2304,
+      "shared_activations": false,
+      "modes": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        8
+      ],
+      "exact_values": 286720,
+      "input_buffers_preserved": true
+    }
+  ],
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_native_grouped_goal_0910.py": "7988f0dd27ec6e334b1f410aad73d1dd8b16efddbc14e576b13b7bd63388eafc",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-grouped-goal-0910.cpp": "0a39a41cbae4f907ef6a99584249515101fb8571aa7d895f4e62d68d98346a6c",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek-v41-native-gemm-goal-0910.cpp": "9ccb9c9ad62ac81990cd476800cd64796c4650597d319f7b606a4f67beef051c",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_grouped_goal_0910.py": "d6002cbb09e392382661f8ccde9e0c93b251d4546d947fc71a57a2b7c97fab23",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-goal-0910/libdeepseek-v41-native-grouped.so": "b5aeca7c8d41140f5c7ae448aed452a18cb532ab19c413f70d1be8f7697fc4f1",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-grouped-goal-0910/libdeepseek-v41-native-grouped-lut.so": "a6916348c2c2438d617940279187d8ba77cdd936b7567c78bb5c498d324b68e2"
+  },
+  "exact_values": 551768,
+  "workers": [
+    1,
+    4
+  ],
+  "decoding_variants": [
+    "baseline_b",
+    "register_lut"
+  ],
+  "descriptor_rejections": 10,
+  "full_checkpoint_loaded": false,
+  "model_tok_s_measured": false,
+  "component_only": true
+}

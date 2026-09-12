@@ -1,0 +1,32 @@
+--- ops.parent.cpp	2026-09-11 15:44:56.095259015 -0600
++++ ops.patched.cpp	2026-09-11 15:44:56.097259022 -0600
+@@ -4770,6 +4770,29 @@
+ 
+     const size_t nb1 = dst->nb[1];
+ 
++    // Few rows, many elements: the row split leaves nth-nr workers idle. Qwen's SSM state
++    // `cache_s_l*` is ne=[196608,1,1] -- ONE row. Split along the row. Bit-exact.
++    if (nr < nth && nc >= nth) {
++        const int dc  = (nc + nth - 1)/nth;
++        const int ic0 = dc*ith;
++        const int ic1 = MIN(ic0 + dc, nc);
++        for (int i1 = 0; i1 < nr && ic1 > ic0; i1++) {
++            if (b == 0.0f) {
++                if (dst->data != src0->data) {
++                    memcpy((char *)dst->data + i1*nb1 + (size_t)ic0*sizeof(float),
++                           (char *)src0->data + i1*nb01 + (size_t)ic0*sizeof(float),
++                           (size_t)(ic1 - ic0) * sizeof(float));
++                }
++                ggml_vec_scale_f32(ic1 - ic0, ((float *)((char *)dst->data + i1*nb1)) + ic0, s);
++            } else {
++                ggml_vec_mad1_f32(ic1 - ic0,
++                    ((float *)((char *)dst->data  + i1*nb1)) + ic0,
++                    ((float *)((char *)src0->data + i1*nb1)) + ic0, s, b);
++            }
++        }
++        return;
++    }
++
+     if (b == 0.0f) {
+         for (int i1 = ir0; i1 < ir1; i1++) {
+             if (dst->data != src0->data) {

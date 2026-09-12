@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "component_only": true,
+  "fresh_request_thread": true,
+  "workers": 16,
+  "wait_policy": "PASSIVE",
+  "spin_count": 1000,
+  "measurements": [
+    {
+      "component": "gemm",
+      "seconds_per_call": [
+        0.0002515248488634825,
+        0.00020960228983312845,
+        0.00021434308029711247,
+        0.00021718092961236834,
+        0.00021113185910508038
+      ],
+      "median_seconds": 0.00021434308029711247,
+      "output_sha256": "4b36aab4fa40ac1cee0d38804d10bd12118f58ecf256be48654edefde2134346"
+    },
+    {
+      "component": "expert",
+      "seconds_per_call": [
+        0.0015359096392057836,
+        0.0014125025691464543,
+        0.0015872692596167325,
+        0.0014229228999465705,
+        0.0012139252806082368
+      ],
+      "median_seconds": 0.0014229228999465705,
+      "output_sha256": "cb6ff8e19b5a3db59dfe00cfdf4797c0112e58057d93851682833234e9f76ce0"
+    }
+  ],
+  "source_sha256": {
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/check_deepseek_v41_thread_wait_0910.py": "f696a6cfb480952b99b6b05afe1c084e3aff9881bb9b22aae913ad0811fc7570",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/deepseek-v41-native-gemm-0910b/libdeepseek-v41-native-gemm.so": "8f32b4827e7b5ddabc9da60bb5eaccc4107a002132b75c9401ca8d3bd580bd1e",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_cpu_reference_0910.py": "d84b8c8fe24ea07e5ebbdee461de1b2fb34925ce7e94dd3b8da745bfa3c2eff1",
+    "/home/user/InfoSystemic/AI-Server/serving/fleet-0903/deepseek_v41_native_bridge_0910.py": "325731098f5e97879f34a77e4346d0968d2ce6048c0d6fea276b75634be3447e"
+  }
+}

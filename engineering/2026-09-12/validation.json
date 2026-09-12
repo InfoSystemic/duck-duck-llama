@@ -1,0 +1,73 @@
+{
+  "checked_utc": "2026-09-12T09:07:03.504829+00:00",
+  "scope": "Publication integrity, source reconstruction, syntax and local controller/probe regression tests. Component evidence and historical model measurements retain their original scope.",
+  "snapshot": {
+    "archive_files": 652,
+    "inherited_files": 5011,
+    "patches": 13,
+    "python_files": 52,
+    "shell_files": 72,
+    "errors": [],
+    "passed": true
+  },
+  "prior_snapshot": {
+    "archive_files": 5015,
+    "inherited_files": 0,
+    "patches": 13,
+    "python_files": 1413,
+    "shell_files": 29,
+    "errors": [],
+    "passed": true
+  },
+  "original_source_comparison": {
+    "archived_source_drift": [],
+    "unlisted_archive_files": [],
+    "missing_archive_files": [],
+    "passed": true
+  },
+  "engine_patch_reconstruction": {
+    "bundles": 13,
+    "passed": true,
+    "method": "Each complete patch applied to its base in a temporary Git index; reconstructed tree ID equals the exported source tree."
+  },
+  "regression_tests": [
+    {
+      "command": "python3 -B -m unittest discover -s tools -p 'test_quality_and_decode.py' -v",
+      "tests": 5,
+      "passed": true
+    },
+    {
+      "command": "python3 -B -m unittest discover -s engineering/2026-09-12/archive/serving/fleet-0912 -p 'test_ab_profiles.py' -v",
+      "tests": 10,
+      "passed": true
+    }
+  ],
+  "known_limits": [
+    "No new full-model performance or quality validation is implied by publication checks.",
+    "GLM Full split correction and NUMA migration have metadata/component validation only; no bulk model relocation was run.",
+    "The isolated DeepSeek V4.1 CPU benchmark and server built successfully, but this engine port has not loaded the checkpoint.",
+    "The native DeepSeek context candidate remains unpromoted and has a documented interruption-recovery cache-accounting defect.",
+    "Legacy dspark-dsv4 retains an unresolved index merge; all three merge-stage blobs are preserved.",
+    "Historical source and patches retain their original whitespace and are not reformatted during export."
+  ],
+  "passed": true,
+  "publication_content_scan": {
+    "staged_files_scanned": 973,
+    "filtered_evidence_files_checked": 3326,
+    "credential_or_binary_findings": [],
+    "manifest_files_not_tracked": [],
+    "host_snapshot_filter_check_passed": true,
+    "passed": true
+  },
+  "publication_files": {
+    "missing_curated_links": [],
+    "oversized_files": [],
+    "unstaged_changes": [],
+    "untracked_files": [],
+    "passed": true
+  },
+  "curated_file_whitespace_check": {
+    "passed": true,
+    "scope": "Tools, root README, snapshot README files and publication metadata. Byte-exact archived source and patches retain original formatting."
+  }
+}

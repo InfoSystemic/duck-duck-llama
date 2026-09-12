@@ -1,0 +1,51 @@
+{
+  "purpose": "Three changes, all opt-in and bit-exact: (1) op profiler records COMPUTE and BARRIER separately; (2) GGML_CPU_PARALLEL_UNARY=<min_elems> lets the elementwise UNARY ops upstream pins to n_tasks=1 use all threads; (3) the same knob widens SCALE and adds a COLUMN-split path for tensors with fewer rows than threads (cache_s_l* is ne=[262144,1,1]).",
+  "layers_patched": {
+    "ggml-cpu.c": "parent = results/glm-flash-q8-pool-0908c/private-cpu/ggml-cpu.c.o",
+    "ops.cpp": "parent = results/glm-flash-rms-guard-0908/private-cpu/ops.cpp.o"
+  },
+  "note": "The production libggml-cpu.so links objects from FOUR private builds plus build-goal. ops.cpp comes from rms-guard, NOT from the pool build that supplies ggml-cpu.c -- patching the wrong layer verifies self-consistently and still ships the wrong code.",
+  "verification": {
+    "ggml_cpu_c_baseline_text_identical": true,
+    "ops_cpp_baseline_text_identical": true,
+    "baseline_relink_byte_identical_to_production": true,
+    "numerics": "greedy output byte-identical on 3 prompts, knob on vs off, AND identical to production"
+  },
+  "measured": {
+    "off": {
+      "tok_s": 15.39,
+      "gb_s": 221.0,
+      "pct": 58.2
+    },
+    "unary_only": {
+      "tok_s": 15.49,
+      "gb_s": 222.4,
+      "pct": 58.5
+    },
+    "unary_plus_scale": {
+      "tok_s": 15.71,
+      "gb_s": 225.3,
+      "pct": 59.3
+    },
+    "delta": "+2.1% tok/s, +1.9% GB/s combined"
+  },
+  "not_implemented": {
+    "mul_mat_per_op_threads": "DEADLOCKS -- ggml_compute_forward_mul_mat has an internal ggml_barrier that reads the FULL team size from tp->n_graph, not params->nth."
+  },
+  "files": {
+    "flash-rms-guarded-0908.h": "9b425380e396f50a1362e446cf64a07d145b4debd609dcc801f1ad493f63b53c",
+    "ggml-cpu.parent.c": "f4051dd62e028cd60f870ea5f57fc462ad22ed0ebc995473c9b7b4b9aa2d3878",
+    "ggml-cpu.patch": "cdfecdf0fc5afefc94c1948f0eefbd39e6051c51471eea6fbc56175eebaac39f",
+    "ggml-cpu.patched.c": "5bbbaf34c9994bfa925b9d369ddcad9d71d038b8ab3fba2392c4b4080fba4efd",
+    "link_command.json": "e97a5a0874684391ec74305c0f255f7885a732fd615f510673240a5fc13b15c3",
+    "manifest.json": "1e7c4ac05dec41dd9327bcb1b4e94122b4582d557b644691c66854fe9c251e66",
+    "mmbench.c": "1adee7b2e159234b00876b030414949ee14f4e36ff01fda19f6fe440a6527ef2",
+    "ops.h": "bedcc204220d9837a22d875f97a7e588df57abe247aced3ddf573a71cd6d2cad",
+    "ops.parent.cpp": "65081339cacb055e21401320c87745e4da438c1b8d4dae79149281c9ba757f0e",
+    "ops.patch": "e6118ba6497ffaa8a7925402f057485f90b712fbaee1db747edd93e36e9495cd",
+    "ops.patched.cpp": "3553746f7aa34051a34de6982ea0651759cf11c3fc6d44bdabf50f13f14852ea",
+    "rebuild.sh": "c24e15b8687137553fe96979fe6a69601849ed2faf75434f622527c572e17746"
+  },
+  "rebuild": "./rebuild.sh [outdir] -- self-contained; no /dev/shm paths; verified to reproduce the measured library's .text byte-for-byte",
+  "applies_to": "GLM-5.3-Flash ONLY. Measured no gain on DeepSeek-V4-Flash (same runtime) -- see FLEET-EXTRACTION s.38."
+}
