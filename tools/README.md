@@ -45,3 +45,18 @@ The newer [exact-process benchmark](../engineering/2026-09-12/archive/serving/fl
 | [gguf_types.py](gguf_types.py), [active_bytes.py](active_bytes.py) | Historical header/type and active-byte estimators; type tables and repack assumptions are revision-specific |
 
 The older GGUF estimators are exploratory diagnostics, not authoritative parsers for every model or quantization. Use the model-specific metadata checks and pinned upstream readers when validating allocation or precision. Avoid using estimated active bytes times speculative tok/s as a bandwidth measurement.
+
+## Measure distributions, not samples
+
+```bash
+./tools/rbench.sh 18083 prod 5            # repeat the 3-prompt decode bench, report median / min / max / spread
+python3 tools/lctx.py 18083 prod 200 8000 32000 100000   # decode rate against CONTEXT length, not just short prompts
+python3 tools/phase.py <server.log> <bench*.json>        # graph build vs allocation vs compute, against the wall per cycle
+```
+
+`rbench.sh` exists because a single run on a 4-socket host carries about 13% spread on prefill and can stall outright: one
+outlying 8-slot point in this repository's own measurements produced a wrong conclusion about aggregate throughput saturating.
+Quote a median and a spread. `lctx.py` exists because every decode figure here was taken at ~200 tokens of prompt, which
+measures weights only; models that keep a growing KV cache on few layers degrade very differently from conventional ones.
+`phase.py` parses the engine's `LLAMA_GRAPH_PHASE_ARM_FILE` output, which separates graph construction and scheduler
+allocation from actual compute — the two are easily confused when a batch shape changes and forces a rebuild.

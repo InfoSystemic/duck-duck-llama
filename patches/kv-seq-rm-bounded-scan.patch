@@ -1,0 +1,24 @@
+--- /home/kwebb/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/src/llama-kv-cache.cpp	2026-08-31 00:38:28.363955092 -0600
++++ qwen-kvfix/llama-kv-cache.cpp	2026-09-13 20:58:54.593003293 -0600
+@@ -403,7 +403,10 @@
+ 
+         uint32_t new_head = cells.size();
+ 
+-        for (uint32_t i = 0; i < cells.size(); ++i) {
++        // fleet-0912-ctx 09-13: cells past the last used index have pos == -1 and can never match, so scan only the
++        // used prefix (a 256K-context cache has 262,144 cells; this runs on every speculative rollback)
++        const uint32_t n_scan = cells.used_max_p1();
++        for (uint32_t i = 0; i < n_scan; ++i) {
+             if (!cells.pos_in(i, p0, p1)) {
+                 continue;
+             }
+@@ -427,7 +430,8 @@
+ 
+             uint32_t new_head = cells.size();
+ 
+-            for (uint32_t i = 0; i < cells.size(); ++i) {
++            const uint32_t n_scan = cells.used_max_p1();
++            for (uint32_t i = 0; i < n_scan; ++i) {
+                 if (!cells.pos_in(i, p0, p1)) {
+                     continue;
+                 }
