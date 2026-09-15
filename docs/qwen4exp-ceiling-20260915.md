@@ -225,11 +225,19 @@ is an 18.3 ms floor — a 55 tok/s ceiling. Decode runs at 41 ms/token, i.e. 34%
 missing two-thirds is per-node overhead across a 6,156-node graph, not memory traffic. This is the clearest
 statement of why this system is op-bound rather than bandwidth-bound.
 
-**Most of the short-context cycle is drafting.** At 200 tokens of context, 24.31 tok/s at 3.23 tokens per
-speculative cycle implies a 133 ms cycle, of which the traced verify graph is 53.5 ms. The remaining 79 ms
-(60%) is draft passes, and the whole speculative apparatus returns 1.30x there. At 30K the balance inverts
-(verify 140.7 ms, drafts ~118 ms) and acceptance *rises* from 55% to 73% — speculation pays better at length,
-not worse, which is the opposite of the intuition we started with and of one of the hypotheses that died.
+**Speculation's value grows with context.** The traces above were taken with `--spec-type none`, so each
+6,156-node graph is one *raw* decoded token; the four profile records per round are the four sockets
+(cpu 0/16/32/48) executing the same graph, not four separate graphs. Comparing those raw figures against the
+speculative runs at matching context:
+
+| ctx | raw (traced) | speculative | speedup |
+|---|---:|---:|---:|
+| 200 | 53.5 ms/token = 18.7 tok/s | 24.31 tok/s | **1.30x** |
+| ~32K | 138.7 ms/token = 7.2 tok/s | 15.89 tok/s | **2.20x** |
+
+Speculation returns 1.3x at short context and 2.2x at long, tracking draft acceptance as it rises from 55% to
+73%. It pays *better* at length — the opposite of the intuition we started with, and of one of the hypotheses
+that died here.
 
 **The reframing.** No configuration in this project has reached 30 tok/s at *any* context length; the best
 measured figure is 24.61 (15 threads/socket, 190 tokens). A 30 tok/s target at 256K therefore requires beating
