@@ -1,3 +1,19 @@
+DISPROVEN 2026-09-14 -- DO NOT ENABLE. Kept for the record, not for use.
+
+Setting GGML_Q4E_SSM_MIRROR=1 does not merely fail to help; it BREAKS a model that
+otherwise works. The control arm that caught it ran the unmodified Q6_K_XL production
+model through the same library with the knob on (arm `q6ssm`, 2026-09-14 18:21) and the
+server failed to load, exactly as the Q4_K_M arm did.
+
+The cause: handle_gated_delta_net accepts exactly two configurations -- all sources
+MIRRORED, or all sources SPLIT_AXIS_1. Mirroring only ssm_alpha/ssm_beta produces a MIX,
+which moves the abort from the ADD to GGML_ASSERT(src_ss[3].axis == SPLIT_AXIS_1) rather
+than removing it.
+
+The lesson this cost: an A/B whose arms all fail proves nothing. Always include an arm
+running a configuration that is already known to work, or a failure common to every arm
+will be misread as evidence about the variable under test.
+
 --- qwen-shexp/llama-model.cpp	2026-09-13 03:09:53.700802085 -0600
 +++ qwen-ssmfix/llama-model.cpp	2026-09-14 17:53:46.835150326 -0600
 @@ -535,6 +535,23 @@
