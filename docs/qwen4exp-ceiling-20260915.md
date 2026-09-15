@@ -197,3 +197,41 @@ Net effect: per-token indexer work goes from O(context) to O(r).
   failure during library load. It actually died about 2.7 minutes in, at graph reserve; the intervening log
   was buffered and lost with the process. Read the wall clock between the surrounding events, not the last
   line of the log.
+
+## 10. The fixed cost, decomposed — and an honest reframing of the target
+
+Everything above concerns how decode degrades with context. This section is the part that does not depend on
+context at all, traced from the 200-token verify graph (53.5 ms, 6,156 nodes).
+
+| op | nodes | time | share |
+|---|---:|---:|---:|
+| MUL_MAT | 580 | 27.7 ms | 52% |
+| MUL_MAT_ID (the actual expert FFN) | 96 | 7.2 ms | 13% |
+| CUSTOM (cross-socket fused reduces) | 191 | 6.7 ms | 13% |
+| all other ops | ~5,289 | ~11.9 ms | 22% |
+
+**The router costs 11% of the graph by itself.** `ffn_moe_logits` (`ffn_gate_inp`, `[2560,512]`) takes 123 µs
+per layer, 5.88 ms across 48 layers. `ffn_gate_shexp` at `[2560,640]` — a *larger* matrix — takes 49 µs. The
+ratio tracks bytes, not arithmetic: the router is **F32** (5.24 MB) and the shared-expert weight is Q6_K
+(~1.34 MB). 3.9x the bytes for 2.5x the time. The twelve indexer `q_proj` projections share the shape and are
+slower still (~180 µs each). About 8 ms of the fixed 53.5 — 15% — is a handful of F32 projections.
+
+Converting them would return roughly 4 ms of graph. That is worth having but is not decisive, and it moves
+both expert routing and indexer selection, so it inherits the lesson from the refuted top-k patch and needs an
+A/B that controls draft acceptance rather than one that only reads tok/s.
+
+**Bandwidth is not yet the binding constraint.** 6.96 GB of active weights per token against 381 GB/s measured
+is an 18.3 ms floor — a 55 tok/s ceiling. Decode runs at 41 ms/token, i.e. 34% of the byte-floor pace. The
+missing two-thirds is per-node overhead across a 6,156-node graph, not memory traffic. This is the clearest
+statement of why this system is op-bound rather than bandwidth-bound.
+
+**Most of the short-context cycle is drafting.** At 200 tokens of context, 24.31 tok/s at 3.23 tokens per
+speculative cycle implies a 133 ms cycle, of which the traced verify graph is 53.5 ms. The remaining 79 ms
+(60%) is draft passes, and the whole speculative apparatus returns 1.30x there. At 30K the balance inverts
+(verify 140.7 ms, drafts ~118 ms) and acceptance *rises* from 55% to 73% — speculation pays better at length,
+not worse, which is the opposite of the intuition we started with and of one of the hypotheses that died.
+
+**The reframing.** No configuration in this project has reached 30 tok/s at *any* context length; the best
+measured figure is 24.61 (15 threads/socket, 190 tokens). A 30 tok/s target at 256K therefore requires beating
+the current short-context number by 22% *and* removing essentially all context scaling. Those are two
+independent problems, and only the second currently has a designed fix.
