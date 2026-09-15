@@ -487,3 +487,46 @@ The general lesson is the one the refuted top-k branch taught first: **validate 
 thing it is testing, at the operating point it will run at.** A microbenchmark on unmasked scores, a needle in
 a context short enough that sparse attention already reads 28% of it, and a scorer blind to truncation are all
 the same error.
+
+## 15. Two changes that stack: +19.4% measured, ~+32% projected at 256K
+
+Both survived scrutiny independently and patch different libraries — one the CPU scheduler, one the graph — so
+they were measured together:
+
+| arm @28,880 ctx | tok/s | acceptance | tok/cycle |
+|---|---:|---:|---:|
+| production | 16.50 | 76% | 4.13 |
+| GET_ROWS threading (`libggml-cpu`) | 18.44 | 76% | 4.13 |
+| f16 pooled keys (`libllama`) | 17.12 | 81% | 4.31 |
+| **both** | **19.53** | 81% | 4.31 |
+
+**+19.4%** against a six-run control mean of 16.35 with a 3.4% spread. The multiplicative expectation is
+19.31 and the measurement is 19.53 — 1.1% apart, so the two compose rather than contending for the same
+resource. Both patched libraries were verified as actually mapped by reading `/proc/<pid>/maps`; the
+threading patch prints no banner, so an unset flag would otherwise have read as "these do not stack".
+
+**The second change was discovered as a control, not as a treatment.** `GGML_Q4E_POOL_CACHE=2` computes the
+pooled indexer keys exactly as production does and then casts them to f16. It was built purely to price a
+risk — that f16 storage would move top-k selection — before attempting a cache that must store f16. The risk
+does not exist: output is byte-identical and draft acceptance *rises* from 76% to 81%, while an f16 `mul_mat`
+source halves the bytes read. It needs no cache, no invalidation and no rollback logic.
+
+**The gain grows with context**, because the gather is a larger share of decode at length — 24% of raw time
+at 28,880, 42% at 237,500. Projected on the raw-decode curve that was validated to within 6% against the
+measured 237,500-token run:
+
+    raw 690 ms → GET_ROWS 261 → 145 ms (1.80x measured) → f16 saves ~48 ms → raw 526 ms
+    ⇒ 4.47 tok/s at 237,500, against 3.40 measured — a 1.32x improvement
+
+### Where that leaves the ceiling
+
+| configuration | 256K tok/s |
+|---|---:|
+| measured today | **3.40** |
+| + both validated changes | **~4.5** |
+| + pooled-key cache, if the splitter accepts it | ~10.7 |
+| 30 tok/s | not reachable CPU-only on this hardware |
+
+The two banked changes are small, independent and low-risk — one bit-exact with byte-identical output across
+four arms, the other with an identical greedy hash and better acceptance. Neither depends on the pooled cache
+nor on any engine-level file.
