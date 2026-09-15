@@ -132,3 +132,68 @@ contract and still change model behaviour. That gap is general, not specific to 
   run zero tests, an `awk` error discarded by `nohup`, and a monitor filter that would have missed a crash.
 - **Benchmark what the model actually feeds the kernel.** The top-k microbenchmark used pure normals and declared the
   patch exact and safe; real scores are heavily masked, and the patch both crashed and changed behaviour.
+
+---
+
+## 7. Thread count is closed (09-15)
+
+Production libraries, identical configuration, only threads per socket varied. Draft acceptance (73%) and
+tokens per speculative cycle (4.00) were identical in every arm, so the arms are behaviourally the same and
+only the thread count moved.
+
+| threads/socket | 190 ctx tok/s | 30,400 ctx tok/s |
+|---|---:|---:|
+| 15 | 24.61 | **15.89** |
+| 16 | 24.06 | 15.50 |
+| 30 (hyperthreading) | 24.15 | 15.31 |
+
+Total spread is 3.8% at 30K, and hyperthreading is the **worst** arm rather than merely neutral — consistent
+with the aggregate bandwidth being real and already saturated by the physical cores. Leaving one core per
+socket free edges out using all of them.
+
+This closes thread count as a route to 30 tok/s: it is worth 4%, and roughly 2x is required. It is the ninth
+hypothesis to die to measurement here, after attention FLOPs, top-k selection cost, `nth_element` as a
+replacement, kernel fusion, acceptance decay with context, NUMA placement, and histogram top-k.
+
+## 8. The indexer's pooled block keys are cacheable, and the storage is already allocated
+
+The sparse-attention indexer rebuilds every block summary on every token. Tracing decode from 200 to 32,000
+tokens of context attributes the growth as `GET_ROWS` +35.1 ms, `ROPE` +14.7 ms, `TOP_K` +7.8 ms of 87.2 ms
+total — while `FLASH_ATTN_EXT`, the actual attention, costs 4.2 ms. **The machinery that chooses what to
+attend to costs an order of magnitude more than attending.**
+
+Three findings make a cache for it much cheaper than expected.
+
+**The roped value is invariant.** Block `b`'s rope position is assigned as `b*ratio` — a pure function of the
+block index, independent of the current token position and of `n_kv`. So the pooled, normed, *roped* key for
+block `b` changes only when a new token lands in block `b`. The cache can hold the post-rope value, which
+puts both the `GET_ROWS` and the `ROPE` growth — about 57% of the measured context-dependent cost — behind
+it, rather than only the gather.
+
+**The dirty set needs no bookkeeping.** Blocks are defined over positions (`block b covers
+[b*ratio, (b+1)*ratio)`), and appended tokens always hold the highest positions, so the blocks an ubatch can
+touch are always the trailing `ceil(n_tokens/r) + 1`. That is derivable from shapes alone: no index tensor,
+no `set_input` change, no memory-subsystem change.
+
+**The storage already exists, unused.** The indexer's KV cache is built as a full cache with a `type_v`, but
+the graph's entire use of it is `build_input_k_idxs` / `cpy_k` / `get_k` / `get_n_kv`. `cpy_v` and `get_v`
+are never called — the V half is allocated and never touched. It holds 256 elements per cell where the
+pooled keys need 128 per block at 4 cells per block: **8x headroom**. Reusing it means the pooled keys
+inherit the existing cross-socket mirroring rule, the existing state save/restore, and the existing
+sequence-removal path, none of which needs new plumbing.
+
+The stage runs on 12 of 48 layers (`compress_ratios` is non-zero only on every fourth layer; the rest are the
+linear-attention path), so the cache is 12 layers deep, not 48.
+
+Net effect: per-token indexer work goes from O(context) to O(r).
+
+## 9. Two more method notes
+
+- **A view of a cache keeps the cache's type.** A measurement-only bypass replaced a `ggml_get_rows` with a
+  view of the same tensor and aborted during graph reserve. `get_rows` *always* produces F32; the view
+  produced F16, and every downstream consumer — norm, rope, the scoring matmul — received the wrong type.
+  Identical shapes are not identical tensors.
+- **A crash timestamp is not a crash time.** That abort printed its last line 34 ms in, which looked like a
+  failure during library load. It actually died about 2.7 minutes in, at graph reserve; the intervening log
+  was buffered and lost with the process. Read the wall clock between the surrounding events, not the last
+  line of the log.
