@@ -353,3 +353,54 @@ Two operational notes. The server builds the path as `slot_save_path + filename`
 no separator, so the path argument **must** carry a trailing slash or the file lands next to the directory
 rather than inside it. And a saved slot is tied to the cache geometry that produced it: a different KV type,
 context size, or slot count will not load it.
+
+## 13. GET_ROWS runs on one thread of sixty — worth +12%, bit-exact, and 33x less than projected
+
+`GET_ROWS` is 40% of the context-dependent decode cost, larger than the next four ops combined. Measured at
+32,000 tokens it moves 8.2 MB per layer in 2.93 ms — **2.80 GB/s, 0.74% of this machine's 381 GB/s** — at
+**91 ns per gathered row**, which is one DRAM latency with no memory-level parallelism. That is the signature
+of a single thread, and `ggml_get_n_tasks()` confirms it:
+
+```c
+        case GGML_OP_GET_ROWS:
+        case GGML_OP_SET_ROWS:
+            {
+                // FIXME: get_rows can use additional threads, but the cost of launching additional threads
+                // decreases performance with GPU offloading
+                n_tasks = 1;
+            } break;
+```
+
+Both ops are pinned to one thread, and the stated reason — GPU-offload launch cost — does not apply on a
+CPU-only build. Meanwhile `ggml_compute_forward_get_rows` **already splits by rows** (`dr = (nr + nth - 1)/nth`
+in every type variant), so the kernel is parallel-capable and correct for any `nth`. This is the same defect
+shape as the UNARY ops being pinned to one thread: the implementation honours `ith/nth` and the scheduler
+refuses to supply them.
+
+Threading it above a row threshold, so small gathers keep the single-task batching path:
+
+| arm | 190 ctx | 28,880 ctx | acceptance | tok/cycle | greedy hash |
+|---|---:|---:|---:|---:|---|
+| production | 24.04 | 16.64 | 76% | 4.13 | `13b7ea22` |
+| patched lib, flag off | 24.06 | 16.28 | 76% | 4.13 | `13b7ea22` |
+| **threaded above 256 rows** | 24.33 | **18.44** | 76% | 4.13 | `13b7ea22` |
+
+**+12.0%** against the control mean, on a 2.2% noise floor. Identical greedy hash, identical acceptance,
+identical tokens-per-cycle — three independent confirmations that the change alters only speed. The 190-token
+row is a built-in placebo: at 200 gathered rows the threshold does not engage, and nothing moves.
+
+### The projection was wrong by 33x, and why that matters
+
+Bands recorded *before* the run: ≥20 tok/s a large win, 17.5–19.5 partial, ~16.5 dead. It landed at 18.44 —
+partial. Backing out the implied cost, `GET_ROWS` went 31.7 → 17.6 ms: a **1.80x** parallel speedup, not the
+8x called realistic or the 60x of full threading.
+
+The diagnosis was right and the remedy was half wrong. 91 ns/row *is* absence of memory-level parallelism —
+but the cure for a latency-bound gather is more outstanding loads, and sixty threads each stalling on their
+own random 256-byte read only recovers 1.8x. Thread count never recovers a latency problem linearly. The
+honest lesson is that "single-threaded" and "slow because single-threaded" are different claims, and only the
+first was established by the 91 ns measurement.
+
+At 237,500–262,144 tokens the same 1.80x on the 288 ms gather term takes raw 756 → 628 ms and decode
+**3.40 → ~3.74 tok/s**. Real, bit-exact, stackable — and a 10% improvement to a number that needs 8x. It
+shaves the context term; it does not change its shape.
