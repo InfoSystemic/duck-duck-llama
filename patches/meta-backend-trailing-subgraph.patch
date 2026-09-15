@@ -1,0 +1,40 @@
+--- qwen-hcfuse/src/ggml-backend-meta.cpp	2026-09-14 09:49:40.020616593 -0600
++++ qwen-metadiag/ggml-backend-meta.cpp	2026-09-15 12:05:21.607273209 -0600
+@@ -3036,6 +3036,37 @@
+                 n_subgraphs++;
+                 i_start = i + 1;
+             }
++            if (i_start != cgraph->n_nodes) {
++                // 09-15 FIX. The loop above closes a subgraph at a reduce point or at the final node, but
++                // nodes that are views of leaf tensors hit a `continue` BEFORE the final-node test. When the
++                // graph's last node is such a view -- which happens as soon as a pass writes a cache and then
++                // views it, e.g. the pooled indexer-key cache -- the trailing subgraph is never emitted and
++                // the assert below fires. Emit it here.
++                //
++                // This is reachable ONLY in the case that currently aborts, so it cannot change any graph
++                // that works today.
++                // `pending` is loop-scoped and a trailing subgraph has no outstanding reduces by
++                // construction -- it is the tail after the last reduce point -- so reduce_nodes is empty.
++                for (size_t j = 0; j < n_backends; j++) {
++                    auto & bcj = backend_ctx->backend_configs[j];
++                    bcj.cgraphs[n_subgraphs].offset = i_start;
++                    bcj.cgraphs[n_subgraphs].reduce_nodes.clear();
++                }
++                n_subgraphs++;
++                i_start = cgraph->n_nodes;
++            }
++            if (false) {
++                fprintf(stderr, "META SPLIT FAIL: i_start=%d n_nodes=%d -- %d unconsumed node(s)\n",
++                        i_start, cgraph->n_nodes, cgraph->n_nodes - i_start);
++                const int from = i_start > 3 ? i_start - 3 : 0;
++                for (int t = from; t < cgraph->n_nodes; t++) {
++                    const ggml_tensor * nd = cgraph->nodes[t];
++                    fprintf(stderr, "  [%d]%s op=%-14s name=%-28s view_src_op=%s\n",
++                            t, t >= i_start ? " UNCONSUMED" : "          ",
++                            ggml_op_name(nd->op), nd->name,
++                            nd->view_src ? ggml_op_name(nd->view_src->op) : "(none)");
++                }
++            }
+             GGML_ASSERT(i_start == cgraph->n_nodes);
+         }
+ 
