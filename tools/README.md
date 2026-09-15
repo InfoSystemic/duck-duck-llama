@@ -42,6 +42,8 @@ The newer [exact-process benchmark](../engineering/2026-09-12/archive/serving/fl
 | [barrier.c](barrier.c) | OpenMP barrier latency across thread counts and socket spans |
 | [kbench.cpp](kbench.cpp), [kbench_id.cpp](kbench_id.cpp) | Dense and routed-expert component harnesses; preserve equal-work comparisons |
 | [concurrent_bench.py](concurrent_bench.py) | Earlier concurrent-serving experiment harness |
-| [gguf_types.py](gguf_types.py), [active_bytes.py](active_bytes.py) | Historical header/type and active-byte estimators; type tables and repack assumptions are revision-specific |
+| [gguf_types.py](gguf_types.py) | Historical header/type estimator; type tables and repack assumptions are revision-specific |
+| [active_bytes.py](active_bytes.py) | Active bytes a forward pass streams, split shared / head / gathered / expert. Reconstructs the model size from the tensor table and prints it against the on-disk size, so a wrong block size is caught instead of silently corrupting the answer. Unknown ggml type ids raise rather than defaulting. Also models the speculative verify, where the shared weights are read once for all drafted tokens and the experts for their union |
+| [dram_per_token.py](dram_per_token.py) | Measured DRAM bytes per generated token from the uncore IMC counters, which settles bandwidth-bound vs overhead-bound. Check the PMU cpumask first: one CPU per socket means perf aggregates the whole machine |
 
 The older GGUF estimators are exploratory diagnostics, not authoritative parsers for every model or quantization. Use the model-specific metadata checks and pinned upstream readers when validating allocation or precision. Avoid using estimated active bytes times speculative tok/s as a bandwidth measurement.
