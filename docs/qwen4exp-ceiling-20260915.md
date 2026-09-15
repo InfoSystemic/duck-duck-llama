@@ -8,12 +8,18 @@
 Every benchmark in this project — and essentially every published CPU inference number — is taken at ~200 tokens of
 prompt. Agents run at 10K-100K. The full curve, production configuration, **measured**:
 
-| context | decode tok/s | ms/token | draft acceptance | tokens/cycle |
+| context | decode tok/s | ms/token | draft acceptance | prefill tok/s |
 |---:|---:|---:|---:|---:|
-| 190 | 24.11 | 41.5 | 55% | 3.23 |
-| 7,600 | **26.29** | 38.8 | **89%** | 4.63 |
-| 30,400 | 15.70 | 63.7 | 73% | 4.00 |
-| 95,000 | 8.08 | 123.7 | 75% | 4.04 |
+| 190 | 24.31 | 41.1 | 55% | 111.5 |
+| 7,600 | **26.29** | 38.8 | **89%** | 114.0 |
+| 30,400 | 14.20 | 70.4 | 73% | 68.9 |
+| 95,000 | 8.08 | 123.7 | 75% | 43.4 |
+| 121,600 | 6.41 | 156.0 | 70% | 38.0 |
+
+Fitting only the two longest points gives **41.9 ms + 0.939 us per context token**, which extrapolates to 288
+ms/token — **3.47 tok/s at the native 262,144**. An independent three-point fit gave 294 ms / 3.40 tok/s. Two fits
+agreeing to 2% is why we stopped short of spending 3.2 hours measuring the last point directly, and spent it on
+experiments that could change the answer instead.
 
 Two things fall out that the 200-token benchmark cannot show.
 
@@ -23,6 +29,23 @@ draft head needs context to predict well: acceptance climbs 55% -> 89%. Short-pr
 **Decode is close to linear in context** beyond that: roughly 30 ms fixed plus ~1.0 us per context token. Extrapolated
 to the native 262,144 window that is ~294 ms/token, or **3.4 tok/s** — which is why "native context support" has never
 been usable in practice, on any of the levers we tried.
+
+## 1b. 256K has TWO barriers of comparable size
+
+A 256K deployment has to fill the context as well as generate from it, and both are far from their limits:
+
+| barrier | today | distance from physical limit |
+|---|---:|---|
+| **fill** a cold 256K context | **3.2 hours** (22.5 tok/s prefill, fitted) | 3.7 PFLOP at 5.7 TFLOP/s peak is 11 min -> **6% of peak** |
+| **generate** from it | **3.47 tok/s** | context path at 0.0023 us/ctx-token floor vs 0.939 measured -> **0.2%** |
+
+They have different causes. Generation is overhead-bound and software fixes it. Filling is compute-bound, which is
+what a GPU has in surplus and this box does not — a V100 at 30% efficiency turns 194 minutes into about 15. So the
+two levers address different halves rather than competing, which dissolves the sequencing question.
+
+**Reaching 30 tok/s at 256K requires both.** The fixed per-token cost is 41.9 ms, so even with zero context cost the
+ceiling is 23.9 tok/s. The indexer work alone lands near 22; the dense path moved off the CPU alone lands near 24;
+together, past 50.
 
 ## 2. The machine is overhead-bound, not bandwidth-bound
 
