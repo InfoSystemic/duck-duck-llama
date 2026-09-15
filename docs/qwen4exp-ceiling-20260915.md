@@ -244,7 +244,39 @@ measured figure is 24.61 (15 threads/socket, 190 tokens). A 30 tok/s target at 2
 the current short-context number by 22% *and* removing essentially all context scaling. Those are two
 independent problems, and only the second currently has a designed fix.
 
-## 11. The sparse attention is a net loss on this machine, and the loss grows with context
+## 11. REFUTED BY MEASUREMENT — the sparse attention is load-bearing, and the reasoning below was circular
+
+> **Read this first.** The section that follows argued that the sparse-attention indexer is a net loss on this
+> hardware and that full attention would be worth 4–9x at 256K. **It was tested and it is wrong.** Disabling
+> the indexer made decode **2.2x slower** (7.41 vs 16.30 tok/s at 28,880) and collapsed draft acceptance from
+> 76% to 37%.
+>
+> **The error was logical, not arithmetic.** The "18x cost ratio" compared the indexer's cost against
+> `FLASH_ATTN_EXT`'s measured cost — but that is what attention costs *after* the indexer has already
+> restricted it to 8,192 positions. It compared the price of an optimisation against the price of the thing it
+> had already optimised. The correct comparison is the indexer against attention **without** it:
+>
+> | at 28,880 | measured |
+> |---|---:|
+> | full attention | **~150 ms/token** |
+> | my estimate | 12.4 ms (**12x off**) |
+> | KV streamed | 710 MB at **4.7 GB/s — 1.2% of machine bandwidth** |
+>
+> Flash-attention decode on this CPU runs at roughly one percent of memory bandwidth. Extrapolated to 237,500
+> tokens, full attention would stream 5.84 GB/token and cost **~1,242 ms**, against the indexer's ~499 ms —
+> so the indexer **saves** ~742 ms/token, a **2.5x win**. On this machine the sparsity is not a mistake
+> inherited from GPU design; it is the only thing making long context tractable at all.
+>
+> A second, independent refutation: acceptance fell 76% → 37%. The MTP draft head's agreement with the target
+> depends on the sparse attention pattern, so even a free change of that pattern would cost 1.6x in tokens per
+> speculative cycle.
+>
+> The section is kept below unedited, because the reasoning is a clean example of a failure mode worth
+> recognising: every number in it was measured, and the conclusion was still wrong.
+
+## 11a. (REFUTED — retained) The original argument
+
+
 
 This is the conclusion the rest of the document has been circling.
 
