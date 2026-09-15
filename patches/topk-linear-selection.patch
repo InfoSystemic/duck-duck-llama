@@ -1,0 +1,44 @@
+Subject: [PATCH] ggml-cpu: make sparse-attention top-k selection O(n) instead of O(n log k)
+
+ggml_compute_forward_top_k_f32 selects the top-k scores with std::partial_sort over the
+full source row. Two properties make that expensive for sparse-attention indexers:
+
+  * it is O(n log k) in n, and n here is the CONTEXT LENGTH, not a fixed hidden size;
+  * the comparator is indirect (data[a] > data[b]), so the scan is cache-hostile.
+
+Worse, the op's only parallel dimension is rows, and the indexer's score tensor has
+shape [n_ctx, 1, 1] -- ggml_nrows() == 1 -- so the whole selection runs on a single
+thread regardless of how many are available.
+
+Measured on a 4-socket Xeon Gold 6242 with Qwen3.8-Flash-Next (indexer top_k 2048, on
+12 of 48 layers), decode falls from 29.22 tok/s at 234 tokens of context to 14.21 at
+38,056, a 36.2 ms/token penalty. KV-cache bytes account for ~1.5 ms of that and the
+extra attention FLOPs would require 0.31% of the machine's peak, so neither explains it.
+The penalty is linear in context (0.981 and 0.949 us per context token measured over two
+independent segments), which is what an O(n)-per-layer indexer path predicts.
+
+At the model's native 262,144 context this selection alone is modelled at ~143 ms/token.
+
+The output order is not required: the existing code swaps dst[0] and dst[1] immediately
+after sorting, with the comment "emphasize that the order is not important". That makes
+std::nth_element a drop-in, giving the same SET in O(n) average.
+
+This is not bit-exact -- the same keys are accumulated by attention in a different order
+-- so it is placed behind an environment knob here rather than changed unconditionally.
+Models affected in our fleet: Qwen3.8-Flash-Next (top_k 2048), DeepSeek-V4.1-Flash (512),
+GLM-5.3-Flash (2048).
+
+--- a/ggml/src/ggml-cpu/ops.cpp
++++ b/ggml/src/ggml-cpu/ops.cpp
+@@
+-        std::partial_sort(tmp, tmp + top_k, tmp + ne00, cmp_top_k{src_data});
++        // partial_sort is O(n log k) in the CONTEXT LENGTH, and this op's only parallel
++        // dimension is rows -- a sparse-attention indexer has exactly one -- so it runs
++        // single-threaded. The order of the output is not required (see the deliberate
++        // swap below), which makes nth_element a legal O(n) drop-in.
++        static const int q4e_topk = []() { const char * v = getenv("GGML_Q4E_TOPK"); return v ? atoi(v) : 0; }();
++        if (q4e_topk == 1) {
++            std::nth_element(tmp, tmp + top_k - 1, tmp + ne00, cmp_top_k{src_data});
++        } else {
++            std::partial_sort(tmp, tmp + top_k, tmp + ne00, cmp_top_k{src_data});
++        }
