@@ -530,3 +530,44 @@ measured 237,500-token run:
 The two banked changes are small, independent and low-risk — one bit-exact with byte-identical output across
 four arms, the other with an identical greedy hash and better acceptance. Neither depends on the pooled cache
 nor on any engine-level file.
+
+## 16. Prefill traced: the growth is attention-mask scanning and cross-socket reduces
+
+Prefill costs 2.48 h for a 237,500-token context and had never been traced. Two ubatches of 1,024 tokens,
+at 2,048 and 114,000 tokens of context:
+
+| op | @2,048 | @114,000 | growth | share of growth |
+|---|---:|---:|---:|---:|
+| `FLASH_ATTN_EXT` | 646 | **11,046** | +10,400 | **40%** |
+| `CUSTOM` (cross-socket reduces) | 1,307 | **10,795** | +9,488 | **36%** |
+| `CONT` | 118 | 2,241 | +2,123 | 8% |
+| `SUM_ROWS` | — | 1,131 | +1,131 | 4% |
+| `TOP_K` | 204 | 1,078 | +874 | 3% |
+| `MUL_MAT_ID` (expert FFN) | 1,909 | 1,910 | 0 | **0%** |
+
+Graph total 7,965 → 34,284 ms, i.e. **7.8 → 33.5 ms/token** against 36.5 predicted by the fitted prefill
+curve — 8% out at 56 times the range it was fitted on.
+
+**Prefill is compute-bound, not overhead-bound.** At 2.19 TFLOP/s against a ~5.7 peak it runs at 38%, which is
+reasonable for quantised GEMMs. An earlier section here described prefill as having a "33x unexplained" cost;
+that was an estimation error — only attention and indexer-scoring FLOPs had been counted, omitting the FFN,
+which is 47% of a prefill ubatch. There is no large hidden inefficiency.
+
+**The expert FFN is exactly flat** across a 56x context increase (1,909 → 1,910 ms), which confirms it as the
+per-token fixed cost and excludes it from the growth entirely.
+
+**A prediction that failed, recorded because the failure is instructive.** From the short-context point alone,
+`TOP_K` looked like the growth driver: it runs per token and scales with the block count, implying 61x growth
+and ~12 ms/token. Measured growth is **5.3x**, 0.85 ms/token, 3% of the total. `partial_sort` parallelises
+across the ~4,096 rows a 1,024-token ubatch provides; decode supplies one row and cannot. **The op that is
+crippled in decode is nearly free in prefill** — the ranking between the two phases inverts, and extrapolating
+one from the other is invalid.
+
+**What actually grows is attention and the reduces**, 76% between them. Attention is nominally capped at
+`top_k · r = 8,192` attended positions, yet it grew 17x where that cap implies 4x — so the cost is not the
+positions attended but the scan across `n_kv` deciding what to skip, which is O(n_kv × n_tokens) in the mask.
+The reduces growing 8x with context is unexplained: 189 nodes moving activations that should be sized by
+n_tokens, not by n_kv.
+
+Neither is addressed by the pooled-key cache, the GET_ROWS threading, or the f16 keys. Prefill optimisation is
+a separate problem from decode optimisation on this architecture.
