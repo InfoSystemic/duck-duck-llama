@@ -571,3 +571,42 @@ n_tokens, not by n_kv.
 
 Neither is addressed by the pooled-key cache, the GET_ROWS threading, or the f16 keys. Prefill optimisation is
 a separate problem from decode optimisation on this architecture.
+
+## 17. Where the remaining gain is blocked, and why the blocker is a build-system fact
+
+The pooled-key cache — caching the indexer's block summaries instead of rebuilding all of them every token —
+targets 59.5 ms of the 87.2 ms of context-dependent decode cost, and would be worth roughly 3x at 256K
+against the ~1.19x banked. It does not work, and the reason is worth recording precisely.
+
+**Four implementation attempts, four different wrong assumptions:**
+
+| attempt | failure | the assumption that was wrong |
+|---|---|---|
+| 1 | `GGML_ASSERT(cap >= n_blocks)` | `get_v` returns **4D** `[n_embd_head_v, n_head_kv, n_kv, n_stream]`, not 2D; reading `ne[1]` gave capacity 2 instead of 524,288 |
+| 2 | same | stream stride is `nb[3]`, not `nb[2]` |
+| 3 | `ggml-backend-meta.cpp:3039` | that a `ggml_cpy` into a cache view would be schedulable |
+| 4 | same assert | that switching to `ggml_set_rows` — the write the KV cache itself uses — would fix it |
+
+Attempt 4 is the informative one: it **refutes** the idea that the write operation was the problem. Reading
+the splitter shows subgraphs close only at a reduce point or at the final node, while nodes that are views of
+leaf tensors hit a `continue` *before* the final-node test. `ggml_set_rows` is documented as returning
+`view(a)`, so both the cache write and the read-back fall into that skipped class.
+
+**The next step is instrumentation, and instrumentation is blocked by the build system.** The splitter lives
+in `libggml-base`, and production's copy cannot be reproduced:
+
+- the production md5 matches `build-L6` and `build-L8` — *not* `build-L5`, despite living in a directory
+  named `prod-L5`
+- the recorded compile recipe produces a 313,704 byte object where production's is 317,592 — different flags,
+  same source
+- **no script in the tree compiles the production object at all.** The link script links it; nothing builds
+  it. The flags are unrecorded.
+
+So a diagnostic build would differ from production in the diagnostic *plus* an unknown amount, and no
+conclusion drawn from it would be attributable. The neighbouring libraries are fine — libllama and
+libggml-cpu both have reproducible, gated recipes — which is why every optimisation reported here could be
+verified and this one cannot.
+
+This was surfaced only because the lineage gate refused the build. The same gate caught two earlier
+wrong-lineage builds in this project. A private-library workflow without one produces A/B results that are
+silently about more than the change under test.
