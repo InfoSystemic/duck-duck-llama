@@ -71,8 +71,21 @@ context. Agents run at 10K-100K. On this box decode **halves** between 234 and 3
 
 That gap is how a genuine defect survived: the sparse-attention indexer used by Qwen (top_k 2048), DeepSeek (512) and
 GLM (2048) selects its keys with `std::partial_sort` over the whole context, on a tensor whose `ggml_nrows()` is 1 —
-so it runs on one thread, O(n log k) in the context length. At 200 tokens it costs 17 us and is invisible. **Modelled**
-at 262,144 context it is ~143 ms/token, which alone caps decode near 7 tok/s. See `patches/` for the O(n) fix.
+so it runs on one thread, scaling with context length. At 200 tokens it costs 17 us and is invisible.
+
+**Measured** (best of 20 reps, one row, top_k 2048), and note this corrects an earlier estimate of ours that was 3-7x
+too pessimistic:
+
+| n_ctx | partial_sort | nth_element | threshold |
+|---:|---:|---:|---:|
+| 38,056 | 0.624 ms | 0.134 | **0.170** |
+| 100,000 | 0.874 | 0.564 | **0.282** |
+| 262,144 | 1.296 | **2.157** | **0.727** |
+
+Across 12 layers and 1.37 passes per token that is ~10 ms/token at 38K context and ~21 at 262,144 — real, worth
+removing, but roughly 28% of the long-context penalty rather than most of it. Two things are worth taking from the
+table: `std::nth_element` is the intuitive fix and is 1.66x *slower* than what it replaces at 262,144, and a
+histogram-threshold selection wins throughout. See `patches/topk-linear-selection.patch`.
 
 ## 6. Where CPU honestly loses
 
