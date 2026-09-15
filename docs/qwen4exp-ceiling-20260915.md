@@ -299,3 +299,45 @@ Everything that has failed here aimed at **arithmetic** or **bytes**: attention 
 noise — "overhead-bound, not byte-bound"), expert requantisation, draft depth, thread count, hyperthreading.
 This system is bound by neither. The only two ideas that have survived scrutiny attack **the amount of work
 performed per token at length** — which is the single axis that has ever moved a number.
+
+## 12. Measured at 237,500 tokens — the model validated 8x outside its fitting range
+
+Every 256K figure above this section was extrapolated from traces at 32,000 and 121,600. This one is measured:
+a single 237,500-token context was prefilled, decoded, and saved to disk.
+
+| | measured | predicted by the fitted curve | error |
+|---|---|---|---|
+| decode | **3.40 tok/s** (293.9 ms/token) | 3.19 tok/s | 6% pessimistic |
+| prefill | **26.6 tok/s** — 237,500 tokens in 8,919 s (**2.48 h**) | 24.2 tok/s | 9% pessimistic |
+| draft acceptance | 63%, 3.56 tokens/cycle | — | — |
+| saved slot | **8.16 GB**, written in 6.8 s | — | — |
+
+`raw(ctx) = 53.5 + 2.679e-3·ctx` predicts 690 ms/token raw at this length; the measured speculative 293.9 ms
+implies a **2.35x** speculative ratio against the 2.20x assumed. Both the decode ladder and the prefill model
+survive validation eight times beyond the range they were fitted on, which is the strongest available
+evidence that the projections here are sound rather than merely self-consistent.
+
+Refitting prefill on the measured average (37.6 ms/token) gives `k = 2.271e-4`, so a full 262,144 fill is
+**2.94 h** rather than the 3.24 h quoted earlier from the two-point fit.
+
+**Draft acceptance is not monotonic in context.** 55% at 200 tokens, 73% at 30,400, **63% at 237,500**, with
+tokens per cycle falling 4.00 → 3.56. Speculation pays increasingly well from short to medium context and
+then gives some of it back at extreme length. An earlier section here said simply that it "pays better at
+length"; that is true only up to a point.
+
+### The cheapest real win in the project needs no engine change
+
+A context that costs 2.48 hours to build serialises to 8.16 GB — 33.5 KB per token (24.0 KB attention KV,
+6.0 KB indexer, the rest recurrent state) — and writes in 6.8 seconds:
+
+    POST /slots/0?action=save     {"filename": "f16-250k.bin"}
+    POST /slots/0?action=restore  {"filename": "f16-250k.bin"}
+
+For any fixed long prefix — a codebase, a corpus, a document set — the 2.48 h is paid once and every later
+session restores it. That is the difference between 256K being a benchmark number and being usable, and it
+requires no kernel work, no patch, and no quality tradeoff.
+
+Two operational notes. The server builds the path as `slot_save_path + filename`, a plain concatenation with
+no separator, so the path argument **must** carry a trailing slash or the file lands next to the directory
+rather than inside it. And a saved slot is tied to the cache geometry that produced it: a different KV type,
+context size, or slot count will not load it.
