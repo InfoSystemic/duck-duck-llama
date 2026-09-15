@@ -838,3 +838,42 @@ draft are substitutes.
 
 These are two different machines built out of the same hardware, and the choice between them is a serving
 decision rather than an optimisation one. The mistake would be to quote either number as *the* capability.
+
+## 23. Speculation and concurrency are substitutes, and the fixed share of a token decides which one pays
+
+Two sweeps, one at 190 tokens and one at 7,600, each with speculation on and off:
+
+| | 190 tokens | 7,600 tokens |
+|---|---|---|
+| best configuration | c=16, **speculation OFF** | **c=1, speculation ON** |
+| best aggregate | **46.74 tok/s** | **16.16 tok/s** |
+| speculation at c=1 | 1.14× | **1.94×** |
+| speculation at high concurrency | **−58%** | still positive, on a falling curve |
+| concurrency, c=1 → best | **3.28×** | **0.57×** at c=8 |
+| fixed share of a token | 99.1% | 72.4% |
+
+At 7,600 tokens the full curve declines from its c=1 peak (16.16 → 10.26 → 7.78 → 6.65), while at 190 tokens
+it climbs to c=16. **The optimum moves from one corner of the configuration space to the other**, decided by
+a single quantity.
+
+**The mechanism.** MTP drafting and batching do the same job: hand a dispatch-bound machine more tokens per
+graph pass. This machine spends 6,156 graph nodes to produce one token and sits at ~34% of its byte-floor
+pace, so tokens-per-pass is the binding resource. Short context is almost entirely fixed cost, which batching
+amortises across streams — and there the draft's extra passes are pure waste. Long context is dominated by
+per-stream KV scanning, which batching cannot share and can only multiply — and there speculation still
+raises tokens per pass while concurrency only adds work.
+
+Speculation's value grows with context (1.14× → 1.94× → ~2.3× at 190 / 7,600 / 28,880), tracking draft
+acceptance rising 55% → 73% → 82%. Concurrency's value shrinks with context, tracking the fixed share
+(99.1% → 72.4% → 40.9% → **7.8%** at 256K).
+
+### What this means for a 256K workload
+
+**`--parallel 1`, speculation on**, plus the four validated single-stream changes documented above. The
+46.74 tok/s aggregate is real and does not apply. The existing `--parallel 1` default was chosen because two
+slots cost 15–20% of single-stream decode; it turns out to be right for a second and much larger reason that
+had never been measured.
+
+The general lesson is that "the throughput of this machine" is not one number. It is a configuration choice
+whose optimum inverts between short and long context, and quoting either endpoint without the context length
+attached is how a benchmark misleads.
