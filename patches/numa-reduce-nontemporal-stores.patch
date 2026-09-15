@@ -1,0 +1,114 @@
+--- /home/user/InfoSystemic/AI-Server/engines/llama.cpp-q4e-goal-0904/ggml/src/ggml-backend-meta.cpp	2026-09-05 21:59:05.013271999 -0600
++++ qwen-hcfuse/src/ggml-backend-meta.cpp	2026-09-14 09:49:40.020616593 -0600
+@@ -15,6 +15,10 @@
+ #include <cstring>
+ #include <condition_variable>
+ #include <map>
++#include <unordered_map>
++#if defined(__AVX512F__)
++#include <immintrin.h>
++#endif
+ #include <fstream>
+ #include <memory>
+ #include <atomic>
+@@ -1203,6 +1207,10 @@
+             case GGML_OP_LIGHTNING_INDEXER: {
+                 split_state = handle_lightning_indexer(src_ss);
+             } break;
++            case GGML_OP_Q4E_HC_MIXSUM:
++            case GGML_OP_Q4E_HC_COMB:
++            case GGML_OP_Q4E_HC_NORM:
++            case GGML_OP_Q4E_HC_COMB2:
+             case GGML_OP_DSV4_HC_COMB:
+             case GGML_OP_DSV4_HC_PRE:
+             case GGML_OP_DSV4_HC_POST: {
+@@ -1278,15 +1286,45 @@
+     };
+ 
+     const std::pair key = std::make_pair(tensor, assume_sync);
++    // fleet-0912-ctx 09-13: validate cache entries on a signature that ignores the allocation-time fields (data, extra), so a
++    // rebuilt graph with identical topology hits instead of flushing the whole cache (6,849 recomputations = ~50 ms per
++    // rebuild on Qwen3.8-Flash-Next). GGML_META_SPLIT_CACHE_MASK=0 restores the raw comparison; _STATS=1 prints counters.
++    static const bool q4e_meta_mask  = [] { const char * v = getenv("GGML_META_SPLIT_CACHE_MASK");  return v == nullptr || atoi(v) != 0; }();
++    static const bool q4e_meta_stats = [] { const char * v = getenv("GGML_META_SPLIT_CACHE_STATS"); return v != nullptr && atoi(v) != 0; }();
++    static long q4e_meta_hits = 0, q4e_meta_miss = 0, q4e_meta_clears = 0;
++    char sig[ggml_backend_meta_buffer_context::nbtc];
++    memcpy(sig, tensor, sizeof(sig));
++    if (q4e_meta_mask) {
++        memset(sig + offsetof(ggml_tensor, data),  0, sizeof(void *));
++        memset(sig + offsetof(ggml_tensor, extra), 0, sizeof(void *));
++    }
+     auto it = buf_ctx->split_state_cache.find(key);
+-    if (it != buf_ctx->split_state_cache.end() && memcmp(it->second.second, (const char *) tensor, sizeof(it->second.second)) != 0) {
++    if (it != buf_ctx->split_state_cache.end() && memcmp(it->second.second, sig, sizeof(sig)) != 0) {
++        if (q4e_meta_stats) {
++            size_t off = 0;
++            while (off < sizeof(sig) && it->second.second[off] == sig[off]) { off++; }
++            q4e_meta_clears++;
++            if (q4e_meta_clears <= 30) {
++                fprintf(stderr, "META_SPLIT_CACHE clear #%ld at '%s' (op %d): first differing byte %zu [buffer@%zu ne@%zu op@%zu src@%zu view_src@%zu data@%zu name@%zu extra@%zu]\n",
++                    q4e_meta_clears, tensor->name, (int) tensor->op, off, offsetof(ggml_tensor, buffer), offsetof(ggml_tensor, ne), offsetof(ggml_tensor, op),
++                    offsetof(ggml_tensor, src), offsetof(ggml_tensor, view_src), offsetof(ggml_tensor, data), offsetof(ggml_tensor, name), offsetof(ggml_tensor, extra));
++            }
++        }
+         buf_ctx->split_state_cache.clear();
+         it = buf_ctx->split_state_cache.end();
+     }
+ 
+     if (it == buf_ctx->split_state_cache.end()) {
++        q4e_meta_miss++;
+         buf_ctx->split_state_cache[key].first = calculate_split_state();
+-        memcpy(buf_ctx->split_state_cache[key].second, tensor, sizeof(buf_ctx->split_state_cache[key].second));
++        memcpy(buf_ctx->split_state_cache[key].second, sig, sizeof(buf_ctx->split_state_cache[key].second));
++    } else {
++        q4e_meta_hits++;
++    }
++    if (q4e_meta_stats && ((q4e_meta_hits + q4e_meta_miss) % 50000) == 0) {
++        fprintf(stderr, "META_SPLIT_CACHE hits=%ld miss=%ld clears=%ld\n", q4e_meta_hits, q4e_meta_miss, q4e_meta_clears);
++    }
++    if (it == buf_ctx->split_state_cache.end()) {
+         if (buf_ctx->debug > 0) {
+             std::string srcs_info;
+             for (size_t i = 0; i < GGML_MAX_SRC; i++) {
+@@ -2137,7 +2175,40 @@
+             float * GGML_RESTRICT p1 = p[1];
+             float * GGML_RESTRICT p2 = p[2];
+             float * GGML_RESTRICT p3 = p[3];
+-            for (int64_t k = t_start; k < t_end; ++k) {
++            int64_t k = t_start;
++#if defined(__AVX512F__)
++            // fleet-0912-ctx 09-14: GGML_META_REDUCE_NT=1 -- the all-reduce writes the same sum into all four socket-local
++            // copies, so three of every four stores are remote and each one first pulls the line for ownership. Non-temporal
++            // stores skip that read, halving the write traffic. Same adds in the same order => bit-identical. Needs all four
++            // pointers to share alignment mod 64 (they do when the per-device buffers have the same layout); otherwise the
++            // scalar loop below runs unchanged.
++            static const bool q4e_reduce_nt = [] { const char * v = getenv("GGML_META_REDUCE_NT"); return v != nullptr && atoi(v) != 0; }();
++            if (q4e_reduce_nt) {
++                const uintptr_t a0 = (uintptr_t) p0 % 64;
++                if (a0 == (uintptr_t) p1 % 64 && a0 == (uintptr_t) p2 % 64 && a0 == (uintptr_t) p3 % 64) {
++                    // advance to the first index where every pointer is 64-byte aligned
++                    int64_t k_al = k;
++                    while (k_al < t_end && ((uintptr_t) (p0 + k_al) % 64) != 0) { k_al++; }
++                    for (; k < k_al; ++k) {
++                        const float sum = (p0[k] + p1[k]) + (p2[k] + p3[k]);
++                        p0[k] = sum; p1[k] = sum; p2[k] = sum; p3[k] = sum;
++                    }
++                    for (; k + 16 <= t_end; k += 16) {
++                        const __m512 v0 = _mm512_load_ps(p0 + k);
++                        const __m512 v1 = _mm512_load_ps(p1 + k);
++                        const __m512 v2 = _mm512_load_ps(p2 + k);
++                        const __m512 v3 = _mm512_load_ps(p3 + k);
++                        const __m512 sum = _mm512_add_ps(_mm512_add_ps(v0, v1), _mm512_add_ps(v2, v3));
++                        _mm512_stream_ps(p0 + k, sum);
++                        _mm512_stream_ps(p1 + k, sum);
++                        _mm512_stream_ps(p2 + k, sum);
++                        _mm512_stream_ps(p3 + k, sum);
++                    }
++                    _mm_sfence();   // the arrive2 barrier below must not pass the non-temporal stores
++                }
++            }
++#endif
++            for (; k < t_end; ++k) {
+                 const float sum = (p0[k] + p1[k]) + (p2[k] + p3[k]);
+                 p0[k] = sum;
+                 p1[k] = sum;
