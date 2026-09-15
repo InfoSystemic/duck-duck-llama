@@ -747,3 +747,50 @@ but about five times too large.
 cache's short-context penalty (−10% measured independently). With 48 blocks the cache's fixed bookkeeping
 exceeds what it saves. A shipping configuration must gate the cache on context length; the threading and the
 top-k fix are safe at every length.
+
+## 21. Aggregate throughput: 46.74 tok/s, and speculation should be off at concurrency
+
+Every number above this section is single-stream. Single-stream decode leaves this machine 65% bandwidth-idle
+at 34% of its byte-floor pace, dispatching 6,156 graph nodes to produce one token — a sparse MoE at batch 1
+has nothing to spend 381 GB/s on. So the aggregate question matters, and it had never been measured here.
+
+190-token prompts, 64 tokens each, `--parallel 16`, wall-clock aggregate:
+
+| concurrency | speculation on | speculation off | winner |
+|---:|---:|---:|---|
+| 1 | 16.25 | 14.25 | spec on |
+| 2 | 23.89 | 24.72 | tie |
+| 4 | 28.28 | 25.80 | spec on |
+| 8 | 34.42 | *15.92* | suspect — see below |
+| **16** | 29.57 | **46.74** | **spec off, +58%** |
+
+**Peak 46.74 tok/s aggregate at c=16 with speculation disabled — 1.92× the shipped single-stream 24.3.**
+
+Both predictions made in advance elsewhere are confirmed: the `--spec-type none`, `--parallel 16` figure
+lands at 46.74 against a predicted 45–79, and speculation stops paying at high concurrency, losing by 58% at
+c=16. The mechanism is that MTP drafting and batching are substitutes — both exist to give a dispatch-bound
+machine more tokens per graph pass, and paying for both wastes the draft's passes.
+
+### Two reading errors, recorded because each nearly became a conclusion
+
+**Comparing a prediction against the wrong arm.** The 45–79 range was first called refuted by checking it
+against the *speculation-on* column (29.57). The prediction named `--spec-type none` explicitly. Misreading a
+prediction is the same class of error as mismeasuring one.
+
+**Explaining an anomaly instead of distrusting it.** The speculation-off point at c=8 reads 15.92 — below its
+own c=4 (25.80) *and* its own c=16 (46.74). That is not a physical shape. It was briefly used as the basis
+for a mechanism ("speculation *is* batching, so the two are complementary") that the c=16 result then
+contradicted. **A datum that breaks monotonicity in both directions is a measurement fault until proven
+otherwise**, and it needs re-running before the c=8 column is used for anything.
+
+### What it changes, and what it does not
+
+Every optimisation in this document is worth 10–25% on single-stream decode. Batched serving with speculation
+off is worth **1.92×**, and it is a configuration change rather than a code change. That does not make the
+single-stream work wasted — it is what a per-request latency SLA needs — but the *machine's* capability is an
+aggregate number, and this is the first measurement of it.
+
+It costs per-stream latency heavily: 20.32 → 3.76 tok/s per stream between c=1 and c=16. So this is the right
+posture for several agents sharing a box and the wrong one for one agent holding a 256K window. The sweep is
+also at 190-token context; at 256K each slot needs ~8.8 GB of KV, and the aggregate behaviour there is a
+different, unmeasured question.
