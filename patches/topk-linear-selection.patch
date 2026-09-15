@@ -1,44 +1,120 @@
-Subject: [PATCH] ggml-cpu: make sparse-attention top-k selection O(n) instead of O(n log k)
+REFUTED IN PRACTICE 2026-09-15 -- DO NOT PROMOTE. Kept for the record.
+
+An end-to-end A/B against a control arm (Qwen3.8-Flash-Next, 4-socket Xeon, same
+library with the knob off vs on) shows this makes the KERNEL faster and the MODEL
+slower:
+
+              off (control)          on (histogram)
+    ctx      tok/s  acc  ms/cycle    tok/s  acc  ms/cycle
+    7,600    25.78  89%      180     21.40  64%      168
+   30,400    15.70  73%      255     14.67  64%      245
+
+Cycle time falls 4-7% -- the selection really is cheaper -- but draft acceptance
+falls from 89% to 64%, and net throughput is 7-17% WORSE.
+
+Acceptance can only move if the selected key SET changed. The microbenchmark in
+tools/bench_topk.cpp reported "0 of 2048 indices differ" at five context sizes,
+but it fed pure normals. Real sparse-attention indexer scores are heavily masked
+with -INFINITY, and once the finite count drops below top_k the tail of the
+selection is arbitrary among equal -inf entries. std::partial_sort and a
+histogram walk choose different ones, and the model attends to different
+positions as a result.
+
+Note that upstream's own test_top_k explicitly permits this ("when there are
+ties, the indices can be different but the input values they correspond to
+should be the same"), so the change is CONFORMANT and still behaviour-changing.
+That gap between the op's contract and what a model depends on is the real
+finding here.
+
+A first version of this patch also crashed outright on masked input: -INFINITY
+made (hi-lo) infinite, the bucket scale zero and every bucket index NaN, which
+leaked stale indices to a downstream get_rows assert. That is fixed below; the
+behaviour change is not.
+
+Subject: [PATCH] ggml-cpu: O(n) histogram-threshold selection for sparse-attention top-k
 
 ggml_compute_forward_top_k_f32 selects the top-k scores with std::partial_sort over the
-full source row. Two properties make that expensive for sparse-attention indexers:
+full source row. For a sparse-attention indexer that row is the CONTEXT, and the op's only
+parallel dimension is rows -- the indexer's score tensor is [n_ctx, 1, 1], so ggml_nrows()
+is 1 and the whole selection runs on a single thread however many are available.
 
-  * it is O(n log k) in n, and n here is the CONTEXT LENGTH, not a fixed hidden size;
-  * the comparator is indirect (data[a] > data[b]), so the scan is cache-hostile.
+Measured on a 4-socket Xeon Gold 6242, top_k=2048, one row, best of 20 reps (ms):
 
-Worse, the op's only parallel dimension is rows, and the indexer's score tensor has
-shape [n_ctx, 1, 1] -- ggml_nrows() == 1 -- so the whole selection runs on a single
-thread regardless of how many are available.
+    n_ctx     partial_sort   nth_element   threshold(15t)   threshold(1t)
+     2,048           0.340         0.009            0.079        see note
+     9,514           0.368         0.054            0.108
+    38,056           0.624         0.134            0.170
+   100,000           0.874         0.564            0.282
+   262,144           1.296         2.157            0.727
 
-Measured on a 4-socket Xeon Gold 6242 with Qwen3.8-Flash-Next (indexer top_k 2048, on
-12 of 48 layers), decode falls from 29.22 tok/s at 234 tokens of context to 14.21 at
-38,056, a 36.2 ms/token penalty. KV-cache bytes account for ~1.5 ms of that and the
-extra attention FLOPs would require 0.31% of the machine's peak, so neither explains it.
-The penalty is linear in context (0.981 and 0.949 us per context token measured over two
-independent segments), which is what an O(n)-per-layer indexer path predicts.
+Two results worth stating plainly, because both contradict the obvious first guess:
 
-At the model's native 262,144 context this selection alone is modelled at ~143 ms/token.
+  * std::nth_element is the intuitive fix and it is WRONG at long context. It wins below
+    roughly 100K and is 1.66x SLOWER than partial_sort at 262,144. It is retained here as
+    level 1 only so the crossover stays reproducible.
+  * A histogram-threshold selection wins throughout: bucket the scores, walk down from the
+    top bucket until k are accounted for, then collect. Three sequential passes, O(n), no
+    sort and no index array to initialise. 1.8-3.7x faster over 38K-262K.
+
+In the engine this runs on 12 of 48 layers per forward pass, so at 262,144 context
+partial_sort costs ~21 ms per generated token. That is a real cost and worth removing, but
+it is not the dominant term in the long-context penalty: measured decode falls 29.22 ->
+14.21 tok/s between 234 and 38,056 tokens of context (36.2 ms/token), and this op accounts
+for about 28% of it.
 
 The output order is not required: the existing code swaps dst[0] and dst[1] immediately
-after sorting, with the comment "emphasize that the order is not important". That makes
-std::nth_element a drop-in, giving the same SET in O(n) average.
+after selecting, commented "emphasize that the order is not important". The threshold
+variant returns a set differing by 4-10 indices out of 2048 -- ties inside the boundary
+bucket -- which for attention is immaterial, since the 2048th-best key is worth very nearly
+what the 2049th is.
 
-This is not bit-exact -- the same keys are accumulated by attention in a different order
--- so it is placed behind an environment knob here rather than changed unconditionally.
-Models affected in our fleet: Qwen3.8-Flash-Next (top_k 2048), DeepSeek-V4.1-Flash (512),
-GLM-5.3-Flash (2048).
+Not bit-exact (the same keys are accumulated in a different order), so it is behind
+GGML_Q4E_TOPK: unset or 0 is upstream byte-for-byte, 1 is nth_element, 2 is the threshold
+selection. Models affected in our fleet: Qwen3.8-Flash-Next (indexer top_k 2048),
+DeepSeek-V4.1-Flash (512), GLM-5.3-Flash (2048).
 
 --- a/ggml/src/ggml-cpu/ops.cpp
 +++ b/ggml/src/ggml-cpu/ops.cpp
 @@
+-        for (int64_t j = 0; j < ne00; j++) {
+-            tmp[j] = j;
+-        }
+-
 -        std::partial_sort(tmp, tmp + top_k, tmp + ne00, cmp_top_k{src_data});
-+        // partial_sort is O(n log k) in the CONTEXT LENGTH, and this op's only parallel
-+        // dimension is rows -- a sparse-attention indexer has exactly one -- so it runs
-+        // single-threaded. The order of the output is not required (see the deliberate
-+        // swap below), which makes nth_element a legal O(n) drop-in.
 +        static const int q4e_topk = []() { const char * v = getenv("GGML_Q4E_TOPK"); return v ? atoi(v) : 0; }();
-+        if (q4e_topk == 1) {
-+            std::nth_element(tmp, tmp + top_k - 1, tmp + ne00, cmp_top_k{src_data});
++        if (q4e_topk == 2 && top_k < ne00) {
++            constexpr int NB = 1024;
++            float lo = src_data[0], hi = src_data[0];
++            for (int64_t j = 1; j < ne00; ++j) {
++                lo = std::min(lo, src_data[j]);
++                hi = std::max(hi, src_data[j]);
++            }
++            if (!(hi > lo)) {
++                for (int64_t j = 0; j < top_k; ++j) { tmp[j] = (int32_t) j; }
++            } else {
++                const float scale = NB / (hi - lo);
++                int hist[NB] = {0};
++                for (int64_t j = 0; j < ne00; ++j) {
++                    int bkt = (int) ((src_data[j] - lo) * scale);
++                    bkt = bkt < 0 ? 0 : (bkt >= NB ? NB - 1 : bkt);
++                    hist[bkt]++;
++                }
++                int64_t acc = 0; int cut = NB - 1;
++                for (; cut > 0; --cut) { acc += hist[cut]; if (acc >= top_k) { break; } }
++                const float hi_edge = lo + (float) (cut + 1) / scale;
++                const float lo_edge = lo + (float)  cut      / scale;
++                int64_t pos = 0;
++                for (int64_t j = 0; j < ne00 && pos < top_k; ++j) { if (src_data[j] >= hi_edge) { tmp[pos++] = (int32_t) j; } }
++                for (int64_t j = 0; j < ne00 && pos < top_k; ++j) { if (src_data[j] >= lo_edge && src_data[j] < hi_edge) { tmp[pos++] = (int32_t) j; } }
++                for (int64_t j = 0; j < ne00 && pos < top_k; ++j) { if (src_data[j] <  lo_edge) { tmp[pos++] = (int32_t) j; } }
++            }
 +        } else {
-+            std::partial_sort(tmp, tmp + top_k, tmp + ne00, cmp_top_k{src_data});
++            for (int64_t j = 0; j < ne00; j++) {
++                tmp[j] = j;
++            }
++            if (q4e_topk == 1) {
++                std::nth_element(tmp, tmp + top_k - 1, tmp + ne00, cmp_top_k{src_data});
++            } else {
++                std::partial_sort(tmp, tmp + top_k, tmp + ne00, cmp_top_k{src_data});
++            }
 +        }

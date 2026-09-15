@@ -16,6 +16,7 @@
 #include <cstring>
 #include <iterator>
 #include <numeric>
+#include <limits>
 #include <random>
 #include <vector>
 #include <chrono>
@@ -78,6 +79,67 @@ static void topk_threshold(const float * s, int n, int k, std::vector<int32_t> &
     (void)n_above;
 }
 
+// 4. the same threshold selection with NO threading. The parallel version above parallelises only the min/max and
+//    histogram passes -- its collection loop is serial -- so most of its win may come from the algorithm rather than
+//    the threads. That matters a lot for shipping: a single-threaded version drops straight into a ggml op, whereas a
+//    parallel one needs intra-op barriers because the indexer's score tensor has exactly one row.
+static void topk_threshold_st(const float * s, int n, int k, std::vector<int32_t> & out) {
+    constexpr int NB = 1024;
+    float lo = s[0], hi = s[0];
+    for (int i = 1; i < n; ++i) { lo = std::min(lo, s[i]); hi = std::max(hi, s[i]); }
+    if (!(hi > lo)) { for (int i = 0; i < k; ++i) out[i] = i; return; }
+    const float scale = NB / (hi - lo);
+    int hist[NB] = {0};
+    for (int i = 0; i < n; ++i) {
+        int bkt = (int)((s[i] - lo) * scale); bkt = bkt < 0 ? 0 : (bkt >= NB ? NB - 1 : bkt);
+        hist[bkt]++;
+    }
+    long acc = 0; int cut = NB - 1;
+    for (; cut > 0; --cut) { acc += hist[cut]; if (acc >= k) break; }
+    const float hi_edge = lo + (float)(cut + 1) / scale;   // strictly above the cut bucket: definitely selected
+    const float lo_edge = lo + (float)cut / scale;
+    int pos = 0;
+    for (int i = 0; i < n && pos < k; ++i) if (s[i] >= hi_edge) out[pos++] = i;
+    for (int i = 0; i < n && pos < k; ++i) if (s[i] >= lo_edge && s[i] < hi_edge) out[pos++] = i;
+    for (int i = 0; i < n && pos < k; ++i) if (s[i] <  lo_edge) out[pos++] = i;   // degenerate: k exceeds what qualifies
+}
+
+// 5. EXACT histogram selection. Variant 4 approximates: it fills the last slots from the boundary bucket in INDEX
+//    order rather than by score, so 4-10 of 2048 indices differ from partial_sort. That is harmless for attention but
+//    not acceptable upstream, where a kernel should return what it returned before. The fix costs one extra pass over
+//    a single bucket: everything strictly above the cut bucket is unambiguously in, and the remaining `need` slots are
+//    chosen from that bucket's members by score. The bucket holds ~n/NB elements, so the sub-selection is trivial --
+//    and in the degenerate case where scores cluster into one bucket this simply degrades to the original cost.
+static void topk_threshold_exact(const float * s, int n, int k, std::vector<int32_t> & out,
+                                 std::vector<int32_t> & scratch) {
+    constexpr int NB = 1024;
+    float lo = s[0], hi = s[0];
+    for (int i = 1; i < n; ++i) { lo = std::min(lo, s[i]); hi = std::max(hi, s[i]); }
+    if (!(hi > lo)) { for (int i = 0; i < k; ++i) out[i] = i; return; }
+    const float scale = NB / (hi - lo);
+    int hist[NB] = {0};
+    for (int i = 0; i < n; ++i) {
+        int bkt = (int)((s[i] - lo) * scale); bkt = bkt < 0 ? 0 : (bkt >= NB ? NB - 1 : bkt);
+        hist[bkt]++;
+    }
+    long acc = 0; int cut = NB - 1;
+    for (; cut > 0; --cut) { acc += hist[cut]; if (acc >= k) break; }
+    const long n_above = acc - hist[cut];          // strictly above the cut bucket: unambiguously selected
+    const long need    = k - n_above;              // still to choose, from inside the cut bucket
+    const float hi_edge = lo + (float)(cut + 1) / scale;
+    const float lo_edge = lo + (float) cut      / scale;
+    int pos = 0;
+    for (int i = 0; i < n; ++i) if (s[i] >= hi_edge) out[pos++] = i;
+    if (need > 0) {
+        scratch.clear();
+        for (int i = 0; i < n; ++i) if (s[i] >= lo_edge && s[i] < hi_edge) scratch.push_back(i);
+        if ((long)scratch.size() > need)
+            std::nth_element(scratch.begin(), scratch.begin() + need - 1, scratch.end(), cmp_top_k{s});
+        for (long j = 0; j < need && j < (long)scratch.size(); ++j) out[pos++] = scratch[j];
+    }
+    while (pos < k) out[pos++] = 0;                // only reachable if k > n
+}
+
 int main(int argc, char ** argv) {
     const int k = argc > 1 ? atoi(argv[1]) : 2048;
     const int reps = argc > 2 ? atoi(argv[2]) : 20;
@@ -86,29 +148,39 @@ int main(int argc, char ** argv) {
     nth = omp_get_max_threads(); if (nth > 15) nth = 15;   // one socket's worth, which is what a ggml op gets
 #endif
     printf("top_k=%d, %d reps, %d threads for the parallel variant\n\n", k, reps, nth);
-    printf("%10s %12s %12s %12s   %s\n", "n_ctx", "partial_sort", "nth_element", "threshold", "set match vs partial_sort");
+    printf("%10s %12s %12s %12s %12s %12s   %s\n", "n_ctx", "partial_sort", "nth_element", "thr(par)",
+           "thr(1thr)", "thr(EXACT)", "indices differing vs partial_sort");
     std::mt19937 rng(1234);
     for (int n : {256, 2048, 9514, 38056, 100000, 262144}) {
         if (n < k) continue;
         std::vector<float> s(n);
         std::normal_distribution<float> nd(0.f, 1.f);
         for (auto & x : s) x = nd(rng);
-        std::vector<int32_t> idx(n), a(k), b(k), c(k);
-        double t1 = 1e18, t2 = 1e18, t3 = 1e18;
+        // 09-14: the first version used pure normals and MISSED a crash. Real indexer scores carry an attention
+        // mask, so a large fraction are -INFINITY. That made (hi-lo) infinite, the bucket scale zero and every
+        // bucket index NaN, which corrupted the selection and leaked stale indices downstream. Mask half of them.
+        {
+            std::uniform_real_distribution<float> u(0.f, 1.f);
+            for (auto & x : s) if (u(rng) < 0.5f) x = -INFINITY;
+        }
+        std::vector<int32_t> idx(n), a(k), b(k), c(k), e(k), f(k), scratch;
+        double t1 = 1e18, t2 = 1e18, t3 = 1e18, t4 = 1e18, t5 = 1e18;
         for (int r = 0; r < reps; ++r) { auto t = clk::now(); topk_partial_sort(s.data(), n, k, idx, a); t1 = std::min(t1, ms_since(t)); }
         for (int r = 0; r < reps; ++r) { auto t = clk::now(); topk_nth_element (s.data(), n, k, idx, b); t2 = std::min(t2, ms_since(t)); }
         for (int r = 0; r < reps; ++r) { auto t = clk::now(); topk_threshold   (s.data(), n, k, c, nth);  t3 = std::min(t3, ms_since(t)); }
+        for (int r = 0; r < reps; ++r) { auto t = clk::now(); topk_threshold_st(s.data(), n, k, e);       t4 = std::min(t4, ms_since(t)); }
+        for (int r = 0; r < reps; ++r) { auto t = clk::now(); topk_threshold_exact(s.data(), n, k, f, scratch); t5 = std::min(t5, ms_since(t)); }
         // Report HOW MANY indices differ, not just whether any do. The threshold variant resolves ties inside one
         // histogram bucket arbitrarily, so a handful of boundary differences is expected and harmless for attention
         // (the 2048th-best key is worth almost exactly what the 2049th is). Exact equality would call that broken.
         auto sorted = [](std::vector<int32_t> v){ std::sort(v.begin(), v.end()); return v; };
-        auto A = sorted(a), B = sorted(b), C = sorted(c);
+        auto A = sorted(a), B = sorted(b), C = sorted(c), E = sorted(e), F = sorted(f);
         auto diff = [&](const std::vector<int32_t> & X){
             std::vector<int32_t> d;
             std::set_symmetric_difference(A.begin(), A.end(), X.begin(), X.end(), std::back_inserter(d));
             return (int)d.size() / 2; };
-        printf("%10d %12.3f %12.3f %12.3f   nth %4d/%d differ, thr %4d/%d differ\n",
-               n, t1, t2, t3, diff(B), k, diff(C), k);
+        printf("%10d %12.3f %12.3f %12.3f %12.3f %12.3f   nth %d, thr %d, thr1 %d, EXACT %d (of %d)\n",
+               n, t1, t2, t3, t4, t5, diff(B), diff(C), diff(E), diff(F), k);
     }
     printf("\nThe engine runs this 12x per forward pass (one per full-attention layer), single-threaded.\n");
     return 0;
