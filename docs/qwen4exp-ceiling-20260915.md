@@ -699,3 +699,51 @@ accordingly. This one did not, and it is the one that needed it: two minutes of 
 the test could not resolve its own hypothesis and should run at 120K+, where `k/n` falls to 3% and the effect
 roughly triples. **An A/B whose expected effect is below its noise floor is not a weak result; it is not a
 result.**
+
+## 20. Everything combined: +25.2%, byte-identical
+
+Four changes, each individually gated and individually measured, run together against the same library set
+with every flag off:
+
+| arm @28,880 ctx | tok/s | acceptance | tokens/cycle | greedy hash |
+|---|---:|---:|---:|---|
+| all off | 16.20 | 76% | 4.13 | `13b7ea22` |
+| **all on** | **20.29** | **82%** | **4.36** | `13b7ea22` |
+
+**+25.2%, with byte-identical output.** The four:
+
+| change | library | alone |
+|---|---|---|
+| row-parallel `GET_ROWS`/`SET_ROWS` | libggml-cpu | +12.8% |
+| exact top-k un-gated from the `-inf` mask | libggml-cpu | below noise floor, unresolved |
+| pooled-key cache + f16 pooled keys | libllama | +13.8% |
+| trailing-subgraph fix | libggml-base | enables the cache to build at all |
+
+All three patched libraries were confirmed *mapped* by reading `/proc/<pid>/maps`, not merely requested via
+the environment — two of the four patches print no banner, so a silent fallback would have read as "these do
+not stack".
+
+### The prediction was wrong, and in the more interesting direction
+
+Recorded before the run: **18.8–19.8**, on the argument that the cache *subsumes* the threading because it
+eliminates the very gather the threading accelerates. The naive multiplicative estimate (21.21) was
+explicitly dismissed as double-counting.
+
+Measured 20.29 — **4.3% below the estimate called wrong**, and above the predicted range. The cache does not
+remove all gathers: it still fetches `r × n_dirty` rows every token, the ~78 non-indexer `GET_ROWS` nodes are
+untouched, and the cache's own `set_rows` write benefits from the threading. The overlap correction was real
+but about five times too large.
+
+### What it means at 256K, and what it costs
+
+| basis | 256K tok/s |
+|---|---:|
+| measured | **3.40** |
+| flat 1.252× from 28,880 | 4.26 |
+| component-wise, scaling with context | 4.72 |
+| **honest range** | **4.3 – 5.0** |
+
+**The combined configuration is not uniformly better.** At 190 tokens it *loses* 7.7%, reproducing the
+cache's short-context penalty (−10% measured independently). With 48 blocks the cache's fixed bookkeeping
+exceeds what it saves. A shipping configuration must gate the cache on context length; the threading and the
+top-k fix are safe at every length.
