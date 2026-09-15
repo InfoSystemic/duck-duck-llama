@@ -15,6 +15,9 @@ it can be audited, reproduced, and rebased deliberately.
 | [`llama.cpp-b249-cpu-numa.patch`](llama.cpp-b249-cpu-numa.patch) | `3173a56471c1753650cd806694145ffd6dcace67` (build 249) | Linux per-socket CPU devices, asynchronous execution, Meta fixes, direct F32 collective |
 | [`llama.cpp-b249-qwen4exp-mtp.patch`](llama.cpp-b249-qwen4exp-mtp.patch) | `3173a56471c1753650cd806694145ffd6dcace67` (build 249) | Qwen3.8/Qwen4 experimental conversion, architecture, and detached MTP-sidecar support |
 | [`llama.cpp-a302733-glm-sr950.patch`](llama.cpp-a302733-glm-sr950.patch) | `a30273376ef669023334fc20ad02ae4ed8196a65` | Integrated CPU-NUMA, GLM tensor-parallel/speculative support, compact-quant and x86 kernel work, tests |
+| [`numa-reduce-nontemporal-stores.patch`](numa-reduce-nontemporal-stores.patch) | q4e goal engine (2026-09-04 line) | Non-temporal stores for the three remote copies written by the cross-socket all-reduce. Bit-identical; +5-10% decode and +11-13% prefill on Qwen3.8-Flash-Next, +2-3% on GLM-5.3-Flash |
+| [`kv-seq-rm-bounded-scan.patch`](kv-seq-rm-bounded-scan.patch) | q4e goal engine (2026-09-04 line) | `llama_kv_cache::seq_rm` scans the used prefix instead of all cells; the full scan ran once per slot per speculative rollback at 256K context |
+| [`qwen4exp-ssm-mirror-type-independent.patch`](qwen4exp-ssm-mirror-type-independent.patch) | q4e goal engine (2026-09-04 line) | `GGML_Q4E_SSM_MIRROR=1`: mirror the small recurrent projections so the tensor-split rule does not depend on their quantisation type |
 
 The two build-249 patches may be applied together. The GLM integration is a
 separate source line and must not be stacked on them. Verify downloads against

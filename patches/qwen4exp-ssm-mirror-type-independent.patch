@@ -1,0 +1,26 @@
+--- qwen-shexp/llama-model.cpp	2026-09-13 03:09:53.700802085 -0600
++++ qwen-ssmfix/llama-model.cpp	2026-09-14 17:53:46.835150326 -0600
+@@ -535,6 +535,23 @@
+                 // while the tensors they combine with get split -- which shows up as
+                 // "cannot infer split for op=ADD srcs=[alpha-0 axis=0, ssm_dt.bias axis=10]"
+                 static const std::regex f_ssm("blk\\.\\d*\\.(ssm_[a-z0-9_.]*|attn_qkv\\.weight|attn_gate\\.weight)");
++                // fleet-0912-ctx 09-14: GGML_Q4E_SSM_MIRROR=1 -- keep the SMALL recurrent projections mirrored.
++                // The split axis the generic rules infer depends on tensor TYPE, not just name. In UD-Q6_K_XL the
++                // ssm_alpha/ssm_beta projections are F32 and are split like ssm_dt.bias, so the ADD combining them agrees.
++                // In the Q4_K_M build they are Q4_K: the generic rule cannot split them and mirrors them, while
++                // ssm_dt.bias (F32 [48]) is still split, and the graph aborts with
++                //   "cannot infer split for op=ADD srcs=[alpha-0 axis=10, blk.0.ssm_dt.bias axis=0]"
++                // -- the mirror image of the failure the f_ssm regex above was widened to fix. These tensors are tiny
++                // (2560x48 and [48]), so mirroring the whole small family costs almost nothing per token and makes the
++                // rule type-independent. Off by default: UD-Q6_K_XL does not need it.
++                static const bool q4e_ssm_mirror = []() {
++                    const char * v = getenv("GGML_Q4E_SSM_MIRROR");
++                    return v != nullptr && atoi(v) != 0;
++                }();
++                static const std::regex f_ssm_small("blk\\.\\d*\\.ssm_(alpha|beta|dt|a|norm)(\\.(weight|bias))?");
++                if (q4e_ssm_mirror && std::regex_match(tensor_name, f_ssm_small)) {
++                    return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_MIRRORED);
++                }
+                 static const std::regex f_cache("cache_(r|s)_l\\d*");
+                 if (std::regex_match(tensor_name, f_exps)) {
+                     return get_tensor_config_impl(GGML_BACKEND_SPLIT_AXIS_1, "ffn_down.weight", "ffn_down_exps.weight");
