@@ -877,3 +877,57 @@ had never been measured.
 The general lesson is that "the throughput of this machine" is not one number. It is a configuration choice
 whose optimum inverts between short and long context, and quoting either endpoint without the context length
 attached is how a benchmark misleads.
+
+## 24. Summary — what was measured, attributed precisely
+
+Every figure below is from this machine, with a named control, and greedy output hashed on every arm.
+
+### Single-stream decode, Qwen3.8-Flash-Next
+
+| change | where | gain, alone | output |
+|---|---|---:|---|
+| row-parallel `GET_ROWS`/`SET_ROWS` | libggml-cpu `ggml-cpu.c` | **+12.8%** | byte-identical |
+| f16 pooled indexer keys | libllama `qwen4exp.cpp` | **+4.7%** | byte-identical, acceptance 76→81% |
+| pooled-key indexer cache | libllama `qwen4exp.cpp` | **+13.8%** | byte-identical, acceptance 76→82% |
+| exact top-k un-gated from the `-inf` mask | libggml-cpu `ops.cpp` | **unresolved** | byte-identical |
+| **all four together** | — | **+25.2%** | **byte-identical** |
+
+Measured at 28,880 tokens against a control mean of 16.20–16.35 established over eight production runs
+(spread 3.4%). **The +25.2% belongs to the combination**; attributing it to the cache alone overstates that
+change by 1.8×. The top-k fix is carried because it is free and exact, **not** because it is proven: its
+expected effect (~0.8% at this context, where `k/n` is 28%) sits below the noise floor, so the A/B could not
+resolve it.
+
+**The cache must be gated on context length.** At 190 tokens it *loses* 8–10%: with 48 blocks its fixed
+bookkeeping exceeds the saving. The threading and the top-k fix are safe at every length.
+
+### Context, measured not extrapolated
+
+| context | decode | note |
+|---:|---:|---|
+| 190 | 24.3–24.6 | best figure ever recorded on this machine |
+| 28,880 | 16.2–16.7 | eight-run control band |
+| 121,600 | 6.41 | |
+| **237,500** | **3.40** | 2.48 h to prefill; 8.16 GB slot |
+
+`raw(ctx) = 53.5 + 2.679e-3·ctx` ms/token reproduces the 237,500 point within 6%, eight times outside its
+fitting range. Prefill `= 10.58 + 2.271e-4·position` reproduces measured fills at 30,400 / 114,000 / 121,600
+within 8%.
+
+### Serving posture
+
+| context regime | best configuration | throughput |
+|---|---|---|
+| short (~190), several agents | c=16, **speculation off** | **46.74 tok/s aggregate** |
+| long (7,600+), one agent | **c=1, speculation on** | 16.16 tok/s |
+
+Speculation and concurrency are substitutes; the fixed share of a token (99.1% → 72.4% → 40.9% → **7.8%** at
+256K) decides which one pays. At 256K, concurrency is a tax and speculation is worth more than anywhere else.
+
+### Refuted here
+
+Full attention instead of the sparse indexer (**2.2× slower**, acceptance 76→37%); the glue megakernel
+(<6 ms of 55.4); the F32 router requant (noise); QKV fusion (**already fused by the converter**); draft depth
+6/8; thread counts 8/12/30 and hyperthreading; slot-restore as a prefill shortcut (loads in 5.2 s, is not
+reused); and my own "18× indexer-to-attention ratio", which compared an optimisation against the cost of the
+thing it had already optimised.
