@@ -76,3 +76,30 @@ Mainline llama.cpp does not do multi-socket tensor parallelism at all. The NUMA
 work being discussed upstream **mirrors the whole model per node**, doubling memory
 and removing the reduction rather than optimising it. This change only exists for
 engines that split tensors across sockets and pay for the reduce.
+
+---
+
+## A failed hypothesis, kept here because the control is the lesson
+
+A third patch was briefly included in this branch and has been removed. A Q4_K_M
+build of the same architecture aborted at graph build:
+
+```
+cannot infer split for op=ADD srcs=[alpha-0 axis=10(MIRRORED), ssm_dt.bias axis=0(SPLIT)]
+```
+
+because that file quantises `ssm_alpha`/`ssm_beta` where the Q6_K build keeps them
+F32, and the generic splitter's inferred axis depends on tensor **type**, not only
+name. The proposed fix mirrored the whole small recurrent family so the rule would
+be type-independent.
+
+It does not work, and the arm that proved it was the control: the **existing,
+working Q6_K model** run through the same library with the rule enabled failed at
+the same new assert as the Q4 file (`src_ss[3].axis == SPLIT_AXIS_1`). So the rule
+does not reconcile the inconsistency, it relocates it — something downstream
+requires one of those tensors split on a specific axis.
+
+Two arms would have shown a fix that was not one: rule-off fails at the original
+assert, rule-on gets further. Only the third arm, the model already known to work,
+distinguishes "repairs the new file" from "breaks the graph for everything". Any
+split-rule change should be run against a model that currently loads, every time.
