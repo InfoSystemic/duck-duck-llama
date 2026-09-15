@@ -345,9 +345,24 @@ A context that costs 2.48 hours to build serialises to 8.16 GB — 33.5 KB per t
     POST /slots/0?action=save     {"filename": "f16-250k.bin"}
     POST /slots/0?action=restore  {"filename": "f16-250k.bin"}
 
-For any fixed long prefix — a codebase, a corpus, a document set — the 2.48 h is paid once and every later
-session restores it. That is the difference between 256K being a benchmark number and being usable, and it
-requires no kernel work, no patch, and no quality tradeoff.
+The intent is that for any fixed long prefix — a codebase, a corpus, a document set — the 2.48 h is paid once
+and every later session restores it.
+
+> **Correction (tested, 08:48).** The artifact **loads** but was **not usable**, so this claim is withdrawn
+> pending a fix. Restore itself works exactly as advertised: 5.2 s, `n_restored: 237595`, 1.56 GB/s off disk,
+> and the handler does repopulate the prefix state (`server-context.cpp:2613`,
+> `slot->prompt.tokens = std::move(restored)`). But a completion that resent the original prompt with
+> `cache_prompt` **never returned in 100 minutes** — roughly two thirds of a cold 237K prefill, so the server
+> was rebuilding from scratch rather than reusing what had just been loaded.
+>
+> The leading hypothesis is that `llama_state_seq_load_file(ctx_tgt, ...)` restores the **target** context
+> only, while speculative decoding also needs draft-side state the snapshot never captured. That predicts the
+> restore works with speculation disabled and fails with it on — a cheap, decisive test, now queued. Two
+> alternatives are not yet excluded: a prefix-comparison mismatch (the slot holds prompt+generated, 237,595,
+> against the 237,500 resent), or a tokenisation difference at the head of the prompt.
+>
+> Until that reports, a 250K snapshot is an 8.16 GB file that loads in five seconds and saves nothing. The
+> save/restore *mechanism* is sound; whether it delivers a usable context is unproven.
 
 Two operational notes. The server builds the path as `slot_save_path + filename`, a plain concatenation with
 no separator, so the path argument **must** carry a trailing slash or the file lands next to the directory
