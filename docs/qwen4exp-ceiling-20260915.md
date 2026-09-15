@@ -243,3 +243,59 @@ that died here.
 measured figure is 24.61 (15 threads/socket, 190 tokens). A 30 tok/s target at 256K therefore requires beating
 the current short-context number by 22% *and* removing essentially all context scaling. Those are two
 independent problems, and only the second currently has a designed fix.
+
+## 11. The sparse attention is a net loss on this machine, and the loss grows with context
+
+This is the conclusion the rest of the document has been circling.
+
+A sparse-attention indexer exists to make attention cheap: score every block of the context, select the top
+`k`, attend only to those. On this hardware the selecting costs vastly more than the skipping saves.
+
+Of the 87.2 ms/token of traced growth between 200 and 32,000 tokens of context:
+
+| | ms | share |
+|---|---:|---:|
+| `GET_ROWS` — gather every cached indexer key | 35.1 | 40% |
+| scoring `mul_mat` — queries against every block | ~25.7 | 29% |
+| `ROPE` — re-rotate every block summary | 14.7 | 17% |
+| `TOP_K` — select 2048 of n_blocks | 7.8 | 9% |
+| **the indexer, total** | **83.3** | **95.5%** |
+| `FLASH_ATTN_EXT` — the attention itself | 3.9 | 4.5% |
+
+**The machinery that decides what to attend to costs 21x the attention it saves.**
+
+And the asymmetry compounds in the worst possible direction:
+
+- **Attention cost is capped.** `top_k = 2048` blocks is 8,192 positions whether the context is 32K or 256K,
+  so the attention term stops growing past ~32K.
+- **The indexer's cost is linear in context.** It re-derives every block summary on every token.
+
+So the longer the context — precisely the regime a 256K model exists for — the worse the trade becomes. By
+the fitted raw-decode curve (`53.5 + 2.679e-3·ctx` ms/token, which reproduces the measured 121,600 point
+within 10%), the context-dependent term at 262,144 is **702 ms/token**, of which ~670 ms is indexer.
+
+What does that 670 ms buy? Avoiding a full read of the KV cache, which is:
+
+    12 attention layers × 262,144 positions × 2 kv-heads × 256 dims × 2 bytes × 2 (K and V) = 6.44 GB/token
+
+**17 ms** at the measured 381 GB/s aggregate, or **~124 ms** at the much poorer effective rate
+`FLASH_ATTN_EXT` achieves today. Either end of that range is far below 670 ms.
+
+**This is not a defect in the model.** On the hardware it was designed for, both premises hold: a GPU has the
+bandwidth to make attention the bottleneck, and enough parallelism to make the indexer nearly free. On a
+4-socket CPU with 381 GB/s, bandwidth is scarce but a long serial chain of small ops is *expensive*. Both
+premises invert, and the optimisation inverts with them.
+
+The test is one line — pass the plain causal mask to the attention call, which makes the entire indexer chain
+unreachable so the graph never builds it. The gate is deliberately **not** speed: full attention is a superset
+of what the indexer selects, but the model trained with the sparse pattern, so the experiment plants a fact at
+25% depth of a long context and asks for it back. Faster *and* retrieves it means the sparsity is a net loss
+here. Faster but *misses* it means the sparsity is load-bearing and the idea is dead.
+
+### The pattern across thirteen refuted hypotheses
+
+Everything that has failed here aimed at **arithmetic** or **bytes**: attention FLOPs, top-k selection cost,
+`nth_element`, kernel fusion, NUMA placement, the elementwise megakernel, the F32 router requant (tested and
+noise — "overhead-bound, not byte-bound"), expert requantisation, draft depth, thread count, hyperthreading.
+This system is bound by neither. The only two ideas that have survived scrutiny attack **the amount of work
+performed per token at length** — which is the single axis that has ever moved a number.
