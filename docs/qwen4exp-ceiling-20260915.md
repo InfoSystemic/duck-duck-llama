@@ -610,3 +610,51 @@ verified and this one cannot.
 This was surfaced only because the lineage gate refused the build. The same gate caught two earlier
 wrong-lineage builds in this project. A private-library workflow without one produces A/B results that are
 silently about more than the change under test.
+
+## 18. Unblocking the cache: a lost build recipe and a two-line scheduler bug
+
+Section 17 reported the pooled-key cache as blocked, with instrumentation impossible because production's
+`libggml-base` could not be reproduced. Both obstacles turned out to be tractable, and the second is a real
+defect rather than a local quirk.
+
+### Recovering a compile recipe that no script contained
+
+Production's `libggml-base` (md5 `1ad65995`) comes from the `build-L6`/`build-L8` lineage, and **no script in
+the tree compiles that object** — the link scripts link it, nothing builds it. Recovered by bisecting flags
+against the 317,592-byte target and matching the instruction mix:
+
+| flags | size | zmm | ymm | xmm | mask regs |
+|---|---:|---:|---:|---:|---:|
+| **production** | **317,592** | 318 | 147 | 1131 | **15** |
+| recorded recipe | 313,704 | — | — | — | — |
+| `-march=cascadelake` | 321,808 | 9 | 578 | 1536 | 7 |
+| `-mavx512f` | **317,592** | 318 | 147 | 1131 | **7** |
+| **`-mavx512f -mavx512bw`** | **317,592** | **318** | **147** | **1131** | **15** |
+
+`-mavx512f` alone reproduces the production **size exactly** while differing in **72,520 bytes of `.text`**.
+Size is not evidence. The mask-register count separated them, and adding `-mavx512bw` produced a
+byte-identical object whose relink reproduces the production library md5.
+
+### The scheduler bug
+
+With a gated instrumented build possible, the failure named itself in one run:
+
+    META SPLIT FAIL: i_start=5410 n_nodes=5418 -- 8 unconsumed node(s)
+      [5414] SET_ROWS  cache_idx_k_l39 (view)         view_src_op=NONE
+      [5417] VIEW      leaf_100 (view)                view_src_op=NONE   ← LAST NODE
+
+The tensor-parallel subgraph splitter closes a subgraph at a reduce point **or at the final node**, but nodes
+that are views of leaf tensors hit a `continue` *before* the final-node test. A graph whose last node is such
+a view therefore never emits its trailing subgraph, and the partition assert fires. Writing a cache and then
+viewing it produces exactly that shape.
+
+The fix emits the trailing subgraph. It is reachable **only** on the path that previously aborted, so it
+cannot alter any graph that already worked — the safest class of change available.
+
+### Why this took four failed attempts first
+
+Each earlier attempt assumed something about the system instead of measuring it: that `get_v` returned a 2D
+shape (it is 4D), that the stream stride was `nb[2]` (it is `nb[3]`), that a `ggml_cpy` into a cache view was
+schedulable, and that switching to `ggml_set_rows` — the write the KV cache itself uses — would therefore fix
+it. The fourth was the useful failure: it **refuted** the write-operation hypothesis and forced the question
+to be settled by reading the splitter rather than by guessing at it again.
