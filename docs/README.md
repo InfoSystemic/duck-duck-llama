@@ -20,3 +20,4 @@ This guide is the curated entry point to Duck Duck Llama. Each case study connec
 - **See what remains:** [roadmap](roadmap.md).
 
 The [previous repository overview](history/legacy-overview-20260912.md) is preserved for historical context. Its chronological runtime updates are superseded by the model guides when discussing current validation status.
+- [The case for CPU + multi-channel memory](case-for-cpu-multichannel.md) — capacity economics, the 4.07x NUMA scaling result, and where CPU honestly loses
