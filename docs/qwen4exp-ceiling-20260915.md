@@ -419,3 +419,39 @@ first was established by the 91 ns measurement.
 At 237,500–262,144 tokens the same 1.80x on the 288 ms gather term takes raw 756 → 628 ms and decode
 **3.40 → ~3.74 tok/s**. Real, bit-exact, stackable — and a 10% improvement to a number that needs 8x. It
 shaves the context term; it does not change its shape.
+
+## 14. Four ways a measurement looked like a result and was not
+
+This section exists because more time went into invalid measurements today than into the optimisations
+themselves, and the failures share a shape worth naming: **the harness produced a clean-looking number while
+the mechanism under test was never exercised.** None would have been caught by reading throughput alone.
+
+**1. A flag that was set and inert.** Production already exports `GGML_CPU_PARALLEL_COPY=1`. It has done
+nothing since the day it was added, because the code path it enables also requires an F32 source (the KV cache
+is f16) and `ne[0] / 4096 > 0` — integer division that is zero for every tensor narrower than 4096 elements.
+A set-but-inert flag is indistinguishable from a set-and-unhelpful one unless the code announces itself.
+Later patches print what they resolved to on startup, and an arm whose announcement is missing is discarded
+rather than interpreted.
+
+**2. A control that could not fail visibly.** A needle-retrieval gate ran the *production* arm to an empty
+string, because the request omitted `ignore_eos` and used raw-completion format against a chat-tuned model.
+Had the treatment arm also returned empty, the two would have agreed and looked like evidence. An A/B whose
+control cannot answer measures nothing.
+
+**3. A scorer that could not tell truncated from wrong.** The replacement gate scored 0/3 on the reply
+`'1. CRIMSON-MERID'` — the model had retrieved the correct passphrase and been cut off mid-word. The cause is
+that Qwen3.8-Flash-Next is a **reasoning** model: its chat template gates on
+`enable_thinking is undefined or enable_thinking is true`, so thinking is on by default and consumes the
+token budget before the answer. Fixed with `chat_template_kwargs: {enable_thinking: false}`, prefix matching
+rather than full-string, and reporting `finish_reason` and `completion_tokens` so truncation is visible.
+
+**4. A harness race that killed arms silently.** Every window restored the production server and exited 20 s
+later, while that server was still loading and not yet listening. The next window's port check found nothing
+bound, launched its own, and two servers raced for the port and 136 GB each. One arm died this way with
+nothing but a CORS banner in its log. Any arm reporting "failed to load" in a chained run must be re-run, not
+interpreted.
+
+The general lesson is the one the refuted top-k branch taught first: **validate that the test can detect the
+thing it is testing, at the operating point it will run at.** A microbenchmark on unmasked scores, a needle in
+a context short enough that sparse attention already reads 28% of it, and a scorer blind to truncation are all
+the same error.
