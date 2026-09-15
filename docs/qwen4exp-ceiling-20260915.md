@@ -256,13 +256,25 @@ Of the 87.2 ms/token of traced growth between 200 and 32,000 tokens of context:
 | | ms | share |
 |---|---:|---:|
 | `GET_ROWS` — gather every cached indexer key | 35.1 | 40% |
-| scoring `mul_mat` — queries against every block | ~25.7 | 29% |
 | `ROPE` — re-rotate every block summary | 14.7 | 17% |
 | `TOP_K` — select 2048 of n_blocks | 7.8 | 9% |
-| **the indexer, total** | **83.3** | **95.5%** |
+| `MUL_MAT` (all 585 nodes, scoring is a slice of this) | 5.9 | 7% |
+| `CONT` — the r slice-copies in the pooling loop | 5.7 | 7% |
+| `ADD` — the pooling sums | 4.0 | 5% |
+| `CUSTOM` — cross-socket reduces | 3.1 | 4% |
+| `MUL_MAT_ID` — expert FFN | 1.8 | 2% |
+| **the indexer's share of the above** | **~71** | **~82%** |
 | `FLASH_ATTN_EXT` — the attention itself | 3.9 | 4.5% |
 
-**The machinery that decides what to attend to costs 21x the attention it saves.**
+**The machinery that decides what to attend to costs ~18x the attention it saves.**
+
+> **Correction.** An earlier revision of this table listed "scoring `mul_mat` ~25.7 ms, 29%" and concluded
+> 21x. That row was a *residual* — the 87.2 ms total minus the four ops that had been named — attributed to a
+> single op that was never measured. Reading the actual op table shows `MUL_MAT` grows **+5.9 ms** across all
+> 585 of its nodes, so the scoring step is cheap; the residual was really `CONT` +5.7 and `ADD` +4.0 (the
+> slice-copies and sums inside the pooling loop) plus small growth in the reduces and the expert matmuls. The
+> conclusion is unchanged, and `GET_ROWS` is if anything a cleaner target: at 40% it is larger than the next
+> four items combined.
 
 And the asymmetry compounds in the worst possible direction:
 
