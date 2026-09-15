@@ -794,3 +794,47 @@ It costs per-stream latency heavily: 20.32 → 3.76 tok/s per stream between c=1
 posture for several agents sharing a box and the wrong one for one agent holding a 256K window. The sweep is
 also at 190-token context; at 256K each slot needs ~8.8 GB of KV, and the aggregate behaviour there is a
 different, unmeasured question.
+
+## 22. The aggregate advantage is a short-context artefact — and it inverts at length
+
+Section 21 measured 46.74 tok/s aggregate at c=16 with speculation off, 1.92× the shipped single-stream. That
+number was taken at a **190-token** context, where the context-independent part of a token is **99%** of it.
+Batching amortises exactly that part. Each additional stream, meanwhile, brings its own full-context KV scan,
+which amortises not at all.
+
+So the multiplier should track the fixed share. Predicted before the run, then measured at 7,600 tokens:
+
+| concurrency | multiplier @190 ctx | multiplier @7,600 ctx |
+|---:|---:|---:|
+| 1 | 1.00× | 1.00× |
+| 2 | 1.73× | **1.22×** |
+| 4 | 1.81× | **0.85×** |
+| 8 | — | **0.57×** |
+| 16 | 3.28× | not run |
+
+| context | fixed share of a token |
+|---:|---:|
+| 190 | 99.1% |
+| 7,600 | 72.4% |
+| 28,880 | 40.9% |
+| 237,500 | **7.8%** |
+
+At 7,600 tokens aggregate peaks at **c=2** and then falls *below* single-stream: by c=8 it is 4.74 tok/s
+against 8.34 at c=1, a 43% loss, with per-stream collapsed to 0.59 tok/s. **Concurrency stops being a
+multiplier and becomes a tax**, because the work it adds per stream is the work it cannot share.
+
+At 256K the fixed share is 7.8%. There is essentially nothing left for batching to amortise, and the trend
+across three contexts says concurrency there would be pure loss.
+
+### What this settles
+
+**For one agent holding a long context, concurrency is not a lever**, and the single-stream work in this
+document — the pooled-key cache, the GET_ROWS threading, the f16 pooled keys, +25.2% combined and
+byte-identical — was the correct target after all.
+
+**For several agents on short contexts, batching dominates everything else**: 46.74 tok/s aggregate, from a
+configuration change rather than a code change, and with speculation *disabled* because a batch and an MTP
+draft are substitutes.
+
+These are two different machines built out of the same hardware, and the choice between them is a serving
+decision rather than an optimisation one. The mistake would be to quote either number as *the* capability.
