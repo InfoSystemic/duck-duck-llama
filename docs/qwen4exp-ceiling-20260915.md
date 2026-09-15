@@ -658,3 +658,44 @@ shape (it is 4D), that the stream stride was `nb[2]` (it is `nb[3]`), that a `gg
 schedulable, and that switching to `ggml_set_rows` — the write the KV cache itself uses — would therefore fix
 it. The fourth was the useful failure: it **refuted** the write-operation hypothesis and forced the question
 to be settled by reading the splitter rather than by guessing at it again.
+
+## 19. An exact top-k fast path that never fires — and a test that could not detect its own hypothesis
+
+`GGML_CPU_ARGSORT_TOP_K=1` is enabled in production and gates an exact `partial_sort` fast path in
+`argsort_descending()`. Its guard is:
+
+```cpp
+std::all_of(data, data + n, [](float v){ return std::isfinite(v); })
+```
+
+A sparse-attention indexer masks with `-INFINITY`, which is not finite. **The guard therefore fails on every
+real indexer row and the O(n log n) full sort runs on every token**, with the optimisation nominally switched
+on. Verified directly: the env var is present in the running server's `/proc/<pid>/environ`, and the guard is
+at `ops.cpp:8691`.
+
+The repair is sound in principle — masked entries cannot enter the top-k, so ties *among them* cannot change
+the selected set. Only finite values need the tie and boundary proofs. One addition is required that the
+obvious fix omits: **NaN must still be rejected.** Comparisons on NaN are undefined and corrupt
+`partial_sort`; that is precisely how an earlier histogram-selection attempt crashed. `-inf` is safe, NaN is
+not, and the original guard conflated them. The patched guard is `none_of(isnan)` plus a check that the k-th
+value is finite.
+
+Output is byte-identical, confirming exactness.
+
+### The measurement was underpowered, and the arithmetic was available beforehand
+
+| ctx | n_blocks | k/n | `partial_sort` vs `sort` | share of graph |
+|---|---:|---:|---:|---:|
+| 28,880 | 7,220 | **28.4%** | 1.17x | **0.8%** |
+| 237,500 | 59,375 | 3.4% | 1.44x | 2.7% |
+
+`partial_sort` is O(n log k), so the saving is `log(n)/log(k)`. At 28,880 the indexer selects 2,048 of 7,220
+blocks — 28% of them — which is close to the worst case for a partial sort. Expected effect **~0.8%** against
+a **3.4%** noise floor measured across seven production control runs. The result (16.00 vs 16.14) is
+indistinguishable from zero **in either direction**, so the fix is neither confirmed nor refuted.
+
+Three earlier windows in this session carried pre-registered effect-size predictions and were sized
+accordingly. This one did not, and it is the one that needed it: two minutes of arithmetic would have shown
+the test could not resolve its own hypothesis and should run at 120K+, where `k/n` falls to 3% and the effect
+roughly triples. **An A/B whose expected effect is below its noise floor is not a weak result; it is not a
+result.**
