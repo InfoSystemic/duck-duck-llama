@@ -931,3 +931,45 @@ Full attention instead of the sparse indexer (**2.2× slower**, acceptance 76→
 6/8; thread counts 8/12/30 and hyperthreading; slot-restore as a prefill shortcut (loads in 5.2 s, is not
 reused); and my own "18× indexer-to-attention ratio", which compared an optimisation against the cost of the
 thing it had already optimised.
+
+## 25. The goal number, measured: 3.40 → 5.96 tok/s at 256K
+
+Everything above projected the 256K figure from a measurement at 28,880 tokens. This is the direct
+measurement, on an identical 250,000-token prompt (same seed, same word list, same construction) as the run
+that produced the 3.40 baseline:
+
+| configuration | decode @237,500 tokens | ms/token |
+|---|---:|---:|
+| production libraries | 3.40 | 293.9 |
+| **all four changes** | **5.96** | **167.7** |
+| | **1.75× (+75%)** | |
+
+Implied raw decode falls from 691 to 394 ms/token — **297 ms removed from every token** at full context.
+
+**The projection was 4.3–5.0 and the measurement is 5.96, so it was 22% conservative.** The reason is that
+both main components grow with context and the projection discounted them:
+
+- `GET_ROWS` is 24% of raw decode at 28,880 tokens and **42%** at 237,500, so threading it is worth
+  proportionally more at length.
+- The pooled-key cache captured 33% of its target at 28,880, where there are 7,220 blocks. Its bookkeeping is
+  fixed while its saving scales with block count, so at 59,375 blocks it captures more.
+
+This is the opposite of the usual direction for these extrapolations, and worth stating plainly: the
+single-stream work compounds *with* context, which is exactly the regime a 256K model exists for.
+
+### The honest ceiling, restated
+
+| | |
+|---|---|
+| best measured at 256K, before this work | **3.40 tok/s** |
+| best measured at 256K, after | **5.96 tok/s** |
+| best measured at any context, ever | 24.61 tok/s (190 tokens) |
+| 30 tok/s at 256K | not reached, and not reachable with anything measured here |
+
+A 256K token costs 394 ms of raw decode even after removing 297 ms of it. 93% of that remaining cost is
+context-dependent work — the indexer's scoring and selection, the attention mask, and the cross-socket
+reduces — and none of the levers tried here touch what is left. Reaching 30 tok/s needs the per-token cost
+below 78 ms, which is a different architecture rather than a better configuration.
+
+What this work does establish: **a 1.75× improvement at full context, byte-identical to production**, from
+four changes that are each small, individually gated, and independently measured.

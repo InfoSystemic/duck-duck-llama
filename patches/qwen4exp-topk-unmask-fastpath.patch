@@ -1,0 +1,41 @@
+--- qwen-hcfuse/ggml-cpu/ops.cpp	2026-09-13 16:15:49.542297890 -0600
++++ qwen-topkfix/ops.cpp	2026-09-15 12:28:15.786460555 -0600
+@@ -8687,19 +8687,27 @@
+ 
+ static void argsort_descending(const float * data, int32_t * indices, int64_t n, int64_t k) {
+     const auto cmp = cmp_argsort<GGML_SORT_ORDER_DESC>{data};
++    // fleet-0912-ctx 09-15: the original guard was all_of(isfinite) over the whole row. A sparse-attention
++    // indexer masks with -INFINITY, so the guard failed on every real indexer row and this fast path never
++    // fired -- the full O(n log n) sort ran every token with GGML_CPU_ARGSORT_TOP_K=1 nominally enabled.
++    // NaN must still be rejected (comparisons on it are undefined and corrupt partial_sort); -inf must not,
++    // because masked entries cannot enter the top-k and ties among them cannot change the selected set.
+     if (argsort_top_k_enabled() && k > 0 && k < n &&
+-            std::all_of(data, data + n, [](float value) { return std::isfinite(value); })) {
++            std::none_of(data, data + n, [](float value) { return std::isnan(value); })) {
+         std::partial_sort(indices, indices + k, indices + n, cmp);
+-        bool tied = false;
+-        for (int64_t i = 1; i < k; ++i) {
+-            tied |= data[indices[i - 1]] == data[indices[i]];
+-        }
+-        int boundary_count = 0;
+-        for (int64_t i = 0; i < n; ++i) {
+-            boundary_count += data[i] == data[indices[k - 1]];
+-        }
+-        if (!tied && boundary_count == 1) {
+-            return;
++        const float kth = data[indices[k - 1]];
++        if (std::isfinite(kth)) {
++            bool tied = false;
++            for (int64_t i = 1; i < k; ++i) {
++                tied |= data[indices[i - 1]] == data[indices[i]];
++            }
++            int boundary_count = 0;
++            for (int64_t i = 0; i < n; ++i) {
++                boundary_count += (std::isfinite(data[i]) && data[i] == kth);
++            }
++            if (!tied && boundary_count == 1) {
++                return;
++            }
+         }
+         // Keep the full sort's original tie ordering.
+         for (int64_t i = 0; i < n; ++i) {
