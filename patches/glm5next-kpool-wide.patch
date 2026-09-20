@@ -1,0 +1,276 @@
+GLM-5.3-Flash (glm5next) CPU library, step 2 of 5: eight-channel inner loop for the fused pool kernel.
+Deployed 2026-09-19. Byte-identical. GGML_CPU_GLM_POOL_WIDE=1, default off. Apply after glm5next-kpool-fusion-statecopy.patch.
+Result: CPU library sha256 3f957a341321b940d93be53c250cdd068825093faa2d9efda142ebe56427b1b3 (current production).
+
+Groups eight channels, hoists the four member-cell lookups out of the channel loop, and keeps scalar expf, float products,
+sequential double accumulation and the double reciprocal, so every output byte matches the scalar kernel.
+
+Evidence (engineering/2026-09-20/archive/sr950-strategy/codex-bench-0919/KPOOL-WIDE-RESULT.md):
+  77 graph cases x 2, five modes, 1/2/3/15 workers: 85,564,960 output bytes per arm, all equal.
+  same loaded model, ABBA, actual Codex requests through the Paseo wrapper, greedy, identical text and speculation counters:
+      3,998 input tokens   14.60 -> 15.15 tok/s  (+3.8%)
+     29,930 input tokens    9.05 -> 10.26 tok/s  (+13.4%)
+  attributed fused pooling time at 29,952 cells: 54.7 -> 24.3 ms per verify graph (single samples).
+
+--- a/pool-kernel.inc
++++ b/pool-kernel.inc
+@@ -1,10 +1,60 @@
+-// GET_ROWS -> key/gate transposes -> APE ADD -> existing softmax-pool arithmetic.
+-// Only the strict matcher in pool-fusion.inc may call this kernel.
+-static std::atomic<uint64_t> glm_pool_fused_calls{0};
++// The deployed scalar kernel is retained unchanged behind the new flag.
++#include "pool-scalar.inc"
+ 
+-extern "C" uint64_t ggml_cpu_glm_pool_fused_count(void);
+-extern "C" uint64_t ggml_cpu_glm_pool_fused_count(void) {
+-    return glm_pool_fused_calls.load(std::memory_order_relaxed);
++// Optional benchmark-only control. Writers change one aligned 32-bit word only
++// while all server slots are idle. Mapping it read-only avoids file I/O in decode.
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <unistd.h>
++static bool glm_pool_wide_enabled() {
++    static const bool enabled = [] {
++        const char * v = std::getenv("GGML_CPU_GLM_POOL_WIDE");
++        return v && std::strcmp(v, "1") == 0;
++    }();
++    if (!enabled) return false;
++    static const uint32_t * control = [] () -> const uint32_t * {
++        const char * path = std::getenv("GGML_CPU_GLM_POOL_WIDE_CONTROL_FILE");
++        if (!path || !*path) return nullptr;
++        const int fd = open(path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
++        GGML_ASSERT(fd >= 0);
++        struct stat info;
++        GGML_ASSERT(fstat(fd, &info) == 0 && S_ISREG(info.st_mode) && info.st_size == sizeof(uint32_t));
++        void * mapping = mmap(nullptr, sizeof(uint32_t), PROT_READ, MAP_SHARED, fd, 0);
++        close(fd);
++        GGML_ASSERT(mapping != MAP_FAILED);
++        return (const uint32_t *) mapping;
++    }();
++    if (!control) return true;
++    const uint32_t value = __atomic_load_n(control, __ATOMIC_ACQUIRE);
++    GGML_ASSERT(value <= 1);
++    return value == 1;
++}
++
++static std::atomic<uint64_t> glm_pool_wide_calls{0};
++extern "C" uint64_t ggml_cpu_glm_pool_wide_count(void);
++extern "C" uint64_t ggml_cpu_glm_pool_wide_count(void) {
++    return glm_pool_wide_calls.load(std::memory_order_relaxed);
++}
++
++// Original arithmetic for tails and exceptional values. Keep MUL operand order.
++static inline void glm_pool_scalar_row(const ggml_fp16_t * const cell[4],
++        const ggml_tensor * ape, int64_t d, int64_t ch, bool probs_first, float * dst) {
++    float work[4], keys[4], probability[4], product[4];
++    for (int m = 0; m < 4; ++m) {
++        keys[m] = GGML_CPU_FP16_TO_FP32(cell[m][ch]);
++        const float gate = GGML_CPU_FP16_TO_FP32(cell[m][d + ch]);
++        const float position = *(const float *) ((const char *) ape->data + ch*ape->nb[0] + m*ape->nb[1]);
++        work[m] = gate + position;
++    }
++    ggml_vec_scale_f32(4, work, 1.0f);
++    float max = -INFINITY;
++    ggml_vec_max_f32(4, &max, work);
++    ggml_float sum = ggml_vec_soft_max_f32(4, probability, work, max);
++    sum = 1.0 / sum;
++    ggml_vec_scale_f32(4, probability, sum);
++    ggml_vec_mul_f32(4, product, probs_first ? probability : keys, probs_first ? keys : probability);
++    ggml_vec_sum_f32(4, dst, product);
+ }
+ 
+ void ggml_compute_forward_glm_pool_fused(
+@@ -14,50 +64,93 @@
+         const ggml_tensor * probs,
+         const ggml_tensor * mul,
+         ggml_tensor * dst) {
++    const bool enabled = glm_pool_wide_enabled();
++#if defined(__AVX512F__) && defined(__AVX2__) && defined(__F16C__)
++    if (!enabled) {
++        ggml_compute_forward_glm_pool_scalar(params, members, ape, probs, mul, dst);
++        return;
++    }
+     if (params->ith == 0) {
+-        const uint64_t call = glm_pool_fused_calls.fetch_add(1, std::memory_order_relaxed);
++        glm_pool_fused_calls.fetch_add(1, std::memory_order_relaxed);
++        const uint64_t call = glm_pool_wide_calls.fetch_add(1, std::memory_order_relaxed);
+         static const bool probe = [] { const char * v = std::getenv("GGML_CPU_GLM_POOL_PROBE"); return v && std::atoi(v) == 1; }();
+         if (probe && call < 8) {
+-            fprintf(stderr, "GLM_POOL_FUSED name=%s d=%lld pools=%lld streams=%lld threads=%d\n",
++            fprintf(stderr, "GLM_POOL_WIDE name=%s d=%lld pools=%lld streams=%lld threads=%d\n",
+                 members->name, (long long) dst->ne[1], (long long) dst->ne[2], (long long) dst->ne[3], params->nth);
+         }
+     }
+     const ggml_tensor * kg = members->src[0];
+     const ggml_tensor * cells = members->src[1];
+-    const int64_t d = dst->ne[1];
+-    const int64_t pools = dst->ne[2];
+-    const int64_t rows = d * pools * dst->ne[3];
+-    const int64_t begin = rows * params->ith / params->nth;
+-    const int64_t end = rows * (params->ith + 1) / params->nth;
++    const int64_t d = dst->ne[1], pools = dst->ne[2];
++    const int64_t blocks_per_pool = (d + 7) / 8;
++    const int64_t blocks = blocks_per_pool * pools * dst->ne[3];
++    const int64_t begin = blocks * params->ith / params->nth;
++    const int64_t end = blocks * (params->ith + 1) / params->nth;
+     const bool probs_first = mul->src[0] == probs;
+-    float scale;
+-    memcpy(&scale, (const float *) probs->op_params, sizeof(float));
+-    for (int64_t row = begin; row < end; ++row) {
+-        const int64_t channel = row % d;
+-        const int64_t pool = (row / d) % pools;
+-        const int64_t stream = row / (d * pools);
+-        float work[4], keys[4], probability[4], product[4];
++    const __m256 inf = _mm256_set1_ps(INFINITY);
++    const __m256 sign = _mm256_set1_ps(-0.0f);
++    const __m512d one = _mm512_set1_pd(1.0);
++    for (int64_t b = begin; b < end;) {
++        const int64_t pool_stream = b / blocks_per_pool;
++        const int64_t pool = pool_stream % pools, stream = pool_stream / pools;
++        const int64_t pool_end = std::min(end, (pool_stream + 1) * blocks_per_pool);
++        const ggml_fp16_t * cell[4];
+         for (int m = 0; m < 4; ++m) {
+-            const int32_t cell = *(const int32_t *) ((const char *) cells->data +
++            const int32_t idx = *(const int32_t *) ((const char *) cells->data +
+                 (4*pool + m)*cells->nb[0] + stream*cells->nb[1]);
+-            GGML_ASSERT(cell >= 0 && cell < kg->ne[1]);
+-            const ggml_fp16_t * cell_data = (const ggml_fp16_t *) ((const char *) kg->data +
+-                cell*kg->nb[1] + stream*kg->nb[2]);
+-            keys[m] = GGML_CPU_FP16_TO_FP32(cell_data[channel]);
+-            const float gate = GGML_CPU_FP16_TO_FP32(cell_data[d + channel]);
+-            const float position = *(const float *) ((const char *) ape->data +
+-                channel*ape->nb[0] + m*ape->nb[1]);
+-            work[m] = gate + position;
++            GGML_ASSERT(idx >= 0 && idx < kg->ne[1]);
++            cell[m] = (const ggml_fp16_t *) ((const char *) kg->data + idx*kg->nb[1] + stream*kg->nb[2]);
+         }
+-        // Keep every arithmetic stage identical to the deployed pool kernel,
+-        // including float products and ggml_float accumulation/reciprocal.
+-        ggml_vec_scale_f32(4, work, scale);
+-        float max = -INFINITY;
+-        ggml_vec_max_f32(4, &max, work);
+-        ggml_float sum = ggml_vec_soft_max_f32(4, probability, work, max);
+-        sum = 1.0 / sum;
+-        ggml_vec_scale_f32(4, probability, sum);
+-        ggml_vec_mul_f32(4, product, probs_first ? probability : keys, probs_first ? keys : probability);
+-        ggml_vec_sum_f32(4, (float *) dst->data + row, product);
++        for (; b < pool_end; ++b) {
++            const int64_t ch = (b - pool_stream*blocks_per_pool) * 8;
++            float * output = (float *) dst->data + pool_stream*d + ch;
++            if (ch + 8 > d) {
++                for (int64_t c = ch; c < d; ++c) glm_pool_scalar_row(cell, ape, d, c, probs_first, output + c - ch);
++                continue;
++            }
++            __m256 keys[4], work[4];
++            __m256 max = _mm256_set1_ps(-INFINITY);
++            bool finite = true;
++            for (int m = 0; m < 4; ++m) {
++                keys[m] = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i *) (cell[m] + ch)));
++                const __m256 gate = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i *) (cell[m] + d + ch)));
++                const __m256 position = _mm256_loadu_ps((const float *) ((const char *) ape->data + m*ape->nb[1]) + ch);
++                work[m] = _mm256_add_ps(gate, position);
++                finite &= _mm256_movemask_ps(_mm256_cmp_ps(_mm256_andnot_ps(sign, work[m]), inf, _CMP_LT_OQ)) == 255;
++                finite &= _mm256_movemask_ps(_mm256_cmp_ps(_mm256_andnot_ps(sign, keys[m]), inf, _CMP_LT_OQ)) == 255;
++                max = _mm256_max_ps(max, work[m]);
++            }
++            if (!finite) {
++                for (int c = 0; c < 8; ++c) glm_pool_scalar_row(cell, ape, d, ch + c, probs_first, output + c);
++                continue;
++            }
++            alignas(64) float shifted[4][8], exponent[4][8];
++            for (int m = 0; m < 4; ++m) {
++                _mm256_store_ps(shifted[m], _mm256_sub_ps(work[m], max));
++                // Use the same scalar libm expf as ggml_vec_soft_max_f32(n=4).
++                // expf(+/-0) is exactly 1; no approximate vector exponential.
++                for (int c = 0; c < 8; ++c) {
++                    exponent[m][c] = shifted[m][c] == 0.0f ? 1.0f : expf(shifted[m][c]);
++                }
++            }
++            __m256 exps[4];
++            __m512d sum = _mm512_setzero_pd();
++            for (int m = 0; m < 4; ++m) {
++                exps[m] = _mm256_load_ps(exponent[m]);
++                sum = _mm512_add_pd(sum, _mm512_cvtps_pd(exps[m]));
++            }
++            const __m256 reciprocal = _mm512_cvtpd_ps(_mm512_div_pd(one, sum));
++            __m512d weighted = _mm512_setzero_pd();
++            for (int m = 0; m < 4; ++m) {
++                const __m256 probability = _mm256_mul_ps(exps[m], reciprocal);
++                const __m256 product = probs_first ? _mm256_mul_ps(probability, keys[m]) : _mm256_mul_ps(keys[m], probability);
++                weighted = _mm512_add_pd(weighted, _mm512_cvtps_pd(product));
++            }
++            _mm256_storeu_ps(output, _mm512_cvtpd_ps(weighted));
++        }
+     }
++#else
++    GGML_UNUSED(enabled);
++    ggml_compute_forward_glm_pool_scalar(params, members, ape, probs, mul, dst);
++#endif
+ }
+--- /dev/null
++++ b/pool-scalar.inc
+@@ -0,0 +1,63 @@
++// GET_ROWS -> key/gate transposes -> APE ADD -> existing softmax-pool arithmetic.
++// Only the strict matcher in pool-fusion.inc may call this kernel.
++static std::atomic<uint64_t> glm_pool_fused_calls{0};
++
++extern "C" uint64_t ggml_cpu_glm_pool_fused_count(void);
++extern "C" uint64_t ggml_cpu_glm_pool_fused_count(void) {
++    return glm_pool_fused_calls.load(std::memory_order_relaxed);
++}
++
++static void ggml_compute_forward_glm_pool_scalar(
++        const ggml_compute_params * params,
++        const ggml_tensor * members,
++        const ggml_tensor * ape,
++        const ggml_tensor * probs,
++        const ggml_tensor * mul,
++        ggml_tensor * dst) {
++    if (params->ith == 0) {
++        const uint64_t call = glm_pool_fused_calls.fetch_add(1, std::memory_order_relaxed);
++        static const bool probe = [] { const char * v = std::getenv("GGML_CPU_GLM_POOL_PROBE"); return v && std::atoi(v) == 1; }();
++        if (probe && call < 8) {
++            fprintf(stderr, "GLM_POOL_FUSED name=%s d=%lld pools=%lld streams=%lld threads=%d\n",
++                members->name, (long long) dst->ne[1], (long long) dst->ne[2], (long long) dst->ne[3], params->nth);
++        }
++    }
++    const ggml_tensor * kg = members->src[0];
++    const ggml_tensor * cells = members->src[1];
++    const int64_t d = dst->ne[1];
++    const int64_t pools = dst->ne[2];
++    const int64_t rows = d * pools * dst->ne[3];
++    const int64_t begin = rows * params->ith / params->nth;
++    const int64_t end = rows * (params->ith + 1) / params->nth;
++    const bool probs_first = mul->src[0] == probs;
++    float scale;
++    memcpy(&scale, (const float *) probs->op_params, sizeof(float));
++    for (int64_t row = begin; row < end; ++row) {
++        const int64_t channel = row % d;
++        const int64_t pool = (row / d) % pools;
++        const int64_t stream = row / (d * pools);
++        float work[4], keys[4], probability[4], product[4];
++        for (int m = 0; m < 4; ++m) {
++            const int32_t cell = *(const int32_t *) ((const char *) cells->data +
++                (4*pool + m)*cells->nb[0] + stream*cells->nb[1]);
++            GGML_ASSERT(cell >= 0 && cell < kg->ne[1]);
++            const ggml_fp16_t * cell_data = (const ggml_fp16_t *) ((const char *) kg->data +
++                cell*kg->nb[1] + stream*kg->nb[2]);
++            keys[m] = GGML_CPU_FP16_TO_FP32(cell_data[channel]);
++            const float gate = GGML_CPU_FP16_TO_FP32(cell_data[d + channel]);
++            const float position = *(const float *) ((const char *) ape->data +
++                channel*ape->nb[0] + m*ape->nb[1]);
++            work[m] = gate + position;
++        }
++        // Keep every arithmetic stage identical to the deployed pool kernel,
++        // including float products and ggml_float accumulation/reciprocal.
++        ggml_vec_scale_f32(4, work, scale);
++        float max = -INFINITY;
++        ggml_vec_max_f32(4, &max, work);
++        ggml_float sum = ggml_vec_soft_max_f32(4, probability, work, max);
++        sum = 1.0 / sum;
++        ggml_vec_scale_f32(4, probability, sum);
++        ggml_vec_mul_f32(4, product, probs_first ? probability : keys, probs_first ? keys : probability);
++        ggml_vec_sum_f32(4, (float *) dst->data + row, product);
++    }
++}

@@ -1,0 +1,23 @@
+libllama, models/glm5next.cpp, MTP draft graph: build the query side of attention only for the rows that produce output.
+DEPLOYED 2026-09-20 (revision d). BIT-IDENTICAL output and draft tokens. LLAMA_F18_MTP_QROWS=1, default off;
+LLAMA_F18_MTP_QROWS_CONTROL_FILE maps a 4-byte word for in-process A/B (a flip forces a graph rebuild).
+Apply after glm5next-mtp-kv-only-catchup.patch.
+
+A draft batch is [accepted rows that only have to reach the draft cache][the one row that predicts][pad rows that keep the graph
+shape constant] (mtp-draft-merge-fastpick-pad.patch). The stock graph runs the whole DSA layer on all of them and discards the
+extra rows just before the FFN. Every row needs its latent K in the cache; only the predicting row needs the query projections,
+the dense attention over the whole context and the output projection. Here Q is built from get_rows(cur, out_ids), the mask
+is sliced the same way (F16 -> get_rows -> F16; 0 and -inf survive), K is still written for every row. The predicting row sees
+the same cache and the same mask row, and the attention kernel is batch-invariant, so its logits do not change.
+Pad rows then cost one K projection at any context length, so GGML_F18_MTP_PAD_MAX_CTX can be raised from 12288 to the context.
+
+Evidence:
+  8-layer proxy, 32 / 3,861 / 13,231-token prompts: text, log-probabilities and draft counts IDENTICAL; draft pass 5.60 -> 5.31 ms
+  at short context, first pass 7.10 -> 6.63 ms at 13K.
+  Full model, window w6, one loaded process, together with glm5next-gdn-row-split.patch: greedy Codex fixture 19.11 -> 19.55
+  tok/s, accepted drafts 175 of 214 in every run, log-probabilities identical; draft graphs 11.38 -> 10.72 ms per cycle.
+  13,231 tokens of context, against the production-equivalent of that context (no pad rows there):
+  14.77/14.73 -> 15.46/15.37 tok/s (+4.5%), same text, same 53 of 82 drafts accepted.
+
+Parent: glm-mtp-kv-only-0919/candidate/glm5next.cpp sha256 8cdbce280d24104496ebeadc996665b65a77e943a488f592446bea8370b2645c; its
+object and the deployed libllama (65670d4a19178bbd...) are reproduced bit for bit before the change. Deployed: 329c25ad50df9bd9...

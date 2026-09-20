@@ -1,0 +1,19 @@
+ggml-cpu top-k, step 5 of 6: selection instead of a partial sort, with a fallback whenever the selected SET is not unique.
+DEPLOYED 2026-09-20. Identical selected set by construction. GGML_F18_FEATURES bit 1, default off.
+Apply after glm5next-fa-mqa-cellsplit.patch.
+
+This is NOT patches/topk-linear-selection.patch, which was refuted on 2026-09-15: once the finite count drops below k the tail among
+equal -inf scores is arbitrary, a histogram walk and std::partial_sort pick different cells, and draft acceptance fell 89% -> 64%.
+Here the k-th largest value is found with std::nth_element on a float copy; if any value outside the top k equals it (a tie across
+the cut, which includes every -inf tail case) or the row holds a NaN, the function returns false and the caller runs the original
+std::partial_sort. Otherwise the set of the k largest is unique and is emitted in index order (the consumers scatter it).
+
+Evidence:
+  tools/topk_select_check.cpp, k = 512, masked scores: the set is IDENTICAL whenever the fast path answers; fallback in all tie cases.
+      n = 1,026   partial_sort 0.128 ms   selection 0.031 ms        n = 25,002   0.203 vs 0.193 ms
+      n = 7,554                0.131 ms             0.041 ms        n = 65,536   0.266 vs 0.466 ms  (selection LOSES)
+    std::partial_sort rejects most elements with one comparison, so it wins again on long rows. The patch therefore selects only
+    for n <= 16,384 pools (65K tokens of context at kpool 4).
+  8-layer proxy, greedy text and top-5 log-probabilities on 32 / 3,861 / 13,231-token prompts: IDENTICAL to production.
+  in-situ op time at 1,026 pools x 3 queries: 0.26 -> 0.06 ms per DSA layer (2.9 -> 0.6 ms per verify graph).
+  full model: measured only together with the attention kernel (see glm5next-fa-mqa-cellsplit.patch); not isolated.

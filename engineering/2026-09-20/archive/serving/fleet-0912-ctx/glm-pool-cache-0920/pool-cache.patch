@@ -1,0 +1,56 @@
+--- parent/pool-kernel.inc
++++ candidate/pool-kernel.inc
+@@ -36,6 +36,8 @@
+ extern "C" uint64_t ggml_cpu_glm_pool_wide_count(void) {
+     return glm_pool_wide_calls.load(std::memory_order_relaxed);
+ }
++
++#include "pool-cache.inc"
+ 
+ // Original arithmetic for tails and exceptional values. Keep MUL operand order.
+ static inline void glm_pool_scalar_row(const ggml_fp16_t * const cell[4],
+@@ -87,6 +89,11 @@
+     const int64_t begin = blocks * params->ith / params->nth;
+     const int64_t end = blocks * (params->ith + 1) / params->nth;
+     const bool probs_first = mul->src[0] == probs;
++    const bool cache_enabled = d == 128 && glm_pool_cache_enabled();
++    const int64_t cache_begin = (begin + blocks_per_pool - 1) / blocks_per_pool;
++    const int64_t cache_end = end / blocks_per_pool;
++    auto * cache = cache_enabled ? glm_pool_cache_local.get(kg, ape, probs_first, size_t(std::max(int64_t(0), cache_end - cache_begin))) : nullptr;
++    uint64_t cache_hits = 0, cache_misses = 0, cache_bypass = 0;
+     const __m256 inf = _mm256_set1_ps(INFINITY);
+     const __m256 sign = _mm256_set1_ps(-0.0f);
+     const __m512d one = _mm512_set1_pd(1.0);
+@@ -100,6 +107,19 @@
+                 (4*pool + m)*cells->nb[0] + stream*cells->nb[1]);
+             GGML_ASSERT(idx >= 0 && idx < kg->ne[1]);
+             cell[m] = (const ggml_fp16_t *) ((const char *) kg->data + idx*kg->nb[1] + stream*kg->nb[2]);
++        }
++        glm_pool_cache_record * record = nullptr;
++        if (cache && b == pool_stream * blocks_per_pool && pool_end == (pool_stream + 1) * blocks_per_pool &&
++                pool_stream >= cache_begin && uint64_t(pool_stream - cache_begin) < cache->capacity) {
++            record = &cache->records[pool_stream % cache->capacity];
++            if (glm_pool_cache_hit(cache, record, cell, uint64_t(pool_stream))) {
++                std::memcpy((float *) dst->data + pool_stream * d, record->output, sizeof(record->output));
++                ++cache_hits; b = pool_end; continue;
++            }
++            ++cache_misses; record->epoch = 0; record->pool = uint64_t(pool_stream);
++            for (int m = 0; m < 4; ++m) std::memcpy(record->input[m], cell[m], sizeof(record->input[m]));
++        } else if (cache_enabled) {
++            ++cache_bypass;
+         }
+         for (; b < pool_end; ++b) {
+             const int64_t ch = (b - pool_stream*blocks_per_pool) * 8;
+@@ -148,7 +168,12 @@
+             }
+             _mm256_storeu_ps(output, _mm512_cvtpd_ps(weighted));
+         }
++        if (record) {
++            std::memcpy(record->output, (const float *) dst->data + pool_stream * d, sizeof(record->output));
++            record->epoch = cache->epoch;
++        }
+     }
++    if (cache_enabled) glm_pool_cache_report(params, members, cache_hits, cache_misses, cache_bypass);
+ #else
+     GGML_UNUSED(enabled);
+     ggml_compute_forward_glm_pool_scalar(params, members, ape, probs, mul, dst);

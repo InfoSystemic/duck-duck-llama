@@ -1,0 +1,144 @@
+#pragma once
+// Gated delta net: split by STATE ROW instead of by head, and make one pass per row instead of four.
+//
+// The stock kernel hands out heads. A socket shard has 16 heads and 15 workers, so one worker does two heads while fourteen
+// wait: the op costs two heads of wall time in every KDA layer (34 of them). Within a head the rows of the (transposed) state
+// matrix never interact: for row j,  row *= exp(g);  d = (v[j] - row.k)*beta;  row += d*k;  out[j] = row.q * scale.
+// So a worker takes a contiguous range of (head, row) pairs, 1/15 of the rows each, and runs the four steps on a row while
+// it is in L1 (the stock order walks all 128 rows four times per token). Same vector kernels on the same 128 floats in the
+// same order per row => the result is bit-identical; only who computes it and when changes.
+
+static constexpr int64_t F18_GDN_MAX_S = 512;
+
+static bool f18_gdn_rows_supported(const ggml_tensor * dst) {
+    const ggml_tensor * v = dst->src[2];
+    return v->ne[0] <= F18_GDN_MAX_S && dst->src[0]->type == GGML_TYPE_F32;
+}
+
+static void f18_gated_delta_net_rows(const ggml_compute_params * params, ggml_tensor * dst) {
+    ggml_tensor * src_q     = dst->src[0];
+    ggml_tensor * src_k     = dst->src[1];
+    ggml_tensor * src_v     = dst->src[2];
+    ggml_tensor * src_g     = dst->src[3];
+    ggml_tensor * src_beta  = dst->src[4];
+    ggml_tensor * src_state = dst->src[5];
+
+    const int64_t S_v      = src_v->ne[0];
+    const int64_t H        = src_v->ne[1];
+    const int64_t n_tokens = src_v->ne[2];
+    const int64_t n_seqs   = src_v->ne[3];
+
+    GGML_ASSERT(ggml_is_contiguous_rows(src_q));
+    GGML_ASSERT(ggml_is_contiguous_rows(src_k));
+    GGML_ASSERT(ggml_is_contiguous_rows(src_v));
+    GGML_ASSERT(ggml_is_contiguous(src_g));
+    GGML_ASSERT(ggml_is_contiguous(src_beta));
+    GGML_ASSERT(ggml_is_contiguous(src_state));
+    GGML_ASSERT(src_g->ne[0] == 1 || src_g->ne[0] == S_v);
+    GGML_ASSERT(src_beta->ne[0] == 1);
+
+    GGML_TENSOR_LOCALS(int64_t, neq, src_q, ne);
+    GGML_TENSOR_LOCALS(size_t,  nbq, src_q, nb);
+    GGML_TENSOR_LOCALS(int64_t, nek, src_k, ne);
+    GGML_TENSOR_LOCALS(size_t,  nbk, src_k, nb);
+    GGML_TENSOR_LOCALS(int64_t, nev, src_v, ne);
+    GGML_TENSOR_LOCALS(size_t,  nbv, src_v, nb);
+    GGML_TENSOR_LOCALS(int64_t, neg, src_g, ne);
+    GGML_TENSOR_LOCALS(size_t,  nbg, src_g, nb);
+    GGML_TENSOR_LOCALS(size_t,  nbb, src_beta, nb);
+
+    const bool kda = (neg0 == S_v);
+
+    const int64_t K = ggml_get_op_params_i32(dst, 0);
+    GGML_ASSERT(K >= 1);
+    const int64_t state_seq_stride = src_state->nb[3] / sizeof(float);
+
+    const int64_t per_thread = S_v + (K > 1 ? S_v * S_v : 0);
+    const int ith = params->ith;
+    const int nth = params->nth;
+
+    float * scratch    = (float *) params->wdata + ith * per_thread + CACHE_LINE_SIZE_F32;
+    float * state_work = K > 1 ? (scratch + S_v) : nullptr;
+
+    const int64_t attn_score_elems    = S_v * H * n_tokens * n_seqs;
+    const int64_t state_size_per_snap = S_v * S_v * H * n_seqs;
+    float * attn_out_base  = (float *) dst->data;
+    float * state_out_base = (float *) dst->data + attn_score_elems;
+    const float * state_in_base = (const float *) src_state->data;
+
+    const int64_t rq3 = nev3 / neq3;
+    const int64_t rk3 = nev3 / nek3;
+
+    const float scale = 1.0f / sqrtf((float) S_v);
+
+    // this worker's share of the (seq, head, row) space
+    const int64_t R  = H * n_seqs * S_v;
+    const int64_t r0 = R * ith / nth;
+    const int64_t r1 = R * (ith + 1) / nth;
+
+    float eg[F18_GDN_MAX_S];
+
+    for (int64_t r = r0; r < r1; ) {
+        const int64_t ir = r / S_v;   // (seq, head)
+        const int64_t j0 = r % S_v;
+        const int64_t j1 = MIN(S_v, j0 + (r1 - r));
+
+        const int64_t iv1 = ir % H;
+        const int64_t iv3 = ir / H;
+        const int64_t iq1 = iv1 % neq1;
+        const int64_t ik1 = iv1 % nek1;
+        const int64_t iq3 = iv3 / rq3;
+        const int64_t ik3 = iv3 / rk3;
+
+        float * s_out = (K > 1) ? state_work : state_out_base + (iv3 * H + iv1) * S_v * S_v;
+        const float * s_in = state_in_base + iv3 * state_seq_stride + iv1 * S_v * S_v;
+        memcpy(s_out + j0 * S_v, s_in + j0 * S_v, (size_t) (j1 - j0) * S_v * sizeof(float));
+
+        float * attn_data = attn_out_base + (iv3 * n_tokens * H + iv1) * S_v;
+
+        for (int64_t t = 0; t < n_tokens; t++) {
+            const float * q_d = (const float *)((const char *)src_q->data + iq3 * nbq3 + t * nbq2 + iq1 * nbq1);
+            const float * k_d = (const float *)((const char *)src_k->data + ik3 * nbk3 + t * nbk2 + ik1 * nbk1);
+            const float * v_d = (const float *)((const char *)src_v->data + iv3 * nbv3 + t * nbv2 + iv1 * nbv1);
+
+            const float beta_val = *(const float *)((const char *)src_beta->data + iv3 * nbb3 + t * nbb2 + iv1 * nbb1);
+            const float * g_d    =  (const float *)((const char *)src_g->data    + iv3 * nbg3 + t * nbg2 + iv1 * nbg1);
+
+            float e0 = 0.0f;
+            if (kda) {
+                for (int64_t i = 0; i < S_v; ++i) {
+                    eg[i] = expf(g_d[i]);
+                }
+            } else {
+                e0 = expf(g_d[0]);
+            }
+
+            for (int64_t j = j0; j < j1; ++j) {
+                float * row = &s_out[j * S_v];
+                if (kda) {
+                    ggml_vec_mul_f32(S_v, row, row, eg);
+                } else {
+                    ggml_vec_scale_f32(S_v, row, e0);
+                }
+                float sum = 0.0f;
+                ggml_vec_dot_f32(S_v, &sum, 0, row, 0, k_d, 0, 1);
+                ggml_vec_mad_f32(S_v, row, k_d, (v_d[j] - sum) * beta_val);
+                sum = 0.0f;
+                ggml_vec_dot_f32(S_v, &sum, 0, row, 0, q_d, 0, 1);
+                attn_data[j] = sum * scale;
+            }
+
+            attn_data += S_v * H;
+
+            if (K > 1) {
+                const int64_t target_slot = n_tokens - 1 - t;
+                if (target_slot >= 0 && target_slot < K) {
+                    float * curr_state_o = state_out_base + target_slot * state_size_per_snap + (iv3 * H + iv1) * S_v * S_v;
+                    memcpy(curr_state_o + j0 * S_v, s_out + j0 * S_v, (size_t) (j1 - j0) * S_v * sizeof(float));
+                }
+            }
+        }
+
+        r += j1 - j0;
+    }
+}

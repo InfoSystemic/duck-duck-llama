@@ -1,0 +1,18 @@
+common/sampling.cpp + common/speculative.cpp: optional log of both sides of the coupled sampler, and a drafter temperature scale.
+NOT deployed; used for window w7 (2026-09-20) only. No effect unless GGML_F18_COUPLE_LOG=<file> or GGML_F18_COUPLED_DRAFT_TEMP is set.
+Apply after coupled-sampling-fast-sampler.patch.
+
+Because verifier and drafter add the same noise G(salt, n, token), a log of the verifier's candidates ("V" lines) and of the
+drafter's raw top-10 ("D" lines), both keyed by (salt, n), is enough to REPLAY any drafter setting offline against the draws the
+verifier really made: no model run per setting, and every setting is judged on the same positions (tools/couple_fit.py).
+The two translation units log through separate FILE buffers, so a line that spans a flush can be torn; the replay drops those.
+
+Result (full model, revision d configuration, 14 sampled Codex turns + 8 sampled native prompts; 6,569 verifier picks, 5,384 draft
+picks, 4,752 on-policy positions; the replay reproduces the logged draft token in 5,384 of 5,384 rows):
+  verifier's token inside the drafter's top-10: 98.1% at draft step 0, 94.9% at step 1; the verifier had ONE candidate left after
+  its chain in 59% / 64% of positions.
+  greedy drafter                 step 0 78.2%   step 1 72.8%   2.352 tokens per cycle
+  coupled drafter as deployed    step 0 81.6%   step 1 74.5%   2.425 tokens per cycle     (+3.1%, same positions, same draws)
+  drafter temperature 0.5 ... 3.0 relative to the verifier's: flat from 0.8 to 1.25 (best 1.1: +0.35%), worse outside
+  drafter truncation (no top_p/min_p, min_p 0.02-0.2, top_p 0.9-0.99) and a bias toward its own top-1: within +-0.2%
+So the deployed setting is at the optimum of this family; what is left of the gap to greedy requests is the MTP head itself.

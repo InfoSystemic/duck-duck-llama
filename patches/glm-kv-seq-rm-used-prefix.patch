@@ -1,0 +1,157 @@
+GLM runtime (llama.cpp-glm5n-goal-0904 line) port of the bounded KV rollback scan. Deployed 2026-09-19. No arithmetic change.
+LLAMA_KV_SEQ_RM_USED_PREFIX=1, default off. Same idea as patches/kv-seq-rm-bounded-scan.patch (q4e line), rebuilt on the exact
+deployed libllama: parent sha256 8c794722eccdcc27aac88def7f1a1d549926a0d6aa3dd00586d6fdca5c8eb08a, result e77a573df69456745857677e71e4e9cc876b8294384fa7798629f3ebe7c3306a.
+
+The service allocates 1,048,576 KV cells; every speculative rollback scanned all of them (~0.85 ms) although only a short prefix
+is occupied. The scan now stops at cells.used_max_p1(). The optional control-file and probe hooks are benchmark instruments.
+
+Evidence (engineering/2026-09-20/archive/sr950-strategy/codex-bench-0919/KV-RANGE-RESULT.md): 16 cache configurations, 5,650 scripted
+steps, 2,826,776 state bytes equal in four modes. Same loaded model, ABBA then BAAB, eight cached Codex-in-Paseo runs at 3,998 tokens,
+identical text and counters: 15.24 -> 15.61 tok/s (+2.4%; blocks +3.2% and +1.7%). Time outside graph phases 9.6 -> 6.0 ms per cycle.
+Upstream llama.cpp still scans all cells at b23efaa2 (src/llama-kv-cache.cpp, seq_rm).
+
+--- parent/llama-kv-cache.cpp
++++ candidate/llama-kv-cache.cpp
+@@ -377,7 +377,118 @@
+     }
+ }
+ 
++#include <atomic>
++// Optional benchmark-only control. Writers change one aligned 32-bit word only
++// while all server slots are idle. Mapping it read-only avoids file I/O in decode.
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <unistd.h>
++static bool kv_used_prefix_enabled() {
++    static const bool enabled = [] {
++        const char * v = std::getenv("LLAMA_KV_SEQ_RM_USED_PREFIX");
++        return v && std::strcmp(v, "1") == 0;
++    }();
++    if (!enabled) return false;
++    static const uint32_t * control = [] () -> const uint32_t * {
++        const char * path = std::getenv("LLAMA_KV_SEQ_RM_CONTROL_FILE");
++        if (!path || !*path) return nullptr;
++        const int fd = open(path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
++        GGML_ASSERT(fd >= 0);
++        struct stat info;
++        GGML_ASSERT(fstat(fd, &info) == 0 && S_ISREG(info.st_mode) && info.st_size == sizeof(uint32_t));
++        void * mapping = mmap(nullptr, sizeof(uint32_t), PROT_READ, MAP_SHARED, fd, 0);
++        close(fd);
++        GGML_ASSERT(mapping != MAP_FAILED);
++        return (const uint32_t *) mapping;
++    }();
++    if (!control) return true;
++    const uint32_t value = __atomic_load_n(control, __ATOMIC_ACQUIRE);
++    GGML_ASSERT(value <= 1);
++    return value == 1;
++}
++
+ bool llama_kv_cache::seq_rm(llama_seq_id seq_id, llama_pos p0, llama_pos p1) {
++    const bool used_prefix = kv_used_prefix_enabled();
++    static const bool probe = [] {
++        const char * value = std::getenv("LLAMA_KV_SEQ_RM_PROBE");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    if (probe) {
++        static std::atomic<int> previous{-1};
++        if (previous.exchange(used_prefix, std::memory_order_relaxed) != used_prefix) {
++            LLAMA_LOG_WARN("KV_SEQ_RM_MODE bounded=%d\n", used_prefix);
++        }
++    }
++    if (!used_prefix) {
++        // TODO: refactor [TAG_KV_CACHE_SHARE_CELLS]
++        if (other) {
++            return true;
++        }
++    
++        // TODO: fix incosistent handling of `seq_id < 0` and `seq_id == -1` in the codebase [TAG_LLAMA_SEQ_ID_NEG]
++        GGML_ASSERT(seq_id == -1 || (seq_id >= 0 && (size_t) seq_id < seq_to_stream.size()));
++    
++        if (p0 < 0) {
++            p0 = 0;
++        }
++    
++        if (p1 < 0) {
++            p1 = std::numeric_limits<llama_pos>::max();
++        }
++    
++        if (seq_id >= 0) {
++            auto & cells = v_cells[seq_to_stream[seq_id]];
++            auto & head  = v_heads[seq_to_stream[seq_id]];
++    
++            uint32_t new_head = cells.size();
++    
++            for (uint32_t i = 0; i < cells.size(); ++i) {
++                if (!cells.pos_in(i, p0, p1)) {
++                    continue;
++                }
++    
++                if (cells.seq_has(i, seq_id) && cells.seq_rm(i, seq_id)) {
++                    if (new_head == cells.size()) {
++                        new_head = i;
++                    }
++                }
++            }
++    
++            // If we freed up a slot, set head to it so searching can start there.
++            if (new_head != cells.size() && new_head < head) {
++                head = new_head;
++            }
++        } else {
++            // match any sequence
++            for (uint32_t s = 0; s < n_stream; ++s) {
++                auto & cells = v_cells[s];
++                auto & head  = v_heads[s];
++    
++                uint32_t new_head = cells.size();
++    
++                for (uint32_t i = 0; i < cells.size(); ++i) {
++                    if (!cells.pos_in(i, p0, p1)) {
++                        continue;
++                    }
++    
++                    cells.rm(i);
++    
++                    if (new_head == cells.size()) {
++                        new_head = i;
++                    }
++                }
++    
++                // If we freed up a slot, set head to it so searching can start there.
++                if (new_head != cells.size() && new_head < head) {
++                    head = new_head;
++                }
++            }
++        }
++    
++        return true;
++    }
++
+     // TODO: refactor [TAG_KV_CACHE_SHARE_CELLS]
+     if (other) {
+         return true;
+@@ -399,8 +510,9 @@
+         auto & head  = v_heads[seq_to_stream[seq_id]];
+ 
+         uint32_t new_head = cells.size();
+-
+-        for (uint32_t i = 0; i < cells.size(); ++i) {
++        const uint32_t n_scan = cells.used_max_p1();
++
++        for (uint32_t i = 0; i < n_scan; ++i) {
+             if (!cells.pos_in(i, p0, p1)) {
+                 continue;
+             }
+@@ -423,8 +535,9 @@
+             auto & head  = v_heads[s];
+ 
+             uint32_t new_head = cells.size();
+-
+-            for (uint32_t i = 0; i < cells.size(); ++i) {
++            const uint32_t n_scan = cells.used_max_p1();
++
++            for (uint32_t i = 0; i < n_scan; ++i) {
+                 if (!cells.pos_in(i, p0, p1)) {
+                     continue;
+                 }

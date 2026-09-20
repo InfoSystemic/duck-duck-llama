@@ -1,0 +1,11 @@
+# GLM-5.3-Flash f18 stack, revision b (2026-09-20): batch-invariant cell-split F32 MQA attention, selection top-k,
+# pooled-result cache, MTP catch-up merged into the first draft pass, constant-shape draft batches (graph reuse), direct draft pick.
+# Libraries are the frozen copies in this directory.
+# Rollback: rm this file; systemctl --user daemon-reload; systemctl --user restart glm53-flash-production.service
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920b:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=3
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1

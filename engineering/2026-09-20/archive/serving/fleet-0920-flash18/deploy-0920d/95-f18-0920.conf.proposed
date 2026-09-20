@@ -1,0 +1,25 @@
+# GLM-5.3-Flash f18 stack, revision d (2026-09-20). Revision c plus three bit-exact changes (window w6: same greedy text hash,
+# same accepted-draft counts, log-probabilities identical; 19.11 -> 19.55 tok/s in one process, +4.5% at 13K tokens of context):
+#   GGML_CPU_NUMA_SHARED_TEAM=1   one OpenMP worker team per NUMA device for BOTH contexts (trunk and MTP draft) instead of two
+#                                 teams pinned to the same cores; 260 -> 200 threads. libggml-cpu (ggml-cpu.cpp).
+#   GGML_F18_FEATURES=7           bit 2 = gated delta net split by state row: 16 heads over 15 workers no longer leaves one
+#                                 worker with two heads in every KDA layer. libggml-cpu (ops).
+#   LLAMA_F18_MTP_QROWS=1         MTP draft graph builds the query side of attention only for the row that predicts; accepted
+#                                 and pad rows only write their K. libllama (models/glm5next.cpp).
+#   GGML_F18_MTP_PAD_MAX_CTX      pad rows no longer attend, so constant-shape draft batches stay on at any context length.
+# Libraries are the frozen copies in this directory (libllama-common is unchanged from revision c).
+# Rollback to revision c: cp ../deploy-0920c/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+# Rollback to stock:      rm the installed drop-in; systemctl --user daemon-reload; systemctl --user restart glm53-flash-production.service
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920d:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=7
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_MTP_PAD_MAX_CTX=1048576
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000
+Environment=GGML_CPU_NUMA_SHARED_TEAM=1
+Environment=LLAMA_F18_MTP_QROWS=1

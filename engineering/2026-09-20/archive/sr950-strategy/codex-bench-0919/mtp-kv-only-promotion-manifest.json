@@ -1,0 +1,22 @@
+{
+ "state": "APPLIED_AND_VERIFIED",
+ "library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy/libllama.so.0.3.0",
+ "sha256": "65670d4a19178bbdffcfbc79ee953e5319083875309ed52aa4de214393e20ce3",
+ "proposed_dropin": "/home/user/sr950-strategy/codex-bench-0919/90-glm-mtp-kv-only-0919.conf.proposed",
+ "dropin": "/home/user/.config/systemd/user/glm53-flash-production.service.d/90-glm-mtp-kv-only-0919.conf",
+ "dropin_sha256": "3d02342b6b0243f919a64abd647ab9b85228f5e08e669afb93265329e4e1a14c",
+ "phase_arm": "/dev/shm/glm-graph-phase.arm",
+ "window_report_sha256": "e0caa84ea381f9f64e51bfcdefc9dfa79f1a9ce5f11f2bc81f2ce8aeb3ece799",
+ "summary_sha256": "ea3cd2ec8a14a4160db7a1644c5c9b2baf288c86a999041d68b2439807abf14d",
+ "controller_sha256": "a1a59c776a136340af7401a7a6ef66890bf50094becb8b7a0c4d8f564de4ae98",
+ "standalone_gate_sha256": {
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/validation-w1.json": "93a03bd1c644e0389105499bf3fcf86a7d8fdc70de43c3f69e37140496c81405",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/validation-w15.json": "d39b558b457780aa04544f8089761d57d90409d82d7d7586d78189f1d9225307"
+ },
+ "expected_warm_gain_percent": 2.513770069143262,
+ "rollback": "Remove only the new drop-in and restart the exact prior production runtime on any identity/output gate failure.",
+ "original_window_record": "mtp-kv-only-r2-window-report.json",
+ "validation_note": "Raw controller record preserves the expected-new-graph parser rejection. Saved traces and final restored production control passed in complete_mtp_kv_r2.py; no benchmark was repeated.",
+ "production_pid": 3717968,
+ "final_audit": "mtp-kv-only-final-audit.json"
+}

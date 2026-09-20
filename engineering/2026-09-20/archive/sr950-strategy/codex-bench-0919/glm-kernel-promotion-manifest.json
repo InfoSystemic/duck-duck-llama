@@ -1,0 +1,29 @@
+{
+ "state": "APPLIED and verified",
+ "library": "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-cpu-fast-0919/libggml-cpu.so.0.22.0",
+ "sha256": "4793379e6894a9286168f79c4f323985388ec0b0ac65e54013dcd2957488af1f",
+ "dropin": "/home/user/.config/systemd/user/glm53-flash-production.service.d/60-glm-kernel-0919.conf",
+ "proposed_dropin": "/home/user/sr950-strategy/codex-bench-0919/glm-kernel-0919.service.proposed.conf",
+ "dropin_sha256": "7e772f4977e68dd9fa9e7436c1c1e726c088e70c26984df324836c107187aceb",
+ "proof": "combo-window-report.json",
+ "settings": "MTP2 and 15 workers/socket unchanged; diagnostic flags omitted",
+ "validation": [
+  "Three full-model greedy outputs unchanged",
+  "All nine stateful scenario outputs match production",
+  "Two simultaneously active slots preserve serial outputs",
+  "Actual Codex file edit and LRU behavior/complexity checks pass"
+ ],
+ "known_issue": "Original production cached append differs from fresh evaluation; candidate reproduces that baseline, not a fix",
+ "measurements": {
+  "codex_explanation_decode_tps": 13.98713016011694,
+  "codex_coding_decode_tps": 15.766775385281242,
+  "raw_tps": [
+   13.84446670055575,
+   15.908136562680898,
+   15.507916183057874
+  ]
+ },
+ "rollback": "Remove only this added drop-in, daemon-reload, and serially restart the original service; original launcher and libraries are unchanged",
+ "production_pid": 2656512,
+ "report": "promotion-report.json"
+}

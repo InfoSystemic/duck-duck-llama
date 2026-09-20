@@ -1,0 +1,31 @@
+02:56:45 stopping proxy (if any) and production
+02:57:09 loading candidate on 18141
+03:01:18 healthy after 218s
+03:01:19 mapped libs: validated-chunk16-bin/libggml.so.0.22.0 validated-chunk16-bin/libllama-server-impl.so validated-chunk16-bin/libmtmd.so.0.3.0 glm-fix/libggml-base.so.0.22.0 deploy/libllama.so.0.3.0 build-pad/libllama-common.so.0.3.0 build/libggml-cpu.so.0.22.0
+03:02:05 battery agreement D vs G: 10 / 10
+03:02:21 probs short: D-vs-G common prefix 64/64, max|dlogp| 0.00e+00, mean 0.00e+00; G==H text True; tps D 13.74 G 14.54 H 14.44
+03:04:30 probs long: D-vs-G common prefix 64/64, max|dlogp| 0.00e+00, mean 0.00e+00; G==H text True; tps D 18.52 G 18.91 H 18.81
+03:05:41 paseo cold D: 18.058777787060656
+03:05:58 paseo warm 0 mode D: 18.287 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:06:14 paseo warm 1 mode G: 18.773 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:06:31 paseo warm 2 mode G: 18.486 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:06:48 paseo warm 3 mode D: 17.785 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:07:05 paseo warm 4 mode H: 18.382 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:07:22 paseo warm 5 mode G: 18.555 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:07:39 paseo warm 6 mode D: 18.078 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:07:56 paseo warm 7 mode G: 18.001 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:08:13 paseo warm 8 mode G: 18.168 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:08:30 paseo warm 9 mode D: 17.734 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:08:47 paseo warm 10 mode H: 18.188 tok/s gen 281.0 draft 214.0 acc 175.0 steps 107.0 cached 4029.0
+03:09:05 paseo warm 11 mode A: 15.784 tok/s gen 256.0 draft 198.0 acc 156.0 steps 99.0 cached 4029.0
+03:09:05 warm-run text hashes by mode (non-A): ['D:424f201528', 'G:424f201528', 'H:424f201528'] ALL IDENTICAL
+03:09:48 native mode D: 13.42 / 14.99 / 15.93  acc 87/206 / 98/186 / 103/176
+03:10:29 native mode G: 13.84 / 15.23 / 16.61  acc 87/206 / 97/188 / 103/176
+03:11:10 native mode G: 13.70 / 15.08 / 16.50  acc 87/206 / 97/188 / 103/176
+03:11:52 native mode D: 13.40 / 14.59 / 15.93  acc 87/206 / 97/188 / 103/176
+03:11:52 restoring production
+03:16:02 production healthy: True window 1157s
+03:16:02 SUMMARY warm mode A: mean 15.784 tok/s  n=1  [15.78]
+03:16:02 SUMMARY warm mode D: mean 17.971 tok/s  n=4  [18.29, 17.78, 18.08, 17.73]
+03:16:02 SUMMARY warm mode G: mean 18.397 tok/s  n=5  [18.77, 18.49, 18.56, 18.00, 18.17]
+03:16:02 SUMMARY warm mode H: mean 18.285 tok/s  n=2  [18.38, 18.19]

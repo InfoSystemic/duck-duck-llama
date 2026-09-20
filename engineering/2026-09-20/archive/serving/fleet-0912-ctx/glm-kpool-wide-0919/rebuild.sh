@@ -1,0 +1,23 @@
+#!/bin/bash
+# Rebuild the private wider kpool kernel over the frozen deployed pool+copy CPU.
+# All other parent objects are retained; only ops.cpp is rebuilt.
+set -e
+D="$(cd "$(dirname "$0")" && pwd)"
+OUT="${1:-$D/build}"
+mkdir -p "$OUT"
+
+echo "--- ops.cpp (parent: glm-flash-rms-guard-0908) ---"
+/usr/bin/c++ -I"$D" -I/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-rms-guard-0908/private-cpu -I/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-pool-0908c/private-cpu -I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/ggml-cpu -DGGML_BACKEND_BUILD -DGGML_BACKEND_SHARED -DGGML_SCHED_MAX_COPIES=4 -DGGML_SHARED -DGGML_USE_CPU_REPACK -DGGML_USE_LLAMAFILE -DGGML_USE_OPENMP -D_GNU_SOURCE -D_XOPEN_SOURCE=600 -Dggml_cpu_EXPORTS -I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/.. -I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/. -I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/ggml-cpu -I/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/ggml/src/../include -O3 -DNDEBUG -std=gnu++17 -fPIC -Wmissing-declarations -Wmissing-noreturn -Wall -Wextra -Wpedantic -Wcast-qual -Wno-unused-function -Wno-array-bounds -Wextra-semi -march=native -fopenmp -o "$OUT"/ops.cpp.o -c "$D"/ops.combo.cpp
+
+echo "--- relink (replacing only ops.cpp.o) ---"
+/usr/bin/c++ -fPIC -O3 -DNDEBUG -shared -Wl,-soname,libggml-cpu.so.0 -o "$OUT"/libggml-cpu.so.0.22.0 /home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-pool-copy-0919/build/ggml-cpu.c.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/ggml-cpu.cpp.o /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/repack.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/hbm.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/quants.c.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/traits.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/amx/amx.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/amx/mmq.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/binary-ops.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/unary-ops.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/vec.cpp.o "$OUT"/ops.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/llamafile/sgemm.cpp.o /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/arch/x86/quants.c.o /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-0908/private-cpu/repack-x86.cpp.o -Wl,-rpath,/home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/bin: /home/user/InfoSystemic/AI-Server/engines/llama.cpp-glm5n-goal-0904/build-goal/bin/libggml-base.so.0.22.0 /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a
+
+ln -sf libggml-cpu.so.0.22.0 "$OUT"/libggml-cpu.so.0
+ln -sf libggml-cpu.so.0 "$OUT"/libggml-cpu.so
+echo "built: $OUT/libggml-cpu.so.0.22.0"
+echo "use with: LD_LIBRARY_PATH=$OUT:<the pinned LD_LIBRARY_PATH from restore-env.txt>"
+echo "enable with: GGML_CPU_GLM_POOL_FUSION=1 GGML_CPU_GLM_POOL_WIDE=1"
+# NOTE: the produced library is functionally identical to the one measured on 2026-09-11 but
+# not byte-identical to it, because GGML_ASSERT embeds __FILE__ and this script compiles from a
+# different absolute path than the original build did. Exported symbol sets match exactly.
+# For a byte-identical rebuild, compile from the same path the manifest records.

@@ -8,8 +8,9 @@ The archive is the detailed engineering record behind the [case studies](../docs
 | --- | ---: | ---: | ---: | ---: |
 | [2026-09-08](2026-09-08/README.md) | 5,015 | 0 | 8 | 5 |
 | [2026-09-12](2026-09-12/README.md) | 664 | 5,011 | 13 | 0 |
+| [2026-09-20](2026-09-20/README.md) | 319 | 0 | 0 | 0 |
 
-The September 8 snapshot includes its September 9–10 follow-ups. The September 12 snapshot adds September 11–12 engineering and references unchanged earlier files. Git history preserves previous publication revisions.
+The September 8 snapshot includes its September 9–10 follow-ups. The September 12 snapshot adds September 11–12 engineering and references unchanged earlier files. The September 20 snapshot is a curated subset for the GLM-5.3-Flash decode work of September 18–20; its source deltas are the [dated patches](../patches/README-20260920-glm5next.md). Git history preserves previous publication revisions.
 
 ## Find an artifact
 
@@ -28,6 +29,7 @@ Run these commands from the repository root. The [generated catalog](catalog.jso
 | CPU-NUMA, tensor splitting, source integration | [Complete engine bundles](2026-09-12/source-bundles.json), [earlier layer order](2026-09-08/README.md#source-bundles-and-reconstruction) |
 | GLM/Qwen scheduling, kernels, counters | [Earlier engineering map](2026-09-08/README.md#engineering-map), [bandwidth assessment](2026-09-08/archive/serving/fleet-0903/MODEL-250GBPS-20260909.md) |
 | September 11 comparisons | [Extraction and corrections](2026-09-12/archive/serving/fleet-0911/FLEET-EXTRACTION-20260911.md) |
+| GLM-5.3-Flash decode through Paseo, September 18–20 | [Snapshot map](2026-09-20/README.md), [report](../benchmarks/glm53-flash-paseo-decode-20260920.md) |
 | Foreground profiles and library rebuilds | [Flash](2026-09-12/archive/serving/fleet-0912/glmflash/README.md), [Qwen](2026-09-12/archive/serving/fleet-0912/qwen/README.md), [Full](2026-09-12/archive/serving/fleet-0912/glmfull/README.md) |
 | Benchmark and lifecycle controls | [A/B/A runner](2026-09-12/archive/serving/fleet-0912/AB-PROFILES.md) |
 | Full split granularity | [Source, metadata checks, and candidate build](2026-09-12/archive/serving/fleet-0912/glmfull-split/README.md) |
@@ -47,6 +49,7 @@ Full source patches are alternatives, not one patch stack. Separate overlays hav
 ```bash
 python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-08
 python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-12
+python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-20
 ```
 
 See [reproduction](../docs/reproducing.md) and [provenance](../docs/provenance.md) before rebuilding a measured configuration.

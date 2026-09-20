@@ -1,0 +1,25 @@
+{
+ "state": "COMPLETED; approved production restored; no thread change promoted",
+ "purpose": "Reversible 8-16 active NUMA worker sweep on exact approved kernel; no promotion",
+ "original_launcher_sha256": "5e3c2023898645da42738bd7949ad43eabc1bc5a38f791e4a251b0927cab3c9c",
+ "private_launcher_sha256": "0c6cda44196db0fdef6042e9cc7ecc512f1822f4721c800e91f7fa021d494546",
+ "cpu_sha256": "4793379e6894a9286168f79c4f323985388ec0b0ac65e54013dcd2957488af1f",
+ "probe": "thread-control-probe.json",
+ "original_pid": 2656512,
+ "private_port": 18141,
+ "private_unit": "glm53-flash-threads-test-0919.service",
+ "temporary_changes": [
+  "16-worker pool capacity",
+  "GGML_CPU_NUMA_THREADS_FILE control for 8-16 active workers",
+  "Private port 18141"
+ ],
+ "restoration": "Always stop private model, restart approved production unit, and verify exact command/library/environment",
+ "no_overlapping_model_loads": true,
+ "private_memory_max_GiB": 380,
+ "private_runtime_max_seconds": 2700,
+ "sampling": "Fixed-output native prompts and actual Codex app-server with temperature 0/seed 42; cached Codex rows compared to same cached control",
+ "known_cache_mismatch": "Unresolved original-production cached/fresh mismatch is retained; no cache fix claimed",
+ "approval": "User selected Run the staged sweep (Recommended) after the 15-20 minute outage was explained.",
+ "report": "thread-window-report.json",
+ "restored_pid": 3927330
+}

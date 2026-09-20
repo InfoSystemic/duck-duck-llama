@@ -21,4 +21,5 @@ This guide is the curated entry point to Duck Duck Llama. Each case study connec
 
 The [previous repository overview](history/legacy-overview-20260912.md) is preserved for historical context. Its chronological runtime updates are superseded by the model guides when discussing current validation status.
 - [The case for CPU + multi-channel memory](case-for-cpu-multichannel.md) — capacity economics, the 4.07x NUMA scaling result, and where CPU honestly loses
+- [What is worth taking upstream, and who has to do it](upstream-candidates.md) — five candidates checked against upstream HEAD, one already fixed there, and why submission is a human's job
 - [Qwen3.8-Flash-Next: where the ceiling actually is](qwen4exp-ceiling-20260915.md) — the decode-vs-context curve, 35% bandwidth extraction, the indexer finding, and eight refuted claims including our own

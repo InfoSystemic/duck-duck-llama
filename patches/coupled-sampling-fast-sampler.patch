@@ -1,0 +1,713 @@
+common/sampling.cpp + common/speculative.cpp: (A) coupled draft/verifier sampling, (B) the host-side cost of the sampler.
+DEPLOYED 2026-09-20 (revision c). (A) is an exact sampler: same distribution, different random stream. (B) returns the same tokens.
+Switches, default off: GGML_F18_COUPLED=1, GGML_F18_FAST_SAMPLER=1; control word bits 3 (verifier picks by Gumbel-max),
+4 (drafter couples), 5 (top-k candidates by scan), 6 (clone without candidates). Apply after mtp-draft-merge-fastpick-pad.patch.
+
+(A) Why. An agent sends no sampling fields, so the server samples at the model's defaults (temp 1.0, top_p 0.95, top_k 40,
+min_p 0.05). The verifier then DRAWS a token, and a greedy draft is accepted only when the draw happens to be the draft's argmax:
+72% of drafts against 82% for the same fixture with temperature 0, 17.1 tok/s against 18.2 on the revision b server.
+How. The last step of the sampler chain (`dist`) is replaced by   argmax_i( logit_i + G(salt, n, id_i) )   over the candidates
+the chain left, where G is standard Gumbel noise that is a pure function of (salt, n, token id): salt is fresh per request (or
+derived from the request seed), n counts the tokens the sampler has accepted. By the Gumbel-max theorem this is an exact sample
+from softmax(logit), i.e. from exactly the distribution `dist` draws from, and nothing the drafter does can change it. The MTP
+drafter looks up the verifier's (salt, n, temp, top_k, top_p, min_p) through a registry keyed by the last 16 accepted tokens,
+cuts its own top-10 the way the verifier's chain will cut, adds THE SAME noise, takes the argmax. Both sides follow the same
+draw, so they agree whenever the two distributions are close, also where the distribution is flat. If the lookup is ambiguous
+(two requests with identical recent tokens) or fails, the drafter stays greedy: correctness never depends on it.
+The grammar resample keeps its own noise stream, which reproduces the stock rejection-resample law exactly.
+Properties worth having anyway: same seed => same text with or without a drafter, and with any drafter.
+
+Evidence (A):
+  tools/coupled_sampling_check.cpp: pick frequencies against softmax for five distributions, fresh salt per draw AND one salt with
+  consecutive counters, 4,000,000 draws each: chi-square p 0.10-0.93; consecutive positions independent (p 0.23).
+  Synthetic coupling: drafter within sigma 0.3 of the verifier's logits: greedy 0.39, coupled 0.88, optimum 1-TV 0.90.
+  8-layer proxy and FULL MODEL: seeded sampled requests give IDENTICAL text with the drafter greedy and coupled (w5: two prompts).
+  Temperature-0 requests: untouched (one finite candidate), fixture text hash unchanged.
+  Full model, window w5, requests exactly as Codex sends them, one loaded process, interleaved:
+      drafter greedy   n=8   17.89 tok/s   1288/1778 drafts accepted = 72.4%
+      coupled          n=11  18.24 tok/s   1766/2356               = 75.0%        (+2.0%, about 2 sigma)
+  Much less than the synthetic case: the MTP head is not close to the trunk where the trunk is uncertain.
+
+(B) Per sampled token the server built 154,880 twelve-byte candidates (0.45 ms) and partial-sorted them for top-k (0.19 ms); per
+verify cycle it cloned the sampler, copying the 1.86 MB candidate array (0.58 ms): ~2.1 ms per cycle at 2.4 tokens per cycle.
+When the first ACTIVE sampler of the chain is top-k (disabled samplers are "?name" placeholders; k <= 128; no logit bias,
+mirostat or n_probs), an AVX-512 threshold scan over the raw logits selects the k best in ~50 us and the chain starts from those,
+sorted: same candidates, same order (tools/topk_scan_check.cpp: 300 rows with -inf, NaN, ties and k = 1..128, 0 mismatches; an
+ascending row is declined after 8,192 insertions and sorted the old way). The grammar resample and a forcing reasoning budget
+still see the whole vocabulary. The clone stops copying candidates that nobody reads.
+Evidence (B): seeded sampled and greedy requests, four sampler configurations, with and without (A): IDENTICAL text on/off.
+  Full model w5, greedy fixture, one process: 18.81/18.84/18.79 -> 19.11/19.11 tok/s (+1.6%); time outside graphs 4.1 -> 2.4 ms.
+  It ONLY helps with a short OpenMP idle spin or a shared worker team: on the default configuration it made decode 2.7% SLOWER,
+  because the first draft graph started earlier, into the spinning workers of the trunk team (cpu-numa-shared-team.patch).
+
+Parents: common/sampling.cpp sha256 f23f8d663932bfd7... (its object recompiles byte-identically to the production object) and
+the speculative.cpp produced by mtp-draft-merge-fastpick-pad.patch. Deployed libllama-common: 0574e0131bd3c532...
+
+--- a/common/sampling.cpp
++++ b/common/sampling.cpp
+@@ -15,6 +15,90 @@
+ #include <unordered_map>
+ #include <vector>
+ 
++// ---- f18 coupled sampling (f18-coupling.inc) ----
++#include "f18-coupling.inc"
++
++#include <fcntl.h>
++#include <mutex>
++#include <random>
++#include <sys/mman.h>
++#include <unistd.h>
++
++// GGML_F18_COUPLED=1, or bit 3 of the mapped control word when GGML_F18_SPEC_CONTROL_FILE is set (flip it only while idle)
++static bool f18_coupled_enabled() {
++    static const uint32_t * control = [] () -> const uint32_t * {
++        const char * path = getenv("GGML_F18_SPEC_CONTROL_FILE");
++        if (!path || !*path) {
++            return nullptr;
++        }
++        const int fd = open(path, O_RDONLY | O_CLOEXEC);
++        if (fd < 0) {
++            return nullptr;
++        }
++        void * mapping = mmap(nullptr, sizeof(uint32_t), PROT_READ, MAP_SHARED, fd, 0);
++        close(fd);
++        return mapping == MAP_FAILED ? nullptr : (const uint32_t *) mapping;
++    }();
++    static const bool env_on = [] {
++        const char * v = getenv("GGML_F18_COUPLED");
++        return v && atoi(v) != 0;
++    }();
++    if (control) {
++        return (__atomic_load_n(control, __ATOMIC_ACQUIRE) & 8u) != 0;
++    }
++    return env_on;
++}
++
++// GGML_F18_FAST_SAMPLER=1, or bits of the control word: bit 5 (32) fast top-k candidates, bit 6 (64) clone without candidates
++static bool f18_fast_sampler_enabled(uint32_t bit = 32u) {
++    static const uint32_t * control = [] () -> const uint32_t * {
++        const char * path = getenv("GGML_F18_SPEC_CONTROL_FILE");
++        if (!path || !*path) {
++            return nullptr;
++        }
++        const int fd = open(path, O_RDONLY | O_CLOEXEC);
++        if (fd < 0) {
++            return nullptr;
++        }
++        void * mapping = mmap(nullptr, sizeof(uint32_t), PROT_READ, MAP_SHARED, fd, 0);
++        close(fd);
++        return mapping == MAP_FAILED ? nullptr : (const uint32_t *) mapping;
++    }();
++    static const bool env_on = [] {
++        const char * v = getenv("GGML_F18_FAST_SAMPLER");
++        return v && atoi(v) != 0;
++    }();
++    if (control) {
++        return (__atomic_load_n(control, __ATOMIC_ACQUIRE) & bit) != 0;
++    }
++    return env_on;
++}
++
++#include "f18-topk-scan.inc"
++
++// GGML_F18_SPEC_TRACE=1: where the host-side sampling time goes (main loop is single-threaded)
++static const bool f18_smpl_trace = [] {
++    const char * v = getenv("GGML_F18_SPEC_TRACE");
++    return v && atoi(v) != 0;
++}();
++static int64_t f18_t_set_logits = 0, f18_t_chain = 0, f18_t_clone = 0, f18_n_sample = 0, f18_n_clone = 0;
++
++// a fixed request seed gives a fixed noise field (same prompt + same seed = same text, with or without a drafter);
++// the default seed gives a fresh one per request
++static uint64_t f18_new_salt(uint32_t seed) {
++    if (seed != LLAMA_DEFAULT_SEED) {
++        return f18_mix64(0xF18C0DE5EEDull ^ (uint64_t) seed);
++    }
++    static std::mutex mtx;
++    static std::mt19937_64 rng = [] {
++        std::random_device rd;
++        const uint64_t s = ((uint64_t) rd() << 32) ^ (uint64_t) rd() ^ (uint64_t) ggml_time_us();
++        return std::mt19937_64(s);
++    }();
++    std::lock_guard<std::mutex> lock(mtx);
++    return rng();
++}
++
+ // the ring buffer works similarly to std::deque, but with a fixed capacity
+ // TODO: deduplicate with llama-impl.h
+ template<typename T>
+@@ -125,9 +209,12 @@
+         prev.clear();
+ 
+         llama_sampler_reset(chain);
++
++        f18_n_acc = 0;
++        f18_salt  = f18_new_salt(params.seed);
+     }
+ 
+-    void set_logits(struct llama_context * ctx, int idx) {
++    void set_logits(struct llama_context * ctx, int idx, bool f18_fast = false) {
+         const float *       sampled_probs  = llama_get_sampled_probs_ith     (ctx, idx);
+         const float *       sampled_logits = llama_get_sampled_logits_ith    (ctx, idx);
+         const llama_token * sampled_ids    = llama_get_sampled_candidates_ith(ctx, idx);
+@@ -137,6 +224,23 @@
+ 
+         const int n_vocab = llama_vocab_n_tokens(vocab);
+ 
++        if (f18_fast && f18_fast_k > 0 && f18_fast_k < n_vocab && !sampled_probs && !sampled_logits) {
++            // the chain's first active sampler is top-k: hand it its own result (k best, sorted) instead of the vocabulary
++            const auto * logits = llama_get_logits_ith(ctx, idx);
++            GGML_ASSERT(logits != nullptr);
++            float   best[F18_FAST_K_MAX];
++            int32_t best_id[F18_FAST_K_MAX];
++            const int m = f18_topk_scan(logits, n_vocab, f18_fast_k, best, best_id);
++            if (m == f18_fast_k) {
++                cur.resize(m);
++                for (int i = 0; i < m; ++i) {
++                    cur[i] = llama_token_data{best_id[i], best[i], 0.0f};
++                }
++                cur_p = { cur.data(), cur.size(), -1, true };
++                return;
++            }
++        }
++
+         if (sampled_probs) {
+             const uint32_t sampled_probs_count = llama_get_sampled_probs_count_ith(ctx, idx);
+             cur.resize(sampled_probs_count);
+@@ -166,8 +270,77 @@
+     }
+ 
+     mutable int64_t t_total_us = 0;
++
++    // f18 coupled sampling: the final pick of a chain that ends in `dist` is argmax(logit + G(f18_salt, f18_n_acc, id))
++    int32_t  f18_fast_k   = 0;     // > 0: the first active sampler of the chain is top-k with this k (fast candidate path)
++    bool     f18_eligible = false;
++    uint64_t f18_salt     = 0;
++    uint64_t f18_n_acc    = 0; // tokens accepted since reset (prompt + generated) = noise index of the next token
+ };
+ 
++static std::mutex                    f18_reg_mtx;
++static std::vector<common_sampler *> f18_reg; // live samplers made by common_sampler_init (clones are not listed)
++
++bool common_sampler_f18_coupling_find(const int32_t * tail, size_t n_tail, f18_coupling & out) {
++    if (n_tail == 0 || !f18_coupled_enabled()) {
++        return false;
++    }
++    std::lock_guard<std::mutex> lock(f18_reg_mtx);
++    const common_sampler * found = nullptr;
++    for (const common_sampler * s : f18_reg) {
++        if (!s->f18_eligible || s->params.backend_sampling || s->prev.size() < n_tail) {
++            continue;
++        }
++        bool same = true;
++        for (size_t i = 0; i < n_tail && same; ++i) {
++            same = s->prev.rat(i) == tail[n_tail - 1 - i];
++        }
++        if (!same) {
++            continue;
++        }
++        if (found) {
++            return false; // two requests with the same recent tokens: do not guess
++        }
++        found = s;
++    }
++    if (!found) {
++        return false;
++    }
++    out.salt  = found->f18_salt;
++    out.n_acc = found->f18_n_acc;
++    out.temp  = found->params.temp;
++    out.top_p = found->params.top_p;
++    out.min_p = found->params.min_p;
++    out.top_k = found->params.top_k;
++    return true;
++}
++
++// Replace the pick of the final `dist` sampler. dist leaves p_i = softmax(logit_i) over the candidates that survived the
++// chain, so argmax(logit_i + G_i) is an exact sample from p. `stream` separates the grammar resample from the first draw.
++static void f18_coupled_select(common_sampler * gsmpl, uint64_t stream) {
++    auto & cur_p = gsmpl->cur_p;
++    if (!gsmpl->f18_eligible || cur_p.size < 2 || cur_p.selected < 0 || !f18_coupled_enabled()) {
++        return;
++    }
++    const uint64_t salt = gsmpl->f18_salt ^ stream;
++    double  best   = -INFINITY;
++    int64_t best_i = -1;
++    for (size_t i = 0; i < cur_p.size; ++i) {
++        const float l = cur_p.data[i].logit;
++        if (!(l > -INFINITY)) {
++            continue;
++        }
++        const double v = (double) l + f18_gumbel(salt, gsmpl->f18_n_acc, (uint32_t) cur_p.data[i].id);
++        if (v > best) {
++            best   = v;
++            best_i = (int64_t) i;
++        }
++    }
++    if (best_i >= 0) {
++        cur_p.selected = best_i;
++    }
++}
++
+ std::string common_params_sampling::print() const {
+     char result[1024];
+ 
+@@ -434,6 +607,30 @@
+         /* .cur_p   = */ {},
+     };
+ 
++    // the override below is only valid where `dist` makes the final pick
++    result->f18_eligible = params.mirostat == 0 &&
++        std::find(params.samplers.begin(), params.samplers.end(), COMMON_SAMPLER_TYPE_ADAPTIVE_P) == params.samplers.end();
++    result->f18_salt = f18_new_salt(params.seed);
++    {
++        std::lock_guard<std::mutex> lock(f18_reg_mtx);
++        f18_reg.push_back(result);
++    }
++
++    // fast candidate path: disabled samplers are "?name" placeholders; the first real one must be top-k (so no logit bias,
++    // penalties, DRY or top-n-sigma ahead of it), and nobody may ask for probabilities of the full vocabulary
++    if (params.mirostat == 0 && params.n_probs == 0) {
++        for (int i = 0; i < llama_sampler_chain_n(chain); ++i) {
++            const char * name = llama_sampler_name(llama_sampler_chain_get(chain, i));
++            if (name && name[0] == '?') {
++                continue;
++            }
++            if (name && strcmp(name, "top-k") == 0 && params.top_k > 0 && params.top_k <= F18_FAST_K_MAX) {
++                result->f18_fast_k = params.top_k;
++            }
++            break;
++        }
++    }
++
+     return result;
+ }
+ 
+@@ -442,6 +639,11 @@
+         return;
+     }
+ 
++    {
++        std::lock_guard<std::mutex> lock(f18_reg_mtx);
++        f18_reg.erase(std::remove(f18_reg.begin(), f18_reg.end(), gsmpl), f18_reg.end());
++    }
++
+     llama_sampler_free(gsmpl->grmr);
+     llama_sampler_free(gsmpl->rbudget);
+     llama_sampler_free(gsmpl->chain);
+@@ -496,6 +698,7 @@
+     llama_sampler_accept(gsmpl->chain, token);
+ 
+     gsmpl->prev.push_back(token);
++    gsmpl->f18_n_acc++;
+ }
+ 
+ void common_sampler_reset(struct common_sampler * gsmpl) {
+@@ -507,15 +710,31 @@
+ }
+ 
+ struct common_sampler * common_sampler_clone(common_sampler * gsmpl) {
+-    return new common_sampler {
++    const int64_t f18_t0 = f18_smpl_trace ? ggml_time_us() : 0;
++    // the candidates of the last sample are rebuilt by the next one; the server's per-cycle clone never reads them
++    const bool f18_skip_cur = f18_fast_sampler_enabled(64u);
++    auto * result = new common_sampler {
+         /* .params  = */ gsmpl->params,
+         /* .grmr    = */ llama_sampler_clone(gsmpl->grmr),
+         /* .rbudget = */ llama_sampler_clone(gsmpl->rbudget),
+         /* .chain   = */ llama_sampler_clone(gsmpl->chain),
+         /* .prev    = */ gsmpl->prev,
+-        /* .cur     = */ gsmpl->cur,
+-        /* .cur_p   = */ gsmpl->cur_p,
++        /* .cur     = */ f18_skip_cur ? std::vector<llama_token_data>() : gsmpl->cur,
++        /* .cur_p   = */ f18_skip_cur ? llama_token_data_array{ nullptr, 0, -1, false } : gsmpl->cur_p,
+     };
++    result->f18_fast_k = gsmpl->f18_fast_k;
++
++    // a clone continues the same noise field (the server restores from one after a checkpoint replay); it is not listed
++    result->f18_eligible = gsmpl->f18_eligible;
++    result->f18_salt     = gsmpl->f18_salt;
++    result->f18_n_acc    = gsmpl->f18_n_acc;
++
++    if (f18_smpl_trace) {
++        f18_t_clone += ggml_time_us() - f18_t0;
++        f18_n_clone++;
++    }
++
++    return result;
+ }
+ 
+ void common_sampler_copy(const common_sampler * src, common_sampler * dst) {
+@@ -536,6 +755,11 @@
+     dst->cur_p      = src->cur_p;
+     dst->cur_p.data = src->cur_p.data ? dst->cur.data() : nullptr; // re-point to dst's buffer
+     dst->t_total_us = src->t_total_us;
++
++    dst->f18_fast_k   = src->f18_fast_k;
++    dst->f18_eligible = src->f18_eligible;
++    dst->f18_salt     = src->f18_salt;
++    dst->f18_n_acc    = src->f18_n_acc;
+ }
+ 
+ void common_perf_print(const struct llama_context * ctx, const struct common_sampler * gsmpl) {
+@@ -604,7 +828,12 @@
+     auto & chain = gsmpl->chain;
+     auto & cur_p = gsmpl->cur_p; // initialized by set_logits
+ 
+-    gsmpl->set_logits(ctx, idx);
++    const int64_t f18_t0 = f18_smpl_trace ? ggml_time_us() : 0;
++    const bool f18_fast = gsmpl->f18_fast_k > 0 && f18_fast_sampler_enabled() &&
++        !(grammar_first && grammar_should_apply(gsmpl)) &&
++        !(gsmpl->rbudget && common_reasoning_budget_get_state(gsmpl->rbudget) == REASONING_BUDGET_FORCING);
++    gsmpl->set_logits(ctx, idx, f18_fast);
++    const int64_t f18_t1 = f18_smpl_trace ? ggml_time_us() : 0;
+ 
+     // Check if a backend sampler has already sampled a token in which case we
+     // return that token id directly.
+@@ -636,9 +865,20 @@
+     }
+ 
+     llama_sampler_apply(chain, &cur_p);
++    f18_coupled_select(gsmpl, 0);
+ 
+     id = cur_p.data[cur_p.selected].id;
+ 
++    if (f18_smpl_trace) {
++        f18_t_set_logits += f18_t1 - f18_t0;
++        f18_t_chain      += ggml_time_us() - f18_t1;
++        if (++f18_n_sample % 512 == 0) {
++            LOG_WRN("F18_SAMPLER_TRACE samples=%lld per-sample ms: set_logits=%.3f chain=%.3f | clones=%lld per-clone ms=%.3f | candidates=%zu\n",
++                    (long long) f18_n_sample, f18_t_set_logits/1000.0/f18_n_sample, f18_t_chain/1000.0/f18_n_sample,
++                    (long long) f18_n_clone, f18_n_clone ? f18_t_clone/1000.0/f18_n_clone : 0.0, gsmpl->cur.size());
++        }
++    }
++
+     if (grammar_first || !grammar_should_apply(gsmpl)) {
+         return id;
+     }
+@@ -667,6 +907,8 @@
+     }
+ 
+     llama_sampler_apply(chain, &cur_p);
++    // stock draws the resample independently of the rejected first draw; a second noise stream keeps exactly that law
++    f18_coupled_select(gsmpl, 0x5EC0DD12A11ull);
+ 
+     GGML_ASSERT(cur_p.selected != -1 && "no selected token during sampling - check your sampling configuration");
+ 
+--- /dev/null
++++ b/common/f18-coupling.inc
+@@ -0,0 +1,40 @@
++#pragma once
++// Coupled sampling for speculative decoding (Gumbel-max with counter-based noise).
++//
++// The verifier picks   argmax_i( log p_i + G(salt, n, id_i) )   over the candidates its sampler chain left, where G is
++// standard Gumbel noise that is a pure function of (salt, n, token id): salt is fresh per request, n counts the tokens the
++// sampler has accepted. By the Gumbel-max theorem that is an exact sample from p, and nothing the drafter does can change it.
++// A drafter that knows (salt, n) adds THE SAME noise to its own log q and takes the argmax, so both sides tend to land on the
++// same token whenever q is close to p -- including at high-entropy positions, where a greedy draft is accepted only with
++// probability p(argmax q).
++//
++// Included by sampling.cpp (verifier) and speculative.cpp (drafter); both live in libllama-common.
++
++#include <cmath>
++#include <cstdint>
++
++static inline uint64_t f18_mix64(uint64_t x) { // splitmix64 finalizer: a bijection with full avalanche
++    x += 0x9E3779B97F4A7C15ull;
++    x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ull;
++    x = (x ^ (x >> 27)) * 0x94D049BB133111EBull;
++    return x ^ (x >> 31);
++}
++
++// Gumbel(0,1) for (salt, position, token id)
++static inline double f18_gumbel(uint64_t salt, uint64_t n, uint32_t id) {
++    const uint64_t h = f18_mix64(f18_mix64(f18_mix64(salt) + n) + id);
++    const double   u = ((double) (h >> 11) + 0.5) * (1.0 / 9007199254740992.0); // (0, 1), 53 bits
++    return -std::log(-std::log(u));
++}
++
++struct f18_coupling {
++    uint64_t salt  = 0;
++    uint64_t n_acc = 0;   // tokens accepted by the verifier's sampler so far = noise index of the next token
++    float    temp  = 1.0f;
++    float    top_p = 1.0f;
++    float    min_p = 0.0f;
++    int32_t  top_k = 0;
++};
++
++// sampling.cpp: finds the one live verifier sampler whose accepted-token tail equals `tail` (oldest first). False when none or several match.
++bool common_sampler_f18_coupling_find(const int32_t * tail, size_t n_tail, f18_coupling & out);
+--- /dev/null
++++ b/common/f18-topk-scan.inc
+@@ -0,0 +1,89 @@
++#pragma once
++// The k largest logits of a vocabulary row, in descending order, lowest index first among equals; NaN never enters.
++// This is what the top-k sampler computes with std::partial_sort over 154,880 twelve-byte candidates (0.19 ms) after the
++// candidate array has been built (0.45 ms). A threshold scan over the raw floats does it in ~20 us.
++
++#include <cstdint>
++#include <cstdlib>
++
++static constexpr int F18_FAST_K_MAX = 128; // std::partial_sort is what top-k itself uses up to here
++// a row that keeps beating the cut (sorted ascending, say) would cost O(n*k): give up and let the caller sort
++static constexpr int F18_TOPK_MAX_INSERTS = 8192;
++
++// the k largest values in descending order, lowest index first among equals; NaN never enters.
++// Returns how many were found, or -1 when the row is pathological (see F18_TOPK_MAX_INSERTS).
++static inline void f18_topk_insert(float v, int32_t id, int k, int & m, float * best, int32_t * best_id) {
++    int j = m < k ? m++ : k - 1;
++    while (j > 0 && best[j - 1] < v) {
++        best[j]    = best[j - 1];
++        best_id[j] = best_id[j - 1];
++        --j;
++    }
++    best[j]    = v;
++    best_id[j] = id;
++}
++
++static int f18_topk_scan_scalar(const float * x, int n, int k, float * best, int32_t * best_id) {
++    int m = 0;
++    int n_ins = 0;
++    for (int i = 0; i < n; ++i) {
++        const float v = x[i];
++        if (m == k ? v > best[k - 1] : v == v) {
++            f18_topk_insert(v, i, k, m, best, best_id);
++            if (++n_ins > F18_TOPK_MAX_INSERTS) {
++                return -1;
++            }
++        }
++    }
++    return m;
++}
++
++#if defined(__x86_64__)
++#include <immintrin.h>
++__attribute__((target("avx512f")))
++static int f18_topk_scan_avx512(const float * x, int n, int k, float * best, int32_t * best_id) {
++    int m = 0;
++    int i = 0;
++    for (; i < n && m < k; ++i) { // fill
++        if (x[i] == x[i]) {
++            f18_topk_insert(x[i], i, k, m, best, best_id);
++        }
++    }
++    if (m < k) {
++        return m;
++    }
++    int n_ins = 0;
++    __m512 thr = _mm512_set1_ps(best[k - 1]);
++    for (; i + 16 <= n; i += 16) {
++        __mmask16 mask = _mm512_cmp_ps_mask(_mm512_loadu_ps(x + i), thr, _CMP_GT_OQ);
++        while (mask) {
++            const int b = __builtin_ctz(mask);
++            mask &= (__mmask16) (mask - 1);
++            const float v = x[i + b];
++            if (v > best[k - 1]) { // the cut may have moved inside this block
++                f18_topk_insert(v, i + b, k, m, best, best_id);
++                thr = _mm512_set1_ps(best[k - 1]);
++                if (++n_ins > F18_TOPK_MAX_INSERTS) {
++                    return -1;
++                }
++            }
++        }
++    }
++    for (; i < n; ++i) {
++        if (x[i] > best[k - 1]) {
++            f18_topk_insert(x[i], i, k, m, best, best_id);
++        }
++    }
++    return m;
++}
++#endif
++
++static int f18_topk_scan(const float * x, int n, int k, float * best, int32_t * best_id) {
++#if defined(__x86_64__)
++    static const bool has_avx512 = __builtin_cpu_supports("avx512f") && !(getenv("GGML_F18_TOPK_SCALAR") && atoi(getenv("GGML_F18_TOPK_SCALAR")) != 0);
++    if (has_avx512) {
++        return f18_topk_scan_avx512(x, n, k, best, best_id);
++    }
++#endif
++    return f18_topk_scan_scalar(x, n, k, best, best_id);
++}
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -9,6 +9,7 @@
+ #include "ngram-map.h"
+ #include "ngram-mod.h"
+ #include "sampling.h"
++#include "f18-coupling.inc"
+ 
+ #include "../src/llama-ext.h" // staging API: llama_set_embeddings_nextn / llama_get_embeddings_nextn_ith (used by MTP)
+ 
+@@ -1332,6 +1333,7 @@
+     bool f18_merge     = false;
+     bool f18_fast_pick = false;
+     bool f18_pad       = false;
++    bool f18_couple    = false; // draft against the verifier's noise (f18-coupling.inc)
+     // pad rows attend densely in the draft layer; past this context that costs more than the graph rebuild it saves
+     llama_pos f18_pad_max_ctx = 12288;
+     bool f18_trace     = false;
+@@ -1354,9 +1356,95 @@
+             f18_merge     = f18_merge_allowed && (mask & 1u);
+             f18_fast_pick = (mask & 2u) != 0;
+             f18_pad       = f18_merge_allowed && (mask & 4u);
++            f18_couple    = (mask & 16u) != 0;
+         }
+     }
+ 
++    std::vector<f18_coupling> f18_cpl;    // per sequence: the verifier's salt, counter and truncation for this draft call
++    std::vector<bool>         f18_cpl_ok;
++    int64_t f18_n_coupled = 0, f18_n_uncoupled = 0;
++
++    static constexpr int F18_PICK_K = 10;
++
++    // the F18_PICK_K largest logits, descending
++    static int f18_top(const float * logits, int n_vocab, float * best, int * best_id) {
++        const int K = F18_PICK_K;
++        int   n = 0;
++        float thr = -INFINITY;
++        for (int i = 0; i < n_vocab; ++i) {
++            const float l = logits[i];
++            if (n == K && l <= thr) {
++                continue;
++            }
++            int j = n < K ? n++ : K - 1;
++            while (j > 0 && best[j - 1] < l) {
++                best[j] = best[j - 1];
++                best_id[j] = best_id[j - 1];
++                --j;
++            }
++            best[j] = l;
++            best_id[j] = i;
++            if (n == K) {
++                thr = best[K - 1];
++            }
++        }
++        return n;
++    }
++
++    // Draft the token the verifier is most likely to DRAW: cut the draft distribution the way the verifier's chain will cut
++    // its own (top_k, top_p, min_p on the untempered distribution, temperature last), add the verifier's noise for this
++    // position, take the argmax. `step` is the draft depth: the verifier samples that token with counter n_acc + step.
++    static llama_token f18_pick_coupled(const float * logits, int n_vocab, const f18_coupling & c, uint64_t step, float & p_top) {
++        float best[F18_PICK_K]    = { 0.0f };
++        int   best_id[F18_PICK_K] = { 0 };
++        const int n = f18_top(logits, n_vocab, best, best_id);
++
++        double pr[F18_PICK_K];
++        double sum = 0.0;
++        for (int j = 0; j < n; ++j) {
++            pr[j] = exp((double) (best[j] - best[0]));
++            sum += pr[j];
++        }
++        int n_keep = n;
++        if (c.top_k > 0) {
++            n_keep = std::min(n_keep, (int) c.top_k);
++        }
++        if (c.top_p < 1.0f) {
++            double cum = 0.0;
++            for (int j = 0; j < n_keep; ++j) {
++                cum += pr[j]/sum;
++                if (cum >= c.top_p) {
++                    n_keep = j + 1;
++                    break;
++                }
++            }
++        }
++        if (c.min_p > 0.0f) {
++            for (int j = 1; j < n_keep; ++j) {
++                if (pr[j] < (double) c.min_p*pr[0]) {
++                    n_keep = j;
++                    break;
++                }
++            }
++        }
++
++        const double inv_t = 1.0/(double) c.temp;
++        double best_v = -INFINITY;
++        int    best_j = 0;
++        double sum_t  = 0.0;
++        for (int j = 0; j < n_keep; ++j) {
++            const double lt = (double) (best[j] - best[0])*inv_t;
++            sum_t += exp(lt);
++            const double v = lt + f18_gumbel(c.salt, c.n_acc + step, (uint32_t) best_id[j]);
++            if (v > best_v) {
++                best_v = v;
++                best_j = j;
++            }
++        }
++        p_top = (float) (exp((double) (best[best_j] - best[0])*inv_t)/sum_t);
++        return best_id[best_j];
++    }
++
+     // same result as the TOP_K(10)+dist chain read through get_candidates: the best token and its softmax share of the top 10
+     static llama_token f18_pick(const float * logits, int n_vocab, float & p_top) {
+         const int K = 10;
+@@ -1474,6 +1562,9 @@
+         f18_pad       = f18_env("GGML_F18_MTP_PAD") && f18_merge_allowed;
+         if (const char * v = getenv("GGML_F18_MTP_PAD_MAX_CTX")) { f18_pad_max_ctx = (llama_pos) atoll(v); }
+         f18_trace     = f18_env("GGML_F18_SPEC_TRACE");
++        f18_couple    = f18_env("GGML_F18_COUPLED");
++        f18_cpl.assign(n_seq, {});
++        f18_cpl_ok.assign(n_seq, false);
+         if (const char * path = getenv("GGML_F18_SPEC_CONTROL_FILE")) {
+             const int fd = open(path, O_RDONLY | O_CLOEXEC);
+             GGML_ASSERT(fd >= 0 && "GGML_F18_SPEC_CONTROL_FILE must exist");
+@@ -1483,7 +1574,7 @@
+             f18_control = (const uint32_t *) mapping;
+             f18_refresh();
+         }
+-        SPC_WRN("f18: mtp merge=%d fast_pick=%d pad=%d trace=%d\n", (int) f18_merge, (int) f18_fast_pick, (int) f18_pad, (int) f18_trace);
++        SPC_WRN("f18: mtp merge=%d fast_pick=%d pad=%d coupled=%d trace=%d\n", (int) f18_merge, (int) f18_fast_pick, (int) f18_pad, (int) f18_couple, (int) f18_trace);
+     }
+ 
+     // f18: write the deferred rows of seq_id that are still part of the sequence (pos < pos_end) to the draft cache now
+@@ -1757,6 +1848,24 @@
+             drafting[seq_id] = true;
+             common_sampler_reset(smpls[seq_id].get());
+ 
++            f18_cpl_ok[seq_id] = false;
++            if (f18_couple && f18_fast_pick && backend_chains[seq_id] == nullptr && dp.prompt) {
++                // the verifier's sampler has accepted the prompt and everything generated, id_last included
++                llama_token tail[16];
++                size_t n_tail = 0;
++                const auto & pr = *dp.prompt;
++                for (size_t k = pr.size() - std::min<size_t>(15, pr.size()); k < pr.size(); ++k) {
++                    tail[n_tail++] = pr[k];
++                }
++                tail[n_tail++] = dp.id_last;
++                f18_coupling c;
++                if (common_sampler_f18_coupling_find(tail, n_tail, c) && c.temp > 0.0f) {
++                    f18_cpl[seq_id]    = c;
++                    f18_cpl_ok[seq_id] = true;
++                }
++                (f18_cpl_ok[seq_id] ? f18_n_coupled : f18_n_uncoupled)++;
++            }
++
+             const int f18_rows_begin = batch.n_tokens;
+ 
+             if (!deferred[seq_id].tok.empty()) {
+@@ -1847,7 +1956,9 @@
+                     llama_synchronize(ctx_dft);
+                     const float * logits = llama_get_logits_ith(ctx_dft, i_last[seq_id]);
+                     GGML_ASSERT(logits != nullptr);
+-                    id    = f18_pick(logits, llama_vocab_n_tokens(llama_model_get_vocab(llama_get_model(ctx_dft))), p_top);
++                    const int n_vocab_dft = llama_vocab_n_tokens(llama_model_get_vocab(llama_get_model(ctx_dft)));
++                    id    = f18_cpl_ok[seq_id] ? f18_pick_coupled(logits, n_vocab_dft, f18_cpl[seq_id], (uint64_t) i, p_top)
++                                               : f18_pick(logits, n_vocab_dft, p_top);
+                     h_row = llama_get_embeddings_nextn_ith(ctx_dft, i_last[seq_id]);
+                 } else {
+                     common_sampler_sample(smpl, ctx_dft, i_last[seq_id], true);
+@@ -1936,9 +2047,10 @@
+         }
+ 
+         if (f18_trace && ++f18_n_draft % 256 == 0) {
+-            SPC_WRN("F18_SPEC_TRACE drafts=%lld per-cycle ms: process=%.3f decode1=%.3f pick1=%.3f decode2=%.3f pick2=%.3f merged_rows=%.2f flushes=%lld\n",
++            SPC_WRN("F18_SPEC_TRACE drafts=%lld per-cycle ms: process=%.3f decode1=%.3f pick1=%.3f decode2=%.3f pick2=%.3f merged_rows=%.2f flushes=%lld coupled=%lld uncoupled=%lld\n",
+                     (long long) f18_n_draft, f18_t_process/1000.0/f18_n_draft, f18_t_decode1/1000.0/f18_n_draft, f18_t_pick1/1000.0/f18_n_draft,
+-                    f18_t_decode2/1000.0/f18_n_draft, f18_t_pick2/1000.0/f18_n_draft, (double) f18_n_merged/f18_n_draft, (long long) f18_n_flushed);
++                    f18_t_decode2/1000.0/f18_n_draft, f18_t_pick2/1000.0/f18_n_draft, (double) f18_n_merged/f18_n_draft, (long long) f18_n_flushed,
++                    (long long) f18_n_coupled, (long long) f18_n_uncoupled);
+         }
+ 
+         if (chain_heads) {
