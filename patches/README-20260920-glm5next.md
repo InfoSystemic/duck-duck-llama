@@ -1,8 +1,8 @@
 # GLM-5.3-Flash decode patches, 09-18 to 09-20
 
-Fourteen changes to the GLM runtime (`llama.cpp-glm5n-goal-0904` line) measured on a Lenovo SR950 (4x Xeon Gold 6242, 755 GiB DDR4-2400,
+Fifteen changes to the GLM runtime (`llama.cpp-glm5n-goal-0904` line) measured on a Lenovo SR950 (4x Xeon Gold 6242, 755 GiB DDR4-2400,
 381.6 GB/s measured, no GPU), plus one candidate for upstream. Rates are single-stream decode tok/s of an actual Codex turn through the
-Paseo wrapper at ~4,000 input tokens, modes compared inside one loaded server. All fourteen are in production (revision e, 2026-09-20).
+Paseo wrapper at ~4,000 input tokens, modes compared inside one loaded server. All fifteen are in production (revision f, 2026-09-20).
 Report: [benchmarks/glm53-flash-paseo-decode-20260920.md](../benchmarks/glm53-flash-paseo-decode-20260920.md).
 
 | # | patch | library | switch | result | output |
@@ -21,6 +21,7 @@ Report: [benchmarks/glm53-flash-paseo-decode-20260920.md](../benchmarks/glm53-fl
 | 12 | `coupled-sampling-fast-sampler.patch` (A) | libllama-common | `GGML_F18_COUPLED=1` | sampled requests 17.89 -> 18.24, acceptance 72.4% -> 75.0% | exact sampler, same distribution |
 | 13 | `coupled-sampling-fast-sampler.patch` (B) | libllama-common | `GGML_F18_FAST_SAMPLER=1` | 18.81 -> 19.11 (+1.6%) | identical |
 | 14 | `meta-backend-small-uploads-blocking-dispatch.patch` | libggml-base | `GGML_META_F18=3` | 19.30 -> 20.18 (+4.6%); sampled 17.98 -> 18.79; verify graph 119.7 -> 115.5 ms | identical |
+| 15 | `q5k-x16-expert-prefetch.patch` | libggml-cpu | `GGML_F18_FEATURES` bit 3 | 19.57 -> 20.18 (+3.1%); expert down projection 77 -> ~95 GB/s per socket | bit-identical |
 | - | `coupled-sampling-offline-fit.patch` | libllama-common | `GGML_F18_COUPLE_LOG` `GGML_F18_COUPLED_DRAFT_TEMP` | window w7 only: replay of drafter settings against logged draws; deployed setting is optimal, coupling +3.1% tokens per cycle | none; not deployed |
 | - | `upstream-cpu-fattn-f32-accumulate.patch` | upstream ggml-cpu at `b23efaa2` | none | error 6.4e-3 -> 8.6e-5, op +17-21% | toward float64; candidate, not submitted |
 
@@ -36,7 +37,7 @@ compared byte for byte with the source that was built and deployed. Every switch
 
 The rows were measured over three days against different controls, so the percentages do not multiply into one figure. What can be
 said: production gave 12.0 tok/s on this fixture before #1 (one cold, sampled run), 15.5-16.2 greedy with #1, #2, #8, #9 deployed, and
-20.0 greedy with all of them (19.0 on sampled requests exactly as Codex sends them, mean of twelve).
+20.2 greedy with all of them (19.7 on sampled requests exactly as Codex sends them, mean of twelve, none below 19).
 
 #4 is the only change whose output differs from the stock engine, and the reason is the stock engine: its kernel sums V in FP16
 ([report](../benchmarks/cpu-flash-attn-f16-accumulation.md)). Its gate is a float64 reference computed in situ, not byte parity.
@@ -49,6 +50,9 @@ entries, because `std::partial_sort` is faster again on long rows.
 
 #7 exists because of #13: the faster sampler made decode 2.7% slower until the two worker teams stopped colliding. The spin-count
 setting needs no code and is what moved the number; the shared team makes the collision impossible.
+
+#15 corrects this repository's own claim that the expert kernels were finished: the Q5_K down projection ran 27% below the wall because
+of its access order, and one prefetch per cache line fixed it. The prefetch distance is not a free parameter (four groups ahead: -65%).
 
 #14 was found with `/proc` and strace, not with a profiler: the backend started one thread per NUMA device for every graph-input
 upload (~93 thread creations per decode cycle). It also records the build recipe of the production libggml-base, which nobody had

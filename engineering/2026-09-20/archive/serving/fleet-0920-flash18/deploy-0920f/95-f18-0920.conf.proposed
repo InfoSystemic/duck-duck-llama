@@ -1,0 +1,26 @@
+# GLM-5.3-Flash f18 stack, revision f (2026-09-20). Revision e plus a software prefetch in the Q5_K x16 expert kernel, bit-exact
+# (window w10, one process: greedy fixture 19.57 -> 20.18 tok/s, verify graph 118.6 -> 114.2 ms; same text hash, accepted drafts and
+# log-probabilities):
+#   GGML_F18_FEATURES=15   bit 3: the experts' down projection (Q5_K in 39 of 42 layers) streamed at ~77 GB/s per socket while the
+#                          Q4_K gate/up projections run at the ~97 GB/s wall. The compact Q5 kernel walks a 2,880-byte block group
+#                          by sub-block (stride 320 bytes), which the hardware streamer does not follow, and expert weights are
+#                          always cold. Prefetching the NEXT group while the current one is multiplied hides the DRAM latency
+#                          (one group ahead; two groups gain little, four groups lose 65%).
+# Libraries are the frozen copies in this directory; libggml-cpu now rebuilds repack.cpp as well (its unmodified source recompiles to
+# the byte-identical production object).
+# Rollback to revision e: cp ../deploy-0920e/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+# Rollback to stock:      rm the installed drop-in; systemctl --user daemon-reload; systemctl --user restart glm53-flash-production.service
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920f:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=15
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_MTP_PAD_MAX_CTX=1048576
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000
+Environment=GGML_CPU_NUMA_SHARED_TEAM=1
+Environment=LLAMA_F18_MTP_QROWS=1
+Environment=GGML_META_F18=3

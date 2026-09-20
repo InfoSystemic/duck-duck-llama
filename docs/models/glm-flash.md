@@ -1,6 +1,6 @@
 # GLM-5.3-Flash
 
-**Status (2026-09-20):** the Q4 service delivers 20.0 tok/s to a Codex agent inside Paseo at ~4K tokens of context on the fixed-output fixture, and 19.0 tok/s on requests exactly as Codex sends them (mean of twelve, 17.7–20.1). It was 15.5–16.2 on 09-19 and 12.0 on 09-18. At 13,231 tokens it measures 17.0 tok/s; at ~30K production measured 10.26 tok/s on 09-19 and has not been re-measured.
+**Status (2026-09-20):** the Q4 service delivers 20.2 tok/s to a Codex agent inside Paseo at ~4K tokens of context on the fixed-output fixture, and 19.7 tok/s on requests exactly as Codex sends them (mean of twelve, 19.1–20.2). It was 15.5–16.2 on 09-19 and 12.0 on 09-18. At 13,231 tokens it measures 17.0 tok/s; at ~30K production measured 10.26 tok/s on 09-19 and has not been re-measured.
 
 ## Decode through Paseo, September 18–20
 
@@ -11,6 +11,7 @@ The measurement is an actual Codex turn through the Paseo wrapper, modes switche
 - **09-20, draft loop and sampling:** catch-up merged into the first draft pass, constant-shape draft batches so both draft graphs are reused (+2.1%), a direct draft pick, top-k candidates taken straight from the logits (+1.6%), and coupled draft/verifier sampling: the verifier's pick becomes Gumbel-max with noise the drafter shares, an exact sampler that raised sampled-request acceptance from 72.4% to 75.0%.
 - **09-20, scheduling:** trunk and draft each owned an OpenMP team pinned to the same 60 cores, and libgomp's default idle spin (~15 ms on this CPU, not the documented 3) made every hand-off a collision. `GOMP_SPINCOUNT=20000` was worth more than any single kernel that day (18.2–18.4 → 18.8); one shared team per device makes the collision impossible.
 - **09-20, the host side:** the tensor-parallel backend started one thread per NUMA device for every graph-input upload, about 93 thread creations per decode cycle, found with `/proc` and strace because perf is not available. Uploads below 1 MiB now run in the caller and the dispatch waits block instead of spinning: 19.30 → 20.18, output identical.
+- **09-20, one expert matrix was not at the wall:** the Q5_K down projection streamed at ~77 GB/s per socket against ~97 for the Q4_K gate and up, because its kernel reads a block group in a strided order the hardware prefetcher does not follow. A software prefetch of the next group: +3.1%, bit-identical.
 - **An integration fix worth as much as a kernel:** the Codex model catalog lacked the lowercase alias Paseo sends, so requests carried 20,751 characters of default instructions. Adding it cut the prompt from 7,739 to 3,998 tokens; decode is context-sensitive, so this alone moved 9.6 → 12.0 tok/s.
 - **Codex sends no sampling fields.** Real turns run at the server defaults (the GGUF carries temp 1.0) and accept fewer drafts, which is why two numbers are reported. Greedy numbers are for comparisons, not a promise.
 

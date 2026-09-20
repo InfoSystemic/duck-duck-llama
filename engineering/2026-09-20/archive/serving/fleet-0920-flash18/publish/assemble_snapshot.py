@@ -43,6 +43,9 @@ mine += [W/'run/window7.py', W/'run/couple_fit.py', W/'results/window-w7.json', 
 mine += [W/'base/make_meta.py', W/'base/build.sh', W/'run/window8.py', W/'run/window9.py', W/'run/proxy_revd.sh', W/'run/adaptive_depth_sim.py',
          W/'results/window-w8.json', W/'results/window-w8.log', W/'results/window-w9.json', W/'results/window-w9.log']
 mine += [W/'deploy-0920e'/n for n in ('95-f18-0920.conf.proposed', 'deploy.sh', 'SHA256SUMS')]
+# revision f: software prefetch in the Q5_K x16 expert kernel, window w10
+mine += [W/'cpu/make_repack.py', W/'cpu/build-repack.sh', W/'cpu/build-all.sh', W/'run/window10.py', W/'results/window-w10.json', W/'results/window-w10.log']
+mine += [W/'deploy-0920f'/n for n in ('95-f18-0920.conf.proposed', 'deploy.sh', 'SHA256SUMS')]
 keep += [p for p in mine if p.exists()]
 missing = [str(p) for p in mine if not p.exists()]
 if missing: print('MISSING from the mine list:', missing)

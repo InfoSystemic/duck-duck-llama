@@ -62,6 +62,7 @@ D_LOG    = (udiff(W/'common/revd/sampling.f18c.cpp', W/'common/sampling.f18c.cpp
 D_TEAM   = udiff(ENG/'ggml/src/ggml-cpu/ggml-cpu.cpp', W/'cpu/ggml-cpu.f18.cpp', 'a/ggml/src/ggml-cpu/ggml-cpu.cpp', 'b/ggml/src/ggml-cpu/ggml-cpu.cpp')
 D_META   = ('[1] parent against the published engine source\n' + udiff(ENG/'ggml/src/ggml-backend-meta.cpp', F/'glm-fix/ggml-backend-meta.cpp', 'a/ggml/src/ggml-backend-meta.cpp', 'b/ggml/src/ggml-backend-meta.cpp')
           + '\n[2] this patch\n' + udiff(F/'glm-fix/ggml-backend-meta.cpp', W/'base/ggml-backend-meta.f18.cpp', 'a/ggml/src/ggml-backend-meta.cpp', 'b/ggml/src/ggml-backend-meta.cpp'))
+D_Q5PF   = udiff(Path('/home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/repack.cpp'), W/'cpu/repack.f18.cpp', 'a/ggml/src/ggml-cpu/repack.cpp', 'b/ggml/src/ggml-cpu/repack.cpp')
 D_QROWS  = udiff(F/'glm-mtp-kv-only-0919/candidate/glm5next.cpp', W/'llama/glm5next.f18.cpp', 'a/src/models/glm5next.cpp', 'b/src/models/glm5next.cpp')
 assert sha(W/'common/speculative.orig.cpp') == sha(ENG/'common/speculative.cpp'), 'speculative.orig.cpp is not the engine source'
 
@@ -74,6 +75,7 @@ OUT = {
  'coupled-sampling-fast-sampler.patch':    D_SAMP + D_INC + D_SPEC_C,
  'coupled-sampling-offline-fit.patch':     D_LOG,
  'cpu-numa-shared-team.patch':             D_TEAM,
+ 'q5k-x16-expert-prefetch.patch':          D_Q5PF,
  'meta-backend-small-uploads-blocking-dispatch.patch': D_META,
  'glm5next-mtp-query-rows.patch':          D_QROWS,
 }
