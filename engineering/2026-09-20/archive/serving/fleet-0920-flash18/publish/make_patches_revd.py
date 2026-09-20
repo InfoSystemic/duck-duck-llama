@@ -60,6 +60,8 @@ D_LOG    = (udiff(W/'common/revd/sampling.f18c.cpp', W/'common/sampling.f18c.cpp
           + udiff(W/'common/revd/speculative.f18c.cpp', W/'common/speculative.f18c.cpp', 'a/common/speculative.cpp', 'b/common/speculative.cpp')
           + udiff(W/'common/revd/f18-coupling.inc', W/'common/f18-coupling.inc', 'a/common/f18-coupling.inc', 'b/common/f18-coupling.inc'))
 D_TEAM   = udiff(ENG/'ggml/src/ggml-cpu/ggml-cpu.cpp', W/'cpu/ggml-cpu.f18.cpp', 'a/ggml/src/ggml-cpu/ggml-cpu.cpp', 'b/ggml/src/ggml-cpu/ggml-cpu.cpp')
+D_META   = ('[1] parent against the published engine source\n' + udiff(ENG/'ggml/src/ggml-backend-meta.cpp', F/'glm-fix/ggml-backend-meta.cpp', 'a/ggml/src/ggml-backend-meta.cpp', 'b/ggml/src/ggml-backend-meta.cpp')
+          + '\n[2] this patch\n' + udiff(F/'glm-fix/ggml-backend-meta.cpp', W/'base/ggml-backend-meta.f18.cpp', 'a/ggml/src/ggml-backend-meta.cpp', 'b/ggml/src/ggml-backend-meta.cpp'))
 D_QROWS  = udiff(F/'glm-mtp-kv-only-0919/candidate/glm5next.cpp', W/'llama/glm5next.f18.cpp', 'a/src/models/glm5next.cpp', 'b/src/models/glm5next.cpp')
 assert sha(W/'common/speculative.orig.cpp') == sha(ENG/'common/speculative.cpp'), 'speculative.orig.cpp is not the engine source'
 
@@ -72,6 +74,7 @@ OUT = {
  'coupled-sampling-fast-sampler.patch':    D_SAMP + D_INC + D_SPEC_C,
  'coupled-sampling-offline-fit.patch':     D_LOG,
  'cpu-numa-shared-team.patch':             D_TEAM,
+ 'meta-backend-small-uploads-blocking-dispatch.patch': D_META,
  'glm5next-mtp-query-rows.patch':          D_QROWS,
 }
 for name, body in OUT.items():

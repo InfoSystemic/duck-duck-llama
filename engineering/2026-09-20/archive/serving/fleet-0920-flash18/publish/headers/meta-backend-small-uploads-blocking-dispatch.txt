@@ -1,0 +1,38 @@
+libggml-base, Meta (tensor-parallel) backend on CPU-NUMA devices: small uploads without threads, dispatch waits that block.
+DEPLOYED 2026-09-20 (revision e). No numerical effect: text hash, accepted drafts and log-probabilities identical.
+GGML_META_F18=<mask> (default 0): bit 1 = uploads below GGML_META_F18_SET_TENSOR_PAR_MIN bytes (default 1 MiB) run in the calling
+thread; bit 0 = the main thread and the per-device dispatch threads block at once. GGML_META_F18_CONTROL_FILE maps a 4-byte word
+for in-process A/B. Two diffs below: [1] the parent of this patch against the published engine source (the non-temporal-store
+all-reduce already in production since 09-14, the GLM-line twin of numa-reduce-nontemporal-stores.patch), [2] this patch.
+
+How it was found. perf is not available on this host (perf_event_paranoid=4, no root), so the host side was measured with what an
+unprivileged user has: per-thread /proc/PID/task/*/stat deltas over one decode (faults, user/system time, context switches, CPU
+placement, run state and wait channel), the cgroup's memory.stat, /proc/interrupts, and strace -f --seccomp-bpf on an 8-layer
+proxy started as strace's own child. strace showed 5,322 madvise(8 MB, MADV_DONTNEED) calls in a 57-cycle decode: thread stacks
+being recycled, ~93 thread creations per decode cycle.
+
+[bit 1] ggml_backend_meta_buffer_set_tensor starts one std::thread per NUMA device for EVERY call on a CPU-NUMA buffer group. That
+is right for weights at load time. It is also the path of every graph input (tokens, positions, masks, KV and pool indices, MTP
+hidden rows) and of uploads that happen inside graph compute: clone, 8 MB stack, arena mmap, TLB shootdowns into the 60 cores that
+are computing, and the transient threads land on worker CPUs (worker preemptions 32 -> 6 per cycle once they are gone).
+[bit 0] Between graphs the main thread and the eight dispatch threads (four per context) wait with 300 us of pause and then
+sched_yield() for up to 20 ms before blocking. They are unpinned and sit on the hyperthread siblings of worker cores, where a
+syscall-spinning sibling slows the one worker every barrier then waits for. Pinning them to the spare cores instead was -9% on
+09-19 (background jobs live there). The load-time knobs GGML_CPU_NUMA_DISPATCH_SPIN_US=0 / _HARD_SPIN_US=0 do the same as bit 0.
+
+Evidence, modes switched inside ONE loaded process:
+  8-layer proxy: trunk graph 22.85 -> 20.82 ms (bit 1) -> 20.2 ms (both); draft graph 5.31 -> 4.43 -> 4.40 ms; decode +13-15%;
+  text and log-probabilities identical on 32 / 3,861 / 13,231-token prompts; prefill unchanged (large uploads stay threaded).
+  FULL MODEL, window w8, Codex fixture through the Paseo wrapper, greedy:
+      revision d 19.30/19.35/19.25   bit 0 only 19.51/19.41   bit 1 only 20.05/20.07   both 20.09/20.21/20.24  (+4.6%)
+      one text hash, 175 of 214 drafts accepted in every run; log-probabilities identical on a short and a 7.7K-token prompt
+  requests exactly as Codex sends them (interleaved, n=6 each): 17.98 -> 18.79 tok/s, acceptance 74.5% / 74.2%
+  13,231 tokens of context: 16.02/16.29 -> 17.09/16.87 tok/s
+  cycle phases: verify graph 119.7 -> 115.5 ms, draft graphs 10.8 -> 9.2 ms per cycle, outside graphs 2.3 -> 1.9 ms
+  Production after deploy, through Paseo: greedy 19.96-20.08 tok/s, sampled 19.00 (n=12, 17.7-20.1).
+
+Build. No recipe for the production libggml-base had been recorded. Recovered by bisection: the engine's own compile command plus
+-mavx512f -mavx512bw reproduces glm-fix/ggml-backend-meta.cpp.o byte for byte, and the engine link line then reproduces the
+production library (sha256 598563d018482c8d...). Script with that gate: archive/serving/fleet-0920-flash18/base/build.sh --gate.
+Parent [1]: engine ggml/src/ggml-backend-meta.cpp (llama.cpp-glm5n-goal-0904 bundle). Parent [2]: sha256 e023a250a89b6fb4...
+Deployed library: a5cb28eed0cfd499...

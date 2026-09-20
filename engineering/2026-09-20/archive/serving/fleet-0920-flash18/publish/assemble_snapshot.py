@@ -39,6 +39,10 @@ mine += sorted((W/'publish/headers').glob('*.txt'))
 # window w7: both sides of the coupled sampler logged, offline replay; the as-deployed sources next to the logging variant
 mine += [W/'run/window7.py', W/'run/couple_fit.py', W/'results/window-w7.json', W/'results/window-w7.log', W/'results/couple-fit-w7.txt',
          W/'common/revd/README.md', W/'common/revd/make_f18_couple.py', W/'common/revd/f18-coupling.inc']
+# revision e: the Meta backend patch with the recovered libggml-base recipe, windows w8/w9, host profiling helpers
+mine += [W/'base/make_meta.py', W/'base/build.sh', W/'run/window8.py', W/'run/window9.py', W/'run/proxy_revd.sh', W/'run/adaptive_depth_sim.py',
+         W/'results/window-w8.json', W/'results/window-w8.log', W/'results/window-w9.json', W/'results/window-w9.log']
+mine += [W/'deploy-0920e'/n for n in ('95-f18-0920.conf.proposed', 'deploy.sh', 'SHA256SUMS')]
 keep += [p for p in mine if p.exists()]
 missing = [str(p) for p in mine if not p.exists()]
 if missing: print('MISSING from the mine list:', missing)
@@ -87,7 +91,7 @@ for p in sorted(set(keep)):
     files.append({'path': dest(p).as_posix(), 'category': cat, 'original_sha256': sha(raw), 'sha256': sha(out), 'bytes': len(out), 'filtered': filtered})
 
 manifest = {'date': '2026-09-20', 'created_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-    'scope': 'GLM-5.3-Flash decode engineering through Paseo/Codex, September 18-20: fused/wider pooling, flat state copy, bounded KV rollback, cache-only MTP catch-up, pooled-result cache, batch-invariant cell-split MQA attention, selection top-k, MTP draft-loop restructure, coupled draft/verifier sampling, sampler host cost, OpenMP team hand-off (spin count and shared team), row-split gated delta net, MTP query rows, production revisions b-d, and the recorded negative results',
+    'scope': 'GLM-5.3-Flash decode engineering through Paseo/Codex, September 18-20: fused/wider pooling, flat state copy, bounded KV rollback, cache-only MTP catch-up, pooled-result cache, batch-invariant cell-split MQA attention, selection top-k, MTP draft-loop restructure, coupled draft/verifier sampling, sampler host cost, OpenMP team hand-off (spin count and shared team), row-split gated delta net, MTP query rows, thread-free graph-input uploads and blocking dispatch waits in the tensor-parallel backend, production revisions b-e, and the recorded negative results',
     'policy': 'Curated subset. Source/configuration/notes are preserved byte for byte unless they name a client, in which case the name is redacted and the file is marked filtered. Evidence JSON removes host context, environment dumps, commands, prompts and response text; long strings become length/hash summaries. No weights, compiled artifacts, raw traces or per-request captures.',
     'files': files, 'inherited_files': [], 'excluded': [{'source': a, 'reason': b} for a, b in skipped], 'filter_counts': dict(counts)}
 (SNAP/'archive-manifest.json').write_text(json.dumps(manifest, indent=1) + '\n')

@@ -34,6 +34,10 @@ collision. One dispatcher per DEVICE, shared by all backends, removes it ([patch
 upstream does not have this problem with OpenMP: both contexts enter their parallel regions from the same server thread and so share
 one team.
 
+A second one from the same day: `set_tensor` on a group of NUMA buffers must not start a thread per device for small uploads. It did,
+for every graph input, ~93 thread creations per decode cycle, and cost 4.6% of decode
+([patch](../patches/meta-backend-small-uploads-blocking-dispatch.patch)). Parallel upload is for weights.
+
 ## 2. CPU flash attention sums V in FP16
 
 A correctness defect in the default configuration, reproducible in isolation on stock upstream: 6.4e-3 relative RMS error for a

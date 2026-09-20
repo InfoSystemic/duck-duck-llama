@@ -1,0 +1,26 @@
+# GLM-5.3-Flash f18 stack, revision e (2026-09-20). Revision d plus a patched libggml-base (Meta tensor-parallel backend), output-identical
+# (window w8, one process: greedy fixture 19.30 -> 20.18 tok/s, sampled Codex requests 17.98 -> 18.79, 13K context +5%; same text hash,
+# same accepted drafts, log-probabilities identical):
+#   GGML_META_F18=3   bit 1: graph-input uploads below 1 MiB run in the calling thread. The backend started one std::thread per NUMA
+#                            device for EVERY set_tensor -- right for weights, ~93 thread creations per decode cycle for inputs
+#                            (clone, 8 MB stack madvise, TLB shootdowns into the 60 working cores). Verify graph -4.2 ms, drafts -1.6 ms.
+#                     bit 0: the main thread and the per-device dispatch threads block at once instead of spinning with sched_yield()
+#                            for up to 20 ms on the hyperthread siblings of worker cores (+0.8% alone).
+# Libraries are the frozen copies in this directory; libggml-base is rebuilt from glm-fix/ggml-backend-meta.cpp with the recovered
+# recipe (engine command + -mavx512f -mavx512bw; the unmodified source reproduces the production library 598563d0... byte for byte).
+# Rollback to revision d: cp ../deploy-0920d/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+# Rollback to stock:      rm the installed drop-in; systemctl --user daemon-reload; systemctl --user restart glm53-flash-production.service
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920e:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=7
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_MTP_PAD_MAX_CTX=1048576
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000
+Environment=GGML_CPU_NUMA_SHARED_TEAM=1
+Environment=LLAMA_F18_MTP_QROWS=1
+Environment=GGML_META_F18=3
