@@ -1,0 +1,229 @@
+libggml-base, Meta (tensor-parallel) backend on CPU-NUMA devices: small uploads without threads, dispatch waits that block.
+DEPLOYED 2026-09-20 (revision e). No numerical effect: text hash, accepted drafts and log-probabilities identical.
+GGML_META_F18=<mask> (default 0): bit 1 = uploads below GGML_META_F18_SET_TENSOR_PAR_MIN bytes (default 1 MiB) run in the calling
+thread; bit 0 = the main thread and the per-device dispatch threads block at once. GGML_META_F18_CONTROL_FILE maps a 4-byte word
+for in-process A/B. Two diffs below: [1] the parent of this patch against the published engine source (the non-temporal-store
+all-reduce already in production since 09-14, the GLM-line twin of numa-reduce-nontemporal-stores.patch), [2] this patch.
+
+How it was found. perf is not available on this host (perf_event_paranoid=4, no root), so the host side was measured with what an
+unprivileged user has: per-thread /proc/PID/task/*/stat deltas over one decode (faults, user/system time, context switches, CPU
+placement, run state and wait channel), the cgroup's memory.stat, /proc/interrupts, and strace -f --seccomp-bpf on an 8-layer
+proxy started as strace's own child. strace showed 5,322 madvise(8 MB, MADV_DONTNEED) calls in a 57-cycle decode: thread stacks
+being recycled, ~93 thread creations per decode cycle.
+
+[bit 1] ggml_backend_meta_buffer_set_tensor starts one std::thread per NUMA device for EVERY call on a CPU-NUMA buffer group. That
+is right for weights at load time. It is also the path of every graph input (tokens, positions, masks, KV and pool indices, MTP
+hidden rows) and of uploads that happen inside graph compute: clone, 8 MB stack, arena mmap, TLB shootdowns into the 60 cores that
+are computing, and the transient threads land on worker CPUs (worker preemptions 32 -> 6 per cycle once they are gone).
+[bit 0] Between graphs the main thread and the eight dispatch threads (four per context) wait with 300 us of pause and then
+sched_yield() for up to 20 ms before blocking. They are unpinned and sit on the hyperthread siblings of worker cores, where a
+syscall-spinning sibling slows the one worker every barrier then waits for. Pinning them to the spare cores instead was -9% on
+09-19 (background jobs live there). The load-time knobs GGML_CPU_NUMA_DISPATCH_SPIN_US=0 / _HARD_SPIN_US=0 do the same as bit 0.
+
+Evidence, modes switched inside ONE loaded process:
+  8-layer proxy: trunk graph 22.85 -> 20.82 ms (bit 1) -> 20.2 ms (both); draft graph 5.31 -> 4.43 -> 4.40 ms; decode +13-15%;
+  text and log-probabilities identical on 32 / 3,861 / 13,231-token prompts; prefill unchanged (large uploads stay threaded).
+  FULL MODEL, window w8, Codex fixture through the Paseo wrapper, greedy:
+      revision d 19.30/19.35/19.25   bit 0 only 19.51/19.41   bit 1 only 20.05/20.07   both 20.09/20.21/20.24  (+4.6%)
+      one text hash, 175 of 214 drafts accepted in every run; log-probabilities identical on a short and a 7.7K-token prompt
+  requests exactly as Codex sends them (interleaved, n=6 each): 17.98 -> 18.79 tok/s, acceptance 74.5% / 74.2%
+  13,231 tokens of context: 16.02/16.29 -> 17.09/16.87 tok/s
+  cycle phases: verify graph 119.7 -> 115.5 ms, draft graphs 10.8 -> 9.2 ms per cycle, outside graphs 2.3 -> 1.9 ms
+  Production after deploy, through Paseo: greedy 19.96-20.08 tok/s, sampled 19.00 (n=12, 17.7-20.1).
+
+Build. No recipe for the production libggml-base had been recorded. Recovered by bisection: the engine's own compile command plus
+-mavx512f -mavx512bw reproduces glm-fix/ggml-backend-meta.cpp.o byte for byte, and the engine link line then reproduces the
+production library (sha256 598563d018482c8d...). Script with that gate: archive/serving/fleet-0920-flash18/base/build.sh --gate.
+Parent [1]: engine ggml/src/ggml-backend-meta.cpp (llama.cpp-glm5n-goal-0904 bundle). Parent [2]: sha256 e023a250a89b6fb4...
+Deployed library: a5cb28eed0cfd499...
+
+[1] parent against the published engine source
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -15,6 +15,10 @@
+ #include <cstring>
+ #include <condition_variable>
+ #include <map>
++#if defined(__AVX512F__)
++#include <immintrin.h>
++#endif
++#include <unordered_map>
+ #include <fstream>
+ #include <memory>
+ #include <atomic>
+@@ -1317,15 +1321,45 @@
+     };
+ 
+     const std::pair key = std::make_pair(tensor, assume_sync);
++    // fleet-0912-ctx 09-13: validate cache entries on a signature that ignores the allocation-time fields (data, extra), so a
++    // rebuilt graph with identical topology hits instead of flushing the whole cache. GGML_META_SPLIT_CACHE_MASK=0 restores
++    // the raw comparison; GGML_META_SPLIT_CACHE_STATS=1 prints counters and the first differing field on a clear.
++    static const bool q4e_meta_mask  = [] { const char * v = getenv("GGML_META_SPLIT_CACHE_MASK");  return v == nullptr || atoi(v) != 0; }();
++    static const bool q4e_meta_stats = [] { const char * v = getenv("GGML_META_SPLIT_CACHE_STATS"); return v != nullptr && atoi(v) != 0; }();
++    static long q4e_meta_hits = 0, q4e_meta_miss = 0, q4e_meta_clears = 0;
++    char sig[ggml_backend_meta_buffer_context::nbtc];
++    memcpy(sig, tensor, sizeof(sig));
++    if (q4e_meta_mask) {
++        memset(sig + offsetof(ggml_tensor, data),  0, sizeof(void *));
++        memset(sig + offsetof(ggml_tensor, extra), 0, sizeof(void *));
++    }
+     auto it = buf_ctx->split_state_cache.find(key);
+-    if (it != buf_ctx->split_state_cache.end() && memcmp(it->second.second, (const char *) tensor, sizeof(it->second.second)) != 0) {
++    if (it != buf_ctx->split_state_cache.end() && memcmp(it->second.second, sig, sizeof(sig)) != 0) {
++        if (q4e_meta_stats) {
++            size_t off = 0;
++            while (off < sizeof(sig) && it->second.second[off] == sig[off]) { off++; }
++            q4e_meta_clears++;
++            if (q4e_meta_clears <= 30) {
++                fprintf(stderr, "META_SPLIT_CACHE clear #%ld at '%s' (op %d): first differing byte %zu [buffer@%zu ne@%zu op@%zu src@%zu view_src@%zu data@%zu name@%zu extra@%zu]\n",
++                    q4e_meta_clears, tensor->name, (int) tensor->op, off, offsetof(ggml_tensor, buffer), offsetof(ggml_tensor, ne), offsetof(ggml_tensor, op),
++                    offsetof(ggml_tensor, src), offsetof(ggml_tensor, view_src), offsetof(ggml_tensor, data), offsetof(ggml_tensor, name), offsetof(ggml_tensor, extra));
++            }
++        }
+         buf_ctx->split_state_cache.clear();
+         it = buf_ctx->split_state_cache.end();
+     }
+ 
+     if (it == buf_ctx->split_state_cache.end()) {
++        q4e_meta_miss++;
+         buf_ctx->split_state_cache[key].first = calculate_split_state();
+-        memcpy(buf_ctx->split_state_cache[key].second, tensor, sizeof(buf_ctx->split_state_cache[key].second));
++        memcpy(buf_ctx->split_state_cache[key].second, sig, sizeof(buf_ctx->split_state_cache[key].second));
++    } else {
++        q4e_meta_hits++;
++    }
++    if (q4e_meta_stats && ((q4e_meta_hits + q4e_meta_miss) % 50000) == 0) {
++        fprintf(stderr, "META_SPLIT_CACHE hits=%ld miss=%ld clears=%ld\n", q4e_meta_hits, q4e_meta_miss, q4e_meta_clears);
++    }
++    if (it == buf_ctx->split_state_cache.end()) {
+         if (buf_ctx->debug > 0) {
+             std::string srcs_info;
+             for (size_t i = 0; i < GGML_MAX_SRC; i++) {
+@@ -2237,7 +2271,38 @@
+             float * GGML_RESTRICT p1 = p[1];
+             float * GGML_RESTRICT p2 = p[2];
+             float * GGML_RESTRICT p3 = p[3];
+-            for (int64_t k = t_start; k < t_end; ++k) {
++            int64_t k = t_start;
++#if defined(__AVX512F__)
++            // fleet-0912-ctx 09-14: GGML_META_REDUCE_NT=1 -- the all-reduce writes the same sum into all four socket-local
++            // copies, so three of every four stores are remote and each first pulls the line for ownership. Non-temporal
++            // stores skip that read. Same adds in the same order => bit-identical. Promoted for Qwen (window 44: +5-10%
++            // decode, +11-13% prefill); this is the same kernel in the GLM engine.
++            static const bool q4e_reduce_nt = [] { const char * v = getenv("GGML_META_REDUCE_NT"); return v != nullptr && atoi(v) != 0; }();
++            if (q4e_reduce_nt) {
++                const uintptr_t a0 = (uintptr_t) p0 % 64;
++                if (a0 == (uintptr_t) p1 % 64 && a0 == (uintptr_t) p2 % 64 && a0 == (uintptr_t) p3 % 64) {
++                    int64_t k_al = k;
++                    while (k_al < t_end && ((uintptr_t) (p0 + k_al) % 64) != 0) { k_al++; }
++                    for (; k < k_al; ++k) {
++                        const float sum = (p0[k] + p1[k]) + (p2[k] + p3[k]);
++                        p0[k] = sum; p1[k] = sum; p2[k] = sum; p3[k] = sum;
++                    }
++                    for (; k + 16 <= t_end; k += 16) {
++                        const __m512 v0 = _mm512_load_ps(p0 + k);
++                        const __m512 v1 = _mm512_load_ps(p1 + k);
++                        const __m512 v2 = _mm512_load_ps(p2 + k);
++                        const __m512 v3 = _mm512_load_ps(p3 + k);
++                        const __m512 sum = _mm512_add_ps(_mm512_add_ps(v0, v1), _mm512_add_ps(v2, v3));
++                        _mm512_stream_ps(p0 + k, sum);
++                        _mm512_stream_ps(p1 + k, sum);
++                        _mm512_stream_ps(p2 + k, sum);
++                        _mm512_stream_ps(p3 + k, sum);
++                    }
++                    _mm_sfence();
++                }
++            }
++#endif
++            for (; k < t_end; ++k) {
+                 const float sum = (p0[k] + p1[k]) + (p2[k] + p3[k]);
+                 p0[k] = sum;
+                 p1[k] = sum;
+
+[2] this patch
+--- a/ggml/src/ggml-backend-meta.cpp
++++ b/ggml/src/ggml-backend-meta.cpp
+@@ -1715,6 +1715,38 @@
+     }
+ }
+ 
++// ---- f18 switches (see make_meta.py): bit 0 = dispatch waits block at once, bit 1 = small set_tensor runs in the caller
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <unistd.h>
++static uint32_t ggml_backend_meta_f18() {
++    static const uint32_t env_mask = [] {
++        const char * v = getenv("GGML_META_F18");
++        return v ? (uint32_t) strtoul(v, nullptr, 0) : 0u;
++    }();
++    static const uint32_t * control = [] () -> const uint32_t * {
++        const char * path = getenv("GGML_META_F18_CONTROL_FILE");
++        if (!path || !*path) {
++            return nullptr;
++        }
++        const int fd = open(path, O_RDONLY | O_CLOEXEC);
++        if (fd < 0) {
++            return nullptr;
++        }
++        void * mapping = mmap(nullptr, sizeof(uint32_t), PROT_READ, MAP_SHARED, fd, 0);
++        close(fd);
++        return mapping == MAP_FAILED ? nullptr : (const uint32_t *) mapping;
++    }();
++    return control ? __atomic_load_n(control, __ATOMIC_ACQUIRE) : env_mask;
++}
++static size_t ggml_backend_meta_f18_set_tensor_par_min() {
++    static const size_t v = [] {
++        const char * e = getenv("GGML_META_F18_SET_TENSOR_PAR_MIN");
++        return e ? (size_t) strtoull(e, nullptr, 0) : (size_t) 1 << 20;
++    }();
++    return v;
++}
++
+ static bool ggml_backend_meta_buffer_is_cpu_numa_group(ggml_backend_buffer_t buffer) {
+     const size_t n_bufs = ggml_backend_meta_buffer_n_bufs(buffer);
+     if (n_bufs <= 1) {
+@@ -1738,7 +1770,9 @@
+     GGML_ASSERT(ggml_is_contiguous(tensor) || split_state.axis == GGML_BACKEND_SPLIT_AXIS_MIRRORED);
+ 
+     auto for_each_buffer = [&](const auto & fn) {
+-        if (!ggml_backend_meta_buffer_is_cpu_numa_group(buffer)) {
++        // one thread per device pays off for weights, not for the handful of small graph inputs of every decode
++        const bool small = (ggml_backend_meta_f18() & 2u) && size < ggml_backend_meta_f18_set_tensor_par_min();
++        if (small || !ggml_backend_meta_buffer_is_cpu_numa_group(buffer)) {
+             for (size_t j = 0; j < n_bufs; ++j) {
+                 fn(j);
+             }
+@@ -2421,6 +2455,7 @@
+             const int64_t t_start = ggml_time_us();
+             int spins = 0;
+             bool yielding = false;
++            const bool block_now = (ggml_backend_meta_f18() & 1u) != 0;
+             while (dispatch_pending.load(std::memory_order_acquire) != 0) {
+                 if (yielding) {
+                     sched_yield();
+@@ -2430,7 +2465,7 @@
+                 if ((++spins & 255) == 0 && !yielding && ggml_time_us() - t_start > dispatch_hard_spin_us) {
+                     yielding = true;
+                 }
+-                if ((spins & 255) == 0 && ggml_time_us() - t_start > dispatch_spin_us) {
++                if (block_now || ((spins & 255) == 0 && ggml_time_us() - t_start > dispatch_spin_us)) {
+                     std::unique_lock<std::mutex> lock(dispatch_mutex);
+                     dispatch_done.wait(lock, [this]() {
+                         return dispatch_pending.load(std::memory_order_acquire) == 0;
+@@ -2482,6 +2517,7 @@
+                         const int64_t t_start = ggml_time_us();
+                         int spins = 0;
+                         bool yielding = false;
++                        const bool block_now = (ggml_backend_meta_f18() & 1u) != 0;
+                         while (dispatch_epoch.load(std::memory_order_acquire) == observed_epoch &&
+                                !dispatch_stop.load(std::memory_order_relaxed)) {
+                             if (yielding) {
+@@ -2495,7 +2531,7 @@
+                                     yielding = true;
+                                 }
+                             }
+-                            if ((spins & 255) == 0 && ggml_time_us() - t_start > dispatch_spin_us) {
++                            if (block_now || ((spins & 255) == 0 && ggml_time_us() - t_start > dispatch_spin_us)) {
+                                 std::unique_lock<std::mutex> lock(dispatch_mutex);
+                                 dispatch_start.wait(lock, [this, observed_epoch]() {
+                                     return dispatch_stop.load(std::memory_order_relaxed) ||

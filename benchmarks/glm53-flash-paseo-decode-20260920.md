@@ -1,9 +1,8 @@
-# GLM-5.3-Flash decode as an agent sees it: 12.0 to 19.2 tok/s, September 18-20
+# GLM-5.3-Flash decode as an agent sees it: 12.0 to 20.0 tok/s, September 18-20
 
-**Status (2026-09-20, revision d in production):** a Codex agent inside Paseo gets **19.2 tok/s** on the fixed-output fixture
-(19.17-19.32 over five runs) and **18.2 tok/s on requests exactly as Codex sends them** (twelve runs, 17.6-18.9, nine of them at or
-above 18.0; a second load: 18.2 over eight). On 09-19 the same service gave 15.5-16.2, on 09-18 12.0. The 18 tok/s target is met on the fixture with 6% to spare and
-on average for sampled traffic; single sampled turns still land below it.
+**Status (2026-09-20, revision e in production):** a Codex agent inside Paseo gets **20.0 tok/s** on the fixed-output fixture
+(19.96-20.08 over four warm runs) and **19.0 tok/s on requests exactly as Codex sends them** (twelve runs, 17.7-20.1, ten of them at
+or above 18.0). On 09-19 the same service gave 15.5-16.2, on 09-18 12.0. Output has been byte-identical since revision b.
 
 Machine: Lenovo SR950, 4x Xeon Gold 6242 (16 cores each, AVX-512 VNNI, no AMX), 24 DIMMs DDR4-2400, 755 GiB, no GPU.
 Measured aggregate read ceiling 381.6 GB/s ([tools/membw.c](../tools/membw.c)). Model: GLM-5.3-Flash UD-Q4_K_XL (186 GiB), Q8_0 MTP
@@ -45,15 +44,16 @@ Three things make comparisons valid:
 | Coupled draft/verifier sampling (Gumbel-max, shared counter-based noise) | sampled requests 17.89 -> 18.24 (+2.0%), acceptance 72.4% -> 75.0%; greedy untouched | exact sampler, same distribution | rev c |
 | One worker team per device for both contexts | 19.11 with or without once the spin is short | identical | rev d |
 | Gated delta net split by state row + MTP query side only for the predicting row | 19.11 -> 19.55 (+2.3%); at 13,231 tokens 14.75 -> 15.41 (+4.5%) | bit-identical | rev d |
+| Tensor-parallel backend: graph-input uploads without a thread per device, dispatch waits that block | 19.30 -> 20.18 (+4.6%); sampled 17.98 -> 18.79; at 13,231 tokens 16.15 -> 16.98 | identical | rev e |
 
 Production after each revision, same fixture through Paseo: revision b 18.09-18.40 greedy, 17.14 sampled (n=4); revision c
-18.46-18.76, 17.94 sampled (n=10); revision d 19.17-19.32, 18.18 sampled (n=12).
+18.46-18.76, 17.94 sampled (n=10); revision d 19.17-19.32, 18.18 sampled (n=12); revision e 19.96-20.08, 19.00 sampled (n=12).
 Windows: w1 (kernels), w2-w4 (draft loop, batch-invariant attention), w5 (spin, sampler, coupling), w6 (revision d), w7 (sampled
-traffic with both sides of the coupled sampler logged).
+traffic with both sides of the coupled sampler logged), w8 (revision e), w9 (draft depth 3 against 2).
 Patches and their evidence: [patches/README-20260920-glm5next.md](../patches/README-20260920-glm5next.md).
 Records, controllers and logs: [engineering/2026-09-20](../engineering/2026-09-20/README.md).
 
-## Three findings that are not kernels
+## Four findings that are not kernels
 
 **Two worker teams per core.** Every `llama_context` creates a backend per CPU-NUMA device, and every such backend owned a
 dispatcher thread that is the master of its own OpenMP team. Trunk plus MTP draft is 8 teams on 60 cores, two pinned workers per
@@ -64,6 +64,17 @@ started 1 ms earlier, deeper into the trunk team's spin (8.3 -> 10.3 ms for the 
 useful range without entering it (1000: -14%, the waits inside a graph go to sleep; PASSIVE: -10.6%; 0: no help; ACTIVE or 1e8:
 ~250x slower). On an 8-layer proxy the trunk graph went 26.5 -> 23.1 ms and the first draft graph 8.3 -> 5.9 ms for any value from
 8,000 to 150,000. [Patch and both fixes](../patches/cpu-numa-shared-team.patch).
+
+**A thread per device for every graph input.** perf is not available on this host (`perf_event_paranoid=4`, no root), so the
+host side had never been looked at. What an unprivileged user does have was enough: per-thread `/proc/PID/task/*/stat` deltas over
+one decode ([tools/thread_profile.py](../tools/thread_profile.py)) and `strace -f --seccomp-bpf` on a proxy started as strace's
+own child. strace showed 5,322 `madvise(8 MB, MADV_DONTNEED)` calls in a 57-cycle decode: thread stacks being recycled, ~93 thread
+creations per cycle. The tensor-parallel backend's `set_tensor` started one `std::thread` per NUMA device for every call on a
+CPU-NUMA buffer group: right for weights, and also the path of every token, position, mask and index upload, including uploads
+inside graph compute. The transient threads landed on worker CPUs (the pinned workers were preempted 32 times per cycle, 6 after
+the fix) and every exit sent TLB shootdowns into 60 computing cores. Uploads below 1 MiB now run in the caller: the verify graph
+went from 119.7 to 115.5 ms and the draft graphs from 10.8 to 9.2 ms per cycle, the largest single step of the day after the
+attention kernel. The 8-layer proxy showed it as +13%. [Patch](../patches/meta-backend-small-uploads-blocking-dispatch.patch).
 
 **Batch-composition invariance.** The first version of the attention kernel let each worker take a slice of the cells that *any*
 query of the batch could see. That made one query's summation order depend on its batch companions, i.e. a verified token's numbers
@@ -83,12 +94,12 @@ the trunk is uncertain. [Patch, exactness test](../patches/coupled-sampling-fast
 
 One speculative cycle verifies three tokens and yields 2.63 on the greedy fixture (about 2.5 sampled).
 
-| Part | 09-19 production, ms | revision d, ms | Note |
-| --- | ---: | ---: | --- |
-| target verify graph | 137 | 119.5 | 7,239 nodes |
-| MTP draft | 18.2 (catch-up + two passes, 3.3 of it graph rebuild) | 10.7 (two passes, both reused) | |
-| outside graphs (sampling, rollback, server) | 6.0 | 2.5 | |
-| **cycle** | **161** | **133** at ~200 tokens of context, **137** at the 4K fixture | |
+| Part | 09-19 production, ms | revision d, ms | revision e, ms | Note |
+| --- | ---: | ---: | ---: | --- |
+| target verify graph | 137 | 119.5 | 115.5 | 7,239 nodes |
+| MTP draft | 18.2 (catch-up + two passes, 3.3 of it graph rebuild) | 10.7 (two passes, both reused) | 9.2 | |
+| outside graphs (sampling, rollback, server) | 6.0 | 2.5 | 1.9 | |
+| **cycle** | **161** | **133** | **127** at ~200 tokens of context, **131** at the 4K fixture | |
 
 Worker-0 attribution inside the verify graph, deployed kernels (106 ms of ops + 11 ms of waits): routed experts 42.2, dense matmul
 36.6, flash attention 4.5, cross-socket reduces 3.5, gated delta net 2.6 (+2.2 waiting, before the row split), top-k 0.6,
@@ -100,16 +111,20 @@ per socket, the machine's measured ceiling, with every expert already split four
 everything a GPU-hybrid engine would hand to the GPU: attention, the indexer, the hyper-connection small ops, the draft loop,
 host work and scheduling. All gains in the table came from there.
 
-On 09-19 the marginal verify token cost ~29 ms (137 ms for three tokens against ~78 ms for a single-token graph); 14 ms of that
-is expert traffic that cannot shrink, and it has not been re-measured on revision d. Draft depth 3-4 lost then (-22% at depth 4).
-The verify batch must also keep ONE shape: a rebuilt trunk graph costs 43 ms.
+The marginal verified row costs 24 ms on revision e (window w9: verify graph 110 ms with three rows, 133.5 ms with four; 14 ms of
+it is expert traffic that cannot shrink, and part of the rest is that the expert kernels are specialised for batches of three).
+That is why depth 3 still loses: 3.12 tokens per cycle instead of 2.63, but 151 ms instead of 121 (greedy 19.56 -> 18.73,
+sampled 19.05 -> 18.29, one process). The verify batch must also keep ONE shape: the backend holds a single compiled graph per
+context, so a change of shape costs 43 ms of graph build plus ~60 ms of re-splitting.
 
 ## What did not work
 
 Kept because each one looked right first ([09-19 log](../engineering/2026-09-20/archive/sr950-strategy/GLM53-FLASH-CODEX-20260919.md),
 [09-18 windows](../engineering/2026-09-20/archive/serving/fleet-0912-ctx/RESULTS-LOG.md)):
 
-- MTP depth 4: -22%; acceptance falls 49/65/63% -> 30/38/39%.
+- MTP depth 4: -22% (09-18); depth 3 on revision e: -4% greedy and sampled (w9), see above.
+- Variable-length verification, simulated offline on 2,605 logged sampled cycles with the measured costs: dropping the second
+  draft when the first one's confidence is low would gain at most +3%, and only if a shape change were free, which it is not.
 - MoE/FFN fusion switches: output changes on all three prompts, no speed signal.
 - Porting a wider expert kernel: cancelled by arithmetic before any code; the experts already run at bandwidth.
 - Q4 token batching, Q4/Q5 clamp fusion, a batched Q8 kernel (13-34% faster alone, +0.8% in a four-socket synthetic cycle): no model gain.
@@ -136,9 +151,11 @@ Kept because each one looked right first ([09-19 log](../engineering/2026-09-20/
 
 ## Open
 
-- Sampled turns average 18.2 in production (twenty runs over two loads: 17.4-19.4, fourteen at or above 18.0). The same stack in
-  a test window measured 18.74 over fourteen runs, none below 18.0; production loads read about 2% below window loads and the
-  cause is not found (same launcher, environment, limits and cgroup settings; no memory or CPU pressure).
+- Production loads read about 2% below test-window loads of the same stack (revision d: 19.2 against 19.55 greedy); the cause is not
+  found (same launcher, environment, limits and cgroup settings; no memory or CPU pressure).
+- The main thread still burns ~7 ms of user CPU per cycle although the wall time outside graphs is 1.9 ms; what it does during
+  graph compute is unknown (no profiler). The first request after a restart also takes ~146 MB of page faults on the main thread
+  (prompt-cache state), which is time to first token, not decode.
 - The 90 `hc_mixes` projections per graph (Q8_0, 16,384 -> 24) take 29 us each for ~5 us of arithmetic; with the other tiny
   matmuls that is 2-3 ms per cycle of pure launch cost. `nextn.eh_proj` is mirrored on all sockets (35.7 MB read per socket per
   draft pass); a split rule would save ~0.6 ms per cycle.
