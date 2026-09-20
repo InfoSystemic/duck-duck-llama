@@ -1,0 +1,37 @@
+common/speculative.cpp, MTP draft driver (common_speculative_impl_draft_mtp): three changes to the draft loop.
+DEPLOYED 2026-09-20 (revision b). Output of the server is unchanged by construction (a drafter cannot change what is verified);
+measured identical text. Switches, default off: GGML_F18_MTP_MERGE, GGML_F18_MTP_FAST_PICK, GGML_F18_MTP_PAD
+(GGML_F18_MTP_PAD_MAX_CTX, default 12288), GGML_F18_SPEC_TRACE; GGML_F18_SPEC_CONTROL_FILE maps a 4-byte word for in-process A/B
+(bit 0 merge, bit 1 fast pick, bit 2 pad; flip it only while the server is idle).
+
+1. Merge the catch-up into the first draft pass. After a verify step the driver wrote the accepted rows to the draft cache with
+   a decode of its own (process()), then drafted. Small verify batches are now only REMEMBERED (token, position, hidden row);
+   draft() puts the rows that are still part of the sequence in front of the first draft row, in the same batch. One graph less
+   per cycle. Anything that does not fit the simple case (interleaved sequences, shared memory, chained heads, a gap in
+   positions) is flushed through the old path first.
+2. Direct pick. The driver sampled each draft token through a common_sampler chain (top-k 10 + dist) over 154,880 candidates
+   and then read candidate 0. f18_pick() finds the 10 largest logits in one pass and returns the best token and its softmax
+   share of those 10: the same token and the same p. The driver asks for backend sampling, which FAILS under tensor split and
+   falls back to the CPU chain, so the guard is on the outcome (backend_chains[seq] == nullptr), not on the request.
+3. Constant-shape draft batches. llama.cpp reuses only the previous graph, and the two draft passes of a cycle have different
+   shapes (k+2 rows, then 1), so both graphs were rebuilt and reallocated every cycle, 2.2 ms each on this engine. Every draft
+   batch of a sequence is padded to n_max + 2 rows. Pad rows sit at FUTURE positions of the same sequence: the real row cannot
+   attend to them (causal mask), they request no output, and their cache cells are removed before the next pass.
+   Pad rows attend densely in the draft layer, so padding was limited to n_past < 12288 here;
+   glm5next-mtp-query-rows.patch removes that cost and the limit.
+   A multi-slot graph cache in llama-context.cpp was tried first and CANNOT work on this engine: the Meta backend keeps a
+   two-entry ping-pong of per-device tensors per BUFFER, so two live graphs that share weight or KV buffers destroy each other
+   (glm-fix/ggml-backend-meta.cpp GGML_ASSERT(bcj.nodes[i])).
+
+Evidence (full model, Codex requests through the Paseo wrapper, greedy, modes switched inside one loaded process, tok/s):
+  w2  kernels + pooled-result cache 18.03/18.00/17.87/18.12 (18.01)   + merge 18.16/18.17/17.85/18.20 (18.10)
+  w3  + merge 17.88/17.81/17.82/17.53 (17.76)     + merge + pad 18.12/18.05/18.29/18.05 (18.13)
+      + merge + direct pick + pad 18.00/18.33/18.17/18.10 (18.15)
+  w4  (with the batch-invariant attention kernel) + merge 17.97 (n=4)   + merge + pad 18.29 (n=2)   all three 18.40 (n=5)
+      all warm runs of all modes: ONE text hash.
+  Battery of 10 short prompts and log-probabilities on a short and a 7K-token prompt: identical between modes (w2, w3, w4).
+  Phase trace: draft graphs per cycle 3 -> 2; with padding both are reused (prepare 2.2 -> 0.05 ms each).
+Separate loads of the same configuration differ by 2-3%, which is why w3 and w4 do not line up with w2.
+
+Parent: common/speculative.cpp of the llama.cpp-glm5n-goal-0904 line, sha256 2aa5336ef0f6a7a8...; the production
+libllama-common (md5 2ed2d370...) is reproduced bit for bit from that source by the same build script before any change.

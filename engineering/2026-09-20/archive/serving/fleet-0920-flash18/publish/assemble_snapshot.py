@@ -24,7 +24,21 @@ mine = [W/'cpu/f18-common.inc', W/'cpu/fa-mqa.inc', W/'cpu/topk-fast.inc', W/'cp
         W/'run/proxy.sh', W/'run/full.sh', W/'run/setmode.sh', W/'run/stop-port.sh', W/'run/parity.py', W/'run/optrace.sh', W/'run/opsum.py', W/'run/window1.py',
         W/'bench/f18bench.py', W/'bench/summarize_metrics.py', W/'common/make_f18.py', W/'common/build.sh',
         W/'results/window-w1.json', W/'results/window-w1.log', W/'publish/tools/topk_select_check.cpp', W/'publish/assemble_snapshot.py']
+# revisions b-d (after the first publication): kernels, draft loop, coupled sampling, worker team, query rows, windows w2-w6
+mine += [W/'cpu/gdn-rows.inc', W/'cpu/fa-mqa.v1.inc', W/'cpu/make_dispatch.py', W/'cpu/build-dispatch.sh', W/'cpu/build-verify.sh', W/'cpu/build-timing.sh',
+         W/'cpu/test/test_fa_invariance.cpp',
+         W/'common/make_f18_pad.py', W/'common/make_f18_couple.py', W/'common/build2.sh', W/'common/f18-coupling.inc', W/'common/f18-topk-scan.inc',
+         W/'common/test/coupled_sampling_check.cpp', W/'common/test/topk_scan_check.cpp',
+         W/'llama/make_ctx.py', W/'llama/make_mtp_qrows.py', W/'llama/build.py', W/'llama/build_glm5next.py',
+         W/'run/window2.py', W/'run/window3.py', W/'run/window4.py', W/'run/window5.py', W/'run/window6.py',
+         W/'run/couple_check.py', W/'run/fast_sampler_check.py', W/'run/fast_sampler_timing.py', W/'run/phase_by_mode.py', W/'run/phase_timeline.py',
+         W/'publish/make_patches_revd.py']
+mine += [W/'results'/f'window-{w}.{e}' for w in ('w2', 'w3', 'w4', 'w5', 'w6') for e in ('json', 'log')]
+mine += [W/d/n for d in ('deploy-0920b', 'deploy-0920c', 'deploy-0920d') for n in ('95-f18-0920.conf.proposed', 'deploy.sh', 'SHA256SUMS')]
+mine += sorted((W/'publish/headers').glob('*.txt'))
 keep += [p for p in mine if p.exists()]
+missing = [str(p) for p in mine if not p.exists()]
+if missing: print('MISSING from the mine list:', missing)
 
 EXTRA_OMIT = {'output_text', 'outputs', 'generated_text', 'completion', 'battery', 'texts', 'a', 'b'}
 def guard(v, counts):
@@ -70,7 +84,7 @@ for p in sorted(set(keep)):
     files.append({'path': dest(p).as_posix(), 'category': cat, 'original_sha256': sha(raw), 'sha256': sha(out), 'bytes': len(out), 'filtered': filtered})
 
 manifest = {'date': '2026-09-20', 'created_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-    'scope': 'GLM-5.3-Flash decode engineering through Paseo/Codex, September 18-20: fused/wider pooling, flat state copy, bounded KV rollback, cache-only MTP catch-up, pooled-result cache, cell-split MQA attention, selection top-k, and the recorded negative results',
+    'scope': 'GLM-5.3-Flash decode engineering through Paseo/Codex, September 18-20: fused/wider pooling, flat state copy, bounded KV rollback, cache-only MTP catch-up, pooled-result cache, batch-invariant cell-split MQA attention, selection top-k, MTP draft-loop restructure, coupled draft/verifier sampling, sampler host cost, OpenMP team hand-off (spin count and shared team), row-split gated delta net, MTP query rows, production revisions b-d, and the recorded negative results',
     'policy': 'Curated subset. Source/configuration/notes are preserved byte for byte unless they name a client, in which case the name is redacted and the file is marked filtered. Evidence JSON removes host context, environment dumps, commands, prompts and response text; long strings become length/hash summaries. No weights, compiled artifacts, raw traces or per-request captures.',
     'files': files, 'inherited_files': [], 'excluded': [{'source': a, 'reason': b} for a, b in skipped], 'filter_counts': dict(counts)}
 (SNAP/'archive-manifest.json').write_text(json.dumps(manifest, indent=1) + '\n')

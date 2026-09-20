@@ -1,7 +1,7 @@
 {
  "date": "2026-09-20",
- "created_utc": "2026-09-20T07:31:24.961435+00:00",
- "scope": "GLM-5.3-Flash decode engineering through Paseo/Codex, September 18-20: fused/wider pooling, flat state copy, bounded KV rollback, cache-only MTP catch-up, pooled-result cache, cell-split MQA attention, selection top-k, and the recorded negative results",
+ "created_utc": "2026-09-20T12:00:42.908377+00:00",
+ "scope": "GLM-5.3-Flash decode engineering through Paseo/Codex, September 18-20: fused/wider pooling, flat state copy, bounded KV rollback, cache-only MTP catch-up, pooled-result cache, batch-invariant cell-split MQA attention, selection top-k, MTP draft-loop restructure, coupled draft/verifier sampling, sampler host cost, OpenMP team hand-off (spin count and shared team), row-split gated delta net, MTP query rows, production revisions b-d, and the recorded negative results",
  "policy": "Curated subset. Source/configuration/notes are preserved byte for byte unless they name a client, in which case the name is redacted and the file is marked filtered. Evidence JSON removes host context, environment dumps, commands, prompts and response text; long strings become length/hash summaries. No weights, compiled artifacts, raw traces or per-request captures.",
  "files": [
   {
@@ -1325,11 +1325,91 @@
    "filtered": false
   },
   {
+   "path": "archive/serving/fleet-0920-flash18/common/build2.sh",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "edcba98a2ab17eff021c51e797e0066825d423cb0729930e5e3d3ce94b0c7581",
+   "sha256": "edcba98a2ab17eff021c51e797e0066825d423cb0729930e5e3d3ce94b0c7581",
+   "bytes": 2089,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/common/f18-coupling.inc",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "232af8fd55c0a0c668f2488da158238e4a8580c11082b4a85038acc6cb23741c",
+   "sha256": "232af8fd55c0a0c668f2488da158238e4a8580c11082b4a85038acc6cb23741c",
+   "bytes": 1985,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/common/f18-topk-scan.inc",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "2362e9466deb8ae4b657006f432060442bbe803b603a8e24092b2de4394e7b46",
+   "sha256": "2362e9466deb8ae4b657006f432060442bbe803b603a8e24092b2de4394e7b46",
+   "bytes": 3226,
+   "filtered": false
+  },
+  {
    "path": "archive/serving/fleet-0920-flash18/common/make_f18.py",
    "category": "engineering-source-or-notes",
-   "original_sha256": "5956eb34e0b0ae2dc2cac3dc15c46a18bd74501f887cbb1dcfc877fda8a24c5d",
-   "sha256": "5956eb34e0b0ae2dc2cac3dc15c46a18bd74501f887cbb1dcfc877fda8a24c5d",
-   "bytes": 16754,
+   "original_sha256": "f399cef8d06860dd42750f07e856e08c7a29fb4a23a4a44cdf115f0541d88e55",
+   "sha256": "f399cef8d06860dd42750f07e856e08c7a29fb4a23a4a44cdf115f0541d88e55",
+   "bytes": 17091,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/common/make_f18_couple.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "ff246ce24986756c4a0bf68c441a9a33519034930e93b32bef4c4e6b76366e85",
+   "sha256": "ff246ce24986756c4a0bf68c441a9a33519034930e93b32bef4c4e6b76366e85",
+   "bytes": 24836,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/common/make_f18_pad.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "e086d92dc7ab2c83c490699e3b87967b9a539d0eee2b6022d88fb0c23b0c2ba4",
+   "sha256": "e086d92dc7ab2c83c490699e3b87967b9a539d0eee2b6022d88fb0c23b0c2ba4",
+   "bytes": 4768,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/common/test/coupled_sampling_check.cpp",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "9a6e176acac619eddc8785eba806f46842cb439dcbf560719854a99e5cf353ad",
+   "sha256": "9a6e176acac619eddc8785eba806f46842cb439dcbf560719854a99e5cf353ad",
+   "bytes": 6750,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/common/test/topk_scan_check.cpp",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "2a3703d2486a7fb72880df82b1dace4998982a2e6b944c3c45a7455e4204b08a",
+   "sha256": "2a3703d2486a7fb72880df82b1dace4998982a2e6b944c3c45a7455e4204b08a",
+   "bytes": 3418,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/cpu/build-dispatch.sh",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "6c26b46fcbba912fc463498e6ffd0297da7a7aa91ddbb7eb916e192578c860a6",
+   "sha256": "6c26b46fcbba912fc463498e6ffd0297da7a7aa91ddbb7eb916e192578c860a6",
+   "bytes": 1554,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/cpu/build-timing.sh",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "6a533058ff76964a0e697109de1b99eede6200431e8d90f5db2d8a3954ff5f15",
+   "sha256": "6a533058ff76964a0e697109de1b99eede6200431e8d90f5db2d8a3954ff5f15",
+   "bytes": 4024,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/cpu/build-verify.sh",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "bef5728e82d8f2c2d5faa140dbf1457edd8ad38ed5b2446547de77ce4a0de53a",
+   "sha256": "bef5728e82d8f2c2d5faa140dbf1457edd8ad38ed5b2446547de77ce4a0de53a",
+   "bytes": 4024,
    "filtered": false
   },
   {
@@ -1343,17 +1423,41 @@
   {
    "path": "archive/serving/fleet-0920-flash18/cpu/f18-common.inc",
    "category": "engineering-source-or-notes",
-   "original_sha256": "4bec3f082efda16776c5f64243e733e77167ff87f7467b95a6556c5835993ce0",
-   "sha256": "4bec3f082efda16776c5f64243e733e77167ff87f7467b95a6556c5835993ce0",
-   "bytes": 1346,
+   "original_sha256": "d5477d8952ad8256bd68c8a656315493e34bac9daa928fbc849f1277e673005e",
+   "sha256": "d5477d8952ad8256bd68c8a656315493e34bac9daa928fbc849f1277e673005e",
+   "bytes": 1425,
    "filtered": false
   },
   {
    "path": "archive/serving/fleet-0920-flash18/cpu/fa-mqa.inc",
    "category": "engineering-source-or-notes",
+   "original_sha256": "013ed1d89a97c6f616209b027eb20a62ce57b90fda582bff86924de93ca02ef2",
+   "sha256": "013ed1d89a97c6f616209b027eb20a62ce57b90fda582bff86924de93ca02ef2",
+   "bytes": 14341,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/cpu/fa-mqa.v1.inc",
+   "category": "engineering-source-or-notes",
    "original_sha256": "18f34246b06584be53d87891e361a28e83628b2873ae8085857324a4a6f1d303",
    "sha256": "18f34246b06584be53d87891e361a28e83628b2873ae8085857324a4a6f1d303",
    "bytes": 12491,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/cpu/gdn-rows.inc",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "693ed27a325650f169997f06cb1c3d171beff9e669b320cec431a0dc9970f74e",
+   "sha256": "693ed27a325650f169997f06cb1c3d171beff9e669b320cec431a0dc9970f74e",
+   "bytes": 6268,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/cpu/make_dispatch.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "c5998b40e1f4bd25ab9014dc32d847611c18b2ab67fb9e47ae4e4ae138ce38dd",
+   "sha256": "c5998b40e1f4bd25ab9014dc32d847611c18b2ab67fb9e47ae4e4ae138ce38dd",
+   "bytes": 7447,
    "filtered": false
   },
   {
@@ -1373,6 +1477,14 @@
    "filtered": false
   },
   {
+   "path": "archive/serving/fleet-0920-flash18/cpu/test/test_fa_invariance.cpp",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "36374e1e6daf8598c9c915729a0f35d136489489e71e0d2181396835a0316c35",
+   "sha256": "36374e1e6daf8598c9c915729a0f35d136489489e71e0d2181396835a0316c35",
+   "bytes": 4332,
+   "filtered": false
+  },
+  {
    "path": "archive/serving/fleet-0920-flash18/cpu/topk-fast.inc",
    "category": "engineering-source-or-notes",
    "original_sha256": "07208234b6cc291bef35a71595e2f2e53b1060f860b8c101da4ccb1c15f4e78c",
@@ -1381,12 +1493,180 @@
    "filtered": false
   },
   {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920b/95-f18-0920.conf.proposed",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "933c7168d2b9986e16387e51b894a0c089bdf73f09458a3028b25ec680dcdcb2",
+   "sha256": "933c7168d2b9986e16387e51b894a0c089bdf73f09458a3028b25ec680dcdcb2",
+   "bytes": 952,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920b/SHA256SUMS",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "b2a4925915af477ec1903ac35547ec57650a9ca647663428e40efb4f50221ec8",
+   "sha256": "b2a4925915af477ec1903ac35547ec57650a9ca647663428e40efb4f50221ec8",
+   "bytes": 179,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920b/deploy.sh",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "ca8de9b87aedc119acdfe5af44f921d77c5d765dc56e988ab1bf933c892a788e",
+   "sha256": "ca8de9b87aedc119acdfe5af44f921d77c5d765dc56e988ab1bf933c892a788e",
+   "bytes": 2104,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920c/95-f18-0920.conf.proposed",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "dee81cd8750357425963ab5538dd5179a85e81b4273a3a4b2c2cb4102bc89ab1",
+   "sha256": "dee81cd8750357425963ab5538dd5179a85e81b4273a3a4b2c2cb4102bc89ab1",
+   "bytes": 1946,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920c/SHA256SUMS",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "e43195f8a737e2ae06f3aa2143cb61683ba03ad4069bea705ca12afdd48fc25f",
+   "sha256": "e43195f8a737e2ae06f3aa2143cb61683ba03ad4069bea705ca12afdd48fc25f",
+   "bytes": 179,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920c/deploy.sh",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "7d2b6f7eaf0e4bfe39846f3662d8829af1865a6a81125afc7726023572d21b2b",
+   "sha256": "7d2b6f7eaf0e4bfe39846f3662d8829af1865a6a81125afc7726023572d21b2b",
+   "bytes": 2238,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920d/95-f18-0920.conf.proposed",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "4b8e71bef676b2670346a0d8d3ac92e73d4a54e91f9d699bdbedb6f544e2ff41",
+   "sha256": "4b8e71bef676b2670346a0d8d3ac92e73d4a54e91f9d699bdbedb6f544e2ff41",
+   "bytes": 2185,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920d/SHA256SUMS",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "5aa79138abb2bbd726e7b40ceb32f1972906a38d2027b8679de98092fda7fb3b",
+   "sha256": "5aa79138abb2bbd726e7b40ceb32f1972906a38d2027b8679de98092fda7fb3b",
+   "bytes": 263,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/deploy-0920d/deploy.sh",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "5128b08f5a99c9ef7c45b52c9085323df62001020c988bd5ea96cb716fa78b96",
+   "sha256": "5128b08f5a99c9ef7c45b52c9085323df62001020c988bd5ea96cb716fa78b96",
+   "bytes": 2316,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/llama/build.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "c923a8001b8f7390a691c1912fc5fc32628e7b6fcadcb8e3dd13095443d184ae",
+   "sha256": "c923a8001b8f7390a691c1912fc5fc32628e7b6fcadcb8e3dd13095443d184ae",
+   "bytes": 1352,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/llama/build_glm5next.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "c9b7d1bef5a595a26ded8f8ac08e4be92f47d242e574054ff9dbb9e7e7a7d826",
+   "sha256": "c9b7d1bef5a595a26ded8f8ac08e4be92f47d242e574054ff9dbb9e7e7a7d826",
+   "bytes": 1889,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/llama/make_ctx.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "522e38562768e86cb4bac40c8db4da2fcc97e4b8cd043052d479e2ed0362498a",
+   "sha256": "522e38562768e86cb4bac40c8db4da2fcc97e4b8cd043052d479e2ed0362498a",
+   "bytes": 9381,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/llama/make_mtp_qrows.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "6badcb9accd86564463103b4ef20e1da9bb14ae21d30858cc0f7a11bef6eaa90",
+   "sha256": "6badcb9accd86564463103b4ef20e1da9bb14ae21d30858cc0f7a11bef6eaa90",
+   "bytes": 6477,
+   "filtered": false
+  },
+  {
    "path": "archive/serving/fleet-0920-flash18/publish/assemble_snapshot.py",
    "category": "engineering-source-or-notes",
-   "original_sha256": "cd555e112bf7e26a113486b4c20c46fc841a9eca0829753b15f75362152a6275",
-   "sha256": "0e3d3726cd45151d0b89f25d4e635e2ec029b4c1c5aead24f5289e26db429de7",
-   "bytes": 5112,
+   "original_sha256": "eb2a6020768b6b2e4ca544c4cb64f5eab0e3ef05c221cc6282cfc7d69d839ab0",
+   "sha256": "3044ada11a685eae5691a2bcadb1183b4529e564393b96c0bcb4848604678282",
+   "bytes": 6713,
    "filtered": true
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/publish/headers/coupled-sampling-fast-sampler.txt",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "ae67b7e4a3a0c7ba7b32d641aea6e81337ce95ad59a74d81d6a89d5a2b4cf416",
+   "sha256": "ae67b7e4a3a0c7ba7b32d641aea6e81337ce95ad59a74d81d6a89d5a2b4cf416",
+   "bytes": 4660,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/publish/headers/cpu-numa-shared-team.txt",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "0ac91277b06375f56866971eb08b925ded7710f11a04e0d2d86f84c33883ec09",
+   "sha256": "0ac91277b06375f56866971eb08b925ded7710f11a04e0d2d86f84c33883ec09",
+   "bytes": 3364,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/publish/headers/glm5next-fa-mqa-cellsplit.txt",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "7007f8c3088fcc4b1e43968869fe07a46aa1d7bf5d69b0c82806e0cd5d2e2a49",
+   "sha256": "7007f8c3088fcc4b1e43968869fe07a46aa1d7bf5d69b0c82806e0cd5d2e2a49",
+   "bytes": 4595,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/publish/headers/glm5next-gdn-row-split.txt",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "e2bb5935603764c773b23e9d507e881764288472c3c5ef09ebb1002731bff844",
+   "sha256": "e2bb5935603764c773b23e9d507e881764288472c3c5ef09ebb1002731bff844",
+   "bytes": 2237,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/publish/headers/glm5next-mtp-query-rows.txt",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "21bb7b90bdffa5a802e30c2d43fee18798f5bbcb56c3b20dcb8ed1d27e57e438",
+   "sha256": "21bb7b90bdffa5a802e30c2d43fee18798f5bbcb56c3b20dcb8ed1d27e57e438",
+   "bytes": 2147,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/publish/headers/mtp-draft-merge-fastpick-pad.txt",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "bdcd01040c9c3752d09bf7484761ca82a275f654b51a480de717206eaf9702d5",
+   "sha256": "bdcd01040c9c3752d09bf7484761ca82a275f654b51a480de717206eaf9702d5",
+   "bytes": 3706,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/publish/headers/topk-select-tie-fallback.txt",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "6637540437d4658087d2f013959d4717e90a8f8db4189078a35ea2d8714a8e32",
+   "sha256": "6637540437d4658087d2f013959d4717e90a8f8db4189078a35ea2d8714a8e32",
+   "bytes": 1815,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/publish/make_patches_revd.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "b613e2239c2eec8621496a756cfc7e47157f3f4d53c13f15207d5aaa79a1d67a",
+   "sha256": "b613e2239c2eec8621496a756cfc7e47157f3f4d53c13f15207d5aaa79a1d67a",
+   "bytes": 4864,
+   "filtered": false
   },
   {
    "path": "archive/serving/fleet-0920-flash18/publish/tools/topk_select_check.cpp",
@@ -1410,6 +1690,110 @@
    "original_sha256": "0f510377a0539763a7c724130baef42731b7bb2ac3870501249cf02e20620b6b",
    "sha256": "0f510377a0539763a7c724130baef42731b7bb2ac3870501249cf02e20620b6b",
    "bytes": 2570,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w2.json",
+   "category": "filtered-evidence",
+   "original_sha256": "b3b4c2949edcc44b9045897a7905a01dd3bbc27fd74a1acae0565745d195ddf7",
+   "sha256": "e66089cff6fcb1f90cddcbd2f40816e7a2a0cd4570180efa683e1a1290763128",
+   "bytes": 7521,
+   "filtered": true
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w2.log",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "3592f562f794a51ea2307431dab97534b787681c502af580182c183f1b8217a6",
+   "sha256": "3592f562f794a51ea2307431dab97534b787681c502af580182c183f1b8217a6",
+   "bytes": 2731,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w3.json",
+   "category": "filtered-evidence",
+   "original_sha256": "42643cae2602cdfa50f39c9692381b83e2b303cbd0de0d8da10502a2eea0a826",
+   "sha256": "cf5478661ab78bfe6dbb25e98e3f8bd97b61dcd7a4d85ace799599ca72286057",
+   "bytes": 7535,
+   "filtered": true
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w3.log",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "bcaa9ee438cc12a35a6001e18c559cba28e30e55347447a59247b2959997f40b",
+   "sha256": "bcaa9ee438cc12a35a6001e18c559cba28e30e55347447a59247b2959997f40b",
+   "bytes": 2736,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w4.json",
+   "category": "filtered-evidence",
+   "original_sha256": "c68e288a6b285d53c67ca729dddc0ab3d3a5af38962e8d5970f028ac2be48b2c",
+   "sha256": "bed24a962b2978b4e4a6c328628dce466bd4dcd1015a1d3569686ea77535af3a",
+   "bytes": 7383,
+   "filtered": true
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w4.log",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "cf644f909e0b40c981e4889314f5293f48649f0c72135755afbfc44c0d57767e",
+   "sha256": "cf644f909e0b40c981e4889314f5293f48649f0c72135755afbfc44c0d57767e",
+   "bytes": 2734,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w5.json",
+   "category": "filtered-evidence",
+   "original_sha256": "4835e8f350e20634afc560f73854ca98fd56710ec4b97916e3e4724782bca6a8",
+   "sha256": "65969b52c345429fbdc1d436bd0b65faa84587b5f06adaa293934ce570a2a1ed",
+   "bytes": 7792,
+   "filtered": true
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w5.log",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "9637ba5d28bfbf90bed0cffc5f3a1054485724f24344afeb5b5dea95b8707fbe",
+   "sha256": "9637ba5d28bfbf90bed0cffc5f3a1054485724f24344afeb5b5dea95b8707fbe",
+   "bytes": 4540,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w6.json",
+   "category": "filtered-evidence",
+   "original_sha256": "75383d107728ce45fbb482fc04272ac719687454c60cdb7da4faf0933b18d563",
+   "sha256": "ff4c025b8f6dedd21c988841c3345c7837e08d4f0f4c204548dbb998623f2ca1",
+   "bytes": 11850,
+   "filtered": true
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/results/window-w6.log",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "e018272a6effc091d9ed7f15deb6128b628582370224e6492853821d56305723",
+   "sha256": "e018272a6effc091d9ed7f15deb6128b628582370224e6492853821d56305723",
+   "bytes": 3951,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/couple_check.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "a73e609a598fa35a96a3151cdfd62640a0acb0374a2f7269190a80ac945e8c10",
+   "sha256": "a73e609a598fa35a96a3151cdfd62640a0acb0374a2f7269190a80ac945e8c10",
+   "bytes": 2763,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/fast_sampler_check.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "82e025cd13dfeeecbda9a65ade21963efa25719ac17e8c7e53dcb5b1e7ed841d",
+   "sha256": "82e025cd13dfeeecbda9a65ade21963efa25719ac17e8c7e53dcb5b1e7ed841d",
+   "bytes": 1902,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/fast_sampler_timing.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "592d15c7bc156e1d8fe5d138a679b632d14b5421e80b08f2b850f65ed5d9c71e",
+   "sha256": "592d15c7bc156e1d8fe5d138a679b632d14b5421e80b08f2b850f65ed5d9c71e",
+   "bytes": 1888,
    "filtered": false
   },
   {
@@ -1445,6 +1829,22 @@
    "filtered": false
   },
   {
+   "path": "archive/serving/fleet-0920-flash18/run/phase_by_mode.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "508132026913e544a26383610d40888059698d5e6df78036d425ead9d61b045f",
+   "sha256": "508132026913e544a26383610d40888059698d5e6df78036d425ead9d61b045f",
+   "bytes": 2718,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/phase_timeline.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "87f42e554cac2100d86e6f825baab3b5d77584e33cd8eff952d9b9f71dfb3767",
+   "sha256": "87f42e554cac2100d86e6f825baab3b5d77584e33cd8eff952d9b9f71dfb3767",
+   "bytes": 2978,
+   "filtered": false
+  },
+  {
    "path": "archive/serving/fleet-0920-flash18/run/proxy.sh",
    "category": "engineering-source-or-notes",
    "original_sha256": "ddc6cd55c2b52300598b7e54bfca19a901fa0e0807d236d480c425bfd3fcacec",
@@ -1474,6 +1874,46 @@
    "original_sha256": "e04dfdedc4796e69e26c9da77b5de636804d053c2de23fa540c130d78f2aa2b1",
    "sha256": "e04dfdedc4796e69e26c9da77b5de636804d053c2de23fa540c130d78f2aa2b1",
    "bytes": 8536,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/window2.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "e2c07a88a934033668944805fe4c37b64af62f4747e93e121502192097786f09",
+   "sha256": "e2c07a88a934033668944805fe4c37b64af62f4747e93e121502192097786f09",
+   "bytes": 8821,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/window3.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "7f4d13bcf26a1e5846f60a3208820a3427f449335497ec984bcf80bc0313fd78",
+   "sha256": "7f4d13bcf26a1e5846f60a3208820a3427f449335497ec984bcf80bc0313fd78",
+   "bytes": 8902,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/window4.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "32c5365c7ce49697621b2a10253b4d6d97393d7e05a59f3d7a2c69cccd8907f4",
+   "sha256": "32c5365c7ce49697621b2a10253b4d6d97393d7e05a59f3d7a2c69cccd8907f4",
+   "bytes": 9272,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/window5.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "0739ddf9b9792d52130080187424f24070ba5e9605d46d4123bed9d80d9ddd49",
+   "sha256": "0739ddf9b9792d52130080187424f24070ba5e9605d46d4123bed9d80d9ddd49",
+   "bytes": 9851,
+   "filtered": false
+  },
+  {
+   "path": "archive/serving/fleet-0920-flash18/run/window6.py",
+   "category": "engineering-source-or-notes",
+   "original_sha256": "6aceaecfaf77fd0cb747cb787494c1cc2add49f8d3f880636f40d33b5c8607d5",
+   "sha256": "6aceaecfaf77fd0cb747cb787494c1cc2add49f8d3f880636f40d33b5c8607d5",
+   "bytes": 11082,
    "filtered": false
   },
   {
@@ -2569,7 +3009,7 @@
   }
  ],
  "filter_counts": {
-  "removed_fields": 368,
+  "removed_fields": 536,
   "summarised_strings": 11,
   "redacted_text_files": 3
  }

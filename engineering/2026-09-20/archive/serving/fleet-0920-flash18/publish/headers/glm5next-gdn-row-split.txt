@@ -1,0 +1,25 @@
+ggml-cpu gated delta net, step 6 of 6: split the work by STATE ROW instead of by head, one fused pass per row.
+DEPLOYED 2026-09-20 (revision d). BIT-IDENTICAL output. GGML_F18_FEATURES bit 2, default off.
+Apply after topk-select-tie-fallback.patch.
+
+The stock kernel hands out heads. A socket shard of GLM-5.3-Flash has 16 KDA heads and the server runs 15 workers per socket, so
+the chunking gives fourteen workers one head and one worker two: the op costs two heads of wall time in each of the 34 KDA
+layers, and fourteen workers wait at the next barrier. Within a head the rows of the (transposed) 128x128 state never interact:
+    row *= exp(g);   d = (v[j] - row.k) * beta;   row += d * k;   out[j] = (row.q) * scale
+so a worker can take any contiguous range of (head, row) pairs. Here every worker gets 1/15 of the rows and runs the four steps
+on a row while it is in L1; the stock order walks all 128 rows of a head four times per token. The same vector kernels see the
+same 128 floats in the same order per row, so the result is bit-identical; only who computes which row changes.
+The initial chunk-counter barrier of the stock kernel is not needed and is gone. Falls back to the stock path when the state
+is wider than 512 or the inputs are not F32.
+
+Evidence:
+  8-layer proxy, greedy text and top-5 log-probabilities, 32 / 3,861 / 13,231-token prompts: IDENTICAL, max |dlogprob| 0.
+  What is left in the op is state traffic: each head copies its 64 KB state in and writes one 64 KB snapshot per token for
+  speculative rollback.
+  Prefill of 13,231 tokens on the proxy: 329 -> 342 tok/s.
+  Full model, window w6, measured together with glm5next-mtp-query-rows.patch inside one loaded process: greedy Codex fixture
+  19.10/18.99/19.23/19.13 -> 19.59/19.46/19.54/19.58 tok/s (+2.3%), text hash and accepted drafts (175 of 214) unchanged,
+  log-probabilities identical on a short and a 7.7K-token prompt. Verify graph 120.31 -> 119.46 ms; this patch is the only
+  change to the trunk graph in that comparison.
+The gain is small because the op is dominated by the state copies, not by arithmetic. Recomputing a rolled-back state from the
+kept inputs instead of snapshotting every token would remove most of the rest; not attempted.

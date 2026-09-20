@@ -1,0 +1,49 @@
+GLM-5.3-Flash (glm5next) CPU library, step 4 of 6: cell-split MQA flash attention for short query batches. Revision 2.
+DEPLOYED 2026-09-20. CHANGES NUMERICAL OUTPUT (toward the float64 result). GGML_F18_FEATURES bit 0, default off.
+Apply after glm5next-pool-result-cache.patch (or after glm5next-kpool-wide.patch; the hunks do not overlap).
+
+What the stock kernel does. With an F16 KV cache, ggml_compute_forward_flash_attn_ext_f16_one_chunk accumulates V in an FP16
+buffer (VKQ16, ggml_vec_mad_f16). Over ~2,000 cells each addend is near or below the accumulator's rounding step, so the small
+terms are dropped. It also walks the whole cache once per query-head row, converts Q to F16 for the dot product, and converts
+each K/V row again for every head and query. This code is identical in upstream llama.cpp (checked at b23efaa2).
+
+What this kernel does (absorbed MLA is MQA: one 512-wide K/V head, V aliases K, one f16 mask row per query):
+  the CELLS are dealt to the workers in round-robin blocks of 64, by cell index, whatever the masks say. Pass A: every worker
+  converts its K tiles to F32 once (16x16 AVX-512 transpose network), computes the masked scores of all query-head rows with one
+  GEMM per tile and keeps each row's maximum. Barrier; the global row maxima are the maxima over workers. Pass B: softmax
+  weights against the global maximum, V accumulation with a second GEMM, the weight sum of each row kept as a running DOUBLE.
+  Barrier; per-row reduce. Everything is F32 or wider.
+
+Why revision 2. Revision 1 let every worker take a slice of the cells that ANY query of the batch could see. That made the
+summation order of one query depend on which other queries shared its batch, so a verified token's numbers depended on its draft
+companions: with constant-shape (padded) draft batches the greedy text alternated between two outputs from run to run. Fixed
+cell blocks make the result a function of the query alone; a float per-tile weight sum still left 1.9e-9, hence the double.
+  tools/fa_mqa_invariance_check.cpp: a query computed alone and inside 3-query batches: BIT-IDENTICAL (8 trials).
+  Full model, window w4: three draft-loop modes, 11 warm runs, ONE text hash (424f201528); the same hash in windows w5, w6 and
+  in production after every later revision.
+
+Accuracy, relative RMS error against a float64 reference computed from the same tensors (tools/fa_mqa_check.cpp, one socket,
+15 workers, 16 heads; "visible" = cells the mask admits):
+                                         stock kernel            this kernel
+  4,096 cells, 2,051 visible, 3 queries  6.39e-3   1.173 ms      2.36e-7   0.277 ms      (the speculative verify shape)
+  4,096 cells, 2,051 visible, 1 query    1.56e-3   0.319 ms      2.35e-7   0.129 ms
+  32,768 cells, 2,051 visible, 3 queries 6.67e-3   1.752 ms      2.41e-7   0.256 ms      (the context term of the op is gone)
+  4,096 cells, 4,000 visible, 1 query    2.03e-3   0.488 ms      2.83e-7   0.195 ms      (dense MTP draft shape)
+  pure upstream build (b23efaa2), first two rows: 6.4e-3 / 1.6e-3.
+  IN SITU (revision 1, 8-layer proxy of the real model, -DF18_FA_VERIFY recomputes each node both ways):
+      1 query     stock 9.6e-4 mean                  this kernel 7.3e-7 mean
+      3 queries   stock 1.26e-2 mean, 2.5e-2 max     this kernel 6.4e-7 mean, 1.4e-6 max
+  In the server the op measures ~0.41 ms per DSA layer (4.5 ms per verify graph over 11 layers) against ~1.1 ms before.
+
+Full model, actual Codex requests through the Paseo wrapper, greedy, 3,998-token input, modes switched inside one loaded process:
+  w1 (revision 1, with topk-select-tie-fallback.patch): production-equivalent 16.22/16.26/16.27/16.20 -> 17.05/17.24/17.30/17.30
+     tok/s (+6.1%), 157 vs 158 of 196 drafts accepted.
+Because the stock kernel is ~1% off, generated text differs from the 09-19 production: 2 of 10 short factual prompts gave the same
+24-token string, and token log-probabilities moved by up to 0.46 on a 7K-token prompt. Byte parity with the stock kernel is
+therefore NOT the gate for this patch; the float64 comparison is. All later patches in this series ARE gated on byte parity
+with this one.
+
+Parent: glm-kpool-wide-0919/ops.combo.cpp sha256 ddebc70e883f8995a3aada3ef334f5963aaa6b74b36b0670df0a46c2b3e68302 (published as
+engineering/2026-09-20/archive/serving/fleet-0912-ctx/glm-kpool-wide-0919). Deployed libraries that contain it:
+revision b libggml-cpu 4415e237582d630a..., revision d libggml-cpu 9203fe09d5b42782... (with steps 5 and 6 and
+cpu-numa-shared-team.patch). f18-common.inc already defines the bit used by step 6.

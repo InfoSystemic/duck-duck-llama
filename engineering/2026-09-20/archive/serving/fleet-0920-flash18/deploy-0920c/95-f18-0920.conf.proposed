@@ -1,0 +1,21 @@
+# GLM-5.3-Flash f18 stack, revision c (2026-09-20). Revision b plus:
+#   GOMP_SPINCOUNT=20000      trunk and MTP draft each own an OpenMP team pinned to the SAME 60 cores; with libgomp's default idle
+#                             spin (300000 x pause, ~15 ms here) the team that just finished fights the one that starts. ~1 ms is
+#                             enough for the waits inside a graph and lets the idle team sleep. Output unchanged (window w5).
+#                             Large values are still catastrophic -- see glm-serving-barrier-is-not-the-limiter.
+#   GGML_F18_FAST_SAMPLER=1   top-k candidates straight from the logits + candidate-free sampler clone: same tokens, ~1.7 ms/cycle.
+#   GGML_F18_COUPLED=1        Gumbel-max verifier pick with counter-based noise shared with the MTP drafter: exact sampling,
+#                             draft acceptance at temp 1.0 72.4% -> 75.0% (window w5). No effect on temperature-0 requests.
+# Libraries are the frozen copies in this directory (libggml-cpu is unchanged from revision b).
+# Rollback to revision b: cp ../deploy-0920b/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+# Rollback to stock:      rm the installed drop-in; systemctl --user daemon-reload; systemctl --user restart glm53-flash-production.service
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920c:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=3
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000

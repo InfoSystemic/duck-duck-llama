@@ -1,0 +1,40 @@
+05:22:35 stopping proxy (if any) and production
+05:23:00 loading candidate on 18141
+05:27:09 GOMP_SPINCOUNT = 20000
+05:27:09 healthy after 217s
+05:27:09 mapped libs: validated-chunk16-bin/libggml.so.0.22.0 validated-chunk16-bin/libllama-server-impl.so validated-chunk16-bin/libmtmd.so.0.3.0 glm-fix/libggml-base.so.0.22.0 build-couple/libllama-common.so.0.3.0 build-dispatch/libggml-cpu.so.0.22.0 build-qrows/libllama.so.0.3.0
+05:28:21 paseo greedy cold C: 19.154332798693414 hash 424f201528
+05:28:38 paseo greedy 0 mode C: 19.098 tok/s gen 281.0 acc 175.0/214.0 steps 107.0 hash 424f201528
+05:28:54 paseo greedy 1 mode D: 19.593 tok/s gen 281.0 acc 175.0/214.0 steps 107.0 hash 424f201528
+05:29:09 paseo greedy 2 mode D: 19.461 tok/s gen 281.0 acc 175.0/214.0 steps 107.0 hash 424f201528
+05:29:26 paseo greedy 3 mode C: 18.994 tok/s gen 281.0 acc 175.0/214.0 steps 107.0 hash 424f201528
+05:29:42 paseo greedy 4 mode C: 19.231 tok/s gen 281.0 acc 175.0/214.0 steps 107.0 hash 424f201528
+05:29:58 paseo greedy 5 mode D: 19.543 tok/s gen 281.0 acc 175.0/214.0 steps 107.0 hash 424f201528
+05:30:14 paseo greedy 6 mode D: 19.582 tok/s gen 281.0 acc 175.0/214.0 steps 107.0 hash 424f201528
+05:30:30 paseo greedy 7 mode C: 19.127 tok/s gen 281.0 acc 175.0/214.0 steps 107.0 hash 424f201528
+05:30:41 probs short: C-vs-D common prefix 64/64, max|dlogp| 0.00e+00; acc C 31/63 D 31/63; tps C 14.72 D 15.18
+05:32:46 probs long: C-vs-D common prefix 64/64, max|dlogp| 0.00e+00; acc C 41/42 D 41/42; tps C 19.40 D 19.71
+05:33:03 paseo sampled 0 mode D: 18.187 tok/s gen 265.0 acc 159.0/212.0 = 0.750 steps 106.0
+05:33:21 paseo sampled 1 mode C: 18.540 tok/s gen 304.0 acc 187.0/234.0 = 0.799 steps 117.0
+05:33:37 paseo sampled 2 mode D: 17.694 tok/s gen 261.0 acc 153.0/214.0 = 0.715 steps 107.0
+05:33:53 paseo sampled 3 mode D: 18.666 tok/s gen 270.0 acc 165.0/210.0 = 0.786 steps 105.0
+05:34:10 paseo sampled 4 mode C: 17.766 tok/s gen 272.0 acc 163.0/216.0 = 0.755 steps 108.0
+05:34:27 paseo sampled 5 mode D: 18.329 tok/s gen 286.0 acc 171.0/228.0 = 0.750 steps 114.0
+05:34:43 paseo sampled 6 mode D: 17.617 tok/s gen 246.0 acc 144.0/204.0 = 0.706 steps 102.0
+05:35:01 paseo sampled 7 mode C: 17.639 tok/s gen 295.0 acc 174.0/240.0 = 0.725 steps 120.0
+05:35:16 paseo sampled 8 mode D: 17.876 tok/s gen 242.0 acc 144.0/196.0 = 0.735 steps 98.0
+05:35:32 paseo sampled 9 mode D: 17.940 tok/s gen 254.0 acc 152.0/202.0 = 0.752 steps 101.0
+05:35:48 paseo sampled 10 mode C: 18.724 tok/s gen 270.0 acc 166.0/206.0 = 0.806 steps 103.0
+05:36:03 paseo sampled 11 mode D: 18.421 tok/s gen 255.0 acc 153.0/202.0 = 0.757 steps 101.0
+05:38:37 13K-token context mode P: 14.773 tok/s acc 53/82 hash 86d3b655e3
+05:38:44 13K-token context mode D: 15.456 tok/s acc 53/82 hash 86d3b655e3
+05:38:51 13K-token context mode P: 14.733 tok/s acc 53/82 hash 86d3b655e3
+05:38:58 13K-token context mode D: 15.365 tok/s acc 53/82 hash 86d3b655e3
+05:39:13 phase mode C (greedy, native prompt): mode 127: tg 16.731  cycle 134.56 ms | target total 120.59 (compute 120.31, reused 84/85) | draft graphs/cycle 1.99 total/cycle 11.48 (compute 11.38, prepare 0.02) | outside graphs 2.49
+05:39:27 phase mode D (greedy, native prompt): mode 127: tg 16.947  cycle 133.04 ms | target total 119.73 (compute 119.46, reused 84/85) | draft graphs/cycle 1.99 total/cycle 10.81 (compute 10.72, prepare 0.02) | outside graphs 2.50
+05:39:27 restoring production
+05:43:35 production healthy: True window 1260s
+05:43:35 SUMMARY greedy mode C: mean 19.113 tok/s  n=4  acceptance 700.0/856.0 = 0.818  [19.10, 18.99, 19.23, 19.13]
+05:43:35 SUMMARY greedy mode D: mean 19.545 tok/s  n=4  acceptance 700.0/856.0 = 0.818  [19.59, 19.46, 19.54, 19.58]
+05:43:35 SUMMARY sampled mode C: mean 18.167 tok/s  n=4  acceptance 690.0/896.0 = 0.770  [18.54, 17.77, 17.64, 18.72]
+05:43:35 SUMMARY sampled mode D: mean 18.091 tok/s  n=8  acceptance 1241.0/1668.0 = 0.744  [18.19, 17.69, 18.67, 18.33, 17.62, 17.88, 17.94, 18.42]

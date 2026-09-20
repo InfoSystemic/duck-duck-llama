@@ -9,6 +9,7 @@
 enum : uint32_t {
     F18_FA_MQA = 1u << 0, // cell-split MQA flash attention for short query batches
     F18_TOPK   = 1u << 1, // nth_element top-k
+    F18_GDN    = 1u << 2, // gated delta net split by state row (gdn-rows.inc)
 };
 
 static uint32_t f18_features() {

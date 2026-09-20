@@ -1,0 +1,44 @@
+common/sampling.cpp + common/speculative.cpp: (A) coupled draft/verifier sampling, (B) the host-side cost of the sampler.
+DEPLOYED 2026-09-20 (revision c). (A) is an exact sampler: same distribution, different random stream. (B) returns the same tokens.
+Switches, default off: GGML_F18_COUPLED=1, GGML_F18_FAST_SAMPLER=1; control word bits 3 (verifier picks by Gumbel-max),
+4 (drafter couples), 5 (top-k candidates by scan), 6 (clone without candidates). Apply after mtp-draft-merge-fastpick-pad.patch.
+
+(A) Why. An agent sends no sampling fields, so the server samples at the model's defaults (temp 1.0, top_p 0.95, top_k 40,
+min_p 0.05). The verifier then DRAWS a token, and a greedy draft is accepted only when the draw happens to be the draft's argmax:
+72% of drafts against 82% for the same fixture with temperature 0, 17.1 tok/s against 18.2 on the revision b server.
+How. The last step of the sampler chain (`dist`) is replaced by   argmax_i( logit_i + G(salt, n, id_i) )   over the candidates
+the chain left, where G is standard Gumbel noise that is a pure function of (salt, n, token id): salt is fresh per request (or
+derived from the request seed), n counts the tokens the sampler has accepted. By the Gumbel-max theorem this is an exact sample
+from softmax(logit), i.e. from exactly the distribution `dist` draws from, and nothing the drafter does can change it. The MTP
+drafter looks up the verifier's (salt, n, temp, top_k, top_p, min_p) through a registry keyed by the last 16 accepted tokens,
+cuts its own top-10 the way the verifier's chain will cut, adds THE SAME noise, takes the argmax. Both sides follow the same
+draw, so they agree whenever the two distributions are close, also where the distribution is flat. If the lookup is ambiguous
+(two requests with identical recent tokens) or fails, the drafter stays greedy: correctness never depends on it.
+The grammar resample keeps its own noise stream, which reproduces the stock rejection-resample law exactly.
+Properties worth having anyway: same seed => same text with or without a drafter, and with any drafter.
+
+Evidence (A):
+  tools/coupled_sampling_check.cpp: pick frequencies against softmax for five distributions, fresh salt per draw AND one salt with
+  consecutive counters, 4,000,000 draws each: chi-square p 0.10-0.93; consecutive positions independent (p 0.23).
+  Synthetic coupling: drafter within sigma 0.3 of the verifier's logits: greedy 0.39, coupled 0.88, optimum 1-TV 0.90.
+  8-layer proxy and FULL MODEL: seeded sampled requests give IDENTICAL text with the drafter greedy and coupled (w5: two prompts).
+  Temperature-0 requests: untouched (one finite candidate), fixture text hash unchanged.
+  Full model, window w5, requests exactly as Codex sends them, one loaded process, interleaved:
+      drafter greedy   n=8   17.89 tok/s   1288/1778 drafts accepted = 72.4%
+      coupled          n=11  18.24 tok/s   1766/2356               = 75.0%        (+2.0%, about 2 sigma)
+  Much less than the synthetic case: the MTP head is not close to the trunk where the trunk is uncertain.
+
+(B) Per sampled token the server built 154,880 twelve-byte candidates (0.45 ms) and partial-sorted them for top-k (0.19 ms); per
+verify cycle it cloned the sampler, copying the 1.86 MB candidate array (0.58 ms): ~2.1 ms per cycle at 2.4 tokens per cycle.
+When the first ACTIVE sampler of the chain is top-k (disabled samplers are "?name" placeholders; k <= 128; no logit bias,
+mirostat or n_probs), an AVX-512 threshold scan over the raw logits selects the k best in ~50 us and the chain starts from those,
+sorted: same candidates, same order (tools/topk_scan_check.cpp: 300 rows with -inf, NaN, ties and k = 1..128, 0 mismatches; an
+ascending row is declined after 8,192 insertions and sorted the old way). The grammar resample and a forcing reasoning budget
+still see the whole vocabulary. The clone stops copying candidates that nobody reads.
+Evidence (B): seeded sampled and greedy requests, four sampler configurations, with and without (A): IDENTICAL text on/off.
+  Full model w5, greedy fixture, one process: 18.81/18.84/18.79 -> 19.11/19.11 tok/s (+1.6%); time outside graphs 4.1 -> 2.4 ms.
+  It ONLY helps with a short OpenMP idle spin or a shared worker team: on the default configuration it made decode 2.7% SLOWER,
+  because the first draft graph started earlier, into the spinning workers of the trunk team (cpu-numa-shared-team.patch).
+
+Parents: common/sampling.cpp sha256 f23f8d663932bfd7... (its object recompiles byte-identically to the production object) and
+the speculative.cpp produced by mtp-draft-merge-fastpick-pad.patch. Deployed libllama-common: 0574e0131bd3c532...

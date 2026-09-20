@@ -1,7 +1,7 @@
 # Engineering snapshot, 2026-09-20
 
 GLM-5.3-Flash decode work of September 18-20, measured the way a Codex agent inside Paseo experiences it. A curated subset, not a
-full export: 319 files, no engine trees. Start with the [report](../../benchmarks/glm53-flash-paseo-decode-20260920.md) and the
+full export: 374 files, no engine trees. Start with the [report](../../benchmarks/glm53-flash-paseo-decode-20260920.md) and the
 [patch table](../../patches/README-20260920-glm5next.md).
 
 | Area | Entry point |
@@ -18,7 +18,15 @@ full export: 319 files, no engine trees. Start with the [report](../../benchmark
 | Cell-split MQA attention, selection top-k, feature switch | [fa-mqa.inc](archive/serving/fleet-0920-flash18/cpu/fa-mqa.inc), [topk-fast.inc](archive/serving/fleet-0920-flash18/cpu/topk-fast.inc), [f18-common.inc](archive/serving/fleet-0920-flash18/cpu/f18-common.inc) |
 | Window w1: controller, filtered report, log | [window1.py](archive/serving/fleet-0920-flash18/run/window1.py), [report](archive/serving/fleet-0920-flash18/results/window-w1.json), [log](archive/serving/fleet-0920-flash18/results/window-w1.log) |
 | 8-layer proxy launcher, greedy/log-probability parity probe, op-trace helpers | [proxy.sh](archive/serving/fleet-0920-flash18/run/proxy.sh), [parity.py](archive/serving/fleet-0920-flash18/run/parity.py), [opsum.py](archive/serving/fleet-0920-flash18/run/opsum.py) |
-| Draft-loop restructure for the MTP driver: **written, built, never run** | [make_f18.py](archive/serving/fleet-0920-flash18/common/make_f18.py) |
+| Cell-split MQA attention revision 2 (batch-invariant) and revision 1, gated delta net by state row | [fa-mqa.inc](archive/serving/fleet-0920-flash18/cpu/fa-mqa.inc), [fa-mqa.v1.inc](archive/serving/fleet-0920-flash18/cpu/fa-mqa.v1.inc), [invariance test](archive/serving/fleet-0920-flash18/cpu/test/test_fa_invariance.cpp), [gdn-rows.inc](archive/serving/fleet-0920-flash18/cpu/gdn-rows.inc) |
+| MTP draft loop: merge, direct pick, constant-shape batches (generators over `speculative.cpp`) | [make_f18.py](archive/serving/fleet-0920-flash18/common/make_f18.py), [make_f18_pad.py](archive/serving/fleet-0920-flash18/common/make_f18_pad.py) |
+| Coupled draft/verifier sampling and the sampler's host cost | [make_f18_couple.py](archive/serving/fleet-0920-flash18/common/make_f18_couple.py), [f18-coupling.inc](archive/serving/fleet-0920-flash18/common/f18-coupling.inc), [f18-topk-scan.inc](archive/serving/fleet-0920-flash18/common/f18-topk-scan.inc), [exactness test](archive/serving/fleet-0920-flash18/common/test/coupled_sampling_check.cpp), [server checks](archive/serving/fleet-0920-flash18/run/couple_check.py) |
+| Two OpenMP teams per core: how it was found and the shared-team dispatcher | [phase_timeline.py](archive/serving/fleet-0920-flash18/run/phase_timeline.py), [fast_sampler_timing.py](archive/serving/fleet-0920-flash18/run/fast_sampler_timing.py), [make_dispatch.py](archive/serving/fleet-0920-flash18/cpu/make_dispatch.py) |
+| MTP graph: query side only for the predicting row; libllama build with its lineage gate | [make_mtp_qrows.py](archive/serving/fleet-0920-flash18/llama/make_mtp_qrows.py), [build_glm5next.py](archive/serving/fleet-0920-flash18/llama/build_glm5next.py) |
+| Negative result: multi-slot graph cache against the Meta backend | [make_ctx.py](archive/serving/fleet-0920-flash18/llama/make_ctx.py) |
+| Windows w2-w6: controllers, filtered reports, logs | [w2](archive/serving/fleet-0920-flash18/results/window-w2.log), [w3](archive/serving/fleet-0920-flash18/results/window-w3.log), [w4](archive/serving/fleet-0920-flash18/results/window-w4.log), [w5](archive/serving/fleet-0920-flash18/results/window-w5.log), [w6](archive/serving/fleet-0920-flash18/results/window-w6.log), [window6.py](archive/serving/fleet-0920-flash18/run/window6.py) |
+| Production revisions b, c, d: drop-ins, library hashes, deploy scripts with automatic rollback | [b](archive/serving/fleet-0920-flash18/deploy-0920b/95-f18-0920.conf.proposed), [c](archive/serving/fleet-0920-flash18/deploy-0920c/95-f18-0920.conf.proposed), [d](archive/serving/fleet-0920-flash18/deploy-0920d/95-f18-0920.conf.proposed), [deploy.sh](archive/serving/fleet-0920-flash18/deploy-0920d/deploy.sh) |
+| Patch headers and the generator that cuts the patch files from the built sources | [make_patches_revd.py](archive/serving/fleet-0920-flash18/publish/make_patches_revd.py) |
 
 ## Contract
 
@@ -34,4 +42,5 @@ python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-20
 ```
 
 Two sessions produced this work: a Codex session on 09-19 (pooling, KV rollback, MTP catch-up, pooled-result cache, the negative
-results) and a Claude session on 09-20 (attention kernel, top-k, window w1, the FP16 accumulation finding, this publication).
+results) and a Claude session on 09-20 (attention kernel and its invariance fix, top-k, draft loop, coupled sampling, the OpenMP
+team finding, gated delta net, MTP query rows, windows w1-w6, production revisions b-d, the FP16 accumulation finding, this publication).

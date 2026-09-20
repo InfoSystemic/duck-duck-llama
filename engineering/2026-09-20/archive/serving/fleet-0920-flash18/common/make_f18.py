@@ -54,7 +54,7 @@ rep('''    std::vector<int>                i_last;
         if (f18_control) {
             const uint32_t mask = __atomic_load_n(f18_control, __ATOMIC_ACQUIRE);
             f18_merge     = f18_merge_allowed && (mask & 1u);
-            f18_fast_pick = !params.backend_sampling && (mask & 2u);
+            f18_fast_pick = (mask & 2u) != 0;
         }
     }
 
@@ -103,7 +103,7 @@ rep('''        verify_h.assign(n_seq, {});
         deferred.assign(n_seq, {});
         f18_merge_allowed = !is_mem_shared && !chain_heads;
         f18_merge     = f18_env("GGML_F18_MTP_MERGE") && f18_merge_allowed;
-        f18_fast_pick = f18_env("GGML_F18_MTP_FAST_PICK") && !this->params.backend_sampling;
+        f18_fast_pick = f18_env("GGML_F18_MTP_FAST_PICK");
         f18_trace     = f18_env("GGML_F18_SPEC_TRACE");
         if (const char * path = getenv("GGML_F18_SPEC_CONTROL_FILE")) {
             const int fd = open(path, O_RDONLY | O_CLOEXEC);
@@ -235,6 +235,10 @@ rep('''            common_batch_add(batch, dp.id_last, dp.n_past, { seq_id }, tr
                 // rows at pos >= n_past were rejected; the rest continue the draft cache
                 auto & d = deferred[seq_id];
                 llama_pos pos_next = llama_memory_seq_pos_max(llama_get_memory(ctx_dft), seq_id) + 1;
+                if (f18_trace && f18_n_draft < 48) {
+                    SPC_WRN("F18_SPEC_DBG draft seq=%d n_past=%d dft_pos_next=%d deferred=%zu first=%d last=%d\\n", (int) seq_id, (int) dp.n_past,
+                            (int) pos_next, d.tok.size(), (int) d.pos.front(), (int) d.pos.back());
+                }
                 for (size_t i = 0; i < d.tok.size(); ++i) {
                     if (d.pos[i] >= dp.n_past || d.pos[i] != pos_next) {
                         continue;
@@ -305,7 +309,7 @@ rep('''                auto * smpl = smpls[seq_id].get();
                 float       p_top;
                 const float * h_row;
 
-                if (f18_fast_pick) {
+                if (f18_fast_pick && backend_chains[seq_id] == nullptr) {
                     llama_synchronize(ctx_dft);
                     const float * logits = llama_get_logits_ith(ctx_dft, i_last[seq_id]);
                     GGML_ASSERT(logits != nullptr);
@@ -336,7 +340,7 @@ rep('''                auto * smpl = smpls[seq_id].get();
                     continue;
                 }
 
-                if (!f18_fast_pick) {
+                if (!(f18_fast_pick && backend_chains[seq_id] == nullptr)) {
                     common_sampler_accept(smpl, id, true);
                 }
 

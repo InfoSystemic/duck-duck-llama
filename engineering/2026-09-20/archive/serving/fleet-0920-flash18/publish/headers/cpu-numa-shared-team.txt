@@ -1,0 +1,33 @@
+ggml-cpu backend (ggml-cpu.cpp): one OpenMP worker team per CPU-NUMA device for ALL contexts, instead of one per backend instance.
+DEPLOYED 2026-09-20 (revision d). No numerical effect. GGML_CPU_NUMA_SHARED_TEAM=1, default off.
+Applies to the per-socket CPU devices of patches/llama.cpp-b249-cpu-numa.patch as carried in the llama.cpp-glm5n-goal-0904 line.
+
+The defect. Every llama_context creates its own backend per device, and every NUMA backend owns a dispatcher thread that is the
+master of its own OpenMP team. A server with a trunk and an MTP draft context therefore runs 8 teams over 60 cores: TWO pinned
+workers per core (`grep Cpus_allowed_list /proc/PID/task/*/status | sort | uniq -c`), and the teams alternate: trunk graph, two
+draft graphs, trunk graph. A team that has just finished spins at libgomp's dock for GOMP_SPINCOUNT iterations. The default,
+300,000, is documented as "3 ms"; with the 140-cycle `pause` of Skylake/Cascade Lake it is ~15 ms, longer than both draft graphs
+together, on the very CPUs the other team needs.
+It was found by accident: a change that saved 1.2 ms of host time per cycle made decode 2.7% SLOWER, because the first draft
+graph now started 1 ms earlier, deeper into the trunk team's spin (8.3 -> 10.3 ms for the same graph).
+
+Two fixes, both measured:
+  GOMP_SPINCOUNT=20000 (~1 ms; no code). 8-layer proxy, same binaries: trunk graph 26.5 -> 23.1 ms, first draft graph
+    8.3 -> 5.9 ms, +16-19% tok/s; flat from 8,000 to 150,000, slightly worse at 2,000 (waits inside a graph start to sleep).
+    Full model, greedy Codex fixture: 18.2-18.4 (revision b, three loads) -> 18.81/18.84/18.79, text unchanged. Deployed in revision c.
+    Earlier trials in this repository bracketed the useful range without entering it: 1000 was 14% slower on this model
+    (FLASH-GOAL-20260904: the waits at the barriers INSIDE a graph go to sleep), OMP_WAIT_POLICY=PASSIVE cost 10.6%
+    (glm-sr950/README), 0 changed nothing (DISPATCH-PROBE-RESULT, 09-19), and ACTIVE or 100,000,000 is ~250x slower
+    (GOAL-70PCT-20260911: two teams per core both burn the core). What works is a spin longer than the longest wait inside
+    a graph and shorter than the gap between two graphs of different teams.
+  This patch: all backends of a device submit to one dispatcher thread, so one team of 15 serves both contexts. 260 -> 200
+    threads, one worker per core, nothing to hand over, and the idle spin now keeps workers hot for the next graph of either
+    context. Proxy: same speed as the short spin with libgomp's DEFAULT spin, 1% better with both. Full model: 19.11 tok/s
+    with or without it once the spin is short (windows w5, w6), so its value is robustness, not speed.
+Opt-in because graphs of one device then run strictly in submission order: two threads driving two contexts concurrently could
+order their shards differently on different devices and deadlock on a cross-device collective. llama-server drives both
+contexts from one loop. Per-thread kernel state is safe to share: the pooled-result cache is keyed by tensor data pointers and
+verifies content; the attention scratch is plain memory.
+
+Parent: ggml/src/ggml-cpu/ggml-cpu.cpp sha256 0cc06844e26a2562...; the unmodified source recompiles to the byte-identical
+object that is linked into the deployed library. Deployed libggml-cpu with this patch: 9203fe09d5b42782...
