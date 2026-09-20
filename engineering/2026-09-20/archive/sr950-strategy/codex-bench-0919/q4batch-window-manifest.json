@@ -1,0 +1,58 @@
+{
+ "status": "COMPLETED; approved production restored; candidate not promoted",
+ "approval": "user-approved",
+ "expected_outage_minutes": [
+  15,
+  20
+ ],
+ "production_sha256": "4793379e6894a9286168f79c4f323985388ec0b0ac65e54013dcd2957488af1f",
+ "candidate_sha256": "90282e20361e22cffbdd08e2aab25e4a510aeadc199df781727d1adf8ecc35e1",
+ "normal_port": 18131,
+ "private_port": 18141,
+ "private_unit": "glm53-flash-q4batch-test-0919.service",
+ "workers_per_socket": 15,
+ "mtp_depth": 2,
+ "production_config_mutations": false,
+ "automatic_promotion": false,
+ "checks": [
+  "exact runtime identity",
+  "no overlapping full-model loads",
+  "production native and greedy Codex controls before and after",
+  "two candidate native groups",
+  "cold and two warm Codex comparisons",
+  "stateful and parallel regressions against saved production reference",
+  "bounded decode profile for unchanged graph structure; no claim of direct live batch counters"
+ ],
+ "reviewed_files": {
+  "/home/user/sr950-strategy/codex-bench-0919/capture_runtime.py": "f909e027911df51dd590f28698b5ca7fc169dd4333b5c2adca0a9a90961f0c0d",
+  "/home/user/sr950-strategy/codex-bench-0919/pool_window.py": "1661218c8070f34230ebd3db863683f6c547305fd48c66adf62e71db8a15dbe7",
+  "/home/user/sr950-strategy/codex-bench-0919/thread_window.py": "57e6a8d79010862e3c472d869b05f81761ad5503d1077cc32b1e0da77f9b8d1e",
+  "/home/user/sr950-strategy/codex-bench-0919/appserver_bench.py": "30e4c81e2822a1f0f246a057c40d9d5a41fc03c8e641472f823a1ffd6d6838d8",
+  "/home/user/sr950-strategy/codex-bench-0919/profile_once.py": "fcb4902de49796b09e9951504e17ca8e70110ca497c560097b4df503edd0eb49",
+  "/home/user/sr950-strategy/codex-bench-0919/summarize_optrace.py": "9f9405df1deaa653e352ec658d0664af3496d3a100933a2763b0bd9b2f81d674",
+  "/home/user/sr950-strategy/codex-bench-0919/stateful_gate.py": "79e501d550c00d913633b2fad479b9b55b603b799aab52fbc769d44b8cb3909b",
+  "/home/user/sr950-strategy/codex-bench-0919/stateful-production-control.json": "97e93995d98610cb2ec1e8f7e40d2e5776646c9004e8717297b92bca07ed4cb1",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/launch-glm-flash-native.sh": "5e3c2023898645da42738bd7949ad43eabc1bc5a38f791e4a251b0927cab3c9c",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/bench3.sh": "1d7f84234a9bfed9eb00a5535d61f74c533563ac73337ee625fc5cc9bb561699",
+  "/home/user/.codex-glm/model-catalogs/glm-5.3-flash.json": "389d54a598f3ca6338d0fd04c1ad59e6cd7b3b43859c9141e9fd0731425d34b7",
+  "/home/user/sr950-strategy/codex-bench-0919/q4batch_window.py": "a70a766145e1658ca5ae6b9950be4e41d5586b390c7667baf0bc1657d001fcf7",
+  "/home/user/sr950-strategy/codex-bench-0919/q4batch-standalone-summary.json": "3a2d9c15d7f12b6b327dc745edd8dfdadef23ea02e78f15b82c511ea7d91de36",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/manifest.json": "cba1d0086be7dbc864266f3f717abe8bd7866f5554ec829650058dc0e4021447",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/repack.cpp": "dd5e820d6595932d745f1a4ec1be3931867acb58b3366e97886204b1809ddb29",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/q4_batch.cpp": "9860d35404cf9f982dd2207b2352dae02562614e2effabba10625b2de2cac9e3",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/validation-small/report.json": "f0f66b6c4cad23430683cfa8677fd2a53ffc4352ceb87811fba2158b20733521",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/validation-real/report.json": "9e7d15d4e79a8038adc0773f4f39ea8801b199df99cd84c742289ff96f0f3913",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/validation-dense/report.json": "ba22fe50bdaff99536931a3d936aab571d139549ae56ccf834362a9c215ff932",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/validation-down-real/report.json": "9c00ebf712906c48bf772add1a98d0dbec2911e1f2f0866781259bfbb3f872a8",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/validation-speed/report.json": "fa5879681694ee8cfd3fe19f36b7efc3b3cbc7a988cfd52d701c4755a7d384f8",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/validation-down-speed/report.json": "3e17bbe2e9a1f280de197bff139768205526cacde0f7ebf5d9c6b38fdd719c5e"
+ },
+ "approval_scope": "User explicitly approved a separate 15\u201320 minute Q4 token-batching kernel outage, private benchmark, and automatic restoration. No promotion.",
+ "restored_pid": 1756372,
+ "outage_seconds": 1032.210377216339,
+ "summary": "/home/user/sr950-strategy/codex-bench-0919/q4batch-window-summary.json",
+ "performance_conclusion": "No convincing overall speed gain: cached Codex +1.38% versus mean controls, smaller than 1.65% control drift; cold Codex -1.18%; native aggregate slightly slower. Keep approved production. 18+ tok/s remains unachieved.",
+ "reviewed_metadata_archive": {
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/manifest.json": "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-q4-batch-cpu-0919/manifest.standalone-reviewed.json"
+ }
+}

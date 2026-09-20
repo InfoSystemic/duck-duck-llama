@@ -1,0 +1,16 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-pool-0919/ops.pool.cpp
++++ /home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-pool-copy-0919/ops.combo.cpp
+@@ -4921,10 +4921,13 @@
+ 
+ #include "cpy-address-probe.inc"
+ 
++#include "cpy-flat.inc"
++
+ void ggml_compute_forward_cpy(
+         const ggml_compute_params * params,
+         ggml_tensor * dst) {
+     glm_pool_cpy_address_probe(params, dst);
++    if (glm_cpy_try_flat(params, dst)) return;
+     ggml_compute_forward_dup(params, dst);
+ }
+ 

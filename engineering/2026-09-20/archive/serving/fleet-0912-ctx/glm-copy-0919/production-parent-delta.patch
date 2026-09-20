@@ -1,0 +1,15 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0911/parallel-unary-0911/ops.patched.cpp
++++ /home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-copy-0919/ops.copy.cpp
+@@ -4919,9 +4919,12 @@
+ 
+ // ggml_compute_forward_cpy
+ 
++#include "cpy-flat.inc"
++
+ void ggml_compute_forward_cpy(
+         const ggml_compute_params * params,
+         ggml_tensor * dst) {
++    if (glm_cpy_try_flat(params, dst)) return;
+     ggml_compute_forward_dup(params, dst);
+ }
+ 

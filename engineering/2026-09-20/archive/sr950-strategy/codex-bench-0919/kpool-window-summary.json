@@ -1,0 +1,389 @@
+{
+ "completed": true,
+ "restored_healthy": true,
+ "candidate_sha256": "3f957a341321b940d93be53c250cdd068825093faa2d9efda142ebe56427b1b3",
+ "rows": [
+  {
+   "context": "short",
+   "cache": "cold",
+   "scalar_tps": 14.38542277159145,
+   "wide_tps": 15.287922541192456,
+   "speedup": 1.0627371043542269,
+   "same_generated_text": true,
+   "same_work_counters": true,
+   "counter_values": {
+    "generated_tokens": [
+     270.0,
+     270.0
+    ],
+    "draft_tokens": [
+     210.0,
+     210.0
+    ],
+    "accepted_draft_tokens": [
+     164.0,
+     164.0
+    ],
+    "draft_verification_steps": [
+     105.0,
+     105.0
+    ],
+    "prompt_tokens": [
+     3998.0,
+     3998.0
+    ],
+    "cached_prompt_tokens": [
+     0.0,
+     0.0
+    ]
+   },
+   "scalar_prefill_seconds": 55.756,
+   "wide_prefill_seconds": 55.72300000000001
+  },
+  {
+   "context": "short",
+   "cache": "warm ABBA",
+   "scalar_tps": 14.601698123411401,
+   "wide_tps": 15.154491622933794,
+   "speedup": 1.0378581651839576,
+   "same_generated_text": true,
+   "same_work_counters": true,
+   "counter_values": {
+    "generated_tokens": [
+     270.0,
+     270.0,
+     270.0,
+     270.0
+    ],
+    "draft_tokens": [
+     210.0,
+     210.0,
+     210.0,
+     210.0
+    ],
+    "accepted_draft_tokens": [
+     165.0,
+     165.0,
+     165.0,
+     165.0
+    ],
+    "draft_verification_steps": [
+     105.0,
+     105.0,
+     105.0,
+     105.0
+    ],
+    "prompt_tokens": [
+     4.0,
+     4.0,
+     4.0,
+     4.0
+    ],
+    "cached_prompt_tokens": [
+     3994.0,
+     3994.0,
+     3994.0,
+     3994.0
+    ]
+   },
+   "order_tps": [
+    14.678699575948697,
+    15.18047902844934,
+    15.128593040847194,
+    14.5255003227889
+   ],
+   "scalar_end_to_start": 0.9895631590273286,
+   "warm_equals_cold": [
+    true,
+    true,
+    true,
+    true
+   ]
+  },
+  {
+   "context": "long",
+   "cache": "cold",
+   "scalar_tps": 8.984200199648889,
+   "wide_tps": 10.257821097311737,
+   "speedup": 1.1417623015249174,
+   "same_generated_text": true,
+   "same_work_counters": false,
+   "counter_values": {
+    "generated_tokens": [
+     261.0,
+     261.0
+    ],
+    "draft_tokens": [
+     214.0,
+     212.0
+    ],
+    "accepted_draft_tokens": [
+     154.0,
+     155.0
+    ],
+    "draft_verification_steps": [
+     107.0,
+     106.0
+    ],
+    "prompt_tokens": [
+     29930.0,
+     29930.0
+    ],
+    "cached_prompt_tokens": [
+     0.0,
+     0.0
+    ]
+   },
+   "scalar_prefill_seconds": 733.671,
+   "wide_prefill_seconds": 713.8899999999999
+  },
+  {
+   "context": "long",
+   "cache": "warm ABBA",
+   "scalar_tps": 9.051029077731346,
+   "wide_tps": 10.260442260442261,
+   "speedup": 1.1336216216216217,
+   "same_generated_text": true,
+   "same_work_counters": true,
+   "counter_values": {
+    "generated_tokens": [
+     261.0,
+     261.0,
+     261.0,
+     261.0
+    ],
+    "draft_tokens": [
+     214.0,
+     214.0,
+     214.0,
+     214.0
+    ],
+    "accepted_draft_tokens": [
+     154.0,
+     154.0,
+     154.0,
+     154.0
+    ],
+    "draft_verification_steps": [
+     107.0,
+     107.0,
+     107.0,
+     107.0
+    ],
+    "prompt_tokens": [
+     4.0,
+     4.0,
+     4.0,
+     4.0
+    ],
+    "cached_prompt_tokens": [
+     29926.0,
+     29926.0,
+     29926.0,
+     29926.0
+    ]
+   },
+   "order_tps": [
+    9.046166643560246,
+    10.224468210130455,
+    10.296670348745458,
+    9.05589674195898
+   ],
+   "scalar_end_to_start": 1.0010756045938707,
+   "warm_equals_cold": [
+    true,
+    true,
+    true,
+    true
+   ]
+  }
+ ],
+ "known_cache_consistency_issue_unresolved": true,
+ "production_controls": {
+  "before": {
+   "prompt_tokens": 3998.0,
+   "cached_prompt_tokens": 0.0,
+   "prompt_seconds": 57.451999999999984,
+   "generated_tokens": 270.0,
+   "decode_seconds": 18.665999999999997,
+   "draft_tokens": 210.0,
+   "accepted_draft_tokens": 164.0,
+   "draft_verification_steps": 105.0,
+   "decode_tokens_per_second": 14.464802314368372,
+   "prefill_tokens_per_second": 69.58852607394,
+   "draft_acceptance": 0.780952380952381,
+   "draft_tokens_per_verification": 2.0
+  },
+  "after": {
+   "prompt_tokens": 3998.0,
+   "cached_prompt_tokens": 0.0,
+   "prompt_seconds": 56.9244,
+   "generated_tokens": 270.0,
+   "decode_seconds": 18.2671,
+   "draft_tokens": 210.0,
+   "accepted_draft_tokens": 165.0,
+   "draft_verification_steps": 105.0,
+   "decode_tokens_per_second": 14.780671261448179,
+   "prefill_tokens_per_second": 70.2335026807485,
+   "draft_acceptance": 0.7857142857142857,
+   "draft_tokens_per_verification": 2.0
+  }
+ },
+ "native": {
+  "native-0": {
+   "aggregate_tps": 15.084533727006143,
+   "all_parity": true,
+   "counts": [
+    {
+     "predicted_n": 256,
+     "draft_n": 250,
+     "draft_n_accepted": 129
+    },
+    {
+     "predicted_n": 256,
+     "draft_n": 216,
+     "draft_n_accepted": 147
+    },
+    {
+     "predicted_n": 256,
+     "draft_n": 226,
+     "draft_n_accepted": 142
+    }
+   ]
+  },
+  "native-1": {
+   "aggregate_tps": 15.210186586043001,
+   "all_parity": true,
+   "counts": [
+    {
+     "predicted_n": 256,
+     "draft_n": 248,
+     "draft_n_accepted": 130
+    },
+    {
+     "predicted_n": 256,
+     "draft_n": 216,
+     "draft_n_accepted": 147
+    },
+    {
+     "predicted_n": 256,
+     "draft_n": 226,
+     "draft_n_accepted": 142
+    }
+   ]
+  }
+ },
+ "profiles": {
+  "0": [
+   {
+    "index": 11,
+    "nodes": 7239,
+    "total_ms": 173.507,
+    "barrier_ms": 31.822,
+    "pool_ms": 54.714,
+    "pool_shape_evidence": [
+     [
+      "GET_ROWS",
+      "f16",
+      "256,29952,1"
+     ],
+     [
+      "LIGHTNING_INDEXER",
+      "f32",
+      "128,32,3"
+     ],
+     [
+      "TOP_K",
+      "f32",
+      "7490,3,1"
+     ]
+    ],
+    "operations_ms": {
+     "GET_ROWS": 55.975,
+     "MUL_MAT_ID": 42.18399999999997,
+     "MUL_MAT": 35.43700000000001,
+     "FLASH_ATTN_EXT": 12.084999999999999,
+     "LIGHTNING_INDEXER": 8.032,
+     "GATED_DELTA_NET": 2.8760000000000003,
+     "CUSTOM": 2.135999999999998,
+     "CONCAT": 1.8329999999999977,
+     "RMS_NORM": 1.8179999999999976,
+     "TOP_K": 1.193,
+     "DSV4_HC_PRE": 1.1809999999999994,
+     "ADD": 1.0190000000000001,
+     "CPY": 0.9440000000000006,
+     "MUL": 0.9020000000000005,
+     "SET_ROWS": 0.7290000000000001,
+     "UNARY": 0.5850000000000004,
+     "DSV4_HC_POST": 0.4720000000000003,
+     "CLAMP": 0.46100000000000035,
+     "ARGSORT": 0.3450000000000002,
+     "SSM_CONV": 0.2450000000000001,
+     "L2_NORM": 0.1420000000000001,
+     "FILL": 0.12299999999999997,
+     "GLU": 0.11600000000000006,
+     "DUP": 0.04500000000000001,
+     "REPEAT": 0.03,
+     "CONT": 0.012,
+     "SCALE": 0.006
+    }
+   }
+  ],
+  "1": [
+   {
+    "index": 11,
+    "nodes": 7239,
+    "total_ms": 162.518,
+    "barrier_ms": 19.278,
+    "pool_ms": 24.284,
+    "pool_shape_evidence": [
+     [
+      "GET_ROWS",
+      "f16",
+      "256,29952,1"
+     ],
+     [
+      "LIGHTNING_INDEXER",
+      "f32",
+      "128,32,3"
+     ],
+     [
+      "TOP_K",
+      "f32",
+      "7490,3,1"
+     ]
+    ],
+    "operations_ms": {
+     "MUL_MAT_ID": 41.81000000000003,
+     "MUL_MAT": 35.52700000000006,
+     "GET_ROWS": 25.502999999999993,
+     "CUSTOM": 23.002999999999997,
+     "FLASH_ATTN_EXT": 11.851999999999999,
+     "LIGHTNING_INDEXER": 7.654000000000002,
+     "GATED_DELTA_NET": 2.6109999999999998,
+     "RMS_NORM": 1.7519999999999984,
+     "CONCAT": 1.7249999999999976,
+     "TOP_K": 1.2140000000000002,
+     "DSV4_HC_PRE": 1.1809999999999994,
+     "CPY": 0.9950000000000006,
+     "ADD": 0.9610000000000004,
+     "MUL": 0.8620000000000004,
+     "SET_ROWS": 0.7489999999999999,
+     "UNARY": 0.5380000000000004,
+     "DSV4_HC_POST": 0.5240000000000004,
+     "CLAMP": 0.41900000000000026,
+     "ARGSORT": 0.3440000000000002,
+     "SSM_CONV": 0.21900000000000014,
+     "L2_NORM": 0.1650000000000001,
+     "GLU": 0.1350000000000001,
+     "FILL": 0.13099999999999998,
+     "DUP": 0.044000000000000004,
+     "REPEAT": 0.025,
+     "CONT": 0.024999999999999998,
+     "SCALE": 0.006
+    }
+   }
+  ]
+ },
+ "long_profile_pool_shapes_match": true
+}

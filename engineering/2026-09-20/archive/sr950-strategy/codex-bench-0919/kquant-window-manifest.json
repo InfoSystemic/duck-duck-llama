@@ -1,0 +1,46 @@
+{
+ "status": "COMPLETED; approved production restored; candidate not promoted",
+ "expected_outage_minutes": [
+  15,
+  20
+ ],
+ "production_sha256": "4793379e6894a9286168f79c4f323985388ec0b0ac65e54013dcd2957488af1f",
+ "candidate_sha256": "63bf425e98ff1e426dfa89730dfee1d14b348e6f1e3688941d8902356ba8a6f6",
+ "normal_port": 18131,
+ "private_port": 18141,
+ "workers_per_socket": 15,
+ "mtp_depth": 2,
+ "production_config_mutations": false,
+ "automatic_promotion": false,
+ "checks": [
+  "exact runtime identity",
+  "no overlapping model loads",
+  "production native and greedy Codex controls before and after",
+  "two candidate native groups",
+  "cold and two warm candidate Codex outputs",
+  "stateful and parallel regression against existing production reference",
+  "bounded decode profile for engagement"
+ ],
+ "reviewed_files": {
+  "/home/user/sr950-strategy/codex-bench-0919/kquant_window.py": "aa6f0749296f50cde5f334fa7e14928af1a064f9750cf1ff87afe4b93828b64b",
+  "/home/user/sr950-strategy/codex-bench-0919/capture_runtime.py": "f909e027911df51dd590f28698b5ca7fc169dd4333b5c2adca0a9a90961f0c0d",
+  "/home/user/sr950-strategy/codex-bench-0919/pool_window.py": "1661218c8070f34230ebd3db863683f6c547305fd48c66adf62e71db8a15dbe7",
+  "/home/user/sr950-strategy/codex-bench-0919/thread_window.py": "57e6a8d79010862e3c472d869b05f81761ad5503d1077cc32b1e0da77f9b8d1e",
+  "/home/user/sr950-strategy/codex-bench-0919/appserver_bench.py": "30e4c81e2822a1f0f246a057c40d9d5a41fc03c8e641472f823a1ffd6d6838d8",
+  "/home/user/sr950-strategy/codex-bench-0919/profile_once.py": "fcb4902de49796b09e9951504e17ca8e70110ca497c560097b4df503edd0eb49",
+  "/home/user/sr950-strategy/codex-bench-0919/summarize_optrace.py": "9f9405df1deaa653e352ec658d0664af3496d3a100933a2763b0bd9b2f81d674",
+  "/home/user/sr950-strategy/codex-bench-0919/stateful_gate.py": "79e501d550c00d913633b2fad479b9b55b603b799aab52fbc769d44b8cb3909b",
+  "/home/user/sr950-strategy/codex-bench-0919/stateful-production-control.json": "97e93995d98610cb2ec1e8f7e40d2e5776646c9004e8717297b92bca07ed4cb1",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/launch-glm-flash-native.sh": "5e3c2023898645da42738bd7949ad43eabc1bc5a38f791e4a251b0927cab3c9c",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/bench3.sh": "1d7f84234a9bfed9eb00a5535d61f74c533563ac73337ee625fc5cc9bb561699",
+  "/home/user/.codex-glm/model-catalogs/glm-5.3-flash.json": "389d54a598f3ca6338d0fd04c1ad59e6cd7b3b43859c9141e9fd0731425d34b7",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kquant-clamp-0919/validation-small/report.json": "841a74dcf4b1e1242cfa684570e4e42935e41a0df93f37f1e88a2782522b3d59",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kquant-clamp-0919/validation-real/report.json": "14a145b3e8161743f2fd8367cc88080b78636c89f66e02214077ca445e6e6e93",
+  "/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kquant-clamp-0919/validation-speed/report.json": "4cd878930a829b0b7c76d48fb9464e5b74a476f6e6f44411f9cb535e3d83a999"
+ },
+ "approval": "User explicitly approved the new 15\u201320 minute Q4/Q5 kernel benchmark outage and automatic restoration.",
+ "restored_pid": 722759,
+ "outage_seconds": 1030.0533967018127,
+ "summary": "/home/user/sr950-strategy/codex-bench-0919/kquant-window-summary.json",
+ "performance_conclusion": "No convincing whole-model speed gain; apparent sub-1% mean-control advantage is smaller than 3-4% control drift. Keep approved production."
+}

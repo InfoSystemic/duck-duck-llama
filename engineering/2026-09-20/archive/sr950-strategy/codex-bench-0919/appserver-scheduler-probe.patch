@@ -1,0 +1,60 @@
+--- appserver_bench.py
++++ appserver_scheduler_probe.py
+@@ -21,6 +21,8 @@
+ import urllib.parse
+ 
+ from summarize_metrics import summarize
++from scheduler_probe import SchedulerProbe
++from capture_runtime import snapshot
+ 
+ ROOT = Path(__file__).resolve().parent
+ PROMPT = ('This is a local inference performance check. Do not call any tools or inspect files. '
+@@ -43,7 +45,13 @@
+     ap.add_argument('--timeout', type=float, default=900)
+     ap.add_argument('--warm', action='store_true', help='Allow prompt cache; default forces cold processing')
+     ap.add_argument('--greedy', action='store_true', help='Set temperature=0 and seed=42 for fixed-output comparisons')
++    ap.add_argument('--pid',type=int,required=True)
+     args = ap.parse_args()
++    assert not (ROOT / f'appserver-{args.tag}.json').exists()
++    state=snapshot(args.pid,18131)
++    assert state['health']=={'status':'ok'} and not any(x['is_processing'] for x in state['slots'])
++    assert not Path('/dev/shm/flash-optrace.arm').exists()
++    observer=SchedulerProbe(args.pid)
+     slots = json.load(urllib.request.urlopen(args.endpoint + '/slots', timeout=10))
+     if any(s.get('is_processing') for s in slots):
+         raise RuntimeError('Another request is active; run the benchmark serially')
+@@ -147,6 +155,7 @@
+                 if method == '_process_exit':
+                     raise RuntimeError('app-server exited during turn')
+                 if method.endswith('/delta') and ('reasoning' in method.lower() or 'agentMessage' in method):
++                    if not observer.started:observer.start()
+                     result.setdefault('first_model_delta_seconds', time.monotonic()-started)
+                 if method == 'item/agentMessage/delta':
+                     result.setdefault('first_visible_delta_seconds', time.monotonic()-started)
+@@ -162,6 +171,9 @@
+                     result['turn_status'] = params.get('turn', {}).get('status')
+                     result['turn_error'] = params.get('turn', {}).get('error')
+                     break
++            result['scheduler']=observer.finish()
++            result['runtime_before']=state
++            result['not_a_speed_benchmark']=True
+             result['server_metrics'] = summarize(before, metrics(args.endpoint))
+             result['output_text'] = ''.join(text)
+             result['marker_pass'] = result['output_text'].rstrip().endswith('GLM_CODEX_PASEO_OK')
+@@ -170,6 +182,7 @@
+                 raise RuntimeError('Benchmark response did not complete with expected marker')
+         except Exception as exc:
+             result['error'] = repr(exc)
++            if observer.started and 'scheduler' not in result:result['scheduler']=observer.finish()
+             raise
+         finally:
+             (ROOT / f'appserver-{args.tag}.json').write_text(json.dumps(result, indent=2) + '\n')
+@@ -180,7 +193,7 @@
+                 p.kill(); p.wait(timeout=10)
+             proxy.shutdown()
+             proxy.server_close()
+-    print(json.dumps({k: v for k, v in result.items() if k not in ('output_text', 'prompt', 'event_counts')}, indent=2), flush=True)
++    print(json.dumps({k: v for k, v in result.items() if k not in ('output_text', 'prompt', 'event_counts','scheduler','runtime_before')}, indent=2), flush=True)
+ 
+ 
+ if __name__ == '__main__':

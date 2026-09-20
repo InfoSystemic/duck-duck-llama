@@ -1,0 +1,65 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/repack.cpp
++++ /home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kquant-clamp-0919/repack.cpp
+@@ -31,6 +31,28 @@
+ #include "ggml-quants.h"
+ 
+ #include "flash-q8-r8-ordered-k-0908.h"
++
++// Private 0919 experiment. Both behavior and counters are off unless requested.
++static bool flash_kquant_clamp_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_KQUANT_CLAMP_FUSION");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++static bool flash_kquant_clamp_probe_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_CPU_KQUANT_CLAMP_PROBE");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++static std::atomic<uint64_t> flash_kquant_clamp_calls[GGML_TYPE_COUNT]{};
++extern "C" uint64_t ggml_cpu_kquant_clamp_fusion_count(int type);
++extern "C" uint64_t ggml_cpu_kquant_clamp_fusion_count(int type) {
++    return type >= 0 && type < GGML_TYPE_COUNT
++        ? flash_kquant_clamp_calls[type].load(std::memory_order_relaxed) : 0;
++}
+ 
+ static bool flash_q8_r8_ordered_k_enabled() {
+     static const bool enabled = [] {
+@@ -7548,15 +7570,31 @@
+             const char * value = getenv("GGML_CPU_X16_Q8_CLAMP_FUSION");
+             return value && atoi(value) == 1;
+         }();
+-        if (!enabled || sp.dst_type != GGML_TYPE_Q8_0 ||
++        const bool q8_enabled = enabled && sp.dst_type == GGML_TYPE_Q8_0;
++        const bool kquant_enabled = flash_kquant_clamp_enabled() &&
++            (sp.dst_type == GGML_TYPE_Q4_K || sp.dst_type == GGML_TYPE_Q5_K);
++        if ((!q8_enabled && !kquant_enabled) ||
+                 gate_clamp->op != GGML_OP_CLAMP || up_clamp->op != GGML_OP_CLAMP) {
+             return false;
++        }
++        if (kquant_enabled) {
++            const ggml_tensor * gate = gate_clamp->src[0];
++            const ggml_tensor * up = up_clamp->src[0];
++            // Only unchanged Q4/Q5 quantization and the supported expert table.
++            if (gate->op != GGML_OP_MUL_MAT_ID || up->op != GGML_OP_MUL_MAT_ID ||
++                    gate->src[0]->type != sp.dst_type || up->src[0]->type != sp.dst_type ||
++                    gate->src[0]->ne[2] > 512 || up->src[0]->ne[2] > 512) {
++                return false;
++            }
+         }
+         const bool okay = forward_x16_moe_swiglu(
+             params, gate_clamp->src[0], up_clamp->src[0], dst, gate_clamp, up_clamp);
+         static std::atomic<bool> logged{false};
+-        if (okay && params->ith == 0 && !logged.exchange(true, std::memory_order_relaxed)) {
++        if (okay && q8_enabled && params->ith == 0 && !logged.exchange(true, std::memory_order_relaxed)) {
+             GGML_LOG_INFO("Q8_X16_CLAMP_FUSION_ACTIVE\n");
++        }
++        if (okay && kquant_enabled && params->ith == 0 && flash_kquant_clamp_probe_enabled()) {
++            flash_kquant_clamp_calls[sp.dst_type].fetch_add(1, std::memory_order_relaxed);
+         }
+         return okay;
+     }

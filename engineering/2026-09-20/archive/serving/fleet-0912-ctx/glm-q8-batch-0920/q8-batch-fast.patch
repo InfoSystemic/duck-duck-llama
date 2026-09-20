@@ -1,0 +1,23 @@
+--- /home/user/InfoSystemic/AI-Server/serving/fleet-0903/results/glm-flash-q8-sum16-0908/private-cpu/repack-x86.cpp
++++ candidate/repack-x86.cpp
+@@ -7764,8 +7764,20 @@
+ #include "flash-q8-sum16.h"
+ #endif
+ 
++#if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++#include "q8-batch-fast.h"
++#endif
++
+ void ggml_gemv_q8_0_x16_q8_0(int n, float * GGML_RESTRICT s, size_t bs, const void * GGML_RESTRICT vx, const void * GGML_RESTRICT vy, int nr, int nc) {
+ #if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++    if (nr >= 2 && nr <= 4 && nc == 16 && glm_q8_batch_fast_enabled()) {
++        glm_q8_batch_fast_count(nr);
++        switch (nr) {
++            case 2: return glm_q8_batch_candidate<2,2,2>(n,s,bs,vx,vy,nr,nc);
++            case 3: return glm_q8_batch_candidate<3,2,2>(n,s,bs,vx,vy,nr,nc);
++            case 4: return glm_q8_batch_candidate<4,2,2>(n,s,bs,vx,vy,nr,nc);
++        }
++    }
+     if (nr > 1) return qwen_q8_batch_dispatch(n, s, bs, vx, vy, nr, nc);
+     GGML_ASSERT(nr == 1 && n % QK8_0 == 0 && nc % 16 == 0);
+     static const bool fast_sum = [] {

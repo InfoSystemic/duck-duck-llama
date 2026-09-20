@@ -1,0 +1,90 @@
+{
+ "status": "VALIDATED_NOT_DEPLOYED",
+ "candidate_sha256": "e37362cdc7d2afd0a93f34b8b1099ec3b10bae99f09458f56acf1c355e129857",
+ "source_sha256": {
+  "build-report.json": "1280e7abb283e365e5c7213bd5d4dfea2780ec054bf46f2e1e3a102ff0902af6",
+  "direct-report.json": "5fdcf5438b3ca37cf671697f93c8f9ca2b49af3030e2a78fd01fc500e6ea8bd3",
+  "direct-summary.json": "4fa912c19c02ab2067c989c47d68e9ff8bb80f570caeb87b29dec1288d215072",
+  "graph-validation.json": "705ae8afd44433aba6d4b900f56645475af3d5d352ff2e26322b5ddd1db42c4e",
+  "numa-report.json": "0bd46f55ba2c91e1347017f9cff9583cd44b43f9bd03470f71779174f158e5cb",
+  "numa-detail-report.json": "02df31d66089380fabe0f171efd0774595769eb076573f06ffcbd022486cf35a"
+ },
+ "production_unchanged": true,
+ "production_pid": 3717968,
+ "decision": "Do not infer a decode-throughput gain or deploy from these synthetic results. Retain candidate for a later justified model A/B.",
+ "synthetic_runs": [
+  {
+   "label": "numa-detail-engagement"
+  },
+  {
+   "label": "numa-detail-distinct4",
+   "summary": {
+    "cycle": {
+     "off_median_ms": 24.4461875,
+     "on_median_ms": 24.324363499999997,
+     "median_speedup": 1.0050083119338356,
+     "aggregate_speedup": 1.0141750298041385
+    },
+    "target": {
+     "off_median_ms": 15.744482,
+     "on_median_ms": 15.344781000000001,
+     "median_speedup": 1.0260480094176645,
+     "aggregate_speedup": 1.032819862832786
+    },
+    "draft": {
+     "off_median_ms": 8.617170999999999,
+     "on_median_ms": 8.631766500000001,
+     "median_speedup": 0.9983090946679336,
+     "aggregate_speedup": 0.9808152165187284
+    }
+   },
+   "blocks": [
+    {
+     "cycle": 1.0139730423354676,
+     "target": 1.0368439290577793,
+     "draft": 0.9724337608602319
+    },
+    {
+     "cycle": 1.014373685190261,
+     "target": 1.0288198529437187,
+     "draft": 0.9889029700120031
+    }
+   ]
+  },
+  {
+   "label": "numa-detail-distinct32",
+   "summary": {
+    "cycle": {
+     "off_median_ms": 24.802337,
+     "on_median_ms": 24.6010275,
+     "median_speedup": 1.0081829712193933,
+     "aggregate_speedup": 1.0224671115584265
+    },
+    "target": {
+     "off_median_ms": 16.172081,
+     "on_median_ms": 15.9401525,
+     "median_speedup": 1.0145499549016233,
+     "aggregate_speedup": 1.0224519341189606
+    },
+    "draft": {
+     "off_median_ms": 8.6373595,
+     "on_median_ms": 8.529278999999999,
+     "median_speedup": 1.0126717041381812,
+     "aggregate_speedup": 1.0224961158492012
+    }
+   },
+   "blocks": [
+    {
+     "cycle": 1.0057558529907726,
+     "target": 1.012077752901511,
+     "draft": 0.9938281393494691
+    },
+    {
+     "cycle": 1.0394588914843115,
+     "target": 1.032907029840695,
+     "draft": 1.0521441327973469
+    }
+   ]
+  }
+ ]
+}

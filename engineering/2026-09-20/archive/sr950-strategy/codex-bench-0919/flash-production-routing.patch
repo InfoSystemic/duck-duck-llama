@@ -1,0 +1,22 @@
+--- /home/user/.local/libexec/paseo/smeagol-model-route.sh
++++ /home/user/.local/libexec/paseo/smeagol-model-route.sh
+@@ -121,14 +121,11 @@
+ 
+   case "$selected" in
+     glm-5.3-flash|glm-flash|glm-flash-q4|glm-flash-goal|GLM-5.3-Flash|smeagol/glm-5.3-flash)
+-      # 18131 is the historical port and is currently dead. 18094 is the
+-      # standing 4-device config written 2026-09-15
+-      # (serving/glm-sr950/model.glm53-flash-q4.env). Try both.
+-      # 18094 is the standing 4-device config (model.glm53-flash-q4.env, engine
+-      # llama.cpp-glm53-flash/build-sr950 -- glm5next is NOT supported by build-dev2).
+-      # It came up 2026-09-15 19:55 and is co-resident with Qwen on 18083.
+-      # 18131 is the historical port and remains the fallback.
+-      _smeagol_resolve 18094 18131
++      # Production Flash is glm53-flash-production.service on 18131.
++      # Do not silently route to experimental 18094 when production is down:
++      # a healthy benchmark server is not a substitute for the selected profile.
++      # Harness-specific explicit endpoint overrides still take precedence.
++      _smeagol_resolve 18131
+       SMEAGOL_ROUTE_MODEL="GLM-5.3-Flash"
+       SMEAGOL_ROUTE_CTX=1048576
+       SMEAGOL_ROUTE_KIND="flash"
