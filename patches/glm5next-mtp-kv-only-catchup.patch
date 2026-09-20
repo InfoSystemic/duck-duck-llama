@@ -1,0 +1,142 @@
+glm5next MTP draft: cache-only catch-up graph. Deployed 2026-09-19. Draft-side only; target arithmetic untouched.
+GGML_GLM5N_MTP_KV_ONLY=1, default off. Only models/glm5next.cpp changes over the deployed libllama
+(parent e77a573df69456745857677e71e4e9cc876b8294384fa7798629f3ebe7c3306a, result 65670d4a19178bbdffcfbc79ee953e5319083875309ed52aa4de214393e20ce3).
+
+After every verify batch the MTP driver refreshes the draft layer's KV cache with a batch that requests NO outputs, yet the graph
+still built the query projection, attention, MoE and LM head. With zero outputs the graph now stops after the KV latent is
+normalised and stored (15 nodes instead of 89).
+
+Evidence (engineering/2026-09-20/archive/sr950-strategy/codex-bench-0919/MTP-KV-RESULT.md): standalone, real 9.26 GB MTP sidecar, four NUMA
+devices, 170 records / 28,400,396 bytes equal (cache tensors, logits, hidden rows) at 1 and 15 workers. Same loaded model, ABBA then
+BAAB, eight cached Codex-in-Paseo runs, identical text and counters: 15.43 -> 15.82 tok/s (+2.5%). Draft work 21.3 -> 18.2 ms per
+cycle. A separate-stream sequence-copy crash in the REFERENCE runtime is preserved in that directory and is not fixed.
+
+--- original/glm5next.cpp
++++ candidate/glm5next.cpp
+@@ -4,6 +4,14 @@
+ #include "llama-memory-hybrid.h"
+ #include "llama-kv-cache-kpool.h"
+ 
++#include <algorithm>
++#include <cstdlib>
++#include <cstring>
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <unistd.h>
++
+ //
+ // GLM-5.3-Flash: hybrid KDA (linear) + DSA (nope-only MLA) attention, mHC
+ // hyper-connections, and a NextN block that is a full DSA decoder layer.
+@@ -12,6 +20,56 @@
+ // exp(A_log) back as -ssm_a; bailingmoe3 stores +exp(A_log). indistinguishable at
+ // load time, so conversion/glm5next.py is the only place the sign is checked.
+ //
++
++namespace {
++static bool glm5next_kv_only_enabled() {
++    static const bool enabled = [] {
++        const char * value = std::getenv("GGML_GLM5N_MTP_KV_ONLY");
++        return value && std::strcmp(value, "1") == 0;
++    }();
++    if (!enabled) return false;
++    static const uint32_t * control = [] () -> const uint32_t * {
++        const char * path = std::getenv("GGML_GLM5N_MTP_KV_ONLY_CONTROL_FILE");
++        if (!path || !*path) return nullptr;
++        const int fd = open(path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
++        GGML_ASSERT(fd >= 0);
++        struct stat info;
++        GGML_ASSERT(fstat(fd, &info) == 0 && S_ISREG(info.st_mode) && info.st_size == sizeof(uint32_t));
++        void * mapping = mmap(nullptr, sizeof(uint32_t), PROT_READ, MAP_SHARED, fd, 0);
++        close(fd);
++        GGML_ASSERT(mapping != MAP_FAILED);
++        return static_cast<const uint32_t *>(mapping);
++    }();
++    if (!control) return true;
++    const uint32_t value = __atomic_load_n(control, __ATOMIC_ACQUIRE);
++    GGML_ASSERT(value <= 1);
++    return value == 1;
++}
++
++class glm5next_input_kv_mode final : public llm_graph_input_i {
++public:
++    explicit glm5next_input_kv_mode(bool enabled) : enabled(enabled) {}
++    void set_input(const llama_ubatch *) override {}
++    bool can_reuse(const llm_graph_params &) override {
++        return enabled == glm5next_kv_only_enabled();
++    }
++    const bool enabled;
++};
++
++class glm5next_input_k_store final : public llm_graph_input_i {
++public:
++    glm5next_input_k_store(ggml_tensor * indices, const llama_kv_cache_context * memory)
++        : indices(indices), memory(memory) {}
++
++    void set_input(const llama_ubatch * batch) override {
++        memory->set_input_k_idxs(indices, batch);
++    }
++
++    // Keep the base class's no-reuse policy for this cache-only graph.
++    ggml_tensor * indices;
++    const llama_kv_cache_context * memory;
++};
++}
+ 
+ // positions the indexer keeps: index_topk/index_kpool whole pools plus the
+ // always-selected tail pool minus one. below this many cached tokens every position is
+@@ -938,10 +996,19 @@
+     ggml_tensor * h_embd = inp->h;
+     res->add_input(std::move(inp));
+ 
+-    ggml_tensor * inp_out_ids = build_inp_out_ids();
+-
+-    // MLA absorption leaves a K-only cache holding the latent, as in the trunk
+-    auto * inp_attn = build_attn_inp_k();
++    const bool kv_only_enabled = glm5next_kv_only_enabled();
++    res->add_input(std::make_unique<glm5next_input_kv_mode>(kv_only_enabled));
++    const bool kv_only = kv_only_enabled && n_outputs == 0 &&
++        hparams.n_layer_nextn == 1 && !cparams.embeddings &&
++        cparams.embeddings_nextn && cparams.embeddings_nextn_masked &&
++        params.samplers.empty() &&
++        std::none_of(cparams.embeddings_layer_inp.begin(), cparams.embeddings_layer_inp.end(),
++                     [](bool value) { return value; });
++
++    ggml_tensor * inp_out_ids = kv_only ? nullptr : build_inp_out_ids();
++
++    // MLA absorption leaves a K-only cache holding the latent, as in the trunk.
++    auto * inp_attn = kv_only ? nullptr : build_attn_inp_k();
+ 
+     ggml_tensor * h_norm = build_norm(h_embd, layer.nextn.hnorm, nullptr, LLM_NORM_RMS, il);
+     cb(h_norm, "mtp_hnorm", il);
+@@ -961,6 +1028,30 @@
+ 
+         cur = build_norm(cur, layer.attn_norm, nullptr, LLM_NORM_RMS, il);
+         cb(cur, "mtp_attn_norm", il);
++
++        if (kv_only) {
++            // With no outputs, this layer only needs to store its normalized KV latent.
++            auto * memory = static_cast<const llama_kv_cache_context *>(mctx);
++            auto * indices = memory->build_input_k_idxs(ctx0, ubatch);
++            res->add_input(std::make_unique<glm5next_input_k_store>(indices, memory));
++
++            auto * kv = ggml_mul_mat(ctx0, layer.wkv_a_mqa, cur);
++            kv = build_norm(kv, layer.attn_kv_a_norm, nullptr, LLM_NORM_RMS, il);
++            cb(kv, "dsa_kv_a_norm", il);
++            auto * k = ggml_reshape_3d(ctx0, kv, hparams.n_lora_kv, 1, n_tokens);
++            cb(k, "dsa_kv_latent", il);
++            ggml_build_forward_expand(gf, memory->cpy_k(ctx0, k, indices, il));
++
++            static const bool probe = [] {
++                const char * value = std::getenv("GGML_GLM5N_MTP_KV_ONLY_PROBE");
++                return value && std::strcmp(value, "1") == 0;
++            }();
++            if (probe) {
++                LLAMA_LOG_WARN("GLM_MTP_KV_ONLY tokens=%u outputs=%lld nodes=%d\n",
++                               ubatch.n_tokens, (long long) n_outputs, ggml_graph_n_nodes(gf));
++            }
++            return;
++        }
+ 
+         cur = build_dsa_layer(layer, inp_attn, /*inp_kp =*/ nullptr, /*scoring =*/ false, cur, il);
+         cb(cur, "mtp_attn_out", il);

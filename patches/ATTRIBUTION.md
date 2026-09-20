@@ -36,3 +36,14 @@ speculative-server plumbing, and tests against
 `a30273376ef669023334fc20ad02ae4ed8196a65`. Any upstream-derived code retains
 the notices and history present in the patch. See the patch itself and
 [`README.md`](README.md) for the exact audited delta and limitations.
+
+## GLM-5.3-Flash decode series, 2026-09-20
+
+`glm5next-kpool-fusion-statecopy.patch`, `glm5next-kpool-wide.patch`, `glm5next-pool-result-cache.patch`,
+`glm-kv-seq-rm-used-prefix.patch` and `glm5next-mtp-kv-only-catchup.patch` were developed for this repository on 2026-09-19;
+`glm5next-fa-mqa-cellsplit.patch`, `topk-select-tie-fallback.patch` and `upstream-cpu-fattn-f32-accumulate.patch` on 2026-09-20.
+All were written with AI coding agents under the repository owner's direction. They modify llama.cpp source files (MIT) and the
+glm5next architecture support of the unslothai/llama.cpp line at `2e0e57f1008053bae4902a772da85e3eb99d4aff`, which is not claimed
+as locally authored. The attention kernel reuses the tree's `simd_gemm` helper. KTransformers' kt-kernel independently splits
+routed-expert weights across NUMA thread pools for GPU-hybrid serving; nothing here derives from its code.
+

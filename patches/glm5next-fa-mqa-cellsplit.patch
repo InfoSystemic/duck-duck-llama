@@ -1,0 +1,530 @@
+GLM-5.3-Flash (glm5next) CPU library, step 4 of 5: cell-split MQA flash attention for short query batches.
+NOT deployed. CHANGES NUMERICAL OUTPUT (toward the float64 result). GGML_F18_FEATURES bit 0, default off.
+Apply after glm5next-pool-result-cache.patch (or after glm5next-kpool-wide.patch; the hunks do not overlap).
+
+What the stock kernel does. With an F16 KV cache, ggml_compute_forward_flash_attn_ext_f16_one_chunk accumulates V in an FP16
+buffer (VKQ16, ggml_vec_mad_f16). Over ~2,000 cells each addend is near or below the accumulator's rounding step, so the small
+terms are dropped. It also walks the whole cache once per query-head row, converts Q to F16 for the dot product, and converts
+each K/V row again for every head and query. This code is identical in upstream llama.cpp (checked at b23efaa2).
+
+What this kernel does (absorbed MLA is MQA: one 512-wide K/V head, V aliases K, one f16 mask row per query):
+  every worker finds the cells ANY query can see (AVX-512BW scan of the mask), takes a contiguous slice of them, converts that
+  slice of K to F32 once, and computes partial softmax sums for all query-head rows with two GEMMs per 64-cell tile
+  (scores = Q x K^T, then V accumulation), all in F32. One barrier, then the per-worker partials are merged per row.
+  The K tile is transposed with a 16x16 AVX-512 network; a scalar transpose cost HALF the kernel before that.
+
+Accuracy, relative RMS error against a float64 reference computed from the same tensors:
+  synthetic, 2,051 of 4,096 cells visible, 3 queries x 16 heads:   stock 6.4e-3    this kernel 2.4e-7
+  pure upstream build (b23efaa2), same program:                     stock 6.4e-3
+  IN SITU, 8-layer proxy of the real model, real cache and masks (-DF18_FA_VERIFY recomputes each node both ways):
+      1 query     stock 9.6e-4 mean           this kernel 7.3e-7 mean
+      3 queries   stock 1.26e-2 mean, 2.5e-2 max   this kernel 6.4e-7 mean, 1.4e-6 max   (the speculative verify batch)
+Speed of the op, 15 workers, one socket: verify shape 1.16 -> 0.23 ms; dense draft shape 0.49 -> 0.17 ms; 32,768-cell cache with
+2,051 visible 1.65 -> 0.24 ms (the context term of the op is gone). In the server the op measures ~0.47 ms per DSA layer
+(cold scratch between calls) against ~1.1 ms including its barrier before.
+
+Full model, window w1 2026-09-20, same loaded process, actual Codex requests through the Paseo wrapper, greedy, 3,998-token input,
+four runs per mode, this patch together with topk-select-tie-fallback.patch:
+      production-equivalent  16.22 / 16.26 / 16.27 / 16.20   mean 16.236 tok/s   157 of 196 drafts accepted
+      both kernels on        17.05 / 17.24 / 17.30 / 17.30   mean 17.225 tok/s   158 of 196                  (+6.1%)
+Because the stock kernel is ~1% off, generated text differs from production: 2 of 10 short factual prompts gave the same 24-token
+string, and token log-probabilities moved by up to 0.46 on a 7K-token prompt. Byte parity with production is therefore NOT the
+gate for this patch; the float64 comparison is. The window library was built before the ifdef'd verify block was added
+(same code otherwise). Queries above 16 tokens (prefill) keep the stock tiled path.
+
+--- a/ops.cpp
++++ b/ops.cpp
+@@ -16,6 +16,7 @@
+ 
+ #include <atomic>
+ #include "flash-rms-guarded-0908.h"
++#include "f18-common.inc"
+ 
+ static std::atomic<uint64_t> flash_rms_guard_counts[FLASH_RMS_GUARD_STATUS_COUNT];
+ extern "C" uint64_t ggml_cpu_rms_guard_count(int status);
+@@ -9252,6 +9253,11 @@
+     }
+ }
+ 
++#include "fa-mqa.inc"
++#ifdef F18_FA_VERIFY
++static thread_local std::vector<float> f18_fa_verify_save;
++#endif
++
+ static void ggml_compute_forward_flash_attn_ext_f16(
+         const ggml_compute_params * params,
+         ggml_tensor * dst) {
+@@ -9296,6 +9302,23 @@
+ 
+     const int ith = params->ith;
+     const int nth = params->nth;
++
++#ifdef F18_FA_VERIFY
++    bool f18_verify = false;
++#endif
++    if (f18_fa_mqa_supported(params, dst)) {
++        f18_fa_mqa(params, dst);
++#ifdef F18_FA_VERIFY
++        // diagnostic build: keep the new result, then let the stock path recompute the node and compare
++        f18_verify = true;
++        ggml_barrier(params->threadpool);
++        if (ith == 0) {
++            f18_fa_verify_save.assign((const float *) dst->data, (const float *) dst->data + ggml_nelements(dst));
++        }
++#else
++        return;
++#endif
++    }
+ 
+     // When use_ref is set, force the vec-only reference implementation (no tiling, no KV-chunking)
+     const bool use_ref = params->use_ref;
+@@ -9386,6 +9409,56 @@
+             current_chunk = ggml_threadpool_chunk_add(params->threadpool, 1);
+         }
+     }
++#ifdef F18_FA_VERIFY
++    if (f18_verify) {
++        ggml_barrier(params->threadpool);
++        if (ith == 0) {
++            // float64 reference from the tensors the node actually received (MQA, f16/f32 K, V may alias K)
++            const float * stock = (const float *) dst->data;
++            const ggml_tensor * mask = dst->src[3];
++            const int64_t n = ggml_nelements(dst);
++            const int64_t DK_ = k->ne[0], DV_ = v->ne[0], N_ = q->ne[1], H_ = q->ne[2], KV_ = k->ne[1];
++            float scale_ = 1.0f; memcpy(&scale_, (const float *) dst->op_params, sizeof(float));
++            std::vector<double> ref((size_t) n, 0.0), kd((size_t) DK_), acc((size_t) DV_), sc((size_t) KV_);
++            std::vector<float> krow((size_t) DK_), vrow((size_t) DV_);
++            for (int64_t nq = 0; nq < N_; ++nq) {
++                const ggml_fp16_t * mrow = (const ggml_fp16_t *) ((const char *) mask->data + nq*mask->nb[1]);
++                for (int64_t h = 0; h < H_; ++h) {
++                    const float * qr = (const float *) ((const char *) q->data + nq*q->nb[1] + h*q->nb[2]);
++                    double mx = -INFINITY;
++                    for (int64_t c = 0; c < KV_; ++c) {
++                        const float mv = GGML_CPU_FP16_TO_FP32(mrow[c]);
++                        if (mv == -INFINITY) { sc[c] = -INFINITY; continue; }
++                        const char * kp = (const char *) k->data + c*k->nb[1];
++                        if (k->type == GGML_TYPE_F16) { ggml_cpu_fp16_to_fp32((const ggml_fp16_t *) kp, krow.data(), DK_); } else { memcpy(krow.data(), kp, DK_*sizeof(float)); }
++                        double a = 0.0;
++                        for (int64_t d = 0; d < DK_; ++d) { a += (double) qr[d]*krow[d]; }
++                        sc[c] = a*scale_ + mv; mx = std::max(mx, sc[c]);
++                    }
++                    double S = 0.0; std::fill(acc.begin(), acc.end(), 0.0);
++                    for (int64_t c = 0; c < KV_; ++c) {
++                        if (sc[c] == -INFINITY) { continue; }
++                        const double w = std::exp(sc[c] - mx); S += w;
++                        const char * vp = (const char *) v->data + c*v->nb[1];
++                        if (v->type == GGML_TYPE_F16) { ggml_cpu_fp16_to_fp32((const ggml_fp16_t *) vp, vrow.data(), DV_); } else { memcpy(vrow.data(), vp, DV_*sizeof(float)); }
++                        for (int64_t d = 0; d < DV_; ++d) { acc[d] += w*vrow[d]; }
++                    }
++                    for (int64_t d = 0; d < DV_; ++d) { ref[(size_t) ((nq*H_ + h)*DV_ + d)] = S > 0 ? acc[d]/S : 0.0; }
++                }
++            }
++            double e_new = 0.0, e_stock = 0.0, ref2 = 0.0;
++            for (int64_t i = 0; i < n; ++i) {
++                const double a = f18_fa_verify_save[i] - ref[i], b = stock[i] - ref[i];
++                e_new += a*a; e_stock += b*b; ref2 += ref[i]*ref[i];
++            }
++            static std::atomic<int> n_logged{0};
++            if (n_logged.fetch_add(1) < 96) {
++                GGML_LOG_WARN("F18_FA_VERIFY kv=%s n_q=%lld n_head=%lld n_kv=%lld rel_rms_vs_f64: new=%.3e stock=%.3e\n", ggml_type_name(k->type),
++                    (long long) N_, (long long) H_, (long long) KV_, ref2 > 0 ? std::sqrt(e_new/ref2) : 0.0, ref2 > 0 ? std::sqrt(e_stock/ref2) : 0.0);
++            }
++        }
++    }
++#endif
+ }
+ 
+ void ggml_compute_forward_flash_attn_ext(
+--- /dev/null
++++ b/f18-common.inc
+@@ -0,0 +1,32 @@
++#pragma once
++// f18 feature switches. GGML_F18_FEATURES is a bit mask (decimal or 0x hex).
++// GGML_F18_CONTROL_FILE names a 4-byte file that overrides the mask while the process runs (A/B without reload).
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <unistd.h>
++
++enum : uint32_t {
++    F18_FA_MQA = 1u << 0, // cell-split MQA flash attention for short query batches
++    F18_TOPK   = 1u << 1, // nth_element top-k
++};
++
++static uint32_t f18_features() {
++    static const uint32_t env_mask = [] {
++        const char * v = std::getenv("GGML_F18_FEATURES");
++        return v ? (uint32_t) std::strtoul(v, nullptr, 0) : 0u;
++    }();
++    static const uint32_t * control = [] () -> const uint32_t * {
++        const char * path = std::getenv("GGML_F18_CONTROL_FILE");
++        if (!path || !*path) return nullptr;
++        const int fd = open(path, O_RDONLY | O_CLOEXEC);
++        GGML_ASSERT(fd >= 0 && "GGML_F18_CONTROL_FILE must exist");
++        struct stat info;
++        GGML_ASSERT(fstat(fd, &info) == 0 && info.st_size == (off_t) sizeof(uint32_t));
++        void * mapping = mmap(nullptr, sizeof(uint32_t), PROT_READ, MAP_SHARED, fd, 0);
++        close(fd);
++        GGML_ASSERT(mapping != MAP_FAILED);
++        return (const uint32_t *) mapping;
++    }();
++    return control ? __atomic_load_n(control, __ATOMIC_ACQUIRE) : env_mask;
++}
+--- /dev/null
++++ b/fa-mqa.inc
+@@ -0,0 +1,355 @@
++#pragma once
++// Cell-split MQA attention for short query batches (GLM DSA/MLA decode and the MTP draft).
++// One K/V head and one f16 mask row per query. Each thread takes a slice of the visible cells,
++// computes partial softmax sums for all query rows with two GEMMs per tile, then the partials are merged.
++
++#include <vector>
++#if defined(__AVX512BW__)
++#include <immintrin.h>
++#endif
++
++static constexpr int64_t F18_FA_TILE     = 64;  // cells per tile
++static constexpr int64_t F18_FA_MAX_Q    = 16;  // query tokens
++static constexpr int64_t F18_FA_MAX_ROWS = 256; // query tokens * heads
++
++struct f18_fa_scratch {
++    std::vector<int32_t> cells;
++    float * buf = nullptr;
++    size_t  cap = 0;
++
++    float * reserve(size_t n) {
++        if (n > cap) {
++            std::free(buf);
++            void * p = nullptr;
++            GGML_ASSERT(posix_memalign(&p, 64, n*sizeof(float)) == 0);
++            buf = (float *) p;
++            cap = n;
++        }
++        return buf;
++    }
++};
++
++static thread_local f18_fa_scratch f18_fa_tls;
++
++#ifdef F18_FA_TIMING
++#include <x86intrin.h>
++static thread_local uint64_t f18_fa_t[8] = {};
++static thread_local uint64_t f18_fa_calls = 0;
++#define F18_T(i) { const uint64_t now_ = __rdtsc(); f18_fa_t[i] += now_ - t_last_; t_last_ = now_; }
++#else
++#define F18_T(i)
++#endif
++
++#if defined(__AVX512F__)
++// out[j] = column j of the 16x16 block with rows r[0..15]
++static inline void f18_transpose16(const __m512 r[16], __m512 out[16]) {
++    __m512 t[16], u[16], v[16];
++    for (int i = 0; i < 8; ++i) {
++        t[2*i]   = _mm512_unpacklo_ps(r[2*i], r[2*i+1]);
++        t[2*i+1] = _mm512_unpackhi_ps(r[2*i], r[2*i+1]);
++    }
++    for (int i = 0; i < 4; ++i) {
++        u[4*i+0] = _mm512_shuffle_ps(t[4*i+0], t[4*i+2], 0x44);
++        u[4*i+1] = _mm512_shuffle_ps(t[4*i+0], t[4*i+2], 0xEE);
++        u[4*i+2] = _mm512_shuffle_ps(t[4*i+1], t[4*i+3], 0x44);
++        u[4*i+3] = _mm512_shuffle_ps(t[4*i+1], t[4*i+3], 0xEE);
++    }
++    for (int i = 0; i < 4; ++i) {
++        v[i]    = _mm512_shuffle_f32x4(u[i],   u[i+4],  0x88);
++        v[i+4]  = _mm512_shuffle_f32x4(u[i],   u[i+4],  0xDD);
++        v[i+8]  = _mm512_shuffle_f32x4(u[i+8], u[i+12], 0x88);
++        v[i+12] = _mm512_shuffle_f32x4(u[i+8], u[i+12], 0xDD);
++    }
++    for (int i = 0; i < 4; ++i) {
++        out[i]    = _mm512_shuffle_f32x4(v[i],   v[i+8],  0x88);
++        out[i+4]  = _mm512_shuffle_f32x4(v[i+4], v[i+12], 0x88);
++        out[i+8]  = _mm512_shuffle_f32x4(v[i],   v[i+8],  0xDD);
++        out[i+12] = _mm512_shuffle_f32x4(v[i+4], v[i+12], 0xDD);
++    }
++}
++#endif
++
++// Kt[d*Tw + tk] = Kr[tk*DK + d]
++static void f18_fa_transpose(const float * Kr, float * Kt, int64_t Tw, int64_t DK) {
++#if defined(__AVX512F__)
++    if (Tw % 16 == 0 && DK % 16 == 0) {
++        __m512 r[16], c[16];
++        for (int64_t tk = 0; tk < Tw; tk += 16) {
++            for (int64_t d = 0; d < DK; d += 16) {
++                for (int i = 0; i < 16; ++i) {
++                    r[i] = _mm512_loadu_ps(Kr + (tk + i)*DK + d);
++                }
++                f18_transpose16(r, c);
++                for (int j = 0; j < 16; ++j) {
++                    _mm512_storeu_ps(Kt + (d + j)*Tw + tk, c[j]);
++                }
++            }
++        }
++        return;
++    }
++#endif
++    for (int64_t tk = 0; tk < Tw; ++tk) {
++        for (int64_t d = 0; d < DK; ++d) {
++            Kt[d*Tw + tk] = Kr[tk*DK + d];
++        }
++    }
++}
++
++static bool f18_fa_mqa_supported(const ggml_compute_params * params, const ggml_tensor * dst) {
++    if (!(f18_features() & F18_FA_MQA) || params->use_ref) {
++        return false;
++    }
++
++    const ggml_tensor * q     = dst->src[0];
++    const ggml_tensor * k     = dst->src[1];
++    const ggml_tensor * v     = dst->src[2];
++    const ggml_tensor * mask  = dst->src[3];
++    const ggml_tensor * sinks = dst->src[4];
++
++    if (!mask || sinks) {
++        return false;
++    }
++    if (q->type != GGML_TYPE_F32 || mask->type != GGML_TYPE_F16) {
++        return false;
++    }
++    if (k->type != v->type || (k->type != GGML_TYPE_F16 && k->type != GGML_TYPE_F32)) {
++        return false;
++    }
++    if (k->ne[2] != 1 || v->ne[2] != 1 || q->ne[3] != 1 || k->ne[3] != 1 || v->ne[3] != 1 || k->ne[1] != v->ne[1]) {
++        return false;
++    }
++    if (mask->ne[2] != 1 || mask->ne[3] != 1 || mask->ne[0] < k->ne[1] || mask->ne[1] < q->ne[1]) {
++        return false;
++    }
++    if (q->ne[1] > F18_FA_MAX_Q || q->ne[1]*q->ne[2] > F18_FA_MAX_ROWS) {
++        return false;
++    }
++
++    float max_bias      = 0.0f;
++    float logit_softcap = 0.0f;
++    memcpy(&max_bias,      (const float *) dst->op_params + 1, sizeof(float));
++    memcpy(&logit_softcap, (const float *) dst->op_params + 2, sizeof(float));
++    if (max_bias != 0.0f || logit_softcap != 0.0f) {
++        return false;
++    }
++
++    // the work buffer carries one pointer per thread
++    return params->wdata != nullptr && params->wsize >= params->nth*sizeof(float *);
++}
++
++static void f18_fa_mqa(const ggml_compute_params * params, ggml_tensor * dst) {
++    const ggml_tensor * q    = dst->src[0];
++    const ggml_tensor * k    = dst->src[1];
++    const ggml_tensor * v    = dst->src[2];
++    const ggml_tensor * mask = dst->src[3];
++
++    const int64_t DK   = k->ne[0];
++    const int64_t DV   = v->ne[0];
++    const int64_t N    = q->ne[1];
++    const int64_t H    = q->ne[2];
++    const int64_t R    = N*H;
++    const int64_t n_kv = k->ne[1];
++    const int64_t T    = F18_FA_TILE;
++
++    const int ith = params->ith;
++    const int nth = params->nth;
++
++    float scale = 1.0f;
++    memcpy(&scale, (const float *) dst->op_params + 0, sizeof(float));
++
++    const bool is_f16  = k->type == GGML_TYPE_F16;
++    const bool v_is_k  = v->data == k->data && v->nb[1] == k->nb[1] && DV == DK;
++
++    auto & tls = f18_fa_tls;
++#ifdef F18_FA_TIMING
++    uint64_t t_last_ = __rdtsc();
++#endif
++
++    // cells that at least one query can see
++    const uint16_t * mrow[F18_FA_MAX_Q];
++    for (int64_t n = 0; n < N; ++n) {
++        mrow[n] = (const uint16_t *) ((const char *) mask->data + n*mask->nb[1]);
++    }
++
++    tls.cells.clear();
++    {
++        int64_t c = 0;
++#if defined(__AVX512BW__)
++        const __m512i ninf = _mm512_set1_epi16((short) 0xFC00);
++        for (; c + 32 <= n_kv; c += 32) {
++            __mmask32 vis = 0;
++            for (int64_t n = 0; n < N; ++n) {
++                vis |= _mm512_cmpneq_epi16_mask(_mm512_loadu_si512((const void *) (mrow[n] + c)), ninf);
++            }
++            while (vis) {
++                tls.cells.push_back((int32_t) (c + __builtin_ctz(vis)));
++                vis &= vis - 1;
++            }
++        }
++#endif
++        for (; c < n_kv; ++c) {
++            bool vis = false;
++            for (int64_t n = 0; n < N; ++n) {
++                vis |= mrow[n][c] != 0xFC00;
++            }
++            if (vis) {
++                tls.cells.push_back((int32_t) c);
++            }
++        }
++    }
++
++    F18_T(0)
++    const int64_t nU = (int64_t) tls.cells.size();
++    const int64_t u0 = ith*nU/nth;
++    const int64_t u1 = (ith + 1)*nU/nth;
++
++    const size_t n_part = (size_t) R*(2 + DV);
++    const size_t need   = (size_t) R*DK + (size_t) DK*T + (size_t) T*DK + (v_is_k ? 0 : (size_t) T*DV) + (size_t) R*T + (size_t) N*T + n_part + (size_t) DV + 64;
++
++    float * Qp   = tls.reserve(need);
++    float * Kt   = Qp + R*DK;
++    float * Kr   = Kt + DK*T;
++    float * Vr   = v_is_k ? Kr : Kr + T*DK;
++    float * KQ   = Vr + T*DV;
++    float * Mq   = KQ + R*T;
++    float * part = Mq + N*T;
++    float * acc  = part + n_part;
++
++    float * PM = part;
++    float * PS = part + R;
++    float * PV = part + 2*R;
++
++    for (int64_t r = 0; r < R; ++r) {
++        PM[r] = -INFINITY;
++        PS[r] = 0.0f;
++    }
++    memset(PV, 0, (size_t) R*DV*sizeof(float));
++
++    ((float **) params->wdata)[ith] = part;
++
++    // query rows: r = n*H + h, the order of the dst rows
++    for (int64_t n = 0; n < N; ++n) {
++        for (int64_t h = 0; h < H; ++h) {
++            memcpy(Qp + (n*H + h)*DK, (const char *) q->data + n*q->nb[1] + h*q->nb[2], DK*sizeof(float));
++        }
++    }
++
++    F18_T(1)
++    for (int64_t t0 = u0; t0 < u1; t0 += T) {
++        const int64_t nt = std::min(T, u1 - t0);
++        const int64_t Tw = (nt + 15) & ~(int64_t) 15; // tile width, padded to the vector width
++
++        for (int64_t tk = 0; tk < nt; ++tk) {
++            const int64_t cell = tls.cells[t0 + tk];
++            const char * k_data = (const char *) k->data + cell*k->nb[1];
++            if (is_f16) {
++                ggml_cpu_fp16_to_fp32((const ggml_fp16_t *) k_data, Kr + tk*DK, DK);
++            } else {
++                memcpy(Kr + tk*DK, k_data, DK*sizeof(float));
++            }
++            if (!v_is_k) {
++                const char * v_data = (const char *) v->data + cell*v->nb[1];
++                if (is_f16) {
++                    ggml_cpu_fp16_to_fp32((const ggml_fp16_t *) v_data, Vr + tk*DV, DV);
++                } else {
++                    memcpy(Vr + tk*DV, v_data, DV*sizeof(float));
++                }
++            }
++            for (int64_t n = 0; n < N; ++n) {
++                Mq[n*Tw + tk] = GGML_CPU_FP16_TO_FP32(mrow[n][cell]);
++            }
++        }
++        if (nt < Tw) {
++            memset(Kr + nt*DK, 0, (size_t) (Tw - nt)*DK*sizeof(float));
++            if (!v_is_k) {
++                memset(Vr + nt*DV, 0, (size_t) (Tw - nt)*DV*sizeof(float));
++            }
++            for (int64_t n = 0; n < N; ++n) {
++                for (int64_t tk = nt; tk < Tw; ++tk) {
++                    Mq[n*Tw + tk] = -INFINITY;
++                }
++            }
++        }
++
++        F18_T(2)
++        // transposed K tile for the score GEMM
++        f18_fa_transpose(Kr, Kt, Tw, DK);
++
++        F18_T(3)
++        memset(KQ, 0, (size_t) R*Tw*sizeof(float));
++        simd_gemm(KQ, Qp, Kt, (int) R, (int) DK, (int) Tw);
++        ggml_vec_scale_f32((int) (R*Tw), KQ, scale);
++        F18_T(4)
++
++        for (int64_t r = 0; r < R; ++r) {
++            float * kq_row = KQ + r*Tw;
++            ggml_vec_add_f32((int) Tw, kq_row, kq_row, Mq + (r/H)*Tw);
++
++            float tile_max;
++            ggml_vec_max_f32((int) Tw, &tile_max, kq_row);
++            if (tile_max == -INFINITY) {
++                memset(kq_row, 0, (size_t) Tw*sizeof(float));
++                continue;
++            }
++
++            const float Mold = PM[r];
++            const float Mnew = fmaxf(Mold, tile_max);
++            if (Mnew > Mold) {
++                const float ms = expf(Mold - Mnew);
++                ggml_vec_scale_f32((int) DV, PV + r*DV, ms);
++                PS[r] *= ms;
++            }
++            PM[r] = Mnew;
++            PS[r] += (float) ggml_vec_soft_max_f32((int) Tw, kq_row, kq_row, Mnew);
++        }
++
++        F18_T(5)
++        simd_gemm(PV, KQ, Vr, (int) R, (int) Tw, (int) DV);
++        F18_T(6)
++    }
++
++    ggml_barrier(params->threadpool);
++    F18_T(7)
++#ifdef F18_FA_TIMING
++    if (ith == 0 && ++f18_fa_calls % 100 == 0) {
++        fprintf(stderr, "F18_FA_TIMING calls=%llu scan=%llu setup=%llu pack=%llu transpose=%llu gemm1=%llu softmax=%llu gemm2=%llu barrier=%llu (kcycles/call)\n",
++            (unsigned long long) f18_fa_calls, (unsigned long long) (f18_fa_t[0]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[1]/f18_fa_calls/1000),
++            (unsigned long long) (f18_fa_t[2]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[3]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[4]/f18_fa_calls/1000),
++            (unsigned long long) (f18_fa_t[5]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[6]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[7]/f18_fa_calls/1000));
++    }
++#endif
++
++    float ** parts = (float **) params->wdata;
++
++    for (int64_t r = ith; r < R; r += nth) {
++        float M_final = -INFINITY;
++        float S_final = 0.0f;
++        memset(acc, 0, (size_t) DV*sizeof(float));
++
++        for (int p = 0; p < nth; ++p) {
++            const float * pp      = parts[p];
++            const float   M_chunk = pp[r];
++            const float   S_chunk = pp[R + r];
++            if (S_chunk == 0.0f) {
++                continue;
++            }
++            const float * V_chunk = pp + 2*R + r*DV;
++
++            const float M_new     = fmaxf(M_final, M_chunk);
++            const float scale_old = expf(M_final - M_new);
++            const float scale_new = expf(M_chunk - M_new);
++
++            for (int64_t d = 0; d < DV; ++d) {
++                acc[d] = acc[d]*scale_old + V_chunk[d]*scale_new;
++            }
++            S_final = S_final*scale_old + S_chunk*scale_new;
++            M_final = M_new;
++        }
++
++        if (S_final != 0.0f) {
++            ggml_vec_scale_f32((int) DV, acc, 1.0f/S_final);
++        }
++
++        memcpy((char *) dst->data + r*dst->nb[1], acc, (size_t) DV*sizeof(float));
++    }
++}
