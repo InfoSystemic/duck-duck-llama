@@ -1,7 +1,7 @@
 # Engineering snapshot, 2026-09-20
 
 GLM-5.3-Flash decode work of September 18-20, measured the way a Codex agent inside Paseo experiences it. A curated subset, not a
-full export: 397 files, no engine trees. Start with the [report](../../benchmarks/glm53-flash-paseo-decode-20260920.md) and the
+full export: 407 files, no engine trees. Start with the [report](../../benchmarks/glm53-flash-paseo-decode-20260920.md) and the
 [patch table](../../patches/README-20260920-glm5next.md).
 
 | Area | Entry point |
@@ -28,7 +28,8 @@ full export: 397 files, no engine trees. Start with the [report](../../benchmark
 | Windows w2-w6: controllers, filtered reports, logs | [w2](archive/serving/fleet-0920-flash18/results/window-w2.log), [w3](archive/serving/fleet-0920-flash18/results/window-w3.log), [w4](archive/serving/fleet-0920-flash18/results/window-w4.log), [w5](archive/serving/fleet-0920-flash18/results/window-w5.log), [w6](archive/serving/fleet-0920-flash18/results/window-w6.log), [window6.py](archive/serving/fleet-0920-flash18/run/window6.py) |
 | Host-side profiling without perf, the thread-per-upload defect, the recovered libggml-base recipe (revision e, window w8) | [make_meta.py](archive/serving/fleet-0920-flash18/base/make_meta.py), [build.sh](archive/serving/fleet-0920-flash18/base/build.sh), [window8.py](archive/serving/fleet-0920-flash18/run/window8.py), [w8 log](archive/serving/fleet-0920-flash18/results/window-w8.log), [tools/thread_profile.py](../../tools/thread_profile.py) |
 | Draft depth 3 against 2 in one process, marginal cost of a verified row (window w9), offline simulation of variable-length verification | [window9.py](archive/serving/fleet-0920-flash18/run/window9.py), [w9 log](archive/serving/fleet-0920-flash18/results/window-w9.log), [adaptive_depth_sim.py](archive/serving/fleet-0920-flash18/run/adaptive_depth_sim.py) |
-| Production revisions b, c, d, e: drop-ins, library hashes, deploy scripts with automatic rollback | [b](archive/serving/fleet-0920-flash18/deploy-0920b/95-f18-0920.conf.proposed), [c](archive/serving/fleet-0920-flash18/deploy-0920c/95-f18-0920.conf.proposed), [d](archive/serving/fleet-0920-flash18/deploy-0920d/95-f18-0920.conf.proposed), [e](archive/serving/fleet-0920-flash18/deploy-0920e/95-f18-0920.conf.proposed), [deploy.sh](archive/serving/fleet-0920-flash18/deploy-0920e/deploy.sh) |
+| Software prefetch in the Q5_K x16 expert kernel (revision f, window w10), with the gate for the production repack object | [make_repack.py](archive/serving/fleet-0920-flash18/cpu/make_repack.py), [build-repack.sh](archive/serving/fleet-0920-flash18/cpu/build-repack.sh), [build-all.sh](archive/serving/fleet-0920-flash18/cpu/build-all.sh), [window10.py](archive/serving/fleet-0920-flash18/run/window10.py), [w10 log](archive/serving/fleet-0920-flash18/results/window-w10.log) |
+| Production revisions b, c, d, e, f: drop-ins, library hashes, deploy scripts with automatic rollback | [b](archive/serving/fleet-0920-flash18/deploy-0920b/95-f18-0920.conf.proposed), [c](archive/serving/fleet-0920-flash18/deploy-0920c/95-f18-0920.conf.proposed), [d](archive/serving/fleet-0920-flash18/deploy-0920d/95-f18-0920.conf.proposed), [e](archive/serving/fleet-0920-flash18/deploy-0920e/95-f18-0920.conf.proposed), [f](archive/serving/fleet-0920-flash18/deploy-0920f/95-f18-0920.conf.proposed), [deploy.sh](archive/serving/fleet-0920-flash18/deploy-0920f/deploy.sh) |
 | Patch headers and the generator that cuts the patch files from the built sources | [make_patches_revd.py](archive/serving/fleet-0920-flash18/publish/make_patches_revd.py) |
 
 ## Contract
@@ -46,5 +47,5 @@ python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-20
 
 Two sessions produced this work: a Codex session on 09-19 (pooling, KV rollback, MTP catch-up, pooled-result cache, the negative
 results) and a Claude session on 09-20 (attention kernel and its invariance fix, top-k, draft loop, coupled sampling, the OpenMP
-team finding, gated delta net, MTP query rows, the thread-per-upload defect of the tensor-parallel backend, windows w1-w9,
-production revisions b-e, the FP16 accumulation finding, this publication).
+team finding, gated delta net, MTP query rows, the thread-per-upload defect of the tensor-parallel backend, windows w1-w10,
+production revisions b-f, the FP16 accumulation finding, this publication).

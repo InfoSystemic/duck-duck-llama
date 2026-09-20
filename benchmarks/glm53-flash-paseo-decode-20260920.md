@@ -1,8 +1,8 @@
-# GLM-5.3-Flash decode as an agent sees it: 12.0 to 20.0 tok/s, September 18-20
+# GLM-5.3-Flash decode as an agent sees it: 12.0 to 20.2 tok/s, September 18-20
 
-**Status (2026-09-20, revision e in production):** a Codex agent inside Paseo gets **20.0 tok/s** on the fixed-output fixture
-(19.96-20.08 over four warm runs) and **19.0 tok/s on requests exactly as Codex sends them** (twelve runs, 17.7-20.1, ten of them at
-or above 18.0). On 09-19 the same service gave 15.5-16.2, on 09-18 12.0. Output has been byte-identical since revision b.
+**Status (2026-09-20, revision f in production):** a Codex agent inside Paseo gets **20.2 tok/s** on the fixed-output fixture
+(19.79-20.49 over four warm runs) and **19.7 tok/s on requests exactly as Codex sends them** (twelve runs, 19.08-20.17, none below
+19). On 09-19 the same service gave 15.5-16.2, on 09-18 12.0. Output has been byte-identical since revision b.
 
 Machine: Lenovo SR950, 4x Xeon Gold 6242 (16 cores each, AVX-512 VNNI, no AMX), 24 DIMMs DDR4-2400, 755 GiB, no GPU.
 Measured aggregate read ceiling 381.6 GB/s ([tools/membw.c](../tools/membw.c)). Model: GLM-5.3-Flash UD-Q4_K_XL (186 GiB), Q8_0 MTP
@@ -45,11 +45,14 @@ Three things make comparisons valid:
 | One worker team per device for both contexts | 19.11 with or without once the spin is short | identical | rev d |
 | Gated delta net split by state row + MTP query side only for the predicting row | 19.11 -> 19.55 (+2.3%); at 13,231 tokens 14.75 -> 15.41 (+4.5%) | bit-identical | rev d |
 | Tensor-parallel backend: graph-input uploads without a thread per device, dispatch waits that block | 19.30 -> 20.18 (+4.6%); sampled 17.98 -> 18.79; at 13,231 tokens 16.15 -> 16.98 | identical | rev e |
+| Software prefetch in the Q5_K expert kernel (the down projection ran at 77 GB/s per socket, gate/up at the 97 GB/s wall) | 19.57 -> 20.18 (+3.1%); verify graph 118.6 -> 114.2 ms | bit-identical | rev f |
 
 Production after each revision, same fixture through Paseo: revision b 18.09-18.40 greedy, 17.14 sampled (n=4); revision c
-18.46-18.76, 17.94 sampled (n=10); revision d 19.17-19.32, 18.18 sampled (n=12); revision e 19.96-20.08, 19.00 sampled (n=12).
+18.46-18.76, 17.94 sampled (n=10); revision d 19.17-19.32, 18.18 sampled (n=12); revision e 19.96-20.08, 19.00 sampled (n=12); revision f 19.79-20.49, 19.71 sampled
+(n=12). Loads differ: the same revision e stack read 20.18 in window w8 and 19.57 in window w10 two hours later, so revisions are
+compared inside one process and the production lines are only what a user got at that hour.
 Windows: w1 (kernels), w2-w4 (draft loop, batch-invariant attention), w5 (spin, sampler, coupling), w6 (revision d), w7 (sampled
-traffic with both sides of the coupled sampler logged), w8 (revision e), w9 (draft depth 3 against 2).
+traffic with both sides of the coupled sampler logged), w8 (revision e), w9 (draft depth 3 against 2), w10 (revision f).
 Patches and their evidence: [patches/README-20260920-glm5next.md](../patches/README-20260920-glm5next.md).
 Records, controllers and logs: [engineering/2026-09-20](../engineering/2026-09-20/README.md).
 
@@ -105,9 +108,13 @@ Worker-0 attribution inside the verify graph, deployed kernels (106 ms of ops + 
 36.6, flash attention 4.5, cross-socket reduces 3.5, gated delta net 2.6 (+2.2 waiting, before the row split), top-k 0.6,
 about 13 in small ops.
 
-**The experts are finished, and so is the dense part.** 24 (token, expert) pairs x 42 layers x 3.8 MB per socket in 42 ms is ~96 GB/s
-per socket, the machine's measured ceiling, with every expert already split four ways. The large dense Q8_0 projections measure
-84-92 GB/s per socket (`[4096,2048]` x102: 88; the LM head: 92). Together that is 79 of the 106 ms. What can still move is
+**The experts and the dense part run at the wall, now.** The aggregate said so all along: 24 (token, expert) pairs x 42 layers x 3.8 MB
+per socket in 42 ms is ~96 GB/s per socket, the machine's measured ceiling, with every expert already split four ways. The per-matrix
+view did not: gate and up (Q4_K) streamed at ~97 GB/s, the down projection (Q5_K) at ~77, because its kernel touches a block group
+in a strided order the hardware prefetcher does not follow and expert weights are never in cache. A software prefetch of the next
+group fixed it (revision f, -4.4 ms per verify graph, bit-identical; one group ahead, because four groups ahead is 65% slower).
+"At the wall on average" hid a 27% gap in the largest single matrix. The large dense Q8_0 projections measure 84-92 GB/s per
+socket (`[4096,2048]` x102: 88; the LM head: 92). Experts plus dense are ~75 of the ~100 ms of op time that are left. What can still move is
 everything a GPU-hybrid engine would hand to the GPU: attention, the indexer, the hyper-connection small ops, the draft loop,
 host work and scheduling. All gains in the table came from there.
 

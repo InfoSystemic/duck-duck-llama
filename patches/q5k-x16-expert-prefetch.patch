@@ -1,0 +1,94 @@
+libggml-cpu, repack.cpp: software prefetch in the compact Q5_K x16 kernel that serves the routed experts' down projection.
+DEPLOYED 2026-09-20 (revision f). BIT-IDENTICAL output (prefetch only). GGML_F18_FEATURES bit 3, default off;
+GGML_F18_Q5_PREFETCH_BLOCKS sets the distance in block groups (default 1).
+
+The experts were "finished": 42-43 ms per verify graph at the DRAM wall. The per-matrix numbers of the production profile say
+otherwise for one of the three matrices (three verify rows, worker 0, 42 MoE layers):
+    gate  Q4_K   12.2 ms   ~97 GB/s per socket     the wall
+    up    Q4_K   12.2 ms   ~97 GB/s
+    down  Q5_K   18.9 ms   ~77 GB/s                1.22x the bytes, 1.55x the time
+The compact Q5 kernel (ggml_gemv_q5_K_x16_bytes_impl<NR, true, 4>) walks a 2,880-byte block group by SUB-BLOCK: for each of the
+eight sub-blocks it visits all eight 320-byte chunks and re-reads each chunk's high-bit line, so the first touches of a group are
+strided and the hardware streamer does not follow them. Expert weights never stay in cache (~19 GB are read per decode cycle),
+so every first touch is a DRAM read with nothing in flight. The Q4_K kernel reads each chunk once, in order, and saturates the
+bus. One _mm_prefetch per cache line of the NEXT block group at the top of each group iteration hides the latency behind the
+multiply of the current group.
+
+Evidence:
+  8-layer proxy, op profile over 10-14 verify graphs per mode, same process: down 2.660 -> 2.175 ms (-18%), gate unchanged
+  (1.69 -> 1.65). Distance 2 groups: 2.66 -> 2.54. Distance 4 groups: 2.64 -> 4.35 ms, i.e. 65% SLOWER: do not guess this number.
+  Text and log-probabilities identical on 32 / 3,861 / 13,231-token prompts.
+  FULL MODEL, window w10, Codex fixture through the Paseo wrapper, greedy, modes switched inside one loaded process:
+      revision e 19.30/19.68/19.65/19.64   with prefetch 20.16/20.19/20.20/20.15   (+3.1%)
+      one text hash, 175 of 214 drafts accepted in every run; log-probabilities identical on a short and a 7.7K-token prompt
+      verify graph 120.1/117.1 -> 113.8/114.6 ms; 13,231 tokens of context 16.05/15.98 -> 16.36/16.12 tok/s
+  Sampled requests (n=6 each) came out equal, 18.60 and 18.60, with draft acceptance 77.1% against 73.9% by the luck of the draws;
+  per cycle the prefetch mode is faster there too. Sampled runs are not used for A/Bs of this size.
+Separate loads of the same configuration differed by 3% that afternoon (revision e read 20.18 in w8 and 19.57 in w10), which is
+why only the in-process comparison is quoted.
+
+Parent: glm-flash-q8-r8-ordered-k-0908/private-cpu/repack.cpp, sha256 34e3beff2fc10068..., published byte for byte in
+engineering/2026-09-08/archive/serving/fleet-0903/results/glm-flash-q8-r8-ordered-k-0908/private-cpu/. Its recorded compile command
+reproduces the production object byte for byte (archive/serving/fleet-0920-flash18/cpu/build-repack.sh --gate).
+Deployed libggml-cpu with this patch: 6374c9fcfc4a6b2d...
+
+--- a/ggml/src/ggml-cpu/repack.cpp
++++ b/ggml/src/ggml-cpu/repack.cpp
+@@ -6991,6 +6991,36 @@
+     }
+ }
+ 
++// f18: bit 3 of GGML_F18_FEATURES / GGML_F18_CONTROL_FILE = prefetch the next Q5_K x16 block group; distance in groups from
++// GGML_F18_Q5_PREFETCH_BLOCKS (default 1)
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <unistd.h>
++static inline bool f18_q5_prefetch_enabled() {
++    static const uint32_t env_mask = [] {
++        const char * v = getenv("GGML_F18_FEATURES");
++        return v ? (uint32_t) strtoul(v, nullptr, 0) : 0u;
++    }();
++    static const uint32_t * control = [] () -> const uint32_t * {
++        const char * path = getenv("GGML_F18_CONTROL_FILE");
++        if (!path || !*path) return nullptr;
++        const int fd = open(path, O_RDONLY | O_CLOEXEC);
++        if (fd < 0) return nullptr;
++        void * mapping = mmap(nullptr, sizeof(uint32_t), PROT_READ, MAP_SHARED, fd, 0);
++        close(fd);
++        return mapping == MAP_FAILED ? nullptr : (const uint32_t *) mapping;
++    }();
++    return ((control ? __atomic_load_n(control, __ATOMIC_ACQUIRE) : env_mask) & 8u) != 0;
++}
++static inline int f18_q5_prefetch_blocks() {
++    static const int v = [] {
++        const char * e = getenv("GGML_F18_Q5_PREFETCH_BLOCKS");
++        const int x = e ? atoi(e) : 1;
++        return x > 0 ? x : 1;
++    }();
++    return v;
++}
++
+ template <int NR, bool COMPACT = false, int NP = 4>
+ static void ggml_gemv_q5_K_x16_bytes_impl(
+         int n, float * s, size_t bs, const void * vx, const void * vy, int nc) {
+@@ -7001,11 +7031,20 @@
+     const auto * weights = (const block_type *) vx;
+     const auto * activations = (const block_q8_K *) vy;
+ #if defined(__AVX512F__) && defined(__AVX512BW__) && defined(__AVX512VNNI__)
++    const bool f18_prefetch = f18_q5_prefetch_enabled();
++    const int  f18_ahead    = f18_q5_prefetch_blocks();
+     for (int g = 0; g < nc / 16; ++g) {
+         const block_type * w = weights + g * nb;
+         __m512 sum[NR];
+         for (int y = 0; y < NR; ++y) sum[y] = _mm512_setzero_ps();
+         for (int b = 0; b < nb; ++b) {
++            if (f18_prefetch) {
++                // the block group this kernel reaches f18_ahead iterations from now (groups are contiguous across g)
++                const char * next = (const char *) (w + b + f18_ahead);
++                for (size_t off = 0; off < sizeof(block_type); off += 64) {
++                    _mm_prefetch(next + off, _MM_HINT_T0);
++                }
++            }
+             __m512i isum[NR], imin[NR];
+             for (int y = 0; y < NR; ++y) isum[y] = imin[y] = _mm512_setzero_si512();
+             for (int sb = 0; sb < 8; ++sb) {
