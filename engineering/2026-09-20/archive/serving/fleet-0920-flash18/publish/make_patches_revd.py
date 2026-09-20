@@ -52,9 +52,13 @@ D_GDN  = udiff(P2, P3, 'a/ops.cpp', 'b/ops.cpp') + newfile(W/'cpu/gdn-rows.inc',
 
 # ---- the rest are whole-file diffs
 D_SPEC_B = udiff(W/'common/speculative.orig.cpp', W/'common/speculative.f18b.cpp', 'a/common/speculative.cpp', 'b/common/speculative.cpp')
-D_SPEC_C = udiff(W/'common/speculative.f18b.cpp', W/'common/speculative.f18c.cpp', 'a/common/speculative.cpp', 'b/common/speculative.cpp')
-D_SAMP   = udiff(ENG/'common/sampling.cpp', W/'common/sampling.f18c.cpp', 'a/common/sampling.cpp', 'b/common/sampling.cpp')
-D_INC    = newfile(W/'common/f18-coupling.inc', 'b/common/f18-coupling.inc') + newfile(W/'common/f18-topk-scan.inc', 'b/common/f18-topk-scan.inc')
+D_SPEC_C = udiff(W/'common/speculative.f18b.cpp', W/'common/revd/speculative.f18c.cpp', 'a/common/speculative.cpp', 'b/common/speculative.cpp')
+D_SAMP   = udiff(ENG/'common/sampling.cpp', W/'common/revd/sampling.f18c.cpp', 'a/common/sampling.cpp', 'b/common/sampling.cpp')
+D_INC    = newfile(W/'common/revd/f18-coupling.inc', 'b/common/f18-coupling.inc') + newfile(W/'common/f18-topk-scan.inc', 'b/common/f18-topk-scan.inc')
+# window w7 only: optional log of both sides + drafter temperature scale, on top of the deployed sources
+D_LOG    = (udiff(W/'common/revd/sampling.f18c.cpp', W/'common/sampling.f18c.cpp', 'a/common/sampling.cpp', 'b/common/sampling.cpp')
+          + udiff(W/'common/revd/speculative.f18c.cpp', W/'common/speculative.f18c.cpp', 'a/common/speculative.cpp', 'b/common/speculative.cpp')
+          + udiff(W/'common/revd/f18-coupling.inc', W/'common/f18-coupling.inc', 'a/common/f18-coupling.inc', 'b/common/f18-coupling.inc'))
 D_TEAM   = udiff(ENG/'ggml/src/ggml-cpu/ggml-cpu.cpp', W/'cpu/ggml-cpu.f18.cpp', 'a/ggml/src/ggml-cpu/ggml-cpu.cpp', 'b/ggml/src/ggml-cpu/ggml-cpu.cpp')
 D_QROWS  = udiff(F/'glm-mtp-kv-only-0919/candidate/glm5next.cpp', W/'llama/glm5next.f18.cpp', 'a/src/models/glm5next.cpp', 'b/src/models/glm5next.cpp')
 assert sha(W/'common/speculative.orig.cpp') == sha(ENG/'common/speculative.cpp'), 'speculative.orig.cpp is not the engine source'
@@ -66,6 +70,7 @@ OUT = {
  'glm5next-gdn-row-split.patch':           D_GDN,
  'mtp-draft-merge-fastpick-pad.patch':     D_SPEC_B,
  'coupled-sampling-fast-sampler.patch':    D_SAMP + D_INC + D_SPEC_C,
+ 'coupled-sampling-offline-fit.patch':     D_LOG,
  'cpu-numa-shared-team.patch':             D_TEAM,
  'glm5next-mtp-query-rows.patch':          D_QROWS,
 }

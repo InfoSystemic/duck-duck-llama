@@ -227,14 +227,7 @@ bool common_sampler_f18_coupling_find(const int32_t * tail, size_t n_tail, f18_c
 // chain, so argmax(logit_i + G_i) is an exact sample from p. `stream` separates the grammar resample from the first draw.
 static void f18_coupled_select(common_sampler * gsmpl, uint64_t stream) {
     auto & cur_p = gsmpl->cur_p;
-    if (!gsmpl->f18_eligible || cur_p.selected < 0 || !f18_coupled_enabled()) {
-        return;
-    }
-    if (cur_p.size < 2) {
-        if (FILE * lf = f18_couple_log()) { // a forced pick still tells the offline fit what the verifier emitted
-            fprintf(lf, "V %llu %llu %llu %d 1 %d 0\\n", (unsigned long long) gsmpl->f18_salt, (unsigned long long) stream,
-                    (unsigned long long) gsmpl->f18_n_acc, (int) cur_p.data[cur_p.selected].id, (int) cur_p.data[cur_p.selected].id);
-        }
+    if (!gsmpl->f18_eligible || cur_p.size < 2 || cur_p.selected < 0 || !f18_coupled_enabled()) {
         return;
     }
     const uint64_t salt = gsmpl->f18_salt ^ stream;
@@ -253,14 +246,6 @@ static void f18_coupled_select(common_sampler * gsmpl, uint64_t stream) {
     }
     if (best_i >= 0) {
         cur_p.selected = best_i;
-    }
-    if (FILE * lf = f18_couple_log()) {
-        fprintf(lf, "V %llu %llu %llu %d %zu", (unsigned long long) gsmpl->f18_salt, (unsigned long long) stream,
-                (unsigned long long) gsmpl->f18_n_acc, (int) cur_p.data[cur_p.selected].id, cur_p.size);
-        for (size_t i = 0; i < cur_p.size; ++i) {
-            fprintf(lf, " %d %.6g", (int) cur_p.data[i].id, (double) cur_p.data[i].logit);
-        }
-        fputc('\\n', lf);
     }
 }
 ''')
@@ -533,13 +518,7 @@ rep('''    // same result as the TOP_K(10)+dist chain read through get_candidate
             }
         }
 
-        // GGML_F18_COUPLED_DRAFT_TEMP scales the drafter's temperature relative to the verifier's (1.0 = trust the head as it is)
-        static const double temp_scale = [] {
-            const char * v = getenv("GGML_F18_COUPLED_DRAFT_TEMP");
-            const double x = v ? atof(v) : 1.0;
-            return x > 0.0 ? x : 1.0;
-        }();
-        const double inv_t = 1.0/((double) c.temp*temp_scale);
+        const double inv_t = 1.0/(double) c.temp;
         double best_v = -INFINITY;
         int    best_j = 0;
         double sum_t  = 0.0;
@@ -553,14 +532,6 @@ rep('''    // same result as the TOP_K(10)+dist chain read through get_candidate
             }
         }
         p_top = (float) (exp((double) (best[best_j] - best[0])*inv_t)/sum_t);
-        if (FILE * lf = f18_couple_log()) {
-            fprintf(lf, "D %llu %llu %llu %d %d %d %.6g %.6g %.6g %d", (unsigned long long) c.salt, (unsigned long long) step,
-                    (unsigned long long) (c.n_acc + step), best_id[best_j], n_keep, n, (double) c.temp, (double) c.top_p, (double) c.min_p, (int) c.top_k);
-            for (int j = 0; j < n; ++j) {
-                fprintf(lf, " %d %.6g", best_id[j], (double) best[j]);
-            }
-            fputc('\\n', lf);
-        }
         return best_id[best_j];
     }
 

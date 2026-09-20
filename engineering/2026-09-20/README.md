@@ -1,7 +1,7 @@
 # Engineering snapshot, 2026-09-20
 
 GLM-5.3-Flash decode work of September 18-20, measured the way a Codex agent inside Paseo experiences it. A curated subset, not a
-full export: 374 files, no engine trees. Start with the [report](../../benchmarks/glm53-flash-paseo-decode-20260920.md) and the
+full export: 383 files, no engine trees. Start with the [report](../../benchmarks/glm53-flash-paseo-decode-20260920.md) and the
 [patch table](../../patches/README-20260920-glm5next.md).
 
 | Area | Entry point |
@@ -21,6 +21,7 @@ full export: 374 files, no engine trees. Start with the [report](../../benchmark
 | Cell-split MQA attention revision 2 (batch-invariant) and revision 1, gated delta net by state row | [fa-mqa.inc](archive/serving/fleet-0920-flash18/cpu/fa-mqa.inc), [fa-mqa.v1.inc](archive/serving/fleet-0920-flash18/cpu/fa-mqa.v1.inc), [invariance test](archive/serving/fleet-0920-flash18/cpu/test/test_fa_invariance.cpp), [gdn-rows.inc](archive/serving/fleet-0920-flash18/cpu/gdn-rows.inc) |
 | MTP draft loop: merge, direct pick, constant-shape batches (generators over `speculative.cpp`) | [make_f18.py](archive/serving/fleet-0920-flash18/common/make_f18.py), [make_f18_pad.py](archive/serving/fleet-0920-flash18/common/make_f18_pad.py) |
 | Coupled draft/verifier sampling and the sampler's host cost | [make_f18_couple.py](archive/serving/fleet-0920-flash18/common/make_f18_couple.py), [f18-coupling.inc](archive/serving/fleet-0920-flash18/common/f18-coupling.inc), [f18-topk-scan.inc](archive/serving/fleet-0920-flash18/common/f18-topk-scan.inc), [exactness test](archive/serving/fleet-0920-flash18/common/test/coupled_sampling_check.cpp), [server checks](archive/serving/fleet-0920-flash18/run/couple_check.py) |
+| Replaying drafter settings against logged draws (window w7): the deployed setting is optimal | [window7.py](archive/serving/fleet-0920-flash18/run/window7.py), [couple_fit.py](archive/serving/fleet-0920-flash18/run/couple_fit.py), [fit output](archive/serving/fleet-0920-flash18/results/couple-fit-w7.txt), [as-deployed sources vs logging variant](archive/serving/fleet-0920-flash18/common/revd/README.md) |
 | Two OpenMP teams per core: how it was found and the shared-team dispatcher | [phase_timeline.py](archive/serving/fleet-0920-flash18/run/phase_timeline.py), [fast_sampler_timing.py](archive/serving/fleet-0920-flash18/run/fast_sampler_timing.py), [make_dispatch.py](archive/serving/fleet-0920-flash18/cpu/make_dispatch.py) |
 | MTP graph: query side only for the predicting row; libllama build with its lineage gate | [make_mtp_qrows.py](archive/serving/fleet-0920-flash18/llama/make_mtp_qrows.py), [build_glm5next.py](archive/serving/fleet-0920-flash18/llama/build_glm5next.py) |
 | Negative result: multi-slot graph cache against the Meta backend | [make_ctx.py](archive/serving/fleet-0920-flash18/llama/make_ctx.py) |

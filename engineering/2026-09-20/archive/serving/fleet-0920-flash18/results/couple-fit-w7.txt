@@ -1,0 +1,44 @@
+185 torn or malformed lines dropped
+1 draft rows with non-finite or unsorted logits skipped, e.g. D 13851385497459697721 0 4037 6500 1 10 1 0.95 0.05 40 6500 30.6918 32265 19.5724 320 19.281 36489 18.1944 19442 17.591 9357 17.3747 31796 16.9354 530 4220 501 
+6569 verifier picks, 5384 draft picks, 4752 joined (2651 at step 0, 2101 at step 1)
+replay self-check: deployed policy reproduces the logged draft token in 5384/5384 rows
+verifier picks that came from the grammar resample stream: 0
+
+coverage and baselines
+  step 0: verifier token inside the drafter's top-10 0.9808; equals the drafter's top-1 0.7823; verifier had a single candidate 0.5926  (n=2651)
+  step 1: verifier token inside the drafter's top-10 0.9486; equals the drafter's top-1 0.7282; verifier had a single candidate 0.6449  (n=2101)
+  deployed: coupled, tau 1.0, mimic truncation step0 0.8163  step1 0.7454  tokens/cycle 2.4247
+  greedy drafter                               step0 0.7823  step1 0.7282  tokens/cycle 2.3521
+
+drafter temperature (relative to the verifier's)
+  coupled, tau 0.5                             step0 0.8103  step1 0.7435  tokens/cycle 2.4127
+  coupled, tau 0.6                             step0 0.8110  step1 0.7463  tokens/cycle 2.4163
+  coupled, tau 0.7                             step0 0.8140  step1 0.7482  tokens/cycle 2.4231
+  coupled, tau 0.8                             step0 0.8167  step1 0.7501  tokens/cycle 2.4293
+  coupled, tau 0.9                             step0 0.8163  step1 0.7487  tokens/cycle 2.4274
+  coupled, tau 1.0                             step0 0.8163  step1 0.7454  tokens/cycle 2.4247
+  coupled, tau 1.1                             step0 0.8216  step1 0.7444  tokens/cycle 2.4332
+  coupled, tau 1.25                            step0 0.8189  step1 0.7406  tokens/cycle 2.4254
+  coupled, tau 1.5                             step0 0.8137  step1 0.7377  tokens/cycle 2.4139
+  coupled, tau 1.75                            step0 0.8118  step1 0.7316  tokens/cycle 2.4056
+  coupled, tau 2.0                             step0 0.8065  step1 0.7287  tokens/cycle 2.3942
+  coupled, tau 2.5                             step0 0.8020  step1 0.7211  tokens/cycle 2.3802
+  coupled, tau 3.0                             step0 0.7993  step1 0.7149  tokens/cycle 2.3708
+
+truncation at the drafter
+  coupled, tau 1.0, no top_p, no min_p         step0 0.8118  step1 0.7368  tokens/cycle 2.4099
+  coupled, tau 1.0, min_p 0.05 only            step0 0.8155  step1 0.7444  tokens/cycle 2.4226
+  coupled, tau 1.0, min_p 0.02                 step0 0.8163  step1 0.7435  tokens/cycle 2.4232
+  coupled, tau 1.0, min_p 0.1                  step0 0.8144  step1 0.7496  tokens/cycle 2.4249
+  coupled, tau 1.0, min_p 0.2                  step0 0.8110  step1 0.7487  tokens/cycle 2.4182
+  coupled, tau 1.0, top_p 0.9                  step0 0.8167  step1 0.7477  tokens/cycle 2.4273
+  coupled, tau 1.0, top_p 0.99                 step0 0.8155  step1 0.7444  tokens/cycle 2.4226
+
+bias toward the drafter's own top-1 (in logit units)
+  coupled, tau 1.0, top-1 bias 0.25            step0 0.8152  step1 0.7458  tokens/cycle 2.4231
+  coupled, tau 1.0, top-1 bias 0.5             step0 0.8163  step1 0.7454  tokens/cycle 2.4247
+  coupled, tau 1.0, top-1 bias 1.0             step0 0.8065  step1 0.7473  tokens/cycle 2.4091
+  coupled, tau 1.0, top-1 bias 1.5             step0 0.8042  step1 0.7435  tokens/cycle 2.4021
+  coupled, tau 1.0, top-1 bias 2.0             step0 0.7959  step1 0.7377  tokens/cycle 2.3831
+
+best: tau 1.1 at 2.4332 tokens/cycle against 2.4247 deployed (+0.35%)

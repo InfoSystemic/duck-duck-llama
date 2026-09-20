@@ -2,7 +2,7 @@
 
 **Status (2026-09-20, revision d in production):** a Codex agent inside Paseo gets **19.2 tok/s** on the fixed-output fixture
 (19.17-19.32 over five runs) and **18.2 tok/s on requests exactly as Codex sends them** (twelve runs, 17.6-18.9, nine of them at or
-above 18.0). On 09-19 the same service gave 15.5-16.2, on 09-18 12.0. The 18 tok/s target is met on the fixture with 6% to spare and
+above 18.0; a second load: 18.2 over eight). On 09-19 the same service gave 15.5-16.2, on 09-18 12.0. The 18 tok/s target is met on the fixture with 6% to spare and
 on average for sampled traffic; single sampled turns still land below it.
 
 Machine: Lenovo SR950, 4x Xeon Gold 6242 (16 cores each, AVX-512 VNNI, no AMX), 24 DIMMs DDR4-2400, 755 GiB, no GPU.
@@ -48,7 +48,8 @@ Three things make comparisons valid:
 
 Production after each revision, same fixture through Paseo: revision b 18.09-18.40 greedy, 17.14 sampled (n=4); revision c
 18.46-18.76, 17.94 sampled (n=10); revision d 19.17-19.32, 18.18 sampled (n=12).
-Windows: w1 (kernels), w2-w4 (draft loop, batch-invariant attention), w5 (spin, sampler, coupling), w6 (revision d).
+Windows: w1 (kernels), w2-w4 (draft loop, batch-invariant attention), w5 (spin, sampler, coupling), w6 (revision d), w7 (sampled
+traffic with both sides of the coupled sampler logged).
 Patches and their evidence: [patches/README-20260920-glm5next.md](../patches/README-20260920-glm5next.md).
 Records, controllers and logs: [engineering/2026-09-20](../engineering/2026-09-20/README.md).
 
@@ -126,11 +127,18 @@ Kept because each one looked right first ([09-19 log](../engineering/2026-09-20/
   (one worker per core, 260 -> 200 threads), not for speed.
 - The row-split gated delta net removes a two-heads-on-one-worker straggler in all 34 KDA layers and still gains under 1 ms:
   the op is dominated by copying a 64 KB state per head per token for speculative rollback.
+- Tuning the coupled drafter. Both sides share their noise, so a log of the verifier's candidates and the drafter's top-10 lets
+  any drafter setting be replayed offline against the draws that really happened ([tool](../tools/couple_fit.py),
+  [patch](../patches/coupled-sampling-offline-fit.patch)). On 4,752 positions of sampled traffic the deployed setting gives 2.425
+  tokens per cycle against 2.352 for a greedy drafter (+3.1%, a cleaner number than the +2.0% of window w5), and no drafter
+  temperature (0.5-3.0), truncation or top-1 bias adds more than 0.35%. The verifier's token is inside the drafter's top-10 98%
+  of the time, and in 59-64% of positions the verifier's chain leaves a single candidate. What is left is the MTP head.
 
 ## Open
 
-- Sampled turns average 18.2 but three of twelve were below 18.0 (17.6-18.0). Acceptance is the lever: log the verifier's
-  candidates and the drafter's top-10 per position and fit the drafter's temperature offline against the shared noise.
+- Sampled turns average 18.2 in production (twenty runs over two loads: 17.4-19.4, fourteen at or above 18.0). The same stack in
+  a test window measured 18.74 over fourteen runs, none below 18.0; production loads read about 2% below window loads and the
+  cause is not found (same launcher, environment, limits and cgroup settings; no memory or CPU pressure).
 - The 90 `hc_mixes` projections per graph (Q8_0, 16,384 -> 24) take 29 us each for ~5 us of arithmetic; with the other tiny
   matmuls that is 2-3 ms per cycle of pure launch cost. `nextn.eh_proj` is mirrored on all sockets (35.7 MB read per socket per
   draft pass); a split rule would save ~0.6 ms per cycle.

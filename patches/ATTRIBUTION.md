@@ -42,7 +42,8 @@ the notices and history present in the patch. See the patch itself and
 `glm5next-kpool-fusion-statecopy.patch`, `glm5next-kpool-wide.patch`, `glm5next-pool-result-cache.patch`,
 `glm-kv-seq-rm-used-prefix.patch` and `glm5next-mtp-kv-only-catchup.patch` were developed for this repository on 2026-09-19;
 `glm5next-fa-mqa-cellsplit.patch`, `topk-select-tie-fallback.patch`, `glm5next-gdn-row-split.patch`, `cpu-numa-shared-team.patch`,
-`glm5next-mtp-query-rows.patch`, `mtp-draft-merge-fastpick-pad.patch`, `coupled-sampling-fast-sampler.patch` and
+`glm5next-mtp-query-rows.patch`, `mtp-draft-merge-fastpick-pad.patch`, `coupled-sampling-fast-sampler.patch`,
+`coupled-sampling-offline-fit.patch` and
 `upstream-cpu-fattn-f32-accumulate.patch` on 2026-09-20. The coupled sampler uses the Gumbel-max trick with counter-based noise;
 drafter-invariant speculative sampling by shared Gumbel noise is described by Daliri, Musco and Suresh, "Coupling without
 Communication and Drafter-Invariant Speculative Decoding" (2024). No code was taken from that work.

@@ -36,6 +36,9 @@ mine += [W/'cpu/gdn-rows.inc', W/'cpu/fa-mqa.v1.inc', W/'cpu/make_dispatch.py', 
 mine += [W/'results'/f'window-{w}.{e}' for w in ('w2', 'w3', 'w4', 'w5', 'w6') for e in ('json', 'log')]
 mine += [W/d/n for d in ('deploy-0920b', 'deploy-0920c', 'deploy-0920d') for n in ('95-f18-0920.conf.proposed', 'deploy.sh', 'SHA256SUMS')]
 mine += sorted((W/'publish/headers').glob('*.txt'))
+# window w7: both sides of the coupled sampler logged, offline replay; the as-deployed sources next to the logging variant
+mine += [W/'run/window7.py', W/'run/couple_fit.py', W/'results/window-w7.json', W/'results/window-w7.log', W/'results/couple-fit-w7.txt',
+         W/'common/revd/README.md', W/'common/revd/make_f18_couple.py', W/'common/revd/f18-coupling.inc']
 keep += [p for p in mine if p.exists()]
 missing = [str(p) for p in mine if not p.exists()]
 if missing: print('MISSING from the mine list:', missing)

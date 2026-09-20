@@ -20,6 +20,7 @@ Report: [benchmarks/glm53-flash-paseo-decode-20260920.md](../benchmarks/glm53-fl
 | 11 | `mtp-draft-merge-fastpick-pad.patch` | libllama-common | `GGML_F18_MTP_MERGE` `_FAST_PICK` `_PAD` | 17.97 -> 18.40 (merge +0.5%, padding +2.1%) | identical |
 | 12 | `coupled-sampling-fast-sampler.patch` (A) | libllama-common | `GGML_F18_COUPLED=1` | sampled requests 17.89 -> 18.24, acceptance 72.4% -> 75.0% | exact sampler, same distribution |
 | 13 | `coupled-sampling-fast-sampler.patch` (B) | libllama-common | `GGML_F18_FAST_SAMPLER=1` | 18.81 -> 19.11 (+1.6%) | identical |
+| - | `coupled-sampling-offline-fit.patch` | libllama-common | `GGML_F18_COUPLE_LOG` `GGML_F18_COUPLED_DRAFT_TEMP` | window w7 only: replay of drafter settings against logged draws; deployed setting is optimal, coupling +3.1% tokens per cycle | none; not deployed |
 | - | `upstream-cpu-fattn-f32-accumulate.patch` | upstream ggml-cpu at `b23efaa2` | none | error 6.4e-3 -> 8.6e-5, op +17-21% | toward float64; candidate, not submitted |
 
 1-6 are one ordered series over parents that are already published with matching hashes
@@ -50,6 +51,8 @@ setting needs no code and is what moved the number; the shared team makes the co
 
 #12 does not make the drafter better, it makes the verifier's randomness shareable. The verifier's pick is an exact sample whatever the
 drafter does ([test](../tools/coupled_sampling_check.cpp)); a fixed seed now gives the same text with or without speculation.
+Shared noise also makes drafter settings replayable offline ([couple_fit.py](../tools/couple_fit.py)): on 4,752 logged positions the
+deployed setting is worth +3.1% tokens per cycle over a greedy drafter and nothing in its family does better.
 
 ## How they were built
 

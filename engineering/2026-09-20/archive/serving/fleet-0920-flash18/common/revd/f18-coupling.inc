@@ -36,17 +36,5 @@ struct f18_coupling {
     int32_t  top_k = 0;
 };
 
-// GGML_F18_COUPLE_LOG=<file>: one text line per verifier pick ("V") and per coupled draft pick ("D"), keyed by (salt, n), so
-// a drafter setting can be evaluated offline against the verifier's actual draws. Both callers run on the server's main loop.
-#include <cstdio>
-#include <cstdlib>
-static inline FILE * f18_couple_log() {
-    static FILE * f = [] () -> FILE * {
-        const char * path = getenv("GGML_F18_COUPLE_LOG");
-        return path && *path ? fopen(path, "a") : nullptr;
-    }();
-    return f;
-}
-
 // sampling.cpp: finds the one live verifier sampler whose accepted-token tail equals `tail` (oldest first). False when none or several match.
 bool common_sampler_f18_coupling_find(const int32_t * tail, size_t n_tail, f18_coupling & out);
