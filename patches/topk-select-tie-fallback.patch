@@ -1,5 +1,6 @@
-ggml-cpu top-k, step 5 of 5: selection instead of a partial sort, with a fallback whenever the selected SET is not unique.
-NOT deployed. Identical selected set by construction. GGML_F18_FEATURES bit 1, default off. Apply after glm5next-fa-mqa-cellsplit.patch.
+ggml-cpu top-k, step 5 of 6: selection instead of a partial sort, with a fallback whenever the selected SET is not unique.
+DEPLOYED 2026-09-20. Identical selected set by construction. GGML_F18_FEATURES bit 1, default off.
+Apply after glm5next-fa-mqa-cellsplit.patch.
 
 This is NOT patches/topk-linear-selection.patch, which was refuted on 2026-09-15: once the finite count drops below k the tail among
 equal -inf scores is arbitrary, a histogram walk and std::partial_sort pick different cells, and draft acceptance fell 89% -> 64%.
@@ -12,9 +13,9 @@ Evidence:
       n = 1,026   partial_sort 0.128 ms   selection 0.031 ms        n = 25,002   0.203 vs 0.193 ms
       n = 7,554                0.131 ms             0.041 ms        n = 65,536   0.266 vs 0.466 ms  (selection LOSES)
     std::partial_sort rejects most elements with one comparison, so it wins again on long rows. The patch therefore selects only
-    for n <= 16,384 pools (65K tokens of context at kpool 4). The window library predates this gate; at the fixture's n = 1,026 it is moot.
+    for n <= 16,384 pools (65K tokens of context at kpool 4).
   8-layer proxy, greedy text and top-5 log-probabilities on 32 / 3,861 / 13,231-token prompts: IDENTICAL to production.
-  in-situ op time at 1,026 pools x 3 queries: 0.26 -> 0.06 ms per DSA layer.
+  in-situ op time at 1,026 pools x 3 queries: 0.26 -> 0.06 ms per DSA layer (2.9 -> 0.6 ms per verify graph).
   full model: measured only together with the attention kernel (see glm5next-fa-mqa-cellsplit.patch); not isolated.
 
 --- a/ops.cpp
@@ -28,7 +29,7 @@ Evidence:
  struct cmp_top_k {
      const float * data;
      bool operator()(int32_t a, int32_t b) const {
-@@ -8617,8 +8619,14 @@
+@@ -8617,9 +8619,15 @@
  
      int32_t * tmp = (int32_t *) params->wdata + (ne00 + CACHE_LINE_SIZE_F32) * ith;
  
@@ -36,13 +37,14 @@ Evidence:
 +
      for (int64_t i = ith; i < nr; i += nth) {
          const float * src_data = (float *)((char *) src0->data + i*nb01);
-+
+ 
 +        if (f18_select && f18_top_k_row(src_data, ne00, top_k, (int32_t *)((char *) dst->data + i*nb1), (float *) tmp)) {
 +            continue;
 +        }
- 
++
          for (int64_t j = 0; j < ne00; j++) {
              tmp[j] = j;
+         }
 --- /dev/null
 +++ b/topk-fast.inc
 @@ -0,0 +1,47 @@

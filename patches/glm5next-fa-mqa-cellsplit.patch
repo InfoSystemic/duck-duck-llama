@@ -1,5 +1,5 @@
-GLM-5.3-Flash (glm5next) CPU library, step 4 of 5: cell-split MQA flash attention for short query batches.
-NOT deployed. CHANGES NUMERICAL OUTPUT (toward the float64 result). GGML_F18_FEATURES bit 0, default off.
+GLM-5.3-Flash (glm5next) CPU library, step 4 of 6: cell-split MQA flash attention for short query batches. Revision 2.
+DEPLOYED 2026-09-20. CHANGES NUMERICAL OUTPUT (toward the float64 result). GGML_F18_FEATURES bit 0, default off.
 Apply after glm5next-pool-result-cache.patch (or after glm5next-kpool-wide.patch; the hunks do not overlap).
 
 What the stock kernel does. With an F16 KV cache, ggml_compute_forward_flash_attn_ext_f16_one_chunk accumulates V in an FP16
@@ -8,29 +8,45 @@ terms are dropped. It also walks the whole cache once per query-head row, conver
 each K/V row again for every head and query. This code is identical in upstream llama.cpp (checked at b23efaa2).
 
 What this kernel does (absorbed MLA is MQA: one 512-wide K/V head, V aliases K, one f16 mask row per query):
-  every worker finds the cells ANY query can see (AVX-512BW scan of the mask), takes a contiguous slice of them, converts that
-  slice of K to F32 once, and computes partial softmax sums for all query-head rows with two GEMMs per 64-cell tile
-  (scores = Q x K^T, then V accumulation), all in F32. One barrier, then the per-worker partials are merged per row.
-  The K tile is transposed with a 16x16 AVX-512 network; a scalar transpose cost HALF the kernel before that.
+  the CELLS are dealt to the workers in round-robin blocks of 64, by cell index, whatever the masks say. Pass A: every worker
+  converts its K tiles to F32 once (16x16 AVX-512 transpose network), computes the masked scores of all query-head rows with one
+  GEMM per tile and keeps each row's maximum. Barrier; the global row maxima are the maxima over workers. Pass B: softmax
+  weights against the global maximum, V accumulation with a second GEMM, the weight sum of each row kept as a running DOUBLE.
+  Barrier; per-row reduce. Everything is F32 or wider.
 
-Accuracy, relative RMS error against a float64 reference computed from the same tensors:
-  synthetic, 2,051 of 4,096 cells visible, 3 queries x 16 heads:   stock 6.4e-3    this kernel 2.4e-7
-  pure upstream build (b23efaa2), same program:                     stock 6.4e-3
-  IN SITU, 8-layer proxy of the real model, real cache and masks (-DF18_FA_VERIFY recomputes each node both ways):
-      1 query     stock 9.6e-4 mean           this kernel 7.3e-7 mean
-      3 queries   stock 1.26e-2 mean, 2.5e-2 max   this kernel 6.4e-7 mean, 1.4e-6 max   (the speculative verify batch)
-Speed of the op, 15 workers, one socket: verify shape 1.16 -> 0.23 ms; dense draft shape 0.49 -> 0.17 ms; 32,768-cell cache with
-2,051 visible 1.65 -> 0.24 ms (the context term of the op is gone). In the server the op measures ~0.47 ms per DSA layer
-(cold scratch between calls) against ~1.1 ms including its barrier before.
+Why revision 2. Revision 1 let every worker take a slice of the cells that ANY query of the batch could see. That made the
+summation order of one query depend on which other queries shared its batch, so a verified token's numbers depended on its draft
+companions: with constant-shape (padded) draft batches the greedy text alternated between two outputs from run to run. Fixed
+cell blocks make the result a function of the query alone; a float per-tile weight sum still left 1.9e-9, hence the double.
+  tools/fa_mqa_invariance_check.cpp: a query computed alone and inside 3-query batches: BIT-IDENTICAL (8 trials).
+  Full model, window w4: three draft-loop modes, 11 warm runs, ONE text hash (424f201528); the same hash in windows w5, w6 and
+  in production after every later revision.
 
-Full model, window w1 2026-09-20, same loaded process, actual Codex requests through the Paseo wrapper, greedy, 3,998-token input,
-four runs per mode, this patch together with topk-select-tie-fallback.patch:
-      production-equivalent  16.22 / 16.26 / 16.27 / 16.20   mean 16.236 tok/s   157 of 196 drafts accepted
-      both kernels on        17.05 / 17.24 / 17.30 / 17.30   mean 17.225 tok/s   158 of 196                  (+6.1%)
-Because the stock kernel is ~1% off, generated text differs from production: 2 of 10 short factual prompts gave the same 24-token
-string, and token log-probabilities moved by up to 0.46 on a 7K-token prompt. Byte parity with production is therefore NOT the
-gate for this patch; the float64 comparison is. The window library was built before the ifdef'd verify block was added
-(same code otherwise). Queries above 16 tokens (prefill) keep the stock tiled path.
+Accuracy, relative RMS error against a float64 reference computed from the same tensors (tools/fa_mqa_check.cpp, one socket,
+15 workers, 16 heads; "visible" = cells the mask admits):
+                                         stock kernel            this kernel
+  4,096 cells, 2,051 visible, 3 queries  6.39e-3   1.173 ms      2.36e-7   0.277 ms      (the speculative verify shape)
+  4,096 cells, 2,051 visible, 1 query    1.56e-3   0.319 ms      2.35e-7   0.129 ms
+  32,768 cells, 2,051 visible, 3 queries 6.67e-3   1.752 ms      2.41e-7   0.256 ms      (the context term of the op is gone)
+  4,096 cells, 4,000 visible, 1 query    2.03e-3   0.488 ms      2.83e-7   0.195 ms      (dense MTP draft shape)
+  pure upstream build (b23efaa2), first two rows: 6.4e-3 / 1.6e-3.
+  IN SITU (revision 1, 8-layer proxy of the real model, -DF18_FA_VERIFY recomputes each node both ways):
+      1 query     stock 9.6e-4 mean                  this kernel 7.3e-7 mean
+      3 queries   stock 1.26e-2 mean, 2.5e-2 max     this kernel 6.4e-7 mean, 1.4e-6 max
+  In the server the op measures ~0.41 ms per DSA layer (4.5 ms per verify graph over 11 layers) against ~1.1 ms before.
+
+Full model, actual Codex requests through the Paseo wrapper, greedy, 3,998-token input, modes switched inside one loaded process:
+  w1 (revision 1, with topk-select-tie-fallback.patch): production-equivalent 16.22/16.26/16.27/16.20 -> 17.05/17.24/17.30/17.30
+     tok/s (+6.1%), 157 vs 158 of 196 drafts accepted.
+Because the stock kernel is ~1% off, generated text differs from the 09-19 production: 2 of 10 short factual prompts gave the same
+24-token string, and token log-probabilities moved by up to 0.46 on a 7K-token prompt. Byte parity with the stock kernel is
+therefore NOT the gate for this patch; the float64 comparison is. All later patches in this series ARE gated on byte parity
+with this one.
+
+Parent: glm-kpool-wide-0919/ops.combo.cpp sha256 ddebc70e883f8995a3aada3ef334f5963aaa6b74b36b0670df0a46c2b3e68302 (published as
+engineering/2026-09-20/archive/serving/fleet-0912-ctx/glm-kpool-wide-0919). Deployed libraries that contain it:
+revision b libggml-cpu 4415e237582d630a..., revision d libggml-cpu 9203fe09d5b42782... (with steps 5 and 6 and
+cpu-numa-shared-team.patch). f18-common.inc already defines the bit used by step 6.
 
 --- a/ops.cpp
 +++ b/ops.cpp
@@ -54,11 +70,10 @@ gate for this patch; the float64 comparison is. The window library was built bef
  static void ggml_compute_forward_flash_attn_ext_f16(
          const ggml_compute_params * params,
          ggml_tensor * dst) {
-@@ -9296,6 +9302,23 @@
- 
+@@ -9297,6 +9303,23 @@
      const int ith = params->ith;
      const int nth = params->nth;
-+
+ 
 +#ifdef F18_FA_VERIFY
 +    bool f18_verify = false;
 +#endif
@@ -75,9 +90,10 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +        return;
 +#endif
 +    }
- 
++
      // When use_ref is set, force the vec-only reference implementation (no tiling, no KV-chunking)
      const bool use_ref = params->use_ref;
+ 
 @@ -9386,6 +9409,56 @@
              current_chunk = ggml_threadpool_chunk_add(params->threadpool, 1);
          }
@@ -137,7 +153,7 @@ gate for this patch; the float64 comparison is. The window library was built bef
  void ggml_compute_forward_flash_attn_ext(
 --- /dev/null
 +++ b/f18-common.inc
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,33 @@
 +#pragma once
 +// f18 feature switches. GGML_F18_FEATURES is a bit mask (decimal or 0x hex).
 +// GGML_F18_CONTROL_FILE names a 4-byte file that overrides the mask while the process runs (A/B without reload).
@@ -149,6 +165,7 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +enum : uint32_t {
 +    F18_FA_MQA = 1u << 0, // cell-split MQA flash attention for short query batches
 +    F18_TOPK   = 1u << 1, // nth_element top-k
++    F18_GDN    = 1u << 2, // gated delta net split by state row (gdn-rows.inc)
 +};
 +
 +static uint32_t f18_features() {
@@ -172,11 +189,18 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +}
 --- /dev/null
 +++ b/fa-mqa.inc
-@@ -0,0 +1,355 @@
+@@ -0,0 +1,377 @@
 +#pragma once
 +// Cell-split MQA attention for short query batches (GLM DSA/MLA decode and the MTP draft).
-+// One K/V head and one f16 mask row per query. Each thread takes a slice of the visible cells,
-+// computes partial softmax sums for all query rows with two GEMMs per tile, then the partials are merged.
++// One K/V head and one f16 mask row per query. Each thread takes a fixed share of the cache cells and computes partial
++// softmax sums for all query rows with two GEMMs per tile; the partials are merged per row.
++//
++// The result for one query must not depend on the OTHER queries of the batch: under speculative decoding those are draft
++// tokens, and a verified token must come out the same whatever was drafted next to it. So:
++//  - a cell belongs to a worker by its index alone (blocks of 64 cells dealt round-robin), never by its rank in the visible set
++//  - the softmax maximum is taken over the whole row first (pass A), so no running rescale depends on tile boundaries
++//  - a row's weight sum is added sequentially in cell order; masked or padded cells add an exact 0.0 and change nothing
++// Cells that only another query can see sit in the tiles as exact zeros, which is what keeps the GEMMs wide.
 +
 +#include <vector>
 +#if defined(__AVX512BW__)
@@ -296,7 +320,7 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +    if (mask->ne[2] != 1 || mask->ne[3] != 1 || mask->ne[0] < k->ne[1] || mask->ne[1] < q->ne[1]) {
 +        return false;
 +    }
-+    if (q->ne[1] > F18_FA_MAX_Q || q->ne[1]*q->ne[2] > F18_FA_MAX_ROWS) {
++    if (q->ne[1] > F18_FA_MAX_Q || q->ne[1]*q->ne[2] > F18_FA_MAX_ROWS || (q->ne[2] % 2) != 0) {
 +        return false;
 +    }
 +
@@ -311,6 +335,8 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +    // the work buffer carries one pointer per thread
 +    return params->wdata != nullptr && params->wsize >= params->nth*sizeof(float *);
 +}
++
++static constexpr int64_t F18_FA_BLOCK = 64; // cells per round-robin block
 +
 +static void f18_fa_mqa(const ggml_compute_params * params, ggml_tensor * dst) {
 +    const ggml_tensor * q    = dst->src[0];
@@ -332,26 +358,27 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +    float scale = 1.0f;
 +    memcpy(&scale, (const float *) dst->op_params + 0, sizeof(float));
 +
-+    const bool is_f16  = k->type == GGML_TYPE_F16;
-+    const bool v_is_k  = v->data == k->data && v->nb[1] == k->nb[1] && DV == DK;
++    const bool is_f16 = k->type == GGML_TYPE_F16;
++    const bool v_is_k = v->data == k->data && v->nb[1] == k->nb[1] && DV == DK;
 +
 +    auto & tls = f18_fa_tls;
 +#ifdef F18_FA_TIMING
 +    uint64_t t_last_ = __rdtsc();
 +#endif
 +
-+    // cells that at least one query can see
 +    const uint16_t * mrow[F18_FA_MAX_Q];
 +    for (int64_t n = 0; n < N; ++n) {
 +        mrow[n] = (const uint16_t *) ((const char *) mask->data + n*mask->nb[1]);
 +    }
 +
++    // this worker's cells: its round-robin blocks, kept when at least one query can see the cell
 +    tls.cells.clear();
-+    {
-+        int64_t c = 0;
++    for (int64_t b0 = (int64_t) ith*F18_FA_BLOCK; b0 < n_kv; b0 += (int64_t) nth*F18_FA_BLOCK) {
++        const int64_t b1 = std::min(b0 + F18_FA_BLOCK, n_kv);
++        int64_t c = b0;
 +#if defined(__AVX512BW__)
 +        const __m512i ninf = _mm512_set1_epi16((short) 0xFC00);
-+        for (; c + 32 <= n_kv; c += 32) {
++        for (; c + 32 <= b1; c += 32) {
 +            __mmask32 vis = 0;
 +            for (int64_t n = 0; n < N; ++n) {
 +                vis |= _mm512_cmpneq_epi16_mask(_mm512_loadu_si512((const void *) (mrow[n] + c)), ninf);
@@ -362,7 +389,7 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +            }
 +        }
 +#endif
-+        for (; c < n_kv; ++c) {
++        for (; c < b1; ++c) {
 +            bool vis = false;
 +            for (int64_t n = 0; n < N; ++n) {
 +                vis |= mrow[n][c] != 0xFC00;
@@ -374,29 +401,31 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +    }
 +
 +    F18_T(0)
-+    const int64_t nU = (int64_t) tls.cells.size();
-+    const int64_t u0 = ith*nU/nth;
-+    const int64_t u1 = (ith + 1)*nU/nth;
++    const int64_t nL     = (int64_t) tls.cells.size();
++    const int64_t nTiles = (nL + T - 1)/T;
++    const int64_t nLp    = nTiles*T; // score storage, tile aligned
 +
-+    const size_t n_part = (size_t) R*(2 + DV);
-+    const size_t need   = (size_t) R*DK + (size_t) DK*T + (size_t) T*DK + (v_is_k ? 0 : (size_t) T*DV) + (size_t) R*T + (size_t) N*T + n_part + (size_t) DV + 64;
++    // published block: [Mloc (R floats)] [S (R doubles)] [PV (R x DV floats)]; R is even here, so the doubles are aligned
++    const size_t n_part = (size_t) R*(3 + DV);
++    const size_t need   = (size_t) R*DK + (size_t) DK*T + (size_t) T*DK + (v_is_k ? 0 : (size_t) T*DV) + (size_t) R*nLp + (size_t) N*T + n_part + (size_t) DV + (size_t) R + 64;
 +
 +    float * Qp   = tls.reserve(need);
 +    float * Kt   = Qp + R*DK;
 +    float * Kr   = Kt + DK*T;
 +    float * Vr   = v_is_k ? Kr : Kr + T*DK;
-+    float * KQ   = Vr + T*DV;
-+    float * Mq   = KQ + R*T;
++    float * SC   = Vr + T*DV;      // scores of all tiles, [tile][R x Tw]
++    float * Mq   = SC + R*nLp;
 +    float * part = Mq + N*T;
 +    float * acc  = part + n_part;
++    float * Mg   = acc + DV;       // row maxima over all workers
 +
-+    float * PM = part;
-+    float * PS = part + R;
-+    float * PV = part + 2*R;
++    float  * PM = part;
++    double * PS = (double *) (part + R);
++    float  * PV = part + 3*R;
 +
 +    for (int64_t r = 0; r < R; ++r) {
 +        PM[r] = -INFINITY;
-+        PS[r] = 0.0f;
++        PS[r] = 0.0;
 +    }
 +    memset(PV, 0, (size_t) R*DV*sizeof(float));
 +
@@ -409,11 +438,7 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +        }
 +    }
 +
-+    F18_T(1)
-+    for (int64_t t0 = u0; t0 < u1; t0 += T) {
-+        const int64_t nt = std::min(T, u1 - t0);
-+        const int64_t Tw = (nt + 15) & ~(int64_t) 15; // tile width, padded to the vector width
-+
++    auto load_tile = [&](int64_t t0, int64_t nt, int64_t Tw, bool with_mask) {
 +        for (int64_t tk = 0; tk < nt; ++tk) {
 +            const int64_t cell = tls.cells[t0 + tk];
 +            const char * k_data = (const char *) k->data + cell*k->nb[1];
@@ -430,8 +455,10 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +                    memcpy(Vr + tk*DV, v_data, DV*sizeof(float));
 +                }
 +            }
-+            for (int64_t n = 0; n < N; ++n) {
-+                Mq[n*Tw + tk] = GGML_CPU_FP16_TO_FP32(mrow[n][cell]);
++            if (with_mask) {
++                for (int64_t n = 0; n < N; ++n) {
++                    Mq[n*Tw + tk] = GGML_CPU_FP16_TO_FP32(mrow[n][cell]);
++                }
 +            }
 +        }
 +        if (nt < Tw) {
@@ -439,46 +466,75 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +            if (!v_is_k) {
 +                memset(Vr + nt*DV, 0, (size_t) (Tw - nt)*DV*sizeof(float));
 +            }
-+            for (int64_t n = 0; n < N; ++n) {
-+                for (int64_t tk = nt; tk < Tw; ++tk) {
-+                    Mq[n*Tw + tk] = -INFINITY;
++            if (with_mask) {
++                for (int64_t n = 0; n < N; ++n) {
++                    for (int64_t tk = nt; tk < Tw; ++tk) {
++                        Mq[n*Tw + tk] = -INFINITY;
++                    }
 +                }
 +            }
 +        }
++    };
 +
++    F18_T(1)
++    // pass A: masked scores of every tile, and the row maxima over this worker's cells
++    for (int64_t it = 0; it < nTiles; ++it) {
++        const int64_t t0 = it*T;
++        const int64_t nt = std::min(T, nL - t0);
++        const int64_t Tw = (nt + 15) & ~(int64_t) 15;
++        float * KQ = SC + R*t0;
++
++        load_tile(t0, nt, Tw, true);
 +        F18_T(2)
-+        // transposed K tile for the score GEMM
 +        f18_fa_transpose(Kr, Kt, Tw, DK);
-+
 +        F18_T(3)
 +        memset(KQ, 0, (size_t) R*Tw*sizeof(float));
 +        simd_gemm(KQ, Qp, Kt, (int) R, (int) DK, (int) Tw);
 +        ggml_vec_scale_f32((int) (R*Tw), KQ, scale);
 +        F18_T(4)
-+
 +        for (int64_t r = 0; r < R; ++r) {
 +            float * kq_row = KQ + r*Tw;
 +            ggml_vec_add_f32((int) Tw, kq_row, kq_row, Mq + (r/H)*Tw);
-+
 +            float tile_max;
 +            ggml_vec_max_f32((int) Tw, &tile_max, kq_row);
-+            if (tile_max == -INFINITY) {
++            PM[r] = fmaxf(PM[r], tile_max);
++        }
++        F18_T(5)
++    }
++
++    ggml_barrier(params->threadpool);
++
++    float ** parts = (float **) params->wdata;
++    for (int64_t r = 0; r < R; ++r) {
++        float m = -INFINITY;
++        for (int p = 0; p < nth; ++p) {
++            m = fmaxf(m, parts[p][r]);
++        }
++        Mg[r] = m;
++    }
++
++    // pass B: weights against the row maximum, weight sums in cell order, V accumulation
++    for (int64_t it = 0; it < nTiles; ++it) {
++        const int64_t t0 = it*T;
++        const int64_t nt = std::min(T, nL - t0);
++        const int64_t Tw = (nt + 15) & ~(int64_t) 15;
++        float * KQ = SC + R*t0;
++
++        load_tile(t0, nt, Tw, false);
++        for (int64_t r = 0; r < R; ++r) {
++            float * kq_row = KQ + r*Tw;
++            if (Mg[r] == -INFINITY) {
 +                memset(kq_row, 0, (size_t) Tw*sizeof(float));
 +                continue;
 +            }
-+
-+            const float Mold = PM[r];
-+            const float Mnew = fmaxf(Mold, tile_max);
-+            if (Mnew > Mold) {
-+                const float ms = expf(Mold - Mnew);
-+                ggml_vec_scale_f32((int) DV, PV + r*DV, ms);
-+                PS[r] *= ms;
++            ggml_vec_soft_max_f32((int) Tw, kq_row, kq_row, Mg[r]); // Tw is a multiple of 16: no scalar tail
++            // one running double per row across all tiles: the sum cannot depend on where the tiles are cut
++            double sum = PS[r];
++            for (int64_t tk = 0; tk < Tw; ++tk) {
++                sum += kq_row[tk];
 +            }
-+            PM[r] = Mnew;
-+            PS[r] += (float) ggml_vec_soft_max_f32((int) Tw, kq_row, kq_row, Mnew);
++            PS[r] = sum;
 +        }
-+
-+        F18_T(5)
 +        simd_gemm(PV, KQ, Vr, (int) R, (int) Tw, (int) DV);
 +        F18_T(6)
 +    }
@@ -487,44 +543,27 @@ gate for this patch; the float64 comparison is. The window library was built bef
 +    F18_T(7)
 +#ifdef F18_FA_TIMING
 +    if (ith == 0 && ++f18_fa_calls % 100 == 0) {
-+        fprintf(stderr, "F18_FA_TIMING calls=%llu scan=%llu setup=%llu pack=%llu transpose=%llu gemm1=%llu softmax=%llu gemm2=%llu barrier=%llu (kcycles/call)\n",
++        fprintf(stderr, "F18_FA_TIMING calls=%llu scan=%llu setup=%llu pack=%llu transpose=%llu gemm1=%llu max=%llu passB=%llu barrier=%llu (kcycles/call)\n",
 +            (unsigned long long) f18_fa_calls, (unsigned long long) (f18_fa_t[0]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[1]/f18_fa_calls/1000),
 +            (unsigned long long) (f18_fa_t[2]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[3]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[4]/f18_fa_calls/1000),
 +            (unsigned long long) (f18_fa_t[5]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[6]/f18_fa_calls/1000), (unsigned long long) (f18_fa_t[7]/f18_fa_calls/1000));
 +    }
 +#endif
 +
-+    float ** parts = (float **) params->wdata;
-+
 +    for (int64_t r = ith; r < R; r += nth) {
-+        float M_final = -INFINITY;
-+        float S_final = 0.0f;
++        double S_final = 0.0;
 +        memset(acc, 0, (size_t) DV*sizeof(float));
-+
 +        for (int p = 0; p < nth; ++p) {
-+            const float * pp      = parts[p];
-+            const float   M_chunk = pp[r];
-+            const float   S_chunk = pp[R + r];
-+            if (S_chunk == 0.0f) {
-+                continue;
-+            }
-+            const float * V_chunk = pp + 2*R + r*DV;
-+
-+            const float M_new     = fmaxf(M_final, M_chunk);
-+            const float scale_old = expf(M_final - M_new);
-+            const float scale_new = expf(M_chunk - M_new);
-+
++            const float * pp = parts[p];
++            S_final += ((const double *) (pp + R))[r];
++            const float * V_chunk = pp + 3*R + r*DV;
 +            for (int64_t d = 0; d < DV; ++d) {
-+                acc[d] = acc[d]*scale_old + V_chunk[d]*scale_new;
++                acc[d] += V_chunk[d];
 +            }
-+            S_final = S_final*scale_old + S_chunk*scale_new;
-+            M_final = M_new;
 +        }
-+
-+        if (S_final != 0.0f) {
-+            ggml_vec_scale_f32((int) DV, acc, 1.0f/S_final);
++        if (S_final != 0.0) {
++            ggml_vec_scale_f32((int) DV, acc, (float) (1.0/S_final));
 +        }
-+
 +        memcpy((char *) dst->data + r*dst->nb[1], acc, (size_t) DV*sizeof(float));
 +    }
 +}

@@ -41,7 +41,11 @@ the notices and history present in the patch. See the patch itself and
 
 `glm5next-kpool-fusion-statecopy.patch`, `glm5next-kpool-wide.patch`, `glm5next-pool-result-cache.patch`,
 `glm-kv-seq-rm-used-prefix.patch` and `glm5next-mtp-kv-only-catchup.patch` were developed for this repository on 2026-09-19;
-`glm5next-fa-mqa-cellsplit.patch`, `topk-select-tie-fallback.patch` and `upstream-cpu-fattn-f32-accumulate.patch` on 2026-09-20.
+`glm5next-fa-mqa-cellsplit.patch`, `topk-select-tie-fallback.patch`, `glm5next-gdn-row-split.patch`, `cpu-numa-shared-team.patch`,
+`glm5next-mtp-query-rows.patch`, `mtp-draft-merge-fastpick-pad.patch`, `coupled-sampling-fast-sampler.patch` and
+`upstream-cpu-fattn-f32-accumulate.patch` on 2026-09-20. The coupled sampler uses the Gumbel-max trick with counter-based noise;
+drafter-invariant speculative sampling by shared Gumbel noise is described by Daliri, Musco and Suresh, "Coupling without
+Communication and Drafter-Invariant Speculative Decoding" (2024). No code was taken from that work.
 All were written with AI coding agents under the repository owner's direction. They modify llama.cpp source files (MIT) and the
 glm5next architecture support of the unslothai/llama.cpp line at `2e0e57f1008053bae4902a772da85e3eb99d4aff`, which is not claimed
 as locally authored. The attention kernel reuses the tree's `simd_gemm` helper. KTransformers' kt-kernel independently splits

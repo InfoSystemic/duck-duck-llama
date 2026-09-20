@@ -1,0 +1,172 @@
+ggml-cpu backend (ggml-cpu.cpp): one OpenMP worker team per CPU-NUMA device for ALL contexts, instead of one per backend instance.
+DEPLOYED 2026-09-20 (revision d). No numerical effect. GGML_CPU_NUMA_SHARED_TEAM=1, default off.
+Applies to the per-socket CPU devices of patches/llama.cpp-b249-cpu-numa.patch as carried in the llama.cpp-glm5n-goal-0904 line.
+
+The defect. Every llama_context creates its own backend per device, and every NUMA backend owns a dispatcher thread that is the
+master of its own OpenMP team. A server with a trunk and an MTP draft context therefore runs 8 teams over 60 cores: TWO pinned
+workers per core (`grep Cpus_allowed_list /proc/PID/task/*/status | sort | uniq -c`), and the teams alternate: trunk graph, two
+draft graphs, trunk graph. A team that has just finished spins at libgomp's dock for GOMP_SPINCOUNT iterations. The default,
+300,000, is documented as "3 ms"; with the 140-cycle `pause` of Skylake/Cascade Lake it is ~15 ms, longer than both draft graphs
+together, on the very CPUs the other team needs.
+It was found by accident: a change that saved 1.2 ms of host time per cycle made decode 2.7% SLOWER, because the first draft
+graph now started 1 ms earlier, deeper into the trunk team's spin (8.3 -> 10.3 ms for the same graph).
+
+Two fixes, both measured:
+  GOMP_SPINCOUNT=20000 (~1 ms; no code). 8-layer proxy, same binaries: trunk graph 26.5 -> 23.1 ms, first draft graph
+    8.3 -> 5.9 ms, +16-19% tok/s; flat from 8,000 to 150,000, slightly worse at 2,000 (waits inside a graph start to sleep).
+    Full model, greedy Codex fixture: 18.2-18.4 (revision b, three loads) -> 18.81/18.84/18.79, text unchanged. Deployed in revision c.
+    Earlier trials in this repository bracketed the useful range without entering it: 1000 was 14% slower on this model
+    (FLASH-GOAL-20260904: the waits at the barriers INSIDE a graph go to sleep), OMP_WAIT_POLICY=PASSIVE cost 10.6%
+    (glm-sr950/README), 0 changed nothing (DISPATCH-PROBE-RESULT, 09-19), and ACTIVE or 100,000,000 is ~250x slower
+    (GOAL-70PCT-20260911: two teams per core both burn the core). What works is a spin longer than the longest wait inside
+    a graph and shorter than the gap between two graphs of different teams.
+  This patch: all backends of a device submit to one dispatcher thread, so one team of 15 serves both contexts. 260 -> 200
+    threads, one worker per core, nothing to hand over, and the idle spin now keeps workers hot for the next graph of either
+    context. Proxy: same speed as the short spin with libgomp's DEFAULT spin, 1% better with both. Full model: 19.11 tok/s
+    with or without it once the spin is short (windows w5, w6), so its value is robustness, not speed.
+Opt-in because graphs of one device then run strictly in submission order: two threads driving two contexts concurrently could
+order their shards differently on different devices and deadlock on a cross-device collective. llama-server drives both
+contexts from one loop. Per-thread kernel state is safe to share: the pooled-result cache is keyed by tensor data pointers and
+verifies content; the attention scratch is plain memory.
+
+Parent: ggml/src/ggml-cpu/ggml-cpu.cpp sha256 0cc06844e26a2562...; the unmodified source recompiles to the byte-identical
+object that is linked into the deployed library. Deployed libggml-cpu with this patch: 9203fe09d5b42782...
+
+--- a/ggml/src/ggml-cpu/ggml-cpu.cpp
++++ b/ggml/src/ggml-cpu/ggml-cpu.cpp
+@@ -9,6 +9,7 @@
+ #include <algorithm>
+ #include <cctype>
+ #include <condition_variable>
++#include <deque>
+ #include <cstdlib>
+ #include <fstream>
+ #include <iterator>
+@@ -108,6 +109,8 @@
+ 
+ // CPU backend - backend (stream)
+ 
++struct ggml_backend_cpu_shared_dispatcher;
++
+ struct ggml_backend_cpu_context {
+     int                 n_threads;
+     ggml_threadpool_t   threadpool;
+@@ -131,9 +134,20 @@
+     std::condition_variable async_cv;
+     std::thread             async_worker;
+ 
++    // f18: when set, graphs go to the device-wide dispatcher instead of async_worker (GGML_CPU_NUMA_SHARED_TEAM=1)
++    ggml_backend_cpu_shared_dispatcher * shared;
++
+     bool                owns_threadpool;
+ };
+ 
++// One dispatcher thread per NUMA device = one OpenMP team of pinned workers for all backends (contexts) of that device.
++struct ggml_backend_cpu_shared_dispatcher {
++    std::mutex                                        mutex;
++    std::condition_variable                           cv;
++    std::deque<std::pair<ggml_backend_t, ggml_cgraph *>> queue;
++    std::thread                                       worker; // lives for the process
++};
++
+ static const char * ggml_backend_cpu_get_name(ggml_backend_t backend) {
+     return "CPU";
+ 
+@@ -143,7 +157,12 @@
+ static void ggml_backend_cpu_free(ggml_backend_t backend) {
+     struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
+ 
+-    if (cpu_ctx->async_enabled) {
++    if (cpu_ctx->async_enabled && cpu_ctx->shared) {
++        std::unique_lock<std::mutex> lock(cpu_ctx->async_mutex);
++        cpu_ctx->async_cv.wait(lock, [cpu_ctx]() {
++            return !cpu_ctx->async_pending && !cpu_ctx->async_running;
++        });
++    } else if (cpu_ctx->async_enabled) {
+         {
+             std::lock_guard<std::mutex> lock(cpu_ctx->async_mutex);
+             cpu_ctx->async_stop = true;
+@@ -254,6 +273,14 @@
+     cpu_ctx->async_status  = GGML_STATUS_SUCCESS;
+     cpu_ctx->async_pending = true;
+     lock.unlock();
++    if (cpu_ctx->shared) {
++        {
++            std::lock_guard<std::mutex> shared_lock(cpu_ctx->shared->mutex);
++            cpu_ctx->shared->queue.emplace_back(backend, cgraph);
++        }
++        cpu_ctx->shared->cv.notify_one();
++        return GGML_STATUS_SUCCESS;
++    }
+     cpu_ctx->async_cv.notify_all();
+     return GGML_STATUS_SUCCESS;
+ }
+@@ -319,6 +346,7 @@
+     ctx->async_running       = false;
+     ctx->async_graph         = nullptr;
+     ctx->async_status        = GGML_STATUS_SUCCESS;
++    ctx->shared              = nullptr;
+     ctx->owns_threadpool     = false;
+ 
+     ggml_backend_t cpu_backend = new ggml_backend {
+@@ -699,6 +727,60 @@
+     }
+ 
+     const std::vector<int> cpus = dev_ctx->cpus;
++
++    const char * shared_team_env = getenv("GGML_CPU_NUMA_SHARED_TEAM");
++    if (shared_team_env && atoi(shared_team_env) != 0) {
++        static std::mutex registry_mutex;
++        static std::map<ggml_backend_dev_t, ggml_backend_cpu_shared_dispatcher *> registry;
++        std::lock_guard<std::mutex> registry_lock(registry_mutex);
++        auto & shared = registry[dev];
++        if (!shared) {
++            shared = new ggml_backend_cpu_shared_dispatcher;
++            shared->worker = std::thread([shared, cpus]() {
++#if defined(__linux__)
++                cpu_set_t affinity;
++                CPU_ZERO(&affinity);
++                for (int cpu : cpus) {
++                    if (cpu >= 0 && cpu < CPU_SETSIZE) {
++                        CPU_SET(cpu, &affinity);
++                    }
++                }
++                if (pthread_setaffinity_np(pthread_self(), sizeof(affinity), &affinity) != 0) {
++                    GGML_LOG_WARN("%s: failed to bind shared NUMA dispatcher thread\n", __func__);
++                }
++#endif
++                while (true) {
++                    std::pair<ggml_backend_t, ggml_cgraph *> job;
++                    {
++                        std::unique_lock<std::mutex> lock(shared->mutex);
++                        shared->cv.wait(lock, [shared]() { return !shared->queue.empty(); });
++                        job = shared->queue.front();
++                        shared->queue.pop_front();
++                    }
++                    auto * job_ctx = (ggml_backend_cpu_context *) job.first->context;
++                    {
++                        std::lock_guard<std::mutex> lock(job_ctx->async_mutex);
++                        job_ctx->async_pending = false;
++                        job_ctx->async_running = true;
++                    }
++                    const ggml_status status = ggml_backend_cpu_graph_compute_impl(job.first, job.second);
++                    {
++                        std::lock_guard<std::mutex> lock(job_ctx->async_mutex);
++                        job_ctx->async_status  = status;
++                        job_ctx->async_running = false;
++                    }
++                    job_ctx->async_cv.notify_all();
++                }
++            });
++            shared->worker.detach();
++            GGML_LOG_INFO("%s: %s uses one shared worker team for all contexts\n", __func__, dev_ctx->name.c_str());
++        }
++        cpu_ctx->shared = shared;
++        GGML_LOG_INFO("%s: initialized %s with %d threads (shared team)\n", __func__, dev_ctx->name.c_str(), dev_ctx->n_threads);
++        GGML_UNUSED(params);
++        return backend;
++    }
++
+     cpu_ctx->async_worker = std::thread([backend, cpu_ctx, cpus]() {
+ #if defined(__linux__)
+         cpu_set_t affinity;
