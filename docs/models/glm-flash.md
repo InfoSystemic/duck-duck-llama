@@ -37,3 +37,37 @@ The September 11 unary/scale comparison records 15.39 to 15.71 mean decode tok/s
 - [Source bundle inventory](../../engineering/2026-09-12/source-bundles.json): distinguish the goal source from earlier bring-up trees.
 
 The Q4 payload is staged on a volatile RAM-backed volume, approximately 186 GiB. Reboot staging, per-node placement, and coexistence with Full affect the operational recipe. Fresh controls, completed-answer checks, and larger-context measurements remain open.
+
+## Running it on fewer sockets
+
+Every number on this page is from four sockets of sixteen cores with twenty-four DDR4-2400 channels, measured at 381.6 GB/s
+aggregate read. Decode is bandwidth-bound, so on a smaller machine the rate scales with memory bandwidth first and core count
+second. Measure the ceiling before downloading 186 GiB of weights — [tools/membw.c](../../tools/membw.c) reports it per socket:
+
+```bash
+gcc -O3 -march=native -mavx512f -fopenmp -o membw tools/membw.c
+NODES=$(numactl -H | awk '/^node [0-9]+ size/ {n++} END{print n+0}')
+CORES=$(lscpu | awk -F: '/^Core\(s\) per socket/{gsub(/ /,"",$2); print $2}')
+for n in $(seq 0 $((NODES - 1))); do (numactl --cpunodebind=$n --membind=$n ./membw 8 "$CORES" &); done; wait
+```
+
+Add the per-node figures together: that sum is the number these results are bound by.
+
+Scale the figures above by your total over 381.6 GB/s for a first estimate, then subtract for the work that is not at the memory
+wall — the lightning-indexer scoring kernel and the small-operation chains follow core count, not bandwidth. A dual-socket
+Cascade Lake with six channels per socket lands near half this machine's bandwidth and under a third of its cores, which puts
+it around half the decode rate.
+
+What must change in the recipe:
+
+- `--device CPU-NUMA0,CPU-NUMA1 --split-mode tensor --tensor-split 1,1` for two nodes, and one worker thread per physical core
+  less one per socket, which leaves a core for that device's dispatcher.
+- `GGML_CPU_NUMA_DEVICES=1` is required or the CPU-NUMA devices are never created; the failure looks like missing support
+  rather than a missing switch. See [PORTING.md](../../patches/PORTING.md).
+- Do not launch the server under a restrictive `taskset`: a restricted mask yields one worker per socket.
+- Context costs memory per node. Tensor-splitting across two nodes mirrors less than across four, so the resident set is
+  smaller, but a million-token context still adds tens of gibibytes per node. Start at 32K and grow it.
+
+An AVX-512 machine without VNNI will load and run, but the 16-column integer kernels that produce these rates do not apply and
+the generic paths are much slower. Cascade Lake and later have VNNI; Skylake-SP does not.
+
