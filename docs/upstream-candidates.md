@@ -1,6 +1,7 @@
 # What is worth taking upstream, and who has to do it
 
-Checked against ggml-org/llama.cpp `b23efaa2ef147f547ee75cbf0c621d61904de80e` (2026-09-20).
+Checked against ggml-org/llama.cpp `b23efaa2ef147f547ee75cbf0c621d61904de80e` (2026-09-20). Every "still open upstream" claim below
+was re-verified in that tree on 2026-09-20 at 17:00; the line numbers are from it.
 
 **Nothing here has been submitted, and none of it may be submitted by an agent.** llama.cpp's `AGENTS.md` and `CONTRIBUTING.md` require
 that a human contributor understands every line, writes the description and the commit messages, and answers review personally;
@@ -8,7 +9,129 @@ agent-opened pull requests and AI-written descriptions are closed and can lead t
 work lives here. This page is preparation: what exists, what the evidence is, and what a submitter must be able to defend.
 Large features should start as an upstream discussion, not as a patch.
 
-## 1. Per-socket CPU devices and tensor parallelism across them
+## Where upstream stands on the things this repository touches
+
+| upstream at `b23efaa2` | state | consequence for this list |
+|---|---|---|
+| `qwen4exp` (Qwen3.8-Flash-Next) | **merged**: `src/models/qwen4exp.cpp`, 1,297 lines; already excluded from `--split-mode tensor` in `llm_arch_supports_sm_tensor` | the Qwen indexer cache becomes a real candidate (item 9); the tensor-split safety patch is moot |
+| `deepseek4` (DeepSeek-V4-Flash) | merged | — |
+| `glm5next` (GLM-5.3-Flash) | **absent** | every glm5next patch here waits for the architecture (item 12) |
+| DeepSeek-V4.1 (`deepseek41`) | absent | the port here is built on JigSaw's third-party diff (item 13) |
+| MTP drafting (`draft-mtp`, downloadable MTP sidecar) | present (`COMMON_SPECULATIVE_TYPE_DRAFT_MTP` in `common/arg.cpp`) | the sidecar idea is not novel; only the two MTP graph savings transfer as ideas (item 12) |
+| x86 repack kernels | `q4_K`/`q5_K`/`q6_K`/`q2_K` 8x8 and `q4_0`/`q4_K`/`q8_0`/`q2_K` 16x1 AVX-512, `mxfp4` 8x8 | the x16 family here must be benchmarked against those before any claim (item 11) |
+| `ggml_get_n_tasks`: 17 unary ops and SCALE forced to one thread | still there (`ggml-cpu.c:2322-2325`, SCALE at 2378) | item 1 open |
+| `llama_kv_cache::seq_rm` full-cell scans | still there (`llama-kv-cache.cpp:405, 429, 481`) | item 2 open |
+| CPU flash attention sums V in FP16 (`VKQ16`) | still there | item 3 open |
+| `GET_ROWS`/`SET_ROWS` on one thread with a FIXME | still there | item 4 open |
+| `top_k` by `std::partial_sort` | still there (`ops.cpp:8583`) | item 5 open |
+| scheduler split cut at 30 inputs | **fixed**: input arrays grow on demand | nothing to submit |
+
+## Tier 1: small, generic, evidence complete; submit as they are
+
+### 1. Elementwise UNARY ops (and SCALE) are pinned to one thread
+
+`ggml_get_n_tasks` sets `n_tasks = 1` for ABS, SGN, NEG, STEP, TANH, ELU, RELU, SIGMOID, HARDSWISH, HARDSIGMOID, EXP, SOFTPLUS,
+EXPM1, FLOOR, CEIL, ROUND, TRUNC although `unary-ops.cpp` already splits rows by `ith/nth` on exactly the path XIELU uses with
+`n_threads`. Deleting the four lines is the whole change. Bit-exact (elementwise, no reduction). +2.1% GLM-5.3-Flash, +3.4%
+Qwen3.8-Flash-Next, 0.0% DeepSeek-V4-Flash (no SSM/linear-attention path: report that zero, it is the honest shape).
+SCALE is the same defect but its hot instance is one row of 262,144 elements, so it needs a column split in the kernel: leave it out
+and be ready to say why.
+Handoff with every argument and its evidence: [UPSTREAM-HANDOFF.md](../engineering/2026-09-12/archive/serving/fleet-0912-ctx/UPSTREAM-HANDOFF.md);
+source and build record: [parallel-unary-0911](../engineering/2026-09-12/archive/serving/fleet-0911/parallel-unary-0911/).
+Branch `unary-ops-parallel` on `InfoSystemic/llama.cpp` was rebased on master on 09-12; rebase again and rewrite its commit message.
+**The most ready item on this page.**
+
+### 2. `llama_kv_cache::seq_rm` scans every allocated cell
+
+Three loops `for (i = 0; i < cells.size(); ++i)` (lines 405, 429, 481). With a 1M-cell cache and a speculative rollback every cycle
+that is ~0.85 ms per call; bounding the scan by `cells.used_max_p1()` (which upstream already maintains) removes it with no behaviour
+change: +2.4% decode on GLM-5.3-Flash in a same-process A/B, and the same scan was found independently at 256K on Qwen.
+[q4e-line patch](../patches/kv-seq-rm-bounded-scan.patch), [GLM-line patch](../patches/glm-kv-seq-rm-used-prefix.patch).
+A submitter needs: the argument that cells past the used bound cannot match a non-negative range, including after `seq_cp` and shifts.
+
+### 3. CPU flash attention sums V in FP16
+
+A correctness defect in the default configuration, reproducible in isolation on stock upstream: 6.4e-3 relative RMS error for a
+three-query batch over ~2,000 cells, 1.3e-2 on real model tensors. Small, self-contained, and independent of everything else here.
+Evidence and a minimal fix with its measured cost (+17-21% in the op): [report](../benchmarks/cpu-flash-attn-f16-accumulation.md),
+[reproducer](../tools/fa_mqa_check.cpp), [candidate patch](../patches/upstream-cpu-fattn-f32-accumulate.patch).
+Open it as an ISSUE with the reproducer first; the maintainers may prefer a different shape of fix (F32 accumulation only when the
+batch has more than one query, or an F32 `V` path selected by type). A submitter needs: why the one-query path is less affected, why
+the generic `to_float` trait must not be used (7x slower), and numbers from at least one non-x86 platform, which do not exist yet.
+Worth stating in the same breath: the one-query and the multi-query path sum in different orders, so one query differs by 3.4e-4
+between a batch of one and a batch of three ([check](../tools/fa_mqa_invariance_check.cpp)); an F32 accumulator shrinks that gap too.
+
+### 4. `GET_ROWS` / `SET_ROWS` on all workers above a row threshold
+
+`ggml-cpu.c` keeps `n_tasks = 1` with the comment "the cost of launching additional threads decreases performance with GPU
+offloading". On a CPU-only graph with a sparse-attention indexer the gather is the largest single growth term with context:
++12.8% alone on Qwen3.8-Flash-Next at 30K and the largest share of the 1.84x at 237,500 tokens, byte-identical.
+[Patch](../patches/qwen4exp-getrows-parallel.patch) (env-gated `GGML_CPU_PARALLEL_GET_ROWS=<min_rows>`; upstream would want a
+constant threshold, not an env). A submitter needs: an answer to the FIXME — thread only when the row count exceeds a threshold
+(256 here) so small gathers on offloaded graphs keep the single-thread path — and a measurement on a GPU-offload configuration
+showing no regression, which does not exist yet.
+
+### 5. Top-k by selection, with a fallback when the set is not unique
+
+`ggml_compute_forward_top_k_f32` uses `std::partial_sort` with an indirect comparator. `std::nth_element` on a float copy is 3-4x faster
+for rows up to a few thousand entries and returns the same SET whenever the k-th value is not tied across the cut; on a tie, fall back.
+Worth less than it looks: above ~25,000 entries `partial_sort` wins again, and an earlier variant without the fallback
+[changed model behaviour](../patches/topk-linear-selection.patch) because masked scores tie at `-inf`.
+[Patch](../patches/topk-select-tie-fallback.patch), [check](../tools/topk_select_check.cpp).
+Upstream's own test accepts any index among ties, so conformance is not the bar; unchanged model behaviour is.
+
+### 6. The sampler rebuilds and sorts the whole vocabulary for every token
+
+`common_sampler::set_logits` writes one 12-byte candidate per vocabulary entry and the top-k sampler then partial-sorts that array:
+0.45 + 0.19 ms per sampled token at 154,880 entries, on the server's main thread, between graphs. The speculative path also clones
+the sampler before every verify step and the clone copies the candidate array (1.86 MB, 0.58 ms), although nothing reads it.
+When the first active sampler of the chain is top-k (the default chain), the k best logits can be selected straight from the logits
+with a threshold scan (~50 us) and handed to the chain already sorted: same candidates, same order, same token.
++1.6% decode here, more on faster machines where a graph is shorter. [Patch, part B](../patches/coupled-sampling-fast-sampler.patch),
+[check](../tools/topk_scan_check.cpp). Self-contained in `common/sampling.cpp`.
+A submitter needs: the conditions under which the shortcut is invalid (logit bias, penalties, DRY or top-n-sigma ahead of top-k,
+mirostat, `n_probs`, grammar-first, a forcing reasoning budget) and that every one of them falls back; tie order at the k-th value
+can differ from `std::partial_sort`, which only matters for identical logits.
+
+### 7. Gated delta net: split by state row when heads do not divide by workers
+
+Upstream's `ggml_compute_forward_gated_delta_net` splits by head; with 16 heads over 15 workers one worker does two in every layer.
+Splitting the (seq, head, row) space evenly with one fused pass per row is bit-identical and applies to the upstream op as it stands.
+Under 1% here (the op is dominated by state copies, not arithmetic): [patch](../patches/glm5next-gdn-row-split.patch). Lowest priority
+in this tier; submit only bundled with a measurement on a model where the op matters more.
+
+## Tier 2: design proposals; start as a discussion
+
+### 8. Speculative decoding with sampled requests: share the verifier's randomness
+
+Upstream verifies a draft by sampling the target and comparing tokens. With temperature > 0 a greedy draft is then accepted with
+probability p(argmax q), which is poor exactly where the text is uncertain. If the final `dist` step picks
+`argmax(logit + G(salt, position, token))`, with G a counter-based Gumbel variate, the sample is exact (Gumbel-max), it no longer
+depends on how many RNG draws speculation consumed, and a drafter that knows (salt, position) can add the same noise to its own
+logits. Acceptance on real agent traffic rose from 72.4% to 75.0% here with an MTP head (+3.1% tokens per cycle, paired replay of
+4,752 positions); a better-calibrated drafter gains much more (synthetic: 0.39 -> 0.88). Same seed gives the same text with and
+without speculation, which is not true of rejection-sampling schemes.
+[Patch, part A](../patches/coupled-sampling-fast-sampler.patch), [exactness test](../tools/coupled_sampling_check.cpp),
+[offline replay of drafter settings](../tools/couple_fit.py).
+This changes which random stream a seed produces, so it should start as a discussion. A submitter needs: the argument for exactness
+including the grammar resample path (it keeps an independent stream, reproducing the current rejection-resample law), and a cleaner
+channel between drafter and sampler than the token-tail registry used here.
+
+### 9. Qwen3.8-Flash-Next: cache the pooled indexer keys instead of re-pooling the whole cache every token
+
+Now that `qwen4exp` is upstream this is the highest-value model-specific item. Upstream's `qwen4exp.cpp` still says "cached indexer
+keys are raw: pooling precedes norm and rotation" (line 598) and pools at read time, i.e. every decode token gathers, pools, norms and
+ropes ALL cached indexer keys before scoring: measured here as 51 of the 87 ms of growth between 200 and 32,000 tokens
+(GET_ROWS 40%, ROPE 17%, TOP_K 9%). Caching the post-rope pooled keys in the indexer cache's unused V half (allocated, never written)
+and refreshing only the trailing `ceil(n_tokens/r)+1` blocks is byte-identical and gave +13.8% at 30K and, with items 4 and the
+split-cap fix, 3.40 -> 6.25 tok/s at 237,500 tokens. It loses ~8-10% at 190 tokens (fixed bookkeeping), so it must be gated on context.
+[Patch against the PR-era tree](../patches/qwen4exp-pooled-key-cache.patch), [Qwen notes](../patches/README-20260915-qwen4exp.md),
+[qwen-flash-next guide](models/qwen-flash-next.md).
+Upstream's `llama-memory-hybrid-idx` is not the tree this was written on: the idea transfers, the patch must be redone and
+re-measured there. A submitter needs: why post-rope values are cacheable (block position is a pure function of block index), why the
+dirty set needs no bookkeeping, and greedy parity on a long prompt.
+
+### 10. Per-socket CPU devices and tensor parallelism across them
 
 The distinct contribution of this repository. Each NUMA node becomes a ggml device (`CPU-NUMA0..N`) with node-bound buffers and a pinned
 worker pool, the Meta backend splits tensors across them, and a direct host-memory all-reduce joins the results. Measured 4.07x from
@@ -26,94 +149,78 @@ measured DRAM ceiling, so the remaining work is exactly the part a hybrid engine
 
 A submitter needs: the device/threading model, why strict `mbind` and not `numactl --interleave`, the failure modes of the generic Meta
 collective that the direct all-reduce avoids, and a plan for platforms without libnuma. This is a large change; ask first.
+Two design points from 09-20 belong in any proposal:
+- a backend instance must NOT own its worker team. Each context creates its own backends, so a server with a draft model ran two
+  OpenMP teams pinned to the same cores, and libgomp's default idle spin (300,000 iterations, ~15 ms with Skylake's 140-cycle `pause`,
+  not the documented 3 ms) made every hand-off between trunk and draft a collision. One dispatcher per DEVICE, shared by all backends,
+  removes it ([patch](../patches/cpu-numa-shared-team.patch)). Stock upstream does not have this problem with OpenMP: both contexts
+  enter their parallel regions from the same server thread and share one team;
+- `set_tensor` on a group of NUMA buffers must not start a thread per device for small uploads. It did, for every graph input (~93
+  thread creations per decode cycle), 4.6% of decode ([patch](../patches/meta-backend-small-uploads-blocking-dispatch.patch)).
+  Upstream's own `ggml-backend-meta.cpp` does not spawn threads there; this only matters for the fork's backend.
 
-One design point changed on 09-20 and belongs in any proposal: a backend instance must NOT own its worker team. Each context creates
-its own backends, so a server with a draft model ran two OpenMP teams pinned to the same cores, and libgomp's default idle spin
-(300,000 iterations, ~15 ms with Skylake's 140-cycle `pause`, not the documented 3 ms) made every hand-off between trunk and draft a
-collision. One dispatcher per DEVICE, shared by all backends, removes it ([patch](../patches/cpu-numa-shared-team.patch)). Stock
-upstream does not have this problem with OpenMP: both contexts enter their parallel regions from the same server thread and so share
-one team.
+## Tier 3: kernels; benchmark against upstream's current kernels before claiming anything
 
-A second one from the same day: `set_tensor` on a group of NUMA buffers must not start a thread per device for small uploads. It did,
-for every graph input, ~93 thread creations per decode cycle, and cost 4.6% of decode
-([patch](../patches/meta-backend-small-uploads-blocking-dispatch.patch)). Parallel upload is for weights.
+### 11. x16 AVX-512 VNNI GEMV family and the Q5_K sub-block prefetch
 
-## 2. CPU flash attention sums V in FP16
+This fork carries 16-row VNNI kernels for Q4_K/Q5_K/Q6_K/Q8_0 (measured at 92% of a bare read loop per socket on 09-11) and for
+MXFP4 ([16.3 GB/s per core](../engineering/2026-09-12/), `GGML_CPU_X16_MXFP4=1`), plus the 09-20 finding that the Q5_K expert kernel
+read at 77 GB/s per socket against 97 for Q4_K because it walks a 2,880-byte block group by sub-block (320-byte stride) and the hardware
+streamer does not follow; one `_mm_prefetch` of the next group per line fixed it, +3.1% decode, bit-exact
+([patch](../patches/q5k-x16-expert-prefetch.patch); prefetch distance 4 was 65% SLOWER, so the distance is not a free parameter).
+Upstream has since added 8x8 kernels for Q4_K/Q5_K/Q6_K/Q2_K and 16x1 AVX-512 kernels for Q4_0/Q4_K/Q8_0/Q2_K; there is no
+measurement of those against this family on the same machine, so there is no claim to make yet. First step for a submitter: build
+upstream, run `llama-bench` on the same GGUF, compare GB/s per socket per type; if upstream's Q5_K path shows the same sub-block walk,
+the prefetch is a two-line PR with a clear mechanism, and Q5_K/Q6_K 16-row kernels are the gap if upstream's 8x8 is measurably slower.
 
-A correctness defect in the default configuration, reproducible in isolation on stock upstream: 6.4e-3 relative RMS error for a
-three-query batch over ~2,000 cells, 1.3e-2 on real model tensors. Small, self-contained, and independent of everything else here.
-Evidence and a minimal fix with its measured cost (+17-21% in the op): [report](../benchmarks/cpu-flash-attn-f16-accumulation.md),
-[reproducer](../tools/fa_mqa_check.cpp), [candidate patch](../patches/upstream-cpu-fattn-f32-accumulate.patch).
-It is a precision fix that costs time, not a speedup; the faster MQA kernel is a separate and much larger change.
-A submitter needs: why the one-query path is less affected, why the generic `to_float` trait must not be used (7x slower),
-and numbers from at least one non-x86 platform, which do not exist yet. Worth stating in the same breath: the one-query and the
-multi-query path sum in different orders, so one query differs by 3.4e-4 between a batch of one and a batch of three
-([check](../tools/fa_mqa_invariance_check.cpp)); an F32 accumulator shrinks that gap as well.
+## Blocked on architecture support; the human can help those PRs land
 
-## 3. `llama_kv_cache::seq_rm` scans every allocated cell
+### 12. GLM-5.3-Flash (`glm5next`)
 
-Upstream still loops `for (i = 0; i < cells.size(); ++i)`. With a 1M-cell cache and a speculative rollback every cycle this was
-~0.85 ms per call; stopping at `cells.used_max_p1()` (which upstream already has) removes it with no behaviour change.
-+2.4% decode on GLM-5.3-Flash in a same-process A/B, and the scan was found independently at 256K on Qwen.
-[q4e-line patch](../patches/kv-seq-rm-bounded-scan.patch), [GLM-line patch](../patches/glm-kv-seq-rm-used-prefix.patch).
-A submitter needs: the argument that cells past the used bound cannot match a non-negative range, including after `seq_cp` and shifts.
+Not in upstream at `b23efaa2`. Two competing PRs existed on 08-26 (#27754 by unsloth with vision, #27752 text-only); their state must
+be checked before anything else, and reviewing/testing them is the most useful thing a human can do for GLM-5.3-Flash users. All of
+these wait for the architecture and are model code, not ggml:
+pooled-indexer kernel fusion and wide pooling ([1](../patches/glm5next-kpool-fusion-statecopy.patch),
+[2](../patches/glm5next-kpool-wide.patch), +3.8% at 4K, +13.4% at 30K), the pooled-result cache
+([3](../patches/glm5next-pool-result-cache.patch)), the batch-invariant MQA attention kernel
+([4](../patches/glm5next-fa-mqa-cellsplit.patch)), MTP catch-up that writes only K/V for accepted rows
+([9](../patches/glm5next-mtp-kv-only-catchup.patch), +2.5%) and MTP query rows that build Q/attention only for the predicting row
+([10](../patches/glm5next-mtp-query-rows.patch), +2.3%, +4.5% at 13K). The two MTP savings are ideas that transfer to upstream's
+`draft-mtp` path for any architecture with a NextN layer; the code does not.
+The whole 12.0 -> 20.2 tok/s record is in [the benchmark](../benchmarks/glm53-flash-paseo-decode-20260920.md) and the
+[patch notes](../patches/README-20260920-glm5next.md).
 
-## 4. Elementwise UNARY ops and SCALE are pinned to one thread
+### 13. DeepSeek-V4.1
 
-`ggml_get_n_tasks` sets `n_tasks = 1` for SIGMOID/EXP/SOFTPLUS/... and for SCALE although both kernels honour `ith/nth`.
-On models with a linear-attention or SSM path this serialises real work: +1.7% (GLM-5.3-Flash) and +3.4% (Qwen3.8-Flash-Next), bit-exact,
-behind a size threshold. Single-row tensors need a column split for SCALE to benefit.
-[Source, parent and build record](../engineering/2026-09-12/archive/serving/fleet-0911/parallel-unary-0911/ggml-cpu.patch).
-A submitter needs: a threshold justified on more than one machine, since small tensors lose to the dispatch cost.
-
-## 5. Top-k by selection, with a fallback when the set is not unique
-
-`ggml_compute_forward_top_k_f32` uses `std::partial_sort` with an indirect comparator. `std::nth_element` on a float copy is 3-4x faster
-for rows up to a few thousand entries and returns the same SET whenever the k-th value is not tied across the cut; on a tie, fall back.
-Worth less than it looks: above ~25,000 entries `partial_sort` wins again, and an earlier variant without the fallback
-[changed model behaviour](../patches/topk-linear-selection.patch) because masked scores tie at `-inf`.
-[Patch](../patches/topk-select-tie-fallback.patch), [check](../tools/topk_select_check.cpp).
-Upstream's own test accepts any index among ties, so conformance is not the bar; unchanged model behaviour is.
-
-## 6. The sampler rebuilds and sorts the whole vocabulary for every token
-
-`common_sampler::set_logits` writes one 12-byte candidate per vocabulary entry and the top-k sampler then partial-sorts that array:
-0.45 + 0.19 ms per sampled token at 154,880 entries, on the server's main thread, between graphs. The speculative path also clones
-the sampler before every verify step and the clone copies the candidate array (1.86 MB, 0.58 ms), although nothing reads it.
-When the first active sampler of the chain is top-k (the default chain), the k best logits can be selected straight from the logits
-with a threshold scan (~50 us) and handed to the chain already sorted: same candidates, same order, same token.
-+1.6% decode here, more on faster machines where a graph is shorter. [Patch, part B](../patches/coupled-sampling-fast-sampler.patch),
-[check](../tools/topk_scan_check.cpp). Self-contained in `common/sampling.cpp`.
-A submitter needs: the conditions under which the shortcut is invalid (logit bias, penalties, DRY or top-n-sigma ahead of top-k,
-mirostat, `n_probs`, grammar-first, a forcing reasoning budget) and that every one of them falls back; tie order at the k-th value
-can differ from `std::partial_sort`, which only matters for identical logits.
-
-## 7. Speculative decoding with sampled requests: share the verifier's randomness
-
-Upstream verifies a draft by sampling the target and comparing tokens. With temperature > 0 a greedy draft is then accepted with
-probability p(argmax q), which is poor exactly where the text is uncertain. If the final `dist` step picks
-`argmax(logit + G(salt, position, token))`, with G a counter-based Gumbel variate, the sample is exact (Gumbel-max), it no longer
-depends on how many RNG draws speculation consumed, and a drafter that knows (salt, position) can add the same noise to its own
-logits. Acceptance on real agent traffic rose from 72.4% to 75.0% here with an MTP head; a better-calibrated drafter gains much more
-(synthetic: 0.39 -> 0.88). Same seed gives the same text with and without speculation, which is not true of rejection-sampling
-schemes. [Patch, part A](../patches/coupled-sampling-fast-sampler.patch), [exactness test](../tools/coupled_sampling_check.cpp).
-This is a design proposal, not a fix: it changes which random stream a seed produces, so it should start as a discussion.
-A submitter needs: the argument for exactness including the grammar resample path (it keeps an independent stream, reproducing the
-current rejection-resample law), and a cleaner channel between drafter and sampler than the token-tail registry used here.
+Not in upstream. The port here ([workspace notes](models/deepseek-v41.md)) is JigSaw's third-party llama-level diff (46 files, no ggml
+changes) carried onto the NUMA-tuned engine; it is theirs to submit. What is ours and could go as review evidence on their PR: the
+converter traps (lazy architecture map, `text_config` flattening before `index_tensors`, `generate_extra_tensors` must chain to
+`super()`), the native Engram lookup validation (267,583,488 exact BF16 values), and the observation that V4.1's compression ratio is
+one general pooling factor where the V4 port hard-codes two. See [results](results.md).
 
 ## Already fixed upstream
 
 The scheduler cut a new split when a split reached `GGML_SCHED_MAX_SPLIT_INPUTS` (30) inputs, which cost 11 ms per token on Qwen and was
 worked around here with `-DGGML_SCHED_MAX_SPLIT_INPUTS=64`. At `b23efaa2` the input arrays grow on demand and that cut is gone.
-Nothing to submit; the workaround only matters for the older source lines in this repository.
+`qwen4exp` is already excluded from `--split-mode tensor` upstream, so the fork's safety patch for that is moot there.
 
 ## Not candidates
 
-- `GET_ROWS` on all workers: upstream keeps it single-threaded on purpose (a FIXME cites the cost with GPU offloading). A proposal has to
-  answer that, for example by threading only above a row count on CPU-only graphs.
-- The glm5next pool fusion, pooled-result cache, MTP catch-up, MTP query rows, the row-split gated delta net and the cell-split MQA
-  attention kernel depend on this fork's architecture code and Meta split rules. They belong with the architecture if and when it
-  lands upstream. The gated-delta-net idea itself (split by state row when heads do not divide by workers, one fused pass per row)
-  applies to upstream's `ggml_compute_forward_gated_delta_net` as it stands and is bit-exact; it is small (under 1% here).
-- Constant-shape draft batches are a workaround for single-slot graph reuse. The upstream answer is a small graph cache per context,
-  which this fork's Meta backend cannot support yet.
+- Non-temporal stores in the cross-socket all-reduce, the Meta trailing-subgraph fix, small-upload/blocking-dispatch: the fork's
+  backend only; upstream has no equivalent code path.
+- Constant-shape (padded) draft batches, draft merge and fast pick: workarounds for the fork's single-slot graph reuse. The upstream
+  answer is a small graph cache per context, which this fork's Meta backend cannot support yet.
+- `topk-linear-selection` (changed model behaviour on `-inf` ties), `qwen4exp-ssm-mirror-type-independent` (disproven), load-time
+  requantisation (slower, hurt MTP acceptance): refuted here, recorded so nobody re-submits them.
+- Worth an ISSUE rather than a patch: `Q4_K_M` quantises Qwen3.8-Flash-Next's `ssm_alpha`/`ssm_beta`/`hc_*_inject` vectors to q4_K
+  while Unsloth's UD quants keep them f32; the type difference changed the fork's split rules and may deserve a type rule in
+  `llama-quantize`. Quality impact was not measured.
+
+## Suggested order, and the checklist for every submission
+
+Order: 1 (unary threading) → 2 (`seq_rm`) → 3 (FA precision, as an issue first) → 4 (`GET_ROWS`) → 5/6 → discussion for 8 and 10 →
+9 once re-done on upstream's `qwen4exp` → 11 after the kernel comparison → help 12 and 13 land as a reviewer.
+
+Before each one (from the 09-12 handoff): search open PRs and issues for the same change and comment there instead of duplicating;
+rewrite the commit message and PR description yourself; fill in the AI-usage disclosure; run `test-backend-ops` where a second backend
+exists — in `test` mode on a CPU-only box it compares nothing and prints OK having run zero tests, so use `perf` mode there.
