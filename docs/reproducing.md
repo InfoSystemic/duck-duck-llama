@@ -29,6 +29,34 @@ git -C /path/to/llama-deepseek-work apply --check "$PROJECT_ROOT/engineering/202
 git -C /path/to/llama-deepseek-work apply "$PROJECT_ROOT/engineering/2026-09-12/patches/llama.cpp-deepseek41-jigsaw-0912.patch"
 ```
 
+**Each bundle names its own upstream, and they are not all the same repository.** The bases live in four: `ggml-org/llama.cpp`
+for the upstream lines, `unslothai/llama.cpp` for the GLM-5.3-Flash (`glm5next`) support line, `YanissAmz/llama.cpp` for the
+DSpark lines, and `JigSawPT/llama.cpp` for the isolated DeepSeek port. Resolving every `base_commit` inside a single clone fails
+with `fatal: reference is not a tree` for all the bundles that belong to a different upstream. Print the map first:
+
+```bash
+python3 - <<'EOF'
+import json
+for e in json.load(open('engineering/2026-09-12/source-bundles.json')):
+    print(f"{e['name']:34s} {e['base_commit'][:12]}  {(e.get('public_remotes') or ['-'])[0]}")
+EOF
+```
+
+GLM-5.3-Flash is the `llama.cpp-glm5n-goal-0904` bundle, based on `unslothai/llama.cpp`. A base commit can be fetched directly,
+so no full clone is needed:
+
+```bash
+PROJECT_ROOT="$PWD"
+mkdir /path/to/llama-glm5n-work && git -C /path/to/llama-glm5n-work init -q .
+git -C /path/to/llama-glm5n-work fetch --depth 1 https://github.com/unslothai/llama.cpp.git \
+  2e0e57f1008053bae4902a772da85e3eb99d4aff
+git -C /path/to/llama-glm5n-work checkout -q FETCH_HEAD
+git -C /path/to/llama-glm5n-work apply "$PROJECT_ROOT/engineering/2026-09-12/patches/llama.cpp-glm5n-goal-0904.patch"
+```
+
+Confirm the result rather than trusting the patch: `git add -A && git write-tree` must print the bundle's `git_tree`, which for
+this one is `7554e6edca88f4df967d66635f2f90be6170c87e`. That check is what `reconstructed_tree_identical` records.
+
 Use a new checkout for this example. Its [build evidence](../engineering/2026-09-12/archive/serving/fleet-0912/upstream/build-result.json) records the host configuration. It is a build-reproduction example, not a validated full-checkpoint serving recipe.
 
 Some measured GLM/Qwen runtimes also used separately rebuilt private libraries. Their parent source, overlays, link recipes, and binary identities are archived. A base engine patch alone does not reproduce all selected libraries. Use the [September 8 layer order](../engineering/2026-09-08/README.md#source-bundles-and-reconstruction) or the later model-specific [Flash](../engineering/2026-09-12/archive/serving/fleet-0912/glmflash/README.md), [Qwen](../engineering/2026-09-12/archive/serving/fleet-0912/qwen/README.md), and [Full](../engineering/2026-09-12/archive/serving/fleet-0912/glmfull-split/README.md) recipes.
