@@ -36,7 +36,7 @@ EXPM1, FLOOR, CEIL, ROUND, TRUNC although `unary-ops.cpp` already splits rows by
 Qwen3.8-Flash-Next, 0.0% DeepSeek-V4-Flash (no SSM/linear-attention path: report that zero, it is the honest shape).
 SCALE is the same defect but its hot instance is one row of 262,144 elements, so it needs a column split in the kernel: leave it out
 and be ready to say why.
-Handoff with every argument and its evidence: [UPSTREAM-HANDOFF.md](../engineering/2026-09-12/archive/serving/fleet-0912-ctx/UPSTREAM-HANDOFF.md);
+Handoff with every argument and its evidence: [upstream-handoff-unary-threading.md](upstream-handoff-unary-threading.md);
 source and build record: [parallel-unary-0911](../engineering/2026-09-12/archive/serving/fleet-0911/parallel-unary-0911/).
 Branch `unary-ops-parallel` on `InfoSystemic/llama.cpp` was rebased on master on 09-12; rebase again and rewrite its commit message.
 **The most ready item on this page.**
