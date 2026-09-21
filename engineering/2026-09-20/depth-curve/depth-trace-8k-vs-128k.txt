@@ -1,0 +1,76 @@
+a: results/optrace-depth-8k.log cpu=16 nodes=7239 total=105.23 ms barrier=7.95
+b: results/optrace-depth-128k.log cpu=0 nodes=7239 total=237.64 ms barrier=8.97
+sum of node times a 102.68 ms, b 234.96 ms, growth +132.28 ms
+
+by op type: key                                                  n_a      ms_a   n_b      ms_b     delta
+  LIGHTNING_INDEXER                                     11     2.176    11    37.469   +35.293
+  GET_ROWS                                              60     2.396    58    36.117   +33.721
+  CONT                                                   5     0.016     9    22.304   +22.288
+  ADD                                                   65     0.385    70    21.938   +21.553
+  SOFT_MAX                                               0     0.000     1    10.657   +10.657
+  MUL_MAT_ID                                           126    39.951   126    42.943    +2.992
+  TOP_K                                                 11     0.317    11     3.094    +2.777
+  FLASH_ATTN_EXT                                        11     5.323    11     6.754    +1.431
+  MUL_MAT                                              684    35.749   684    36.848    +1.099
+  DUP                                                    0     0.000    11     0.193    +0.193
+  CONCAT                                               130     1.748   138     1.926    +0.178
+  SET_ROWS                                              12     0.733    11     0.904    +0.171
+  GATED_DELTA_NET                                       34     2.580    34     2.737    +0.157
+  DSV4_HC_POST                                          90     0.465    90     0.610    +0.145
+  DSV4_HC_PRE                                           90     1.173    90     1.313    +0.140
+  RMS_NORM                                             166     1.783   179     1.918    +0.135
+  MUL                                                   43     1.055    44     1.179    +0.124
+  UNARY                                                129     0.560   131     0.673    +0.113
+  CLAMP                                                 87     0.451    91     0.512    +0.061
+  SSM_CONV                                              34     0.233    34     0.284    +0.051
+  ARGSORT                                               42     0.361    42     0.401    +0.040
+  FILL                                                  11     0.126    11     0.142    +0.016
+  SCALE                                                  1     0.006     3     0.011    +0.005
+  DSV4_HC_COMB                                           0     0.000     1     0.001    +0.001
+  REPEAT                                                 1     0.041     1     0.033    -0.008
+  GLU                                                   42     0.133    42     0.120    -0.013
+  L2_NORM                                               43     0.141    36     0.127    -0.014
+  CUSTOM                                                90     3.081    90     2.753    -0.328
+  CPY                                                   41     1.699    44     0.997    -0.702
+
+by op and name: key                                                  n_a      ms_a   n_b      ms_b     delta
+  LIGHTNING_INDEXER:indexer_pool_score-N                11     2.176    11    37.469   +35.293
+  GET_ROWS:indexer_pool_members-N                       11     1.283    11    34.608   +33.325
+  CONT:indexer_pool_members-N (view) (permuted) (cont)     0     0.000     2    22.278   +22.278
+  ADD:node_N                                            53     0.252    59    20.340   +20.088
+  SOFT_MAX:indexer_pool_probs-N                          0     0.000     1    10.657   +10.657
+  TOP_K:node_N                                          11     0.317    11     3.094    +2.777
+  ADD:kpool_kq_mask-N                                   11     0.130    11     1.598    +1.468
+  FLASH_ATTN_EXT:node_N                                 11     5.323    11     6.754    +1.431
+  MUL_MAT_ID:ffn_moe_gate-N                             42    12.040    42    13.135    +1.095
+  MUL_MAT_ID:ffn_moe_down-N                             42    15.686    42    16.686    +1.000
+  MUL_MAT_ID:ffn_moe_up-N                               42    12.225    42    13.122    +0.897
+  MUL_MAT:node_N                                       349    15.945   349    16.506    +0.561
+  GET_ROWS:node_N                                       45     1.101    45     1.500    +0.399
+  DUP:node_N                                             0     0.000    11     0.193    +0.193
+  SET_ROWS: (view) (view)                               11     0.732    11     0.904    +0.172
+  MUL_MAT:ffn_gate-N                                    45     1.762    45     1.922    +0.160
+  GATED_DELTA_NET:node_N                                34     2.580    34     2.737    +0.157
+  CONCAT:node_N                                         96     1.077   104     1.220    +0.143
+  MUL_MAT:hc_mixes-N                                    90     2.579    90     2.703    +0.124
+  MUL:ffn_moe_weighted-N                                42     1.052    42     1.174    +0.122
+  DSV4_HC_POST:hc_attn_post-N                           45     0.247    45     0.356    +0.109
+  MUL_MAT:dsa_out-N                                     11     2.764    11     2.852    +0.088
+  DSV4_HC_PRE:hc_ffn_pre-N                              45     0.584    45     0.668    +0.084
+  RMS_NORM:norm-N                                       75     0.322    88     0.402    +0.080
+  MUL_MAT:kda_out-N                                     34     3.572    34     3.651    +0.079
+  DSV4_HC_PRE:hc_attn_pre-N                             45     0.589    45     0.645    +0.056
+  RMS_NORM:node_N                                       90     1.457    90     1.512    +0.055
+  SSM_CONV:node_N                                       34     0.233    34     0.284    +0.051
+  UNARY:ffn_moe_probs-N                                 42     0.232    42     0.281    +0.049
+  ARGSORT:ffn_moe_argsort-N                             42     0.361    42     0.401    +0.040
+  DSV4_HC_POST:l_last-N                                 45     0.218    45     0.254    +0.036
+  CONCAT:conv_input-N                                   34     0.671    34     0.706    +0.035
+  UNARY:kda_conv-N                                      31     0.120    32     0.153    +0.033
+  MUL_MAT:fattn_mla-N                                   11     0.693    11     0.726    +0.033
+  UNARY:node_N                                          56     0.208    57     0.239    +0.031
+  CPY:kpool_pool_bias_fN                                 0     0.000     1     0.029    +0.029
+  MUL_MAT:ffn_shexp-N                                   42     1.310    42     1.339    +0.029
+  CLAMP:ffn_moe_up_clamped-N                            42     0.225    42     0.250    +0.025
+  CLAMP:ffn_gate_clamped-N                               1     0.001     4     0.023    +0.022
+  MUL_MAT:ffn_up-N                                      45     1.749    45     1.766    +0.017

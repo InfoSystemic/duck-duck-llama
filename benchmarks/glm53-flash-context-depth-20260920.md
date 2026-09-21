@@ -56,5 +56,22 @@ Greedy tokens per cycle were 2.5 at every depth from 16K on (the text is the sam
   past 128K or saturates at the cache-ram cap has not been measured. Until it is, a 512K session is projected safe (~335 GiB) and a
   1M session is not.
 
-The growth is in the eleven DSA layers, which score every cached (pooled) indexer key for each new token; the 34 KDA layers carry a
-fixed-size state. Per-op traces at 8K and 128K on the same cached session are the next step and the basis for any work on the slope.
+## Where the growth is (per-op trace, same session, one socket's verify graph)
+
+[tools/depth_trace.py](../tools/depth_trace.py) rebuilds the probe's history so the prompt cache answers it, arms the CPU op
+profiler once decode has started, and [tools/opdiff.py](../tools/opdiff.py) compares two traces
+([raw traces and the table](../engineering/2026-09-20/depth-curve/)). Verify graph: 105.2 ms at 8K, 237.6 ms at 128K, the same
+7,239 nodes.
+
+| op (eleven DSA layers unless noted) | 8K | 128K | growth |
+|---|---:|---:|---:|
+| `LIGHTNING_INDEXER` pool score: 3 query rows x 32 heads against 34,178 pooled keys per layer | 2.2 ms | 37.5 ms | +35.3 |
+| fused pool kernel (dispatched at the `indexer_pool_members` GET_ROWS node): validates 2 KB of cache per pool against its record, copies the cached result | 1.3 | 34.6 | +33.3 |
+| one layer (the last DSA layer) not fused at 128K: `CONT` x2, `ADD`, `SOFT_MAX` over the whole [4,128,34178] member set | 0 | 51.0 | +51.0 |
+| `TOP_K` over 34,178 pools x 3 rows | 0.3 | 3.1 | +2.8 |
+| mask add, attention, MoE cache effects | | | +9 |
+
+Attention itself grows 1.4 ms. The slope is the indexer's bookkeeping: a scoring kernel running at per-row overhead (~240 GFLOP/s
+on 15 cores for 0.84 GFLOP per layer), validation bandwidth for a cache that already holds the answer, and one layer dropping off
+the fused path (the 14-node matcher rejects when the allocator lets the output overlap its inputs). None of it is inherent; the
+plan to remove it is in the engineering notes of the next revision.
