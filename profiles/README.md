@@ -41,3 +41,10 @@ The [comparison controller](../engineering/2026-09-12/archive/serving/fleet-0912
 ## Earlier launchers
 
 The four shell launchers in this directory and their [original guide](legacy-README.md) are retained for historical reproduction. Some use single-node workarounds or older MTP behavior that later source variants changed. Read them with their dated benchmark reports; use the guides above to understand the subsequent engineering.
+
+## Portable recipe
+
+[`glm-flash-any-sockets.json`](glm-flash-any-sockets.json) renders the GLM-5.3-Flash Q4 command for any socket count.
+Its defaults describe a dual-socket ten-core host; `DEVICES`, `TENSOR_SPLIT`, `THREADS` and `CTX_SIZE` are parameters,
+and it sets no `LD_LIBRARY_PATH` because a freshly built engine resolves its own libraries. It is a recipe, not a
+measured result — every recorded figure in this repository is four-socket.

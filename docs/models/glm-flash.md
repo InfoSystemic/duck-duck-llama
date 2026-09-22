@@ -70,6 +70,10 @@ wall — the lightning-indexer scoring kernel and the small-operation chains fol
 Cascade Lake with six channels per socket lands near half this machine's bandwidth and under a third of its cores, which puts
 it around half the decode rate.
 
+[`profiles/glm-flash-any-sockets.json`](../../profiles/glm-flash-any-sockets.json) is parameterized for this: it takes a
+device list, a tensor split, a thread count and a context size, and its `GGML_CPU_NUMA_THREADS` follows the thread count
+rather than the four-socket constant. Render it with `tools/render_profile.py` and read the command before running it.
+
 What must change in the recipe:
 
 - `--device CPU-NUMA0,CPU-NUMA1 --split-mode tensor --tensor-split 1,1` for two nodes, and one worker thread per physical core
