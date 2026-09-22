@@ -69,3 +69,39 @@ Each library is the production link line with one or two objects replaced, after
 the byte-identical production object, and the unmodified link reproduces the production library hash. Build scripts, generators
 (`make_*.py`), window controllers and deploy records are in [engineering/2026-09-20](../engineering/2026-09-20/README.md).
 Production drop-ins of revisions b, c and d, with rollback instructions, are in `archive/serving/fleet-0920-flash18/deploy-0920*/`.
+
+## Applying these to a reconstructed engine
+
+Verified 2026-09-21 against a fresh reconstruction of the `llama.cpp-glm5n-goal-0904` bundle (base `2e0e57f1` of
+unslothai/llama.cpp plus `engineering/2026-09-12/patches/llama.cpp-glm5n-goal-0904.patch`). Apply
+[`glm5next-x16-moe-expert-bound.patch`](glm5next-x16-moe-expert-bound.patch) first or the model cannot decode a token at all.
+
+**Six apply as they are** (`git apply <patch>`): `glm5next-x16-moe-expert-bound`, `cpu-numa-shared-team`,
+`meta-backend-small-uploads-blocking-dispatch`, `mtp-draft-merge-fastpick-pad`, `q5k-x16-expert-prefetch`,
+`glm5next-split-state-diagnostic`.
+
+**Four were cut with bare filenames rather than repository-relative paths** and need the target directory supplied:
+
+| patch | invocation |
+|---|---|
+| `glm5next-gdn-row-split` | `git apply --directory=ggml/src/ggml-cpu` |
+| `topk-select-tie-fallback` | `git apply --directory=ggml/src/ggml-cpu` |
+| `glm5next-mtp-kv-only-catchup` | `git apply --directory=src/models` |
+| `glm-kv-seq-rm-used-prefix` | `git apply --directory=src` |
+
+**The remaining eight are a chain and will not apply to the bare bundle.** They were cut against the private rebuilt sources
+of the 09-11 and 09-19 workspaces, in this file's numbered order, and several depend on each other rather than only on the
+base: `glm5next-kpool-fusion-statecopy` (#1) CREATES `pool-kernel.inc`, which `glm5next-kpool-wide` (#2) and
+`glm5next-pool-result-cache` (#3) then modify, so neither can apply before it; `glm5next-mtp-query-rows` (#10) expects
+`glm5next-mtp-kv-only-catchup` (#9) already applied; `glm5next-fa-mqa-cellsplit` (#4) expects the 09-11 `ops.cpp` overlay;
+the two `coupled-sampling` patches expect the f18 `common/` overlays; and `meta-backend-trailing-subgraph` is a plain
+`diff -u` carrying workspace paths and a timestamp rather than a git header.
+
+The numbering in the table above is the application order. The earlier overlays those hunks assume live in the engineering
+snapshots — start from `engineering/2026-09-12/archive/serving/fleet-0911/parallel-unary-0911/` and the `glm-*-0919`
+directories under `engineering/2026-09-20/archive/serving/fleet-0912-ctx/`.
+
+**A practical first pass**, if the goal is a working fast server rather than reproducing every measurement: take the base,
+apply the expert bound, then the six-plus-four above. That gets the NUMA worker-team fix, the thread-free graph uploads
+(+4.6%), the padded draft batches, the Q5_K expert prefetch (+3.1%), the bounded `seq_rm` scan (+2.4%), the row-split gated
+delta net and the selection top-k, without touching the pooled-indexer chain.
