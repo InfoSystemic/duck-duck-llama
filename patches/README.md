@@ -27,6 +27,14 @@ separate source line and must not be stacked on them. Verify downloads against
 [`SHA256SUMS`](SHA256SUMS), and see [`ATTRIBUTION.md`](ATTRIBUTION.md) for
 provenance.
 
+**Required to run GLM-5.3-Flash — apply this one.**
+[`glm5next-x16-moe-expert-bound.patch`](glm5next-x16-moe-expert-bound.patch) raises the x16 mixed-expert active list from 256 to
+512 entries. GLM-5.3-Flash has 288 routed experts, so the published engine aborts on
+`GGML_ASSERT(n_as <= 256)` inside `tensor_traits_x16::forward_mul_mat_id` the moment the first token is decoded — after the
+model has loaded, which makes it read like a model problem. The measured host always ran 512 in a private repack object, so the
+recorded results are unaffected and the published engine was simply never exercised at this expert count. Reported by an
+outside tester on 2026-09-21.
+
 **Safety fix — apply this one.**
 [`qwen4exp-exclude-from-tensor-split.patch`](qwen4exp-exclude-from-tensor-split.patch)
 adds `LLM_ARCH_QWEN4EXP` to `llm_arch_supports_sm_tensor()`'s exclusion list.

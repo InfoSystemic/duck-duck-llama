@@ -38,6 +38,18 @@ The September 11 unary/scale comparison records 15.39 to 15.71 mean decode tok/s
 
 The Q4 payload is staged on a volatile RAM-backed volume, approximately 186 GiB. Reboot staging, per-node placement, and coexistence with Full affect the operational recipe. Fresh controls, completed-answer checks, and larger-context measurements remain open.
 
+## Before the first launch
+
+The published engine needs [one patch](../../patches/glm5next-x16-moe-expert-bound.patch) to run this model at all: the x16
+mixed-expert path sizes its active-expert list at 256 and this model has 288 routed experts, so the first decoded token aborts
+on `GGML_ASSERT(n_as <= 256)`. The four-socket host ran a private object with the larger bound, so no recorded result is
+affected, but nothing in this repository exercised the published path at that expert count until an outside tester did.
+
+Speculative decoding also needs the MTP draft as its own file, and there is no download for it. The `nextn` tensors ship
+inside the main GGUF — a stock loader lists them as `blk.45.nextn.*` unused and ignores them — and
+[extract-glm5next-mtp-gguf.py](../../engineering/2026-09-08/archive/serving/glm53-flash/extract-glm5next-mtp-gguf.py) writes
+them out as the standalone sidecar that `--spec-draft-model` expects.
+
 ## Running it on fewer sockets
 
 Every number on this page is from four sockets of sixteen cores with twenty-four DDR4-2400 channels, measured at 381.6 GB/s
