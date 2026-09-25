@@ -1,0 +1,106 @@
+--- a/ggml/src/ggml-cpu/ggml-cpu.c
++++ b/ggml/src/ggml-cpu/ggml-cpu.c
+@@ -1999,6 +1999,72 @@
+     }
+ }
+ 
++// GGML_CPU_MOE_WEIGHTED_SUM_FUSION=2: the same fusion, bit-identical to the unfused graph. The MUL node rounds each
++// weighted expert value on its own and the ADD nodes then add them in slot order; ggml_vec_mad_f32 fuses that into
++// one FMA, which rounds once, so its sums differ in the last bit. Here every product is rounded first (the empty asm
++// on EVERY product, the first one included, keeps GCC's default -ffp-contract=fast from fusing it back into an FMA)
++// and added in slot order. Replaces a MUL over
++// [n_embd, n_expert_used, n_tokens] plus n_expert_used - 1 ADD nodes (MiMo prefill: ~460 MB of traffic and 8 barriers
++// per layer per node) with one pass that reads the expert outputs once.
++static void ggml_compute_forward_moe_weighted_sum_exact(
++        const struct ggml_compute_params * params,
++        const struct ggml_tensor * mul,
++        struct ggml_tensor * dst) {
++
++    const struct ggml_tensor * experts = mul->src[0];
++    const struct ggml_tensor * weights = mul->src[1];
++
++    GGML_ASSERT(experts->type == GGML_TYPE_F32 && weights->type == GGML_TYPE_F32);
++    GGML_ASSERT(mul->type == GGML_TYPE_F32 && dst->type == GGML_TYPE_F32);
++    GGML_ASSERT(experts->ne[0] == mul->ne[0] && experts->ne[1] == mul->ne[1] && experts->ne[2] == mul->ne[2]);
++    GGML_ASSERT(weights->ne[0] == 1 && weights->ne[1] == experts->ne[1] && weights->ne[2] == experts->ne[2]);
++    GGML_ASSERT(dst->ne[0] == experts->ne[0] && dst->ne[1] == experts->ne[2]);
++    GGML_ASSERT(experts->nb[0] == sizeof(float) && weights->nb[0] == sizeof(float) && dst->nb[0] == sizeof(float));
++    GGML_ASSERT(experts->ne[1] <= 16);
++
++    const int64_t n_embd = experts->ne[0];
++    const int64_t n_expert_used = experts->ne[1];
++    const int64_t n_tokens = experts->ne[2];
++    const int ith = params->ith;
++    const int nth = params->nth;
++
++    const int64_t ir0_start = (n_embd*ith)/nth;
++    const int64_t ir0_end = (n_embd*(ith + 1))/nth;
++
++    for (int64_t it = 0; it < n_tokens; ++it) {
++        float * out = (float *) ((char *) dst->data + it*dst->nb[1]);
++        const float * src[16];
++        float w[16];
++        for (int64_t ie = 0; ie < n_expert_used; ++ie) {
++            src[ie] = (const float *) ((const char *) experts->data + it*experts->nb[2] + ie*experts->nb[1]);
++            w[ie] = *(const float *) ((const char *) weights->data + it*weights->nb[2] + ie*weights->nb[1]);
++        }
++        int64_t i = ir0_start;
++#if defined(__AVX512F__)
++        for (; i + 16 <= ir0_end; i += 16) {
++            __m512 acc = _mm512_mul_ps(_mm512_loadu_ps(src[0] + i), _mm512_set1_ps(w[0]));
++            __asm__("" : "+v"(acc));
++            for (int64_t ie = 1; ie < n_expert_used; ++ie) {
++                __m512 v = _mm512_mul_ps(_mm512_loadu_ps(src[ie] + i), _mm512_set1_ps(w[ie]));
++                __asm__("" : "+v"(v));
++                acc = _mm512_add_ps(acc, v);
++            }
++            _mm512_storeu_ps(out + i, acc);
++        }
++#endif
++        for (; i < ir0_end; ++i) {
++            float acc = src[0][i] * w[0];
++            __asm__("" : "+x"(acc));
++            for (int64_t ie = 1; ie < n_expert_used; ++ie) {
++                float v = src[ie][i] * w[ie];
++                __asm__("" : "+x"(v));
++                acc = acc + v;
++            }
++            out[i] = acc;
++        }
++    }
++}
++
+ static void * incr_ptr_aligned(void ** p, size_t size, size_t align) {
+ 
+     void * ptr = *p;
+@@ -3528,7 +3594,7 @@
+ static bool ggml_cpu_moe_gate_up_fusion = false;
+ static bool ggml_cpu_moe_clamp_fusion = false;
+ static bool ggml_cpu_ffn_gate_up_fusion = false;
+-static bool ggml_cpu_moe_weighted_sum_fusion = false;
++static int  ggml_cpu_moe_weighted_sum_fusion = 0;   // 1: vec_mad (FMA) fusion; 2: bit-identical to the unfused graph
+ static bool ggml_cpu_moe_down_weighted_sum_fusion = false;
+ static const char * ggml_cpu_op_profile_filter = NULL;
+ static const char * ggml_cpu_op_profile_arm_file = NULL;
+@@ -3718,7 +3784,11 @@
+                 }
+ 
+                 if (valid) {
+-                    ggml_compute_forward_moe_weighted_sum_fused(params, node, previous);
++                    if (ggml_cpu_moe_weighted_sum_fusion == 2) {
++                        ggml_compute_forward_moe_weighted_sum_exact(params, node, previous);
++                    } else {
++                        ggml_compute_forward_moe_weighted_sum_fused(params, node, previous);
++                    }
+                     return n_fusion_nodes - 1;
+                 }
+             }
+@@ -4843,7 +4913,7 @@
+         }
+         {
+             const char * env = getenv("GGML_CPU_MOE_WEIGHTED_SUM_FUSION");
+-            ggml_cpu_moe_weighted_sum_fusion = (env != NULL && atoi(env) == 1);
++            ggml_cpu_moe_weighted_sum_fusion = env != NULL && (atoi(env) == 1 || atoi(env) == 2) ? atoi(env) : 0;
+         }
+         {
+             const char * env = getenv("GGML_CPU_MOE_DOWN_WEIGHTED_SUM_FUSION");

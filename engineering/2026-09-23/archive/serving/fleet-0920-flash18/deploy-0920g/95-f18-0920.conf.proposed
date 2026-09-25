@@ -1,0 +1,23 @@
+# GLM-5.3-Flash f18 stack, revision g (2026-09-20). Revision f plus the overlap-proof pooled-indexer fusion, bit-exact:
+#   the 14-node pool-fusion matcher (ggml-cpu.c, pool-fusion.inc) rejected any layer whose output the allocator had placed over
+#   `pool_cells`; once the LAST DSA layer's GET_ROWS has consumed pool_cells that is exactly what happens at depth, so layer 43 ran
+#   the unfused gather/permute/softmax chain (+51 ms per verify graph at 128K, ~+13 ms at 33K). Both pool kernels now snapshot the
+#   cell indices they need and barrier before writing, and the matcher only rejects overlap with the KV cache or the weight.
+#   No new environment: libggml-cpu is the only library that changed (ggml-cpu.c.o rebuilt from cpu/cfuse with the recorded command;
+#   the unpatched copy reproduces the deployed object byte for byte; ops/dispatch/repack objects as in revision f).
+# Rollback to revision f: cp ../deploy-0920f/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+# Rollback to stock:      rm the installed drop-in; systemctl --user daemon-reload; systemctl --user restart glm53-flash-production.service
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920g:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=15
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_MTP_PAD_MAX_CTX=1048576
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000
+Environment=GGML_CPU_NUMA_SHARED_TEAM=1
+Environment=LLAMA_F18_MTP_QROWS=1
+Environment=GGML_META_F18=3

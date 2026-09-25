@@ -8,9 +8,10 @@ The archive is the detailed engineering record behind the [case studies](../docs
 | --- | ---: | ---: | ---: | ---: |
 | [2026-09-08](2026-09-08/README.md) | 5,015 | 0 | 8 | 5 |
 | [2026-09-12](2026-09-12/README.md) | 664 | 5,011 | 13 | 0 |
-| [2026-09-20](2026-09-20/README.md) | 319 | 0 | 0 | 0 |
+| [2026-09-20](2026-09-20/README.md) | 407 | 0 | 0 | 0 |
+| [2026-09-23](2026-09-23/README.md) | 216 | 0 | 2 layers | 0 |
 
-The September 8 snapshot includes its September 9–10 follow-ups. The September 12 snapshot adds September 11–12 engineering and references unchanged earlier files. The September 20 snapshot is a curated subset for the GLM-5.3-Flash decode work of September 18–20; its source deltas are the [dated patches](../patches/README-20260920-glm5next.md). Git history preserves previous publication revisions.
+The September 8 snapshot includes its September 9–10 follow-ups. The September 12 snapshot adds September 11–12 engineering and references unchanged earlier files. The September 20 snapshot is a curated subset for the GLM-5.3-Flash decode work of September 18–20; its source deltas are the [dated patches](../patches/README-20260920-glm5next.md). The September 23 snapshot covers MiMo-V2.6-Pro-RL, GLM-5.3-Flash revisions g–l and the depth campaign, Cascade Lake micro-benchmarks and Qwen-Image-2.1; its two engine layers rebuild the production MiMo runtime, and its assembler built redaction into export rather than relying on a later history rewrite. Git history preserves previous publication revisions.
 
 ## Find an artifact
 
@@ -34,6 +35,8 @@ Run these commands from the repository root. The [generated catalog](catalog.jso
 | Benchmark and lifecycle controls | [A/B/A runner](2026-09-12/archive/serving/fleet-0912/AB-PROFILES.md) |
 | Full split granularity | [Source, metadata checks, and candidate build](2026-09-12/archive/serving/fleet-0912/glmfull-split/README.md) |
 | RAM-cache placement | [NUMA relocation utility](2026-09-12/archive/serving/fleet-0912/numa/README.md) |
+| MiMo-V2.6-Pro-RL: conversion, tensor parallelism, the DFlash drafter, CPU kernels, vision, tool calls | [Snapshot map](2026-09-23/README.md), [guide](../docs/models/mimo-v26-pro.md), [case study](../docs/case-studies/block-drafter.md) |
+| GLM-5.3-Flash at depth, revisions g–l | [Depth plan and log](2026-09-23/archive/serving/fleet-0920-flash18/DEPTH-CAMPAIGN-PLAN-20260920.md), [drop-ins](2026-09-23/README.md#glm-53-flash-september-20-evening) |
 | DeepSeek native CPU runtime | [CPU tuning](2026-09-08/archive/serving/fleet-0903/DEEPSEEK-V41-CPU-TUNING-20260910.md), [Engram lookup](2026-09-08/archive/serving/fleet-0903/DEEPSEEK-V41-ENGRAM-LOOKUP-20260910.md) |
 | DeepSeek new components and context | [Compressor/sparse prefill](2026-09-12/archive/serving/fleet-0912/deepseek/README.md), [context/cache recovery](2026-09-12/archive/serving/fleet-0912/deepseek-context/README.md) |
 | DeepSeek upstream port | [Assessment, fixes, and build evidence](2026-09-12/archive/serving/fleet-0912/upstream/DEEPSEEK-V41-UPSTREAM-20260912.md) |
@@ -50,6 +53,7 @@ Full source patches are alternatives, not one patch stack. Separate overlays hav
 python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-08
 python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-12
 python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-20
+python3 tools/verify_engineering_snapshot.py --snapshot engineering/2026-09-23
 ```
 
 See [reproduction](../docs/reproducing.md) and [provenance](../docs/provenance.md) before rebuilding a measured configuration.

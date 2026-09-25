@@ -1,0 +1,7 @@
+   depth  prompt tok  prefill t/s  decode t/s  tok/cyc  accept   wall s
+    4057        4067         42.1       13.29    5.818   0.981    101.4
+   16201       12155         36.7        6.43    2.462   0.551    341.1
+
+prompt tok is the NEW tokens prefilled at that step, not the whole context -- the cache carries the rest, which
+is what an append-only conversation actually pays. A decode rate that holds up across depths means the sliding
+window is doing its job; a falling one means the 10 full-attention layers dominate.

@@ -1,0 +1,14 @@
+diff --git a/tools/mtmd/clip.cpp b/tools/mtmd/clip.cpp
+index 913f50e..bdeea3f 100644
+--- a/tools/mtmd/clip.cpp
++++ b/tools/mtmd/clip.cpp
+@@ -1696,6 +1696,9 @@ struct clip_model_loader {
+                         hparams.wa_pattern_mode.assign(pat.begin(), pat.end());
+                         get_u32(KEY_IMAGE_MIN_PIXELS, hparams.image_min_pixels);
+                         get_u32(KEY_IMAGE_MAX_PIXELS, hparams.image_max_pixels);
++                        // --image-min/max-tokens override the metadata pixel limits (no-op when not given);
++                        // without this the flags were silently ignored for this projector
++                        hparams.set_limit_image_tokens();
+                         hparams.set_warmup_n_tokens(46*46); // avoid OOM on warmup
+                     } break;
+                 case PROJECTOR_TYPE_STEP3VL:

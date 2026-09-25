@@ -1,0 +1,517 @@
+diff --git a/ggml/src/ggml-cpu/ggml-cpu.c b/ggml/src/ggml-cpu/ggml-cpu.c
+index 812f5bf..9066dfb 100644
+--- a/ggml/src/ggml-cpu/ggml-cpu.c
++++ b/ggml/src/ggml-cpu/ggml-cpu.c
+@@ -3455,7 +3455,7 @@ struct ggml_cplan ggml_graph_plan(
+                         size_t n_chunks = n_tasks;
+                         size_t decode   = sizeof(float)*(neq2*n_chunks*(2+DV) + n_tasks*(DK + 2*DV));
+ 
+-                        cur += MAX(prefill, decode);
++                        cur += MAX(MAX(prefill, decode), ggml_cpu_fa_gqa_work_size(node, n_tasks));
+                     } break;
+                 case GGML_OP_FLASH_ATTN_BACK:
+                     {
+diff --git a/ggml/src/ggml-cpu/ops.cpp b/ggml/src/ggml-cpu/ops.cpp
+index 0ac6ae8..481227b 100644
+--- a/ggml/src/ggml-cpu/ops.cpp
++++ b/ggml/src/ggml-cpu/ops.cpp
+@@ -9166,6 +9166,474 @@ static void ggml_flash_attn_ext_reduce_partials(
+     }
+ }
+ 
++// ---------------------------------------------------------------------------------------------------------------
++// GQA-grouped split-KV flash attention for small query batches (decode, speculative verify), GGML_CPU_FA_GQA=1.
++//
++// The decode paths above run one (query row, Q head) pair at a time over the whole KV range. Under grouped-query
++// attention that streams every K/V row rk2 x N times per call (MiMo-V2.6-Pro under 4-way tensor parallelism: 16 Q
++// heads per KV head x 8 verify rows = 128 passes over the cache per layer), and V is accumulated in FP16. Here all
++// Q heads sharing a KV head, times a group of query rows, form one [G x DK] block that meets each K/V tile once:
++// scores and P*V are two small GEMMs (simd_gemm) with F32 accumulation. The KV range is split into chunks so every
++// thread has work even with two KV heads, and the partial (M, S, O) of each chunk are merged at the end.
++// ---------------------------------------------------------------------------------------------------------------
++
++static constexpr int64_t FA_GQA_T     = 64;   // KV cells per tile
++static constexpr int64_t FA_GQA_G_MAX = 128;  // queries per group: rows x (Q heads of one KV head)
++
++// GGML_CPU_FA_GQA=1: decode and speculative-verify batches; =2: prompt batches as well
++static int fa_gqa_level() {
++    static const int level = [] {
++        const char * value = getenv("GGML_CPU_FA_GQA");
++        return value ? atoi(value) : 0;
++    }();
++    return level;
++}
++
++// The shapes this path takes; everything else keeps the existing kernels.
++static bool fa_gqa_eligible(const ggml_tensor * dst) {
++#if !defined(GGML_SIMD) || defined(__ARM_FEATURE_SVE) || defined(__riscv_v_intrinsic)
++    GGML_UNUSED(dst);
++    return false;
++#else
++    if (fa_gqa_level() <= 0) {
++        return false;
++    }
++    const ggml_tensor * q    = dst->src[0];
++    const ggml_tensor * k    = dst->src[1];
++    const ggml_tensor * v    = dst->src[2];
++    const ggml_tensor * mask = dst->src[3];
++    if (q->type != GGML_TYPE_F32 || k->type != v->type || (k->type != GGML_TYPE_F16 && k->type != GGML_TYPE_F32)) {
++        return false;
++    }
++    if (q->ne[3] != 1 || k->ne[3] != 1 || v->ne[3] != 1) {
++        return false;
++    }
++    if (mask && (mask->type != GGML_TYPE_F16 || mask->ne[2] != 1 || mask->ne[3] != 1)) {
++        return false;
++    }
++    float max_bias = 0.0f;
++    float softcap  = 0.0f;
++    memcpy(&max_bias, (const float *) dst->op_params + 1, sizeof(float));
++    memcpy(&softcap,  (const float *) dst->op_params + 2, sizeof(float));
++    if (max_bias != 0.0f || softcap != 0.0f) {
++        return false;
++    }
++    const int64_t n_head    = q->ne[2];
++    const int64_t n_head_kv = k->ne[2];
++    if (n_head % n_head_kv != 0 || v->ne[2] != n_head_kv || k->ne[1] < 1) {
++        return false;
++    }
++    // prompt batches keep the tiled path unless level 2
++    return n_head / n_head_kv <= FA_GQA_G_MAX && (fa_gqa_level() >= 2 || q->ne[1] < (int64_t) ggml_fa_tile_config::Q);
++#endif
++}
++
++static int64_t fa_gqa_thread_floats(int64_t DK, int64_t DV) {
++    const int64_t G = FA_GQA_G_MAX;
++    const int64_t T = FA_GQA_T;
++    // Qf, O, scores, K tile, V tile, running max, running sum, mask tile, padding
++    return G*DK + G*DV + G*T + DK*T + T*DV + 2*G + G*T + 2*(int64_t) CACHE_LINE_SIZE_F32;
++}
++
++// upper bound on KV chunks per (row group, KV head); the partials buffer is sized from it
++static int64_t fa_gqa_max_chunks(int nth, int64_t n_head_kv) {
++    return std::max<int64_t>(1, (4*nth + n_head_kv - 1) / n_head_kv);
++}
++
++size_t ggml_cpu_fa_gqa_work_size(const struct ggml_tensor * node, int n_tasks) {
++    if (!fa_gqa_eligible(node)) {
++        return 0;
++    }
++    const int64_t DK        = node->src[1]->ne[0];
++    const int64_t DV        = node->src[2]->ne[0];
++    const int64_t N         = node->src[0]->ne[1];
++    const int64_t n_head    = node->src[0]->ne[2];
++    const int64_t n_head_kv = node->src[1]->ne[2];
++    // worst case over the row-group sizes fa_gqa_make_plan can choose (it only ever halves NR)
++    const int64_t rk2 = n_head / n_head_kv;
++    int64_t slots = 0;
++    for (int64_t NR = std::min<int64_t>(std::max<int64_t>(1, FA_GQA_G_MAX / rk2), N); ; NR = (NR + 1) / 2) {
++        const int64_t n_rg   = (N + NR - 1) / NR;
++        const int64_t groups = n_rg * n_head_kv;
++        const int64_t nch    = std::min(std::max<int64_t>(1, (4*n_tasks + groups - 1) / groups), fa_gqa_max_chunks(n_tasks, n_head_kv));
++        slots = std::max(slots, groups * nch * rk2 * NR);
++        if (NR == 1) {
++            break;
++        }
++    }
++    return sizeof(float) * (n_tasks * fa_gqa_thread_floats(DK, DV) + slots * (2 + DV));
++}
++
++struct fa_gqa_plan {
++    int64_t lo;        // first KV cell of the visible span, tile-aligned
++    int64_t hi;        // one past the last visible KV cell
++    int64_t NR;        // query rows per row group
++    int64_t n_rg;      // row groups
++    int64_t n_chunks;  // KV chunks per (row group, KV head)
++    int64_t chunk;     // KV cells per chunk, a multiple of FA_GQA_T
++    int64_t n_items;   // n_rg * n_head_kv * n_chunks
++};
++
++// Planned at run time from the mask: sliding-window layers see a few tiles out of a much longer cache, so the
++// work is spread over the visible span only, and query rows are split into smaller groups when there are too few
++// tiles to keep every thread busy. Every thread derives the same plan from the same inputs.
++static fa_gqa_plan fa_gqa_make_plan(const ggml_tensor * dst, int nth) {
++    const ggml_tensor * q    = dst->src[0];
++    const ggml_tensor * k    = dst->src[1];
++    const ggml_tensor * mask = dst->src[3];
++    const int64_t N         = q->ne[1];
++    const int64_t rk2       = q->ne[2] / k->ne[2];
++    const int64_t n_head_kv = k->ne[2];
++    const int64_t n_kv      = k->ne[1];
++    const int64_t T         = FA_GQA_T;
++
++    fa_gqa_plan p;
++    int64_t lo = n_kv;
++    int64_t hi = 0;
++    if (mask) {
++        for (int64_t r = 0; r < N; r++) {
++            const ggml_fp16_t * mp = (const ggml_fp16_t *) ((const char *) mask->data + r*mask->nb[1]);
++            int64_t a = 0;
++            while (a < lo && GGML_CPU_FP16_TO_FP32(mp[a]) == -INFINITY) {
++                a++;
++            }
++            lo = std::min(lo, a);
++            int64_t b = n_kv;
++            while (b > hi && GGML_CPU_FP16_TO_FP32(mp[b - 1]) == -INFINITY) {
++                b--;
++            }
++            hi = std::max(hi, b);
++        }
++        if (hi <= lo) {   // nothing visible anywhere: a single empty item keeps the merge uniform
++            lo = 0;
++            hi = 0;
++        }
++    } else {
++        lo = 0;
++        hi = n_kv;
++    }
++    p.lo = lo / T * T;
++    p.hi = hi;
++    const int64_t n_tiles = std::max<int64_t>(1, (p.hi - p.lo + T - 1) / T);
++
++    const int64_t max_chunks = fa_gqa_max_chunks(nth, n_head_kv);
++    p.NR = std::min<int64_t>(std::max<int64_t>(1, FA_GQA_G_MAX / rk2), N);
++    while (p.NR > 1 && ((N + p.NR - 1) / p.NR) * n_head_kv * n_tiles < 2*nth && rk2 * ((p.NR + 1) / 2) >= 16) {
++        p.NR = (p.NR + 1) / 2;
++    }
++    p.n_rg = (N + p.NR - 1) / p.NR;
++    const int64_t groups = p.n_rg * n_head_kv;
++    const int64_t want   = std::max<int64_t>(1, (4*nth + groups - 1) / groups);
++    const int64_t nch    = std::min(std::min(want, n_tiles), max_chunks);
++    p.chunk    = (n_tiles + nch - 1) / nch * T;
++    p.n_chunks = std::max<int64_t>(1, (p.hi - p.lo + p.chunk - 1) / p.chunk);
++    p.n_items  = groups * p.n_chunks;
++    return p;
++}
++#if defined(__AVX512F__)
++// In-register 16x16 float transpose: r[i] holds row i on entry, column i on exit.
++static inline void fa_gqa_transpose16(__m512 r[16]) {
++    __m512 t[16];
++    for (int i = 0; i < 16; i += 2) {
++        t[i]     = _mm512_unpacklo_ps(r[i], r[i + 1]);
++        t[i + 1] = _mm512_unpackhi_ps(r[i], r[i + 1]);
++    }
++    for (int i = 0; i < 16; i += 4) {
++        r[i]     = _mm512_shuffle_ps(t[i],     t[i + 2], _MM_SHUFFLE(1, 0, 1, 0));
++        r[i + 1] = _mm512_shuffle_ps(t[i],     t[i + 2], _MM_SHUFFLE(3, 2, 3, 2));
++        r[i + 2] = _mm512_shuffle_ps(t[i + 1], t[i + 3], _MM_SHUFFLE(1, 0, 1, 0));
++        r[i + 3] = _mm512_shuffle_ps(t[i + 1], t[i + 3], _MM_SHUFFLE(3, 2, 3, 2));
++    }
++    for (int i = 0; i < 4; i++) {
++        t[i]      = _mm512_shuffle_f32x4(r[i],     r[i + 4],  0x88);
++        t[i + 4]  = _mm512_shuffle_f32x4(r[i],     r[i + 4],  0xdd);
++        t[i + 8]  = _mm512_shuffle_f32x4(r[i + 8], r[i + 12], 0x88);
++        t[i + 12] = _mm512_shuffle_f32x4(r[i + 8], r[i + 12], 0xdd);
++    }
++    for (int i = 0; i < 4; i++) {
++        r[i]      = _mm512_shuffle_f32x4(t[i],     t[i + 8],  0x88);
++        r[i + 8]  = _mm512_shuffle_f32x4(t[i],     t[i + 8],  0xdd);
++        r[i + 4]  = _mm512_shuffle_f32x4(t[i + 4], t[i + 12], 0x88);
++        r[i + 12] = _mm512_shuffle_f32x4(t[i + 4], t[i + 12], 0xdd);
++    }
++}
++#endif
++
++// C[M x N] += A[M x K] * B[K x N] for the GQA flash-attention tiles. simd_gemm walks 4-row blocks across all N
++// columns, re-streaming the whole B panel (48 KB for the QK^T tile, larger than L1) for every 4 rows. Here 32-column
++// panels are outermost, so each K x 32 slice of B (24 KB for DK 192) stays L1-resident while 12-row blocks of A stream
++// past it. Every C element still receives the same FMA sequence in the same order, so the result is bit-identical.
++static void fa_gqa_gemm(float * GGML_RESTRICT C, const float * GGML_RESTRICT A, const float * GGML_RESTRICT B, int M, int K, int N) {
++    constexpr int KN = GGML_F32_EPR;
++    if (N % (2*KN) != 0) {
++        simd_gemm(C, A, B, M, K, N);
++        return;
++    }
++    for (int jj = 0; jj < N; jj += 2*KN) {
++        int ii = 0;
++        for (; ii + 12 <= M; ii += 12) {
++            simd_gemm_ukernel<12, 2>(C + (int64_t) ii*N + jj, A + (int64_t) ii*K, B + jj, K, N);
++        }
++        for (; ii + 4 <= M; ii += 4) {
++            simd_gemm_ukernel<4, 2>(C + (int64_t) ii*N + jj, A + (int64_t) ii*K, B + jj, K, N);
++        }
++        for (; ii < M; ii++) {
++            simd_gemm_ukernel<1, 2>(C + (int64_t) ii*N + jj, A + (int64_t) ii*K, B + jj, K, N);
++        }
++    }
++}
++
++static void ggml_compute_forward_flash_attn_ext_gqa(
++        const ggml_compute_params * params,
++        ggml_tensor * dst,
++        const fa_gqa_plan & p) {
++#if defined(GGML_SIMD) && !defined(__ARM_FEATURE_SVE) && !defined(__riscv_v_intrinsic)
++    const ggml_tensor * q     = dst->src[0];
++    const ggml_tensor * k     = dst->src[1];
++    const ggml_tensor * v     = dst->src[2];
++    const ggml_tensor * mask  = dst->src[3];
++    const ggml_tensor * sinks = dst->src[4];
++
++    const int64_t DK        = k->ne[0];
++    const int64_t DV        = v->ne[0];
++    const int64_t N         = q->ne[1];
++    const int64_t n_head    = q->ne[2];
++    const int64_t n_head_kv = k->ne[2];
++    const int64_t T         = FA_GQA_T;
++    const int64_t rk2       = n_head / n_head_kv;
++    const int64_t Gp        = rk2 * p.NR;   // partial slots per item
++
++    float scale = 1.0f;
++    memcpy(&scale, (const float *) dst->op_params + 0, sizeof(float));
++
++    const int ith = params->ith;
++    const int nth = params->nth;
++
++    const int64_t pstride = 2 + DV;   // per query: M, S, O[DV]
++    GGML_ASSERT(params->wsize >= sizeof(float) * (nth * fa_gqa_thread_floats(DK, DV) + p.n_items * Gp * pstride));
++
++    float * wbase    = (float *) params->wdata + ith * fa_gqa_thread_floats(DK, DV);
++    float * Qf       = wbase;                       // [G x DK]  scaled queries, g = row*rk2 + head
++    float * O        = Qf + FA_GQA_G_MAX*DK;        // [G x DV]  output accumulators
++    float * Sc       = O  + FA_GQA_G_MAX*DV;        // [G x T]   scores, then probabilities
++    float * KT       = Sc + FA_GQA_G_MAX*T;         // [DK x T]  K tile, transposed
++    float * Vt       = KT + DK*T;                   // [T x DV]  V tile
++    float * Mx       = Vt + T*DV;                   // [G]       running max
++    float * Sm       = Mx + FA_GQA_G_MAX;           // [G]       running sum
++    float * Mk       = Sm + FA_GQA_G_MAX;           // [NR x T]  mask tile
++    float * partials = (float *) params->wdata + nth * fa_gqa_thread_floats(DK, DV);
++
++    if (ith == 0) {
++        ggml_threadpool_chunk_set(params->threadpool, nth);
++    }
++    ggml_barrier(params->threadpool);
++
++    for (int64_t item = ith; item < p.n_items; item = ggml_threadpool_chunk_add(params->threadpool, 1)) {
++        const int64_t ch  = item % p.n_chunks;
++        const int64_t ik2 = (item / p.n_chunks) % n_head_kv;
++        const int64_t rg  = item / (p.n_chunks * n_head_kv);
++        const int64_t r0  = rg * p.NR;
++        const int64_t nr  = std::min(p.NR, N - r0);
++        const int64_t G   = rk2 * nr;
++        const int64_t ic0 = p.lo + ch * p.chunk;
++        const int64_t ic1 = std::min(ic0 + p.chunk, p.hi);
++
++        bool started = false;
++        for (int64_t ic = ic0; ic < ic1; ic += T) {
++            const int64_t t = std::min(T, ic1 - ic);
++
++            // mask tile; a tile no row can see is skipped outright
++            bool all_zero = true;
++            if (mask) {
++                bool any = false;
++                for (int64_t rr = 0; rr < nr; rr++) {
++                    const ggml_fp16_t * mp = (const ggml_fp16_t *) ((const char *) mask->data + (r0 + rr)*mask->nb[1]) + ic;
++                    float * mrow = Mk + rr*T;
++                    for (int64_t tk = 0; tk < t; tk++) {
++                        const float m = GGML_CPU_FP16_TO_FP32(mp[tk]);
++                        mrow[tk]  = m;
++                        any      |= m != -INFINITY;
++                        all_zero &= m == 0.0f;
++                    }
++                }
++                if (!any) {
++                    continue;
++                }
++            }
++
++            if (!started) {
++                started = true;
++                for (int64_t rr = 0; rr < nr; rr++) {
++                    for (int64_t j = 0; j < rk2; j++) {
++                        const float * pq = (const float *) ((const char *) q->data + (r0 + rr)*q->nb[1] + (ik2*rk2 + j)*q->nb[2]);
++                        float * dq = Qf + (rr*rk2 + j)*DK;
++                        for (int64_t d = 0; d < DK; d++) {
++                            dq[d] = pq[d] * scale;
++                        }
++                    }
++                }
++                for (int64_t g = 0; g < G; g++) {
++                    Mx[g] = -INFINITY;
++                    Sm[g] = 0.0f;
++                }
++                memset(O, 0, G*DV*sizeof(float));
++            }
++
++            // K tile transposed to [DK x T] (the score GEMM runs along the KV axis), zero-padded
++#if defined(__AVX512F__)
++            if (k->type == GGML_TYPE_F16 && DK % 16 == 0 && T % 16 == 0) {
++                // 16 keys x 16 dims at a time: vector F16->F32 conversion, in-register transpose, 16 row stores.
++                // Same floats as the scalar path (the conversion is exact), at ~1/8 of the instructions.
++                for (int64_t tb = 0; tb < T; tb += 16) {
++                    for (int64_t db = 0; db < DK; db += 16) {
++                        __m512 r[16];
++                        for (int i = 0; i < 16; i++) {
++                            if (tb + i < t) {
++                                const ggml_fp16_t * k16 = (const ggml_fp16_t *) ((const char *) k->data + (ic + tb + i)*k->nb[1] + ik2*k->nb[2]) + db;
++                                r[i] = _mm512_cvtph_ps(_mm256_loadu_si256((const __m256i *) k16));
++                            } else {
++                                r[i] = _mm512_setzero_ps();
++                            }
++                        }
++                        fa_gqa_transpose16(r);
++                        for (int i = 0; i < 16; i++) {
++                            _mm512_storeu_ps(KT + (db + i)*T + tb, r[i]);
++                        }
++                    }
++                }
++            } else
++#endif
++            {
++            if (t < T) {
++                memset(KT, 0, DK*T*sizeof(float));
++            }
++            for (int64_t tk = 0; tk < t; tk++) {
++                const char * kp = (const char *) k->data + (ic + tk)*k->nb[1] + ik2*k->nb[2];
++                if (k->type == GGML_TYPE_F16) {
++                    const ggml_fp16_t * k16 = (const ggml_fp16_t *) kp;
++                    for (int64_t d = 0; d < DK; d++) {
++                        KT[d*T + tk] = GGML_CPU_FP16_TO_FP32(k16[d]);
++                    }
++                } else {
++                    const float * k32 = (const float *) kp;
++                    for (int64_t d = 0; d < DK; d++) {
++                        KT[d*T + tk] = k32[d];
++                    }
++                }
++            }
++            }
++
++            memset(Sc, 0, G*T*sizeof(float));
++            fa_gqa_gemm(Sc, Qf, KT, (int) G, (int) DK, (int) T);
++
++            for (int64_t g = 0; g < G; g++) {
++                float * srow = Sc + g*T;
++                if (mask && !all_zero) {
++                    const float * mrow = Mk + (g / rk2)*T;
++                    for (int64_t tk = 0; tk < t; tk++) {
++                        srow[tk] += mrow[tk];
++                    }
++                }
++                for (int64_t tk = t; tk < T; tk++) {
++                    srow[tk] = -INFINITY;
++                }
++            }
++
++            // online softmax, one query at a time
++            for (int64_t g = 0; g < G; g++) {
++                float * srow = Sc + g*T;
++                float tmax = -INFINITY;
++                ggml_vec_max_f32((int) T, &tmax, srow);
++                if (tmax == -INFINITY) {
++                    memset(srow, 0, T*sizeof(float));
++                    continue;
++                }
++                if (tmax > Mx[g]) {
++                    const float ms = expf(Mx[g] - tmax);   // 0 on the first visible tile
++                    ggml_vec_scale_f32((int) DV, O + g*DV, ms);
++                    Sm[g] *= ms;
++                    Mx[g]  = tmax;
++                }
++                Sm[g] += (float) ggml_vec_soft_max_f32((int) T, srow, srow, Mx[g]);
++            }
++
++            // V tile [T x DV], zero-padded
++            for (int64_t tk = 0; tk < t; tk++) {
++                const char * vp = (const char *) v->data + (ic + tk)*v->nb[1] + ik2*v->nb[2];
++                if (v->type == GGML_TYPE_F16) {
++                    ggml_cpu_fp16_to_fp32((const ggml_fp16_t *) vp, Vt + tk*DV, DV);
++                } else {
++                    memcpy(Vt + tk*DV, vp, DV*sizeof(float));
++                }
++            }
++            if (t < T) {
++                memset(Vt + t*DV, 0, (T - t)*DV*sizeof(float));
++            }
++
++            fa_gqa_gemm(O, Sc, Vt, (int) G, (int) T, (int) DV);
++        }
++
++        float * part = partials + item*Gp*pstride;
++        for (int64_t g = 0; g < G; g++) {
++            float * pg = part + g*pstride;
++            if (!started) {
++                pg[0] = -INFINITY;
++                pg[1] = 0.0f;   // the merge skips empty partials without reading O
++                continue;
++            }
++            pg[0] = Mx[g];
++            pg[1] = Sm[g];
++            memcpy(pg + 2, O + g*DV, DV*sizeof(float));
++        }
++    }
++
++    ggml_barrier(params->threadpool);
++
++    // merge the chunks of each output (row, head); the thread's scratch is free again
++    float * acc = wbase;
++    for (int64_t idx = ith; idx < N*n_head; idx += nth) {
++        const int64_t r   = idx / n_head;
++        const int64_t h   = idx % n_head;
++        const int64_t ik2 = h / rk2;
++        const int64_t rg  = r / p.NR;
++        const int64_t g   = (r % p.NR)*rk2 + (h % rk2);
++
++        float M = -INFINITY;
++        float S = 0.0f;
++        memset(acc, 0, DV*sizeof(float));
++        for (int64_t ch = 0; ch < p.n_chunks; ch++) {
++            const float * pg = partials + ((rg*n_head_kv + ik2)*p.n_chunks + ch)*Gp*pstride + g*pstride;
++            if (pg[1] == 0.0f) {
++                continue;
++            }
++            const float Mn = std::max(M, pg[0]);
++            const float so = expf(M - Mn);
++            const float sn = expf(pg[0] - Mn);
++            for (int64_t d = 0; d < DV; d++) {
++                acc[d] = acc[d]*so + pg[2 + d]*sn;
++            }
++            S = S*so + pg[1]*sn;
++            M = Mn;
++        }
++        if (sinks) {
++            const float s  = ((const float *) sinks->data)[h];
++            const float Mn = std::max(M, s);
++            const float so = expf(M - Mn);
++            ggml_vec_scale_f32((int) DV, acc, so);
++            S = S*so + expf(s - Mn);
++        }
++        const float S_inv = S == 0.0f ? 0.0f : 1.0f/S;
++        float * out = (float *) ((char *) dst->data + (r*dst->ne[1] + h)*dst->nb[1]);
++        for (int64_t d = 0; d < DV; d++) {
++            out[d] = acc[d]*S_inv;
++        }
++    }
++#else
++    GGML_UNUSED(params); GGML_UNUSED(dst); GGML_UNUSED(p);
++    GGML_ABORT("fa_gqa: built without SIMD");
++#endif
++}
++
+ static void ggml_compute_forward_flash_attn_ext_f16(
+         const ggml_compute_params * params,
+         ggml_tensor * dst) {
+@@ -9214,6 +9682,11 @@ static void ggml_compute_forward_flash_attn_ext_f16(
+     // When use_ref is set, force the vec-only reference implementation (no tiling, no KV-chunking)
+     const bool use_ref = params->use_ref;
+ 
++    if (!use_ref && fa_gqa_eligible(dst)) {
++        ggml_compute_forward_flash_attn_ext_gqa(params, dst, fa_gqa_make_plan(dst, nth));
++        return;
++    }
++
+     const bool kv_is_f32_or_f16 = (k->type == GGML_TYPE_F32 || k->type == GGML_TYPE_F16);
+     const bool use_split_kv_path = !use_ref && (neq1 == 1 && neq3 == 1) && kv_is_f32_or_f16 && (k->type == v->type) && q->type == GGML_TYPE_F32 && nek1 >= 512;
+ 
+diff --git a/ggml/src/ggml-cpu/ops.h b/ggml/src/ggml-cpu/ops.h
+index 269955e..c2d85d2 100644
+--- a/ggml/src/ggml-cpu/ops.h
++++ b/ggml/src/ggml-cpu/ops.h
+@@ -90,6 +90,8 @@ void ggml_compute_forward_leaky_relu(const struct ggml_compute_params * params,
+ void ggml_compute_forward_tri(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_fill(const struct ggml_compute_params * params, struct ggml_tensor * dst);
+ void ggml_compute_forward_flash_attn_ext(const struct ggml_compute_params * params, struct ggml_tensor * dst);
++// scratch bytes the GGML_CPU_FA_GQA decode path needs for this node (0 when it does not apply)
++size_t ggml_cpu_fa_gqa_work_size(const struct ggml_tensor * node, int n_tasks);
+ void ggml_compute_forward_flash_attn_back(
+         const struct ggml_compute_params * params,
+         const bool masked,

@@ -1,0 +1,22 @@
+[
+ {
+  "name": "llama.cpp-mimo-tp-layer2",
+  "applies_on": "llama.cpp-glm5n-goal-0904",
+  "source_head": "d0c56cb",
+  "description": "DeepSeek-V4.1 port (JigSawPT, hand-merged) + MiMo-V2 tensor-parallel commit, engine source only",
+  "upstream_base_commit": "2e0e57f1008053bae4902a772da85e3eb99d4aff",
+  "patch": "patches/llama.cpp-mimo-tp-layer2.patch",
+  "patch_sha256": "8fec1c7a37bfba731dcc0c2d26c8536525bef2e61ba4b17c2408972a538c2cf0",
+  "bytes": 324246
+ },
+ {
+  "name": "llama.cpp-mimo-tp-layer3-build-prod-0922j",
+  "applies_on": "llama.cpp-mimo-tp-layer2",
+  "source_head": "build-prod-0922j",
+  "description": "DFlash fixes, grouped-query split-KV flash attention, x16 GEMM, XML tool-call parser, image limits",
+  "upstream_base_commit": "2e0e57f1008053bae4902a772da85e3eb99d4aff",
+  "patch": "patches/llama.cpp-mimo-tp-layer3-build-prod-0922j.patch",
+  "patch_sha256": "1a4ee72160f72b25f5fb1e4597f001b1c08f7c9f6c1e837d8842bd38207d6f5b",
+  "bytes": 87709
+ }
+]

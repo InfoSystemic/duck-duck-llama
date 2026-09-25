@@ -1,0 +1,24 @@
+glm5next: lightning-indexer score with 16 cached rows per query pass, and radix top-k for long rows (revision h, 2026-09-20)
+
+Parent: the revision g ops.cpp over the published 09-11 CPU sources. Library: libggml-cpu only. Switch: GGML_F18_FEATURES bit 4
+for the score kernel; the top-k change rides the existing bit 1 (selection top-k) for rows above 16,384 entries.
+
+Score kernel. `ggml_compute_forward_lightning_indexer` computed sum_h relu(q_h . k) * w_h + mask for every cached pool row by
+calling ggml_vec_dot_f32 96 times per row (32 heads x 3 query rows): each call reloads the row, runs the four-accumulator ladder,
+reduces, and returns through a function pointer, ~10-13 GFLOP/s per core. At 128K context (34,178 pools) that was 3.4 ms per DSA
+layer, 37 ms per verify graph. The new path keeps every query vector in eight zmm registers and applies it to a block of 16 rows
+(8 KB, L1-resident), so the 96 query vectors (48 KB) stream from L2 once per block instead of once per row. The per-dot arithmetic
+is exactly ggml_vec_dot_f32's AVX-512 path (GGML_F32_STEP 64, four accumulators, fma with a zero addend on the first half, the
+pairwise reduce, _mm512_reduce_add_ps), heads are summed in head order in float, and the mask is added last: the outputs are
+identical (tools/li_fast_check.cpp loads the library, flips the control word, and compares 24,000 / 102,534 / 393,216 values:
+0 differ) at 2.3x per core (12.8 -> 29.8 GFLOP/s). What remains is the per-dot horizontal reduce, which exactness fixes; a real
+GEMM would change the summation order and is a separate, quality-gated option.
+
+Top-k. The selection path (nth_element on a float copy, tie fallback to the reference partial_sort) was gated to rows up to
+16,384 entries because partial_sort wins above ~25K. Above the gate the k-th largest value is now found by an MSB-first radix
+select over order-preserving key bits (one pass over the row, then passes over the shrinking candidate set, no comparisons); the
+threshold value is the same, so the selected set and the tie fallback are unchanged (tools/topk_radix_check.cpp: nine rows of
+20K-137K entries with ties and -inf, identical sets, ~2.4x per row).
+
+Production numbers are in the README table: no change at 4K by construction (the indexer is ~2 ms of a 105 ms graph there); the
+expected gain at 128K is ~19 ms per cycle of the 70 ms slope.

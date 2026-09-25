@@ -1,0 +1,25 @@
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index 545c824..2b21cc3 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -1181,7 +1181,19 @@ struct common_speculative_impl_draft_dflash : public common_speculative_impl {
+ 
+             const int32_t n = (int32_t) dp.n_past;
+ 
+-            const int32_t n_draft = params.n_max;
++            // A tensor-parallel load of a 500 GiB target takes ~30 minutes, so measuring one draft length per launch is
++            // hours of wall clock for a handful of numbers. Reading a clamp out of a file on every draft call turns the
++            // whole n-max sweep into one load, the same trick LLAMA_MTP_DRAFT_N_FILE plays for draft-mtp. It can only
++            // LOWER n_max, so it never exceeds what the block size allows.
++            int32_t n_draft = params.n_max;
++            static const char * limit_file = getenv("LLAMA_SPEC_DRAFT_N_FILE");
++            if (limit_file) {
++                std::ifstream input(limit_file);
++                int32_t requested = 0;
++                if (input >> requested && requested > 0) {
++                    n_draft = std::min(n_draft, requested);
++                }
++            }
+ 
+             const int32_t n_block_tokens = n_draft + (is_dspark && sample_from_anchor ? 0 : 1);
+             i_block_beg[seq_id] = batch.n_tokens;

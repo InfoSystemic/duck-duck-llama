@@ -1,0 +1,21 @@
+# GLM-5.3-Flash f18 stack, revision i (2026-09-20). Revision h plus GGML_CPU_ROUTER_F16=1 (no library change).
+#   The MoE router weight is F32 in this GGUF: blk.N.ffn_gate_inp [4096, 288] read once per layer per verify row, 3.1 ms of the
+#   105 ms verify graph at 71 GB/s per socket, i.e. at the wall on bytes it does not need. Storing it as F16 at load halves those
+#   bytes; the kernel converts per row and the 09-01 work found the logits bit-identical on the 4-layer oracle. The gate here is
+#   the greedy fixture text hash: if it moves, this is not bit-identical on the full model and the revision is rolled back.
+# Rollback to revision h: cp ../deploy-0920h/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920i:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=31
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_MTP_PAD_MAX_CTX=1048576
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000
+Environment=GGML_CPU_NUMA_SHARED_TEAM=1
+Environment=LLAMA_F18_MTP_QROWS=1
+Environment=GGML_META_F18=3
+Environment=GGML_CPU_ROUTER_F16=1

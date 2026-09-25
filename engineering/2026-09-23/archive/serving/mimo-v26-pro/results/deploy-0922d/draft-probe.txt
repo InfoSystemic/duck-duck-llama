@@ -1,0 +1,9 @@
+case                 tok/s  tok/cyc  drafted  accepted   rate
+verbatim repeat      16.45    7.385       83        83  1.000
+counting             19.93    7.385       83        83  1.000
+memorised list       10.14    3.840      118        71  0.602
+code                 12.43    5.053      105        77  0.733
+open prose            6.91    2.087      104        50  0.481
+
+If even 'verbatim repeat' accepts under ~40%, the MTP head is not receiving a correct hidden state or the wrong
+head is being used for the draft step -- a plumbing bug, not a weak head. Compare with GLM-5.3-Flash at 0.775.

@@ -1,0 +1,26 @@
+# GLM-5.3-Flash f18 stack, revision j (2026-09-20). Revision h plus load-time requantisation of the DENSE Q8_0 weights to Q6_K.
+#   (Revision i, GGML_CPU_ROUTER_F16=1, was REJECTED: 19.69/19.83 tok/s against h's 20.5 and draft acceptance 0.775 -> 0.763, so
+#   the F16 router changes expert routing on this model rather than being bit-identical as the 09-01 oracle suggested.)
+#   NOT bit-identical: must not ship without the perplexity gate (run/ppl_glm.py). Attention, shared-expert, output and dense-FFN
+#   weights are Q8_0 (8.5 bits) and read at 71-94 GB/s per socket, at the wall; Q6_K is 0.772x the bytes, sized at ~6.5 ms of the
+#   105 ms verify graph. The routed experts are NOT touched. Watch draft acceptance as well as tok/s: if it falls, the trade is bad
+#   whatever perplexity says.
+# Rollback to revision h: cp ../deploy-0920h/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920j:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=31
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_MTP_PAD_MAX_CTX=1048576
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000
+Environment=GGML_CPU_NUMA_SHARED_TEAM=1
+Environment=LLAMA_F18_MTP_QROWS=1
+Environment=GGML_META_F18=3
+Environment=GGML_CPU_ATTN_REQUANT=q6_K
+Environment=GGML_CPU_SHEXP_REQUANT=q6_K
+Environment=GGML_CPU_OUTPUT_REQUANT=q6_K
+Environment=GGML_CPU_DENSE_FFN_REQUANT=q6_K

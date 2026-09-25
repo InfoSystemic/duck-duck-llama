@@ -1,0 +1,23 @@
+# GLM-5.3-Flash f18 stack, revision l (2026-09-20). Revision h plus the composite drafter at the SELECTIVE lookup length.
+#   Revision k used n_match 8 and lost badly on novel text: 16.07 / 18.51 / 17.66 tok/s with draft acceptance 0.507-0.655 against
+#   revision h's 20.5 and 0.775, because ngram-mod REPLACES the MTP draft whenever it matches and an 8-token context match is far
+#   too loose next to a well-trained MTP head. n_match 24 (the engine default) lets it override only on a 24-token exact match.
+#   The repeated-fixture numbers under k (25.3-25.5 tok/s at acceptance 1.000) are the n-gram cache replaying its own stored
+#   answer -- the cache survives across requests and --no-cache-prompt does not clear it. Never quote a warm ngram-mod number.
+# Rollback to revision h: cp ../deploy-0920h/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920l:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=31
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_MTP_PAD_MAX_CTX=1048576
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000
+Environment=GGML_CPU_NUMA_SHARED_TEAM=1
+Environment=LLAMA_F18_MTP_QROWS=1
+Environment=GGML_META_F18=3
+# systemd Environment= splits on whitespace unless the whole assignment is quoted.
+Environment="EXTRA_ARGS=--spec-type ngram-mod,draft-mtp --spec-ngram-mod-n-max 2 --spec-ngram-mod-n-min 2 --spec-ngram-mod-n-match 24"

@@ -1,0 +1,21 @@
+--- a/ggml/src/ggml-cpu/ops.cpp
++++ b/ggml/src/ggml-cpu/ops.cpp
+@@ -9543,6 +9543,18 @@
+             for (int64_t g = 0; g < G; g++) {
+                 float * srow = Sc + g*T;
+                 float tmax = -INFINITY;
++#if defined(__AVX512F__)
++                // ggml_vec_max_f32 is a scalar loop (a float max reduction does not vectorize without fast-math): a
++                // 64-step dependent vmaxss chain per query row was ~2/3 of the softmax phase. max is exact in any order
++                // (only the sign of a zero maximum could differ, and x - (+-0) feeds identical exps), so bit-identical.
++                if (T % 16 == 0) {
++                    __m512 vm = _mm512_loadu_ps(srow);
++                    for (int64_t tk = 16; tk < T; tk += 16) {
++                        vm = _mm512_max_ps(vm, _mm512_loadu_ps(srow + tk));
++                    }
++                    tmax = _mm512_reduce_max_ps(vm);
++                } else
++#endif
+                 ggml_vec_max_f32((int) T, &tmax, srow);
+                 if (tmax == -INFINITY) {
+                     memset(srow, 0, T*sizeof(float));

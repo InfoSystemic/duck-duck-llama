@@ -1,0 +1,23 @@
+glm5next: pooled-indexer fusion that survives an output placed over its inputs (revision g, 2026-09-20)
+
+Parent: the 09-19 pool-fusion sources (glm-pool-copy-0919/pool-fusion.inc in the C compute file, glm-pool-cache-r2-0920/pool-kernel.inc
+and glm-kpool-wide-0919/pool-scalar.inc in ops.cpp) over the published 09-11 CPU sources. Library: libggml-cpu only.
+
+What it fixes. The 14-node matcher that replaces the pooled-indexer chain (GET_ROWS of every pool member, two permute+cont copies,
+the APE add, softmax, weighted sum) with one fused kernel rejected any layer whose OUTPUT the allocator had placed over the
+`pool_cells` input. `pool_cells` is consumed by all eleven DSA layers, so only after the last one's GET_ROWS can its storage be
+reused, and whether that happens depends on tensor sizes. A 128K-token session restored from the server's RAM prompt cache
+(different cell layout: n_kv 136,712 for 128,416 tokens) hit it on layer 43 and paid the unfused chain: +51 ms per verify graph
+(CONT 22.3 + ADD 18.0 + SOFT_MAX 10.7 ms over a [4,128,34178] member set) on top of a 238 ms graph.
+
+The change. Both pool kernels (wide AVX-512 and scalar) snapshot the cell indices of the pools they own into a thread-local
+buffer, `ggml_barrier`, then compute and write; fusion only ever runs with the full team (single-task nodes never enter the
+fusion path), so the barrier is safe. The matcher then drops the `cells` term of its overlap rejection and keeps the KV cache and
+the APE weight, which cannot overlap a graph temporary. Same bytes out: only the order of the reads changed.
+
+Evidence. Unpatched copies of all three files rebuild the deployed objects byte for byte (ggml-cpu.c.o 1c80cc478a66327e with the
+recorded command plus -ffile-prefix-map). Proxy parity: identical greedy text hashes and draft counts at 8K and 41K. Production:
+4K Codex fixture 19.98 / 20.26 / 20.33 tok/s against 20.15 before, same acceptance; the 8K-128K curve re-measured in a fresh
+session is unchanged (128K: 202 vs 198 ms per cycle, noise), because a fresh session never trips the rejection. This is a
+robustness fix for restored sessions, not a speedup; the same-day trace that suggested +51 ms in the steady state had been taken
+on the restored state (recorded in the benchmark's correction).

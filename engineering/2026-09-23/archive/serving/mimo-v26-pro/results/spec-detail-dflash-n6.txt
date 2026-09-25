@@ -1,0 +1,10 @@
+decode           6.74 tok/s  (81 tokens in 11.9 s)
+prompt           27.1 tok/s (45 tokens)
+verify cycles    35
+tokens/cycle     2.314
+ms/cycle         339.0
+draft acceptance 46/204 = 0.225
+implied bandwidth 294 GB/s at 92.7 GiB/cycle = 77% of this host's 381.6
+
+Reading it: tokens/cycle well below the draft depth + 1 means an acceptance problem (better heads, lower depth).
+A low implied bandwidth percentage with healthy tokens/cycle means a bytes or op-overhead problem instead.

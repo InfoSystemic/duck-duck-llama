@@ -1,0 +1,25 @@
+# GLM-5.3-Flash f18 stack, revision h (2026-09-20). Revision g plus the lightning-indexer score kernel restructured, bit-identical:
+#   GGML_F18_FEATURES=31   bit 4 (cpu/li-fast.inc): the deployed kernel called ggml_vec_dot_f32 96 times per cached pool row
+#                          (32 heads x 3 query rows), ~10-13 GFLOP/s per core. Same arithmetic in the same order (two-step
+#                          four-accumulator ladder, same reduce, head-ordered relu/weight sum, mask last) with 16 rows blocked per
+#                          query pass: 2.3x per core (cpu/test/li_fast_check.cpp: outputs identical at 8K/34K/131K rows). At 128K
+#                          context the score op was 37.5 ms per verify graph (11 layers); expected ~16 ms.
+#   bit 1 (already on): the top-k select path now covers rows above 16,384 entries with an MSB-first radix select (cpu/topk-fast.inc):
+#                          same threshold value, same set, same tie fallback (cpu/test/topk_radix_check.cpp), ~2.4x per row.
+# Libraries: only libggml-cpu changed against revision g (ops.cpp.o rebuilt; ggml-cpu.c.o, ggml-cpu.cpp.o, repack.cpp.o as in g).
+# Rollback to revision g: cp ../deploy-0920g/95-f18-0920.conf.proposed over the installed drop-in; daemon-reload; restart.
+# Rollback to stock:      rm the installed drop-in; systemctl --user daemon-reload; systemctl --user restart glm53-flash-production.service
+[Service]
+Environment=LIB_PREPEND=/home/user/InfoSystemic/AI-Server/serving/fleet-0920-flash18/deploy-0920h:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-mtp-kv-only-0919/deploy:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kv-range-0919/deploy-r2:/home/user/InfoSystemic/AI-Server/serving/fleet-0912-ctx/glm-kpool-wide-0919/deploy
+Environment=GGML_F18_FEATURES=31
+Environment=GGML_CPU_GLM_POOL_CACHE=1
+Environment=GGML_F18_MTP_MERGE=1
+Environment=GGML_F18_MTP_FAST_PICK=1
+Environment=GGML_F18_MTP_PAD=1
+Environment=GGML_F18_MTP_PAD_MAX_CTX=1048576
+Environment=GGML_F18_FAST_SAMPLER=1
+Environment=GGML_F18_COUPLED=1
+Environment=GOMP_SPINCOUNT=20000
+Environment=GGML_CPU_NUMA_SHARED_TEAM=1
+Environment=LLAMA_F18_MTP_QROWS=1
+Environment=GGML_META_F18=3

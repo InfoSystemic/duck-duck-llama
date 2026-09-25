@@ -1,0 +1,126 @@
+--- a/ggml/src/ggml-cpu/ops.cpp
++++ b/ggml/src/ggml-cpu/ops.cpp
+@@ -1,4 +1,8 @@
+ #include "ops.h"
++#if defined(__x86_64__)
++#include <x86intrin.h>
++#endif
++#include <atomic>
+ 
+ #include "ggml-cpu.h"
+ #include "ggml-impl.h"
+@@ -9383,6 +9387,13 @@
+     }
+ }
+ 
++
++// GGML_CPU_FA_GQA_PHASES=1 (dev instrumentation): per-phase TSC cycles of the GQA kernel, summed over threads and
++// printed every 64 calls on thread 0
++static bool fa_gqa_phases_on() { static const bool on = [] { const char * v = getenv("GGML_CPU_FA_GQA_PHASES"); return v && atoi(v) != 0; }(); return on; }
++static std::atomic<uint64_t> fa_gqa_ph[10];
++static std::atomic<uint64_t> fa_gqa_ph_calls{0};
++static const char * fa_gqa_ph_names[10] = {"mask", "qprep", "ktile", "qk_gemm", "maskadd", "softmax", "vtile", "pv_gemm", "partial", "merge"};
+ static void ggml_compute_forward_flash_attn_ext_gqa(
+         const ggml_compute_params * params,
+         ggml_tensor * dst,
+@@ -9439,6 +9450,10 @@
+         const int64_t ic1 = std::min(ic0 + p.chunk, p.hi);
+ 
+         bool started = false;
++        const bool ph = fa_gqa_phases_on();
++        uint64_t tp = ph ? __rdtsc() : 0, tq = 0;
++        uint64_t acc_ph[10] = {0};
++        #define FA_PH(i) do { if (ph) { tq = __rdtsc(); acc_ph[i] += tq - tp; tp = tq; } } while (0)
+         for (int64_t ic = ic0; ic < ic1; ic += T) {
+             const int64_t t = std::min(T, ic1 - ic);
+ 
+@@ -9457,9 +9472,11 @@
+                     }
+                 }
+                 if (!any) {
++                    FA_PH(0);
+                     continue;
+                 }
+             }
++            FA_PH(0);
+ 
+             if (!started) {
+                 started = true;
+@@ -9478,6 +9495,7 @@
+                 }
+                 memset(O, 0, G*DV*sizeof(float));
+             }
++            FA_PH(1);
+ 
+             // K tile transposed to [DK x T] (the score GEMM runs along the KV axis), zero-padded
+ #if defined(__AVX512F__)
+@@ -9523,8 +9541,10 @@
+             }
+             }
+ 
++            FA_PH(2);
+             memset(Sc, 0, G*T*sizeof(float));
+             fa_gqa_gemm(Sc, Qf, KT, (int) G, (int) DK, (int) T);
++            FA_PH(3);
+ 
+             for (int64_t g = 0; g < G; g++) {
+                 float * srow = Sc + g*T;
+@@ -9539,6 +9559,7 @@
+                 }
+             }
+ 
++            FA_PH(4);
+             // online softmax, one query at a time
+             for (int64_t g = 0; g < G; g++) {
+                 float * srow = Sc + g*T;
+@@ -9569,6 +9590,7 @@
+                 Sm[g] += (float) ggml_vec_soft_max_f32((int) T, srow, srow, Mx[g]);
+             }
+ 
++            FA_PH(5);
+             // V tile [T x DV], zero-padded
+             for (int64_t tk = 0; tk < t; tk++) {
+                 const char * vp = (const char *) v->data + (ic + tk)*v->nb[1] + ik2*v->nb[2];
+@@ -9582,7 +9604,9 @@
+                 memset(Vt + t*DV, 0, (T - t)*DV*sizeof(float));
+             }
+ 
++            FA_PH(6);
+             fa_gqa_gemm(O, Sc, Vt, (int) G, (int) T, (int) DV);
++            FA_PH(7);
+         }
+ 
+         float * part = partials + item*Gp*pstride;
+@@ -9597,11 +9621,15 @@
+             pg[1] = Sm[g];
+             memcpy(pg + 2, O + g*DV, DV*sizeof(float));
+         }
++        FA_PH(8);
++        if (ph) for (int i = 0; i < 9; i++) fa_gqa_ph[i].fetch_add(acc_ph[i], std::memory_order_relaxed);
++        #undef FA_PH
+     }
+ 
+     ggml_barrier(params->threadpool);
+ 
+     // merge the chunks of each output (row, head); the thread's scratch is free again
++    const uint64_t tm0 = fa_gqa_phases_on() ? __rdtsc() : 0;
+     float * acc = wbase;
+     for (int64_t idx = ith; idx < N*n_head; idx += nth) {
+         const int64_t r   = idx / n_head;
+@@ -9640,6 +9668,16 @@
+             out[d] = acc[d]*S_inv;
+         }
+     }
++    if (fa_gqa_phases_on()) {
++        fa_gqa_ph[9].fetch_add(__rdtsc() - tm0, std::memory_order_relaxed);
++        if (ith == 0 && (fa_gqa_ph_calls.fetch_add(1) + 1) % 64 == 0) {
++            uint64_t tot = 0;
++            for (int i = 0; i < 10; i++) tot += fa_gqa_ph[i].load();
++            fprintf(stderr, "fa_gqa phases (%% of %llu Mcycles, all threads):", (unsigned long long) (tot / 1000000));
++            for (int i = 0; i < 10; i++) fprintf(stderr, " %s %.1f", fa_gqa_ph_names[i], 100.0 * fa_gqa_ph[i].load() / (double) (tot ? tot : 1));
++            fprintf(stderr, "\n");
++        }
++    }
+ #else
+     GGML_UNUSED(params); GGML_UNUSED(dst); GGML_UNUSED(p);
+     GGML_ABORT("fa_gqa: built without SIMD");

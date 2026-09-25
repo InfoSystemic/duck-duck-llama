@@ -1,0 +1,131 @@
+--- a/conversion/mimo.py
++++ b/conversion/mimo.py
+@@ -1,16 +1,44 @@
+ from __future__ import annotations
+ 
+ import json
++import os
+ import re
+ 
+ from typing import Any, Callable, Iterable, TYPE_CHECKING
+ 
++import numpy as np
+ import torch
+ 
+ if TYPE_CHECKING:
+     from torch import Tensor
+ 
+-from .base import MmprojModel, ModelBase, TextModel, gguf
++from .base import LazyTorchTensor, MmprojModel, ModelBase, TextModel, gguf, logger
++
++
++class MXFP4ExpertStack:
++    # A stacked routed-expert tensor in ggml MXFP4 that is produced one expert at a time
++    # when the writer reaches it, so a 1T-parameter model never holds a whole layer in RAM.
++    # With sources=None only the bytes are reserved (a sparse hole): the skeleton pass,
++    # where serving/mimo-v26-pro/fill_experts.py later pwrites every expert in place.
++
++    def __init__(self, n_expert: int, rows: int, cols: int,
++                 sources: list[tuple[Callable[[], Tensor], Callable[[], Tensor]]] | None):
++        assert cols % 32 == 0
++        self.shape = (n_expert, rows, cols // 32 * 17)
++        self.dtype = np.dtype(np.uint8)
++        self.nbytes = n_expert * rows * (cols // 32) * 17
++        self.sources = sources
++
++    def tofile(self, fout) -> None:
++        if self.sources is None:
++            # seek over the tensor, then write its last byte so the hole is part of the file
++            fout.seek(self.nbytes - 1, os.SEEK_CUR)
++            fout.write(b"\0")
++            return
++        for w_gen, s_gen in self.sources:
++            weight = LazyTorchTensor.to_eager(w_gen())
++            scale = LazyTorchTensor.to_eager(s_gen())
++            ModelBase.repack_mxfp4_blocks(weight, scale).tofile(fout)
+ 
+ 
+ @ModelBase.register("MiMoV2FlashForCausalLM", "MiMoV2ForCausalLM")
+@@ -28,6 +56,12 @@
+         self.block_count = self.hparams["num_hidden_layers"] + self._n_nextn
+         self.tensor_map = gguf.get_tensor_name_map(self.model_arch, self.block_count)
+ 
++        # MiMo-V2.6 (and V2.5-Pro-FP4) keep the routed experts in MXFP4: U8 codes [rows, cols/2]
++        # (element 2i in the low nibble) + U8 E8M0 scales [rows, cols/32], next to FP8 elsewhere.
++        qc = self.hparams.get("quantization_config") or {}
++        self._mxfp4_store = qc.get("store_dtype") == "mxfp4"
++        self._mxfp4_experts: dict[tuple[int, str], dict[int, dict[str, Callable[[], Tensor]]]] = {}
++
+     @staticmethod
+     def _tp_aware_qkv_dequant(weight: Tensor, scale_inv: Tensor,
+                               n_q: int, n_kv: int, hd: int, vhd: int,
+@@ -95,6 +129,15 @@
+         return torch.cat(qs + ks + vs, dim=0)
+ 
+     def dequant_model(self):
++        # Take the MXFP4 experts out before the FP8 path, and the float32 cast in
++        # prepare_tensors, can touch the packed codes; prepare_tensors writes them raw.
++        if self._mxfp4_store:
++            pat = re.compile(r"^model\.layers\.(\d+)\.mlp\.experts\.(\d+)\.(gate|up|down)_proj\.weight(_scale)?$")
++            for name in list(self.model_tensors.keys()):
++                if m := pat.match(name):
++                    group = self._mxfp4_experts.setdefault((int(m.group(1)), m.group(3)), {})
++                    group.setdefault(int(m.group(2)), {})["s" if m.group(4) else "w"] = self.model_tensors.pop(name)
++
+         # Capture raw FP8 (weight, scale_inv) lambdas for qkv_proj BEFORE super
+         # rewrites them with the existing dequant. Replace super's lambda after
+         # it runs so scale_inv removal still happens via the standard path.
+@@ -220,9 +263,43 @@
+                 return
+         yield from super().modify_tensors(data_torch, name, bid)
+ 
++    def _write_mxfp4_experts(self):
++        # MIMO_MXFP4_SKELETON=1 reserves every stacked expert tensor as a hole instead of
++        # reading it, so the GGUF can be built with only the non-expert shards on disk.
++        skeleton = os.environ.get("MIMO_MXFP4_SKELETON") == "1"
++        n_expert = self.hparams["n_routed_experts"]
++        n_embd = self.hparams["hidden_size"]
++        n_ff = self.hparams["moe_intermediate_size"]
++        keys = {
++            "gate": gguf.MODEL_TENSOR.FFN_GATE_EXP,
++            "up":   gguf.MODEL_TENSOR.FFN_UP_EXP,
++            "down": gguf.MODEL_TENSOR.FFN_DOWN_EXP,
++        }
++        for bid, is_moe in enumerate(self.hparams["moe_layer_freq"]):
++            if not is_moe:
++                continue
++            for proj, key in keys.items():
++                rows, cols = (n_embd, n_ff) if proj == "down" else (n_ff, n_embd)
++                experts = self._mxfp4_experts.pop((bid, proj), {})
++                sources = None
++                if not skeleton:
++                    missing = [e for e in range(n_expert) if experts.get(e, {}).keys() != {"w", "s"}]
++                    if missing:
++                        raise ValueError(f"layer {bid} {proj}_proj: missing MXFP4 experts {missing[:8]} ({len(missing)} total)")
++                    sources = [(experts[e]["w"], experts[e]["s"]) for e in range(n_expert)]
++                new_name = self.format_tensor_name(key, bid)
++                logger.info(f"{new_name}: MXFP4 routed experts{' (reserved)' if skeleton else ''}, shape = {{{cols}, {rows}, {n_expert}}}")
++                self.gguf_writer.add_tensor(new_name, MXFP4ExpertStack(n_expert, rows, cols, sources),  # ty: ignore[invalid-argument-type]
++                                            raw_dtype=gguf.GGMLQuantizationType.MXFP4)
++        if self._mxfp4_experts:
++            raise ValueError(f"MXFP4 experts outside MoE layers: {sorted(self._mxfp4_experts)[:8]}")
++
+     def prepare_tensors(self):
+         super().prepare_tensors()
+ 
++        if self._mxfp4_store:
++            self._write_mxfp4_experts()
++
+         if self._experts is not None:
+             # flatten `list[dict[str, Tensor]]` into `list[str]`
+             experts = [k for d in self._experts for k in d.keys()]
+@@ -384,6 +461,9 @@
+         for name, tensor in state_dict.items():
+             if name.endswith(skip_suffixes):
+                 continue
++            # MiMo-V2.6 also ships the tokenizer's speech decoder + vocoder (audio output); input needs the encoder only
++            if name.startswith("decoder."):
++                continue
+             if m := codebook_re.match(name):
+                 codebooks[int(m.group(1))] = tensor
+                 continue
