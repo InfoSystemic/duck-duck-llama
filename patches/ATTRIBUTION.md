@@ -52,3 +52,16 @@ glm5next architecture support of the unslothai/llama.cpp line at `2e0e57f1008053
 as locally authored. The attention kernel reuses the tree's `simd_gemm` helper. KTransformers' kt-kernel independently splits
 routed-expert weights across NUMA thread pools for GPU-hybrid serving; nothing here derives from its code.
 
+`glm5next-pool-fusion-overlap-proof.patch` and `glm5next-indexer-score-blocked.patch` (revisions g and h) were developed for this
+repository on the evening of 2026-09-20 on the same line and under the same terms as the series above.
+
+## MiMo-V2.6-Pro, 2026-09-21 to 2026-09-23
+
+The [2026-09-23 snapshot](../engineering/2026-09-23/README.md) publishes two engine layers and a set of feature patches. The layers
+carry model support from public sources that is not claimed as locally authored: JigSawPT's DeepSeek-V4.1 port (merged by hand into
+this project's NUMA-tuned fork), the `mimo2` architecture, and the DFlash drafter runtime and converter, on the unslothai/llama.cpp
+line at `2e0e57f1008053bae4902a772da85e3eb99d4aff`. The MiMo model, its DFlash drafter and the reference modeling code are Xiaomi's.
+Developed for this repository, with AI coding agents under the repository owner's direction: the MXFP4 expert converter patch, the
+six DFlash fixes, the MiMo-V2 tensor-parallel split, grouped-query split-KV flash attention and its vectorised row max, the x16
+multi-column and paired-group GEMM kernels, the exact MoE weighted-sum fusion, the XML tool-call parser fix, the `mimovl` image-token
+limit fix, and the memory guards. They modify llama.cpp source files (MIT).

@@ -1,8 +1,9 @@
 # GLM-5.3-Flash decode patches, 09-18 to 09-20
 
-Fifteen changes to the GLM runtime (`llama.cpp-glm5n-goal-0904` line) measured on a Lenovo SR950 (4x Xeon Gold 6242, 755 GiB DDR4-2400,
+Seventeen changes to the GLM runtime (`llama.cpp-glm5n-goal-0904` line) measured on a Lenovo SR950 (4x Xeon Gold 6242, 755 GiB DDR4-2400,
 381.6 GB/s measured, no GPU), plus one candidate for upstream. Rates are single-stream decode tok/s of an actual Codex turn through the
-Paseo wrapper at ~4,000 input tokens, modes compared inside one loaded server. All fifteen are in production (revision f, 2026-09-20).
+Paseo wrapper at ~4,000 input tokens, modes compared inside one loaded server. All seventeen are in production (revision h, 2026-09-20);
+#16 and #17 were added on the evening of 09-20 and published on 09-24.
 Report: [benchmarks/glm53-flash-paseo-decode-20260920.md](../benchmarks/glm53-flash-paseo-decode-20260920.md).
 
 | # | patch | library | switch | result | output |
@@ -22,6 +23,8 @@ Report: [benchmarks/glm53-flash-paseo-decode-20260920.md](../benchmarks/glm53-fl
 | 13 | `coupled-sampling-fast-sampler.patch` (B) | libllama-common | `GGML_F18_FAST_SAMPLER=1` | 18.81 -> 19.11 (+1.6%) | identical |
 | 14 | `meta-backend-small-uploads-blocking-dispatch.patch` | libggml-base | `GGML_META_F18=3` | 19.30 -> 20.18 (+4.6%); sampled 17.98 -> 18.79; verify graph 119.7 -> 115.5 ms | identical |
 | 15 | `q5k-x16-expert-prefetch.patch` | libggml-cpu | `GGML_F18_FEATURES` bit 3 | 19.57 -> 20.18 (+3.1%); expert down projection 77 -> ~95 GB/s per socket | bit-identical |
+| 16 | `glm5next-pool-fusion-overlap-proof.patch` | libggml-cpu | none: part of `GGML_CPU_GLM_POOL_FUSION=1` | 4K: 19.98 / 20.26 / 20.33 against 20.15; the 8K-128K curve of a fresh session is unchanged (202 vs 198 ms per cycle at 128K); a session restored from the RAM prompt cache no longer drops its last DSA layer off the fused path | byte-identical |
+| 17 | `glm5next-indexer-score-blocked.patch` | libggml-cpu | `GGML_F18_FEATURES` bit 4; the radix top-k rides bit 1 | 4K: 20.54 / 20.62 / 20.49 (the indexer is ~2 ms of a 105 ms graph there); score op 2.3x per core, top-k ~2.4x per row above 16,384 entries; the expected ~19 ms per cycle at 128K was not measured | bit-identical; identical set |
 | - | `coupled-sampling-offline-fit.patch` | libllama-common | `GGML_F18_COUPLE_LOG` `GGML_F18_COUPLED_DRAFT_TEMP` | window w7 only: replay of drafter settings against logged draws; deployed setting is optimal, coupling +3.1% tokens per cycle | none; not deployed |
 | - | `upstream-cpu-fattn-f32-accumulate.patch` | upstream ggml-cpu at `b23efaa2` | none | error 6.4e-3 -> 8.6e-5, op +17-21% | toward float64; candidate, not submitted |
 
@@ -32,6 +35,13 @@ over `common/speculative.cpp` and `common/sampling.cpp`. Every header names its 
 compared byte for byte with the source that was built and deployed. Every switch defaults off.
 `GGML_F18_CONTROL_FILE`, `GGML_F18_SPEC_CONTROL_FILE`, `LLAMA_F18_MTP_QROWS_CONTROL_FILE` and the older `*_CONTROL_FILE` variables map a
 4-byte file so a benchmark can flip a feature inside a loaded server; change them only while the server is idle.
+
+#16 and #17 are production revisions g and h. #16 fixes a rejection in the 14-node fusion matcher that a restored 128K session hit
+(+51 ms per graph); a session that reaches 128K by appending never did, which is why the curve did not move
+([correction](../benchmarks/glm53-flash-context-depth-20260920.md#where-the-growth-is-per-op-trace-same-session-one-sockets-verify-graph)).
+Revisions i-l tried an F16 router, dense Q6_K requantisation and two composite n-gram/MTP drafters; all four were slower and were rolled
+back ([numbers](../docs/models/glm-flash.md#revisions-gl-september-20-evening-what-24-toks-would-take)). Their drop-ins are archived
+in the [2026-09-23 snapshot](../engineering/2026-09-23/README.md#glm-53-flash-september-20-evening).
 
 ## Reading the numbers
 

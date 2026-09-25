@@ -1,0 +1,114 @@
+glm5next: pooled-indexer fusion that survives an output placed over its inputs (revision g, 2026-09-20)
+
+Parent: the 09-19 pool-fusion sources (glm-pool-copy-0919/pool-fusion.inc in the C compute file, glm-pool-cache-r2-0920/pool-kernel.inc
+and glm-kpool-wide-0919/pool-scalar.inc in ops.cpp) over the published 09-11 CPU sources. Library: libggml-cpu only.
+
+What it fixes. The 14-node matcher that replaces the pooled-indexer chain (GET_ROWS of every pool member, two permute+cont copies,
+the APE add, softmax, weighted sum) with one fused kernel rejected any layer whose OUTPUT the allocator had placed over the
+`pool_cells` input. `pool_cells` is consumed by all eleven DSA layers, so only after the last one's GET_ROWS can its storage be
+reused, and whether that happens depends on tensor sizes. A 128K-token session restored from the server's RAM prompt cache
+(different cell layout: n_kv 136,712 for 128,416 tokens) hit it on layer 43 and paid the unfused chain: +51 ms per verify graph
+(CONT 22.3 + ADD 18.0 + SOFT_MAX 10.7 ms over a [4,128,34178] member set) on top of a 238 ms graph.
+
+The change. Both pool kernels (wide AVX-512 and scalar) snapshot the cell indices of the pools they own into a thread-local
+buffer, `ggml_barrier`, then compute and write; fusion only ever runs with the full team (single-task nodes never enter the
+fusion path), so the barrier is safe. The matcher then drops the `cells` term of its overlap rejection and keeps the KV cache and
+the APE weight, which cannot overlap a graph temporary. Same bytes out: only the order of the reads changed.
+
+Evidence. Unpatched copies of all three files rebuild the deployed objects byte for byte (ggml-cpu.c.o 1c80cc478a66327e with the
+recorded command plus -ffile-prefix-map). Proxy parity: identical greedy text hashes and draft counts at 8K and 41K. Production:
+4K Codex fixture 19.98 / 20.26 / 20.33 tok/s against 20.15 before, same acceptance; the 8K-128K curve re-measured in a fresh
+session is unchanged (128K: 202 vs 198 ms per cycle, noise), because a fresh session never trips the rejection. This is a
+robustness fix for restored sessions, not a speedup; the same-day trace that suggested +51 ms in the steady state had been taken
+on the restored state (recorded in the benchmark's correction).
+
+--- a/ggml/src/ggml-cpu/pool-fusion.inc
++++ b/ggml/src/ggml-cpu/pool-fusion.inc
+@@ -64,8 +64,11 @@
+     if (!ggml_can_fuse_subgraph(graph, start, N, ops, &output, 1)) POOL_REJECT();
+     // Allocation happened before fusion; final storage may reuse intermediate
+     // storage, but must never overwrite the live cache, cells, or position weights.
+-    if (ggml_cpu_pool_overlaps(n[13], kg) || ggml_cpu_pool_overlaps(n[13], cells) ||
+-            ggml_cpu_pool_overlaps(n[13], ape)) POOL_REJECT();
++    // 2026-09-20: an output placed over `cells` no longer rejects. Once the LAST DSA layer's GET_ROWS has consumed
++    // pool_cells the allocator may hand its storage to that layer's output, which is exactly what happened at depth:
++    // layer 43 alone ran the unfused chain (+51 ms per graph at 128K). The kernels now snapshot the cell indices
++    // they need and barrier before writing, so only the KV cache and the weight remain hazards.
++    if (ggml_cpu_pool_overlaps(n[13], kg) || ggml_cpu_pool_overlaps(n[13], ape)) POOL_REJECT();
+     ggml_compute_forward_glm_pool_fused(params, n[0], ape, n[11], n[12], n[13]);
+     #undef POOL_REJECT
+     return N - 1;
+--- a/ggml/src/ggml-cpu/pool-kernel.inc
++++ b/ggml/src/ggml-cpu/pool-kernel.inc
+@@ -1,4 +1,5 @@
+-// The deployed scalar kernel is retained unchanged behind the new flag.
++// The deployed scalar kernel is retained behind the new flag (both kernels snapshot their cell indices since 2026-09-20).
++#include <vector>
+ #include "pool-scalar.inc"
+ 
+ // Optional benchmark-only control. Writers change one aligned 32-bit word only
+@@ -94,17 +95,31 @@
+     const int64_t cache_end = end / blocks_per_pool;
+     auto * cache = cache_enabled ? glm_pool_cache_local.get(kg, ape, probs_first, size_t(std::max(int64_t(0), cache_end - cache_begin))) : nullptr;
+     uint64_t cache_hits = 0, cache_misses = 0, cache_bypass = 0;
++    // Snapshot the cell indices this thread needs before ANY thread writes dst. The matcher no longer rejects a pattern whose
++    // output the allocator placed over `cells` (once the last DSA layer's GET_ROWS has consumed pool_cells its storage is free,
++    // so that layer fell off the fused path at depth and paid the unfused chain: +51 ms per graph at 128K). kg is the KV cache
++    // and ape a weight; neither can overlap a graph temporary. Same bytes out: only the read order changed.
++    const int64_t ps_first = begin < end ? begin / blocks_per_pool : 0;
++    const int64_t ps_last  = begin < end ? (end - 1) / blocks_per_pool : -1;
++    static thread_local std::vector<int32_t> cell_snap;
++    cell_snap.resize(size_t(std::max<int64_t>(0, ps_last - ps_first + 1)) * 4);
++    for (int64_t ps = ps_first; ps <= ps_last; ++ps) {
++        const int64_t sp = ps % pools, ss = ps / pools;
++        for (int m = 0; m < 4; ++m) {
++            cell_snap[size_t(ps - ps_first)*4 + m] = *(const int32_t *) ((const char *) cells->data + (4*sp + m)*cells->nb[0] + ss*cells->nb[1]);
++        }
++    }
++    if (params->nth > 1) ggml_barrier(params->threadpool);
+     const __m256 inf = _mm256_set1_ps(INFINITY);
+     const __m256 sign = _mm256_set1_ps(-0.0f);
+     const __m512d one = _mm512_set1_pd(1.0);
+     for (int64_t b = begin; b < end;) {
+         const int64_t pool_stream = b / blocks_per_pool;
+-        const int64_t pool = pool_stream % pools, stream = pool_stream / pools;
++        const int64_t stream = pool_stream / pools;
+         const int64_t pool_end = std::min(end, (pool_stream + 1) * blocks_per_pool);
+         const ggml_fp16_t * cell[4];
+         for (int m = 0; m < 4; ++m) {
+-            const int32_t idx = *(const int32_t *) ((const char *) cells->data +
+-                (4*pool + m)*cells->nb[0] + stream*cells->nb[1]);
++            const int32_t idx = cell_snap[size_t(pool_stream - ps_first)*4 + m];
+             GGML_ASSERT(idx >= 0 && idx < kg->ne[1]);
+             cell[m] = (const ggml_fp16_t *) ((const char *) kg->data + idx*kg->nb[1] + stream*kg->nb[2]);
+         }
+--- a/ggml/src/ggml-cpu/pool-scalar.inc
++++ b/ggml/src/ggml-cpu/pool-scalar.inc
+@@ -32,14 +32,25 @@
+     const bool probs_first = mul->src[0] == probs;
+     float scale;
+     memcpy(&scale, (const float *) probs->op_params, sizeof(float));
++    // snapshot this thread's cell indices before any thread writes dst (see the wide kernel): dst may overlap `cells`
++    const int64_t ps_first = begin < end ? begin / d : 0;
++    const int64_t ps_last  = begin < end ? (end - 1) / d : -1;
++    static thread_local std::vector<int32_t> cell_snap;
++    cell_snap.resize(size_t(std::max<int64_t>(0, ps_last - ps_first + 1)) * 4);
++    for (int64_t ps = ps_first; ps <= ps_last; ++ps) {
++        const int64_t sp = ps % pools, ss = ps / pools;
++        for (int m = 0; m < 4; ++m) {
++            cell_snap[size_t(ps - ps_first)*4 + m] = *(const int32_t *) ((const char *) cells->data + (4*sp + m)*cells->nb[0] + ss*cells->nb[1]);
++        }
++    }
++    if (params->nth > 1) ggml_barrier(params->threadpool);
+     for (int64_t row = begin; row < end; ++row) {
+         const int64_t channel = row % d;
+         const int64_t pool = (row / d) % pools;
+         const int64_t stream = row / (d * pools);
+         float work[4], keys[4], probability[4], product[4];
+         for (int m = 0; m < 4; ++m) {
+-            const int32_t cell = *(const int32_t *) ((const char *) cells->data +
+-                (4*pool + m)*cells->nb[0] + stream*cells->nb[1]);
++            const int32_t cell = cell_snap[size_t(row / d - ps_first)*4 + m];
+             GGML_ASSERT(cell >= 0 && cell < kg->ne[1]);
+             const ggml_fp16_t * cell_data = (const ggml_fp16_t *) ((const char *) kg->data +
+                 cell*kg->nb[1] + stream*kg->nb[2]);

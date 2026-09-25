@@ -1,0 +1,360 @@
+glm5next: lightning-indexer score with 16 cached rows per query pass, and radix top-k for long rows (revision h, 2026-09-20)
+
+Parent: the revision g ops.cpp over the published 09-11 CPU sources. Library: libggml-cpu only. Switch: GGML_F18_FEATURES bit 4
+for the score kernel; the top-k change rides the existing bit 1 (selection top-k) for rows above 16,384 entries.
+
+Score kernel. `ggml_compute_forward_lightning_indexer` computed sum_h relu(q_h . k) * w_h + mask for every cached pool row by
+calling ggml_vec_dot_f32 96 times per row (32 heads x 3 query rows): each call reloads the row, runs the four-accumulator ladder,
+reduces, and returns through a function pointer, ~10-13 GFLOP/s per core. At 128K context (34,178 pools) that was 3.4 ms per DSA
+layer, 37 ms per verify graph. The new path keeps every query vector in eight zmm registers and applies it to a block of 16 rows
+(8 KB, L1-resident), so the 96 query vectors (48 KB) stream from L2 once per block instead of once per row. The per-dot arithmetic
+is exactly ggml_vec_dot_f32's AVX-512 path (GGML_F32_STEP 64, four accumulators, fma with a zero addend on the first half, the
+pairwise reduce, _mm512_reduce_add_ps), heads are summed in head order in float, and the mask is added last: the outputs are
+identical (tools/li_fast_check.cpp loads the library, flips the control word, and compares 24,000 / 102,534 / 393,216 values:
+0 differ) at 2.3x per core (12.8 -> 29.8 GFLOP/s). What remains is the per-dot horizontal reduce, which exactness fixes; a real
+GEMM would change the summation order and is a separate, quality-gated option.
+
+Top-k. The selection path (nth_element on a float copy, tie fallback to the reference partial_sort) was gated to rows up to
+16,384 entries because partial_sort wins above ~25K. Above the gate the k-th largest value is now found by an MSB-first radix
+select over order-preserving key bits (one pass over the row, then passes over the shrinking candidate set, no comparisons); the
+threshold value is the same, so the selected set and the tie fallback are unchanged (tools/topk_radix_check.cpp: nine rows of
+20K-137K entries with ties and -inf, identical sets, ~2.4x per row).
+
+Production numbers are in the README table: no change at 4K by construction (the indexer is ~2 ms of a 105 ms graph there); the
+expected gain at 128K is ~19 ms per cycle of the 70 ms slope.
+
+--- a/ggml/src/ggml-cpu/f18-common.inc
++++ b/ggml/src/ggml-cpu/f18-common.inc
+@@ -10,6 +10,8 @@
+     F18_FA_MQA = 1u << 0, // cell-split MQA flash attention for short query batches
+     F18_TOPK   = 1u << 1, // nth_element top-k
+     F18_GDN    = 1u << 2, // gated delta net split by state row (gdn-rows.inc)
++    // bit 3 is the Q5_K expert prefetch (repack.f18.cpp)
++    F18_LI_FAST = 1u << 4, // lightning indexer score, 16 cached rows per query pass (li-fast.inc), bit-identical
+ };
+ 
+ static uint32_t f18_features() {
+--- a/ggml/src/ggml-cpu/ops.cpp
++++ b/ggml/src/ggml-cpu/ops.cpp
+@@ -12085,9 +12085,16 @@
+ // ggml_compute_forward_lightning_indexer
+ 
++#include "li-fast.inc"
++
+ void ggml_compute_forward_lightning_indexer(
+         const ggml_compute_params * params,
+         ggml_tensor * dst) {
+ 
++    if ((f18_features() & F18_LI_FAST) && f18_li_fast_supported(dst)) {
++        f18_lightning_indexer_fast(params, dst);
++        return;
++    }
++
+     const ggml_tensor * q = dst->src[0];
+     const ggml_tensor * k = dst->src[1];
+     const ggml_tensor * w = dst->src[2]; // weights
+--- /dev/null
++++ b/ggml/src/ggml-cpu/li-fast.inc
+@@ -0,0 +1,87 @@
++#pragma once
++// Lightning indexer pool score, restructured: the same arithmetic as ggml_compute_forward_lightning_indexer, in the same order,
++// without 96 ggml_vec_dot_f32 calls per cached row.
++//
++// score[t][ik] = sum_h relu(q[h][t] . k[ik]) * w[h][t]  + mask[t][ik]
++//
++// The deployed kernel loops (stream, token, row, head) and calls ggml_vec_dot_f32 for every (head, token, row): each call reloads
++// the row, runs the 4 x 16-lane FMA ladder, reduces, and returns through a function pointer. At 128K context that is 3.4 ms per
++// layer for 0.84 GFLOP: ~10-13 GFLOP/s per core. Here each query vector is held in eight zmm registers and applied to a block of
++// 16 cached rows (8 KB, L1-resident), so the 96 query vectors (48 KB) are streamed from L2 once per block instead of once per row;
++// the per-dot arithmetic is exactly ggml_vec_dot_f32's AVX-512 path (GGML_F32_STEP 64, four accumulators, fma with a zero addend
++// for the first half, pairwise reduce, _mm512_reduce_add_ps), the head sum is the same float chain in head order, and the mask
++// add is last -- so the bytes are identical (cpu/test/li_fast_check.cpp compares both kernels bit for bit: 2.3x per core; the
++// per-dot horizontal reduce is what remains, and a true GEMM would change the summation order).
++//
++// Scope: k F32 with 128 columns, q F32, dst F32, mask F16, contiguous rows, AVX-512F. Anything else falls back to the deployed
++// kernel. Threads split the cached rows as before.
++#include <immintrin.h>
++
++static inline bool f18_li_fast_supported(const ggml_tensor * dst) {
++    const ggml_tensor * q = dst->src[0];
++    const ggml_tensor * k = dst->src[1];
++    const ggml_tensor * w = dst->src[2];
++    const ggml_tensor * m = dst->src[3];
++    return ggml_cpu_has_avx512() &&
++           q->type == GGML_TYPE_F32 && k->type == GGML_TYPE_F32 && w->type == GGML_TYPE_F32 && m->type == GGML_TYPE_F16 &&
++           dst->type == GGML_TYPE_F32 && q->ne[0] == 128 && k->ne[0] == 128 && k->ne[1] == 1 && q->ne[2] <= 8 &&
++           q->nb[0] == sizeof(float) && k->nb[0] == sizeof(float) && w->nb[0] == sizeof(float) && m->nb[0] == sizeof(ggml_fp16_t) &&
++           dst->nb[0] == sizeof(float) && k->nb[2] == 128*sizeof(float) && q->nb[1] == 128*sizeof(float);
++}
++
++__attribute__((target("avx512f")))
++static void f18_lightning_indexer_fast(const ggml_compute_params * params, ggml_tensor * dst) {
++    const ggml_tensor * q = dst->src[0];
++    const ggml_tensor * k = dst->src[1];
++    const ggml_tensor * w = dst->src[2];
++    const ggml_tensor * m = dst->src[3];
++
++    const int n_head   = q->ne[1];
++    const int n_tokens = q->ne[2];
++    const int n_stream = q->ne[3];
++    const int n_kv     = k->ne[2];
++
++    const int ith = params->ith, nth = params->nth;
++    const int dr  = (n_kv + nth - 1)/nth;
++    const int ir0 = dr*ith;
++    const int ir1 = MIN(ir0 + dr, n_kv);
++
++    // Blocks of 16 cached rows (8 KB, L1-resident) see each query vector once: the 96 query vectors (48 KB) are streamed from L2
++    // once per block instead of once per row. Per (token, row) the head terms are still added in head order, each dot product
++    // still runs the same two-step four-accumulator ladder and the same reduce, and the mask is still added last.
++    enum { BLOCK = 16 };
++    for (int s = 0; s < n_stream; ++s) {
++        for (int ik0 = ir0; ik0 < ir1; ik0 += BLOCK) {
++            const int nb = MIN(BLOCK, ir1 - ik0);
++            float score[8][BLOCK]; // n_tokens is at most 8 on this path (3 in production); larger batches take the deployed kernel
++            for (int t = 0; t < n_tokens; ++t) for (int r = 0; r < nb; ++r) score[t][r] = 0.0f;
++            for (int t = 0; t < n_tokens; ++t) {
++                const float * w_row = (const float *) ((const char *) w->data + t*w->nb[1] + s*w->nb[3]);
++                for (int h = 0; h < n_head; ++h) {
++                    const float * q_row = (const float *) ((const char *) q->data + h*q->nb[1] + t*q->nb[2] + s*q->nb[3]);
++                    __m512 qv[8];
++                    for (int j = 0; j < 8; ++j) qv[j] = _mm512_loadu_ps(q_row + 16*j);
++                    const float wh = w_row[h];
++                    for (int r = 0; r < nb; ++r) {
++                        const float * k_row = (const float *) ((const char *) k->data + (ik0 + r)*k->nb[2] + s*k->nb[3]);
++                        // ggml_vec_dot_f32, n = 128: two GGML_F32_STEP iterations over four 16-lane accumulators
++                        __m512 acc[4];
++                        for (int j = 0; j < 4; ++j) acc[j] = _mm512_fmadd_ps(qv[j], _mm512_loadu_ps(k_row + 16*j), _mm512_setzero_ps());
++                        for (int j = 0; j < 4; ++j) acc[j] = _mm512_fmadd_ps(qv[4 + j], _mm512_loadu_ps(k_row + 64 + 16*j), acc[j]);
++                        // GGML_F32x16_REDUCE: offset 2 then 1, then the horizontal reduce
++                        acc[0] = _mm512_add_ps(acc[0], acc[2]);
++                        acc[1] = _mm512_add_ps(acc[1], acc[3]);
++                        acc[0] = _mm512_add_ps(acc[0], acc[1]);
++                        const float qk = (float) (ggml_float) _mm512_reduce_add_ps(acc[0]);
++                        score[t][r] += MAX(qk, 0.0f) * wh;
++                    }
++                }
++            }
++            for (int t = 0; t < n_tokens; ++t) {
++                const ggml_fp16_t * m_row = (const ggml_fp16_t *) ((const char *) m->data + t*m->nb[1] + (s % m->ne[3])*m->nb[3]);
++                float * dst_row = (float *) ((char *) dst->data + t*dst->nb[1] + s*dst->nb[3]);
++                for (int r = 0; r < nb; ++r) dst_row[ik0 + r] = score[t][r] + GGML_CPU_FP16_TO_FP32(m_row[ik0 + r]);
++            }
++        }
++    }
++}
+--- /dev/null
++++ b/tools/li_fast_check.cpp
+@@ -0,0 +1,72 @@
++// li_fast_check.cpp <libggml-cpu.so> [n_kv] [reps] -- bit-compare and time the lightning indexer kernel with F18_LI_FAST off and on.
++//
++// Loads the library, builds q [128, 32, 3], k [128, 1, n_kv] f32, w [32, 3], mask f16 [n_kv, 3] with random values (some pools
++// masked to -inf), runs ggml_compute_forward_lightning_indexer single-threaded through a control file that flips bit 4 between
++// runs, and compares the outputs byte for byte. Then times both variants.
++//
++// build: c++ -std=c++17 -O2 -I$ENG/ggml/include -I$ENG/ggml/src -I$ENG/ggml/src/ggml-cpu li_fast_check.cpp -ldl -o li_fast_check
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <cstdint>
++#include <chrono>
++#include <random>
++#include <vector>
++#include <dlfcn.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <sys/mman.h>
++#include "ggml.h"
++#include "ggml-cpu.h"
++#include "ggml-backend.h"
++#include "ggml-cpu-impl.h"   // ggml_compute_params
++
++extern "C" {
++typedef void (*li_fn)(const struct ggml_compute_params *, struct ggml_tensor *);
++}
++
++int main(int argc, char ** argv) {
++    if (argc < 2) { fprintf(stderr, "usage: %s <libggml-cpu.so> [n_kv] [reps]\n", argv[0]); return 2; }
++    const int n_kv = argc > 2 ? atoi(argv[2]) : 34178;
++    const int reps = argc > 3 ? atoi(argv[3]) : 20;
++    const char * ctl = "/dev/shm/li-fast-check.u32";
++    { FILE * f = fopen(ctl, "wb"); uint32_t z = 0; fwrite(&z, 4, 1, f); fclose(f); }
++    setenv("GGML_F18_CONTROL_FILE", ctl, 1);
++    void * lib = dlopen(argv[1], RTLD_NOW | RTLD_LOCAL);
++    if (!lib) { fprintf(stderr, "dlopen: %s\n", dlerror()); return 2; }
++    auto li = (li_fn) dlsym(lib, "ggml_compute_forward_lightning_indexer");
++    if (!li) { fprintf(stderr, "symbol missing\n"); return 2; }
++    const int fd = open(ctl, O_RDWR); uint32_t * word = (uint32_t *) mmap(nullptr, 4, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); close(fd);
++
++    ggml_init_params ip = { (size_t(64) << 20) + size_t(n_kv) * 2048, nullptr, false };
++    ggml_context * ctx = ggml_init(ip);
++    ggml_tensor * q = ggml_new_tensor_4d(ctx, GGML_TYPE_F32, 128, 32, 3, 1);
++    ggml_tensor * k = ggml_new_tensor_4d(ctx, GGML_TYPE_F32, 128, 1, n_kv, 1);
++    ggml_tensor * w = ggml_new_tensor_4d(ctx, GGML_TYPE_F32, 32, 3, 1, 1);
++    ggml_tensor * m = ggml_new_tensor_4d(ctx, GGML_TYPE_F16, n_kv, 3, 1, 1);
++    ggml_tensor * d0 = ggml_new_tensor_4d(ctx, GGML_TYPE_F32, n_kv, 3, 1, 1);
++    ggml_tensor * d1 = ggml_new_tensor_4d(ctx, GGML_TYPE_F32, n_kv, 3, 1, 1);
++    std::mt19937_64 rng(42); std::normal_distribution<float> nd(0.0f, 1.0f);
++    for (int i = 0; i < 128*32*3; ++i) ((float *) q->data)[i] = nd(rng);
++    for (int i = 0; i < 128*n_kv; ++i) ((float *) k->data)[i] = nd(rng);
++    for (int i = 0; i < 32*3; ++i) ((float *) w->data)[i] = nd(rng) * 0.1f;
++    std::uniform_int_distribution<int> coin(0, 9);
++    for (int i = 0; i < n_kv*3; ++i) ((ggml_fp16_t *) m->data)[i] = ggml_fp32_to_fp16(coin(rng) == 0 ? -INFINITY : 0.0f);
++    for (ggml_tensor * d : {d0, d1}) { d->op = GGML_OP_LIGHTNING_INDEXER; d->src[0] = q; d->src[1] = k; d->src[2] = w; d->src[3] = m; }
++
++    ggml_compute_params params = {}; params.ith = 0; params.nth = 1;
++    std::vector<char> wdata((128 + 64) * sizeof(float) * 2); params.wdata = wdata.data(); params.wsize = wdata.size();
++
++    auto run = [&](uint32_t bits, ggml_tensor * d) { __atomic_store_n(word, bits, __ATOMIC_RELEASE); li(&params, d); };
++    run(0, d0); run(16, d1);
++    const int same = memcmp(d0->data, d1->data, ggml_nbytes(d0)) == 0;
++    int mism = 0; for (int i = 0; i < n_kv*3; ++i) if (((float *) d0->data)[i] != ((float *) d1->data)[i]) ++mism;
++    printf("n_kv %d: outputs %s (%d of %d values differ)\n", n_kv, same ? "IDENTICAL" : "DIFFER", mism, n_kv*3);
++    for (uint32_t bits : {0u, 16u}) {
++        auto t0 = std::chrono::steady_clock::now();
++        for (int r = 0; r < reps; ++r) run(bits, d0);
++        const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count() / reps;
++        printf("  F18_LI_FAST %s: %.3f ms per call (1 thread), %.1f GFLOP/s\n", bits ? "on " : "off", ms, 2.0*128*32*3*n_kv/ms/1e6);
++    }
++    return same ? 0 : 1;
++}
+--- a/ggml/src/ggml-cpu/topk-fast.inc
++++ b/ggml/src/ggml-cpu/topk-fast.inc
+@@ -5,9 +5,37 @@
+ #include <functional>
+ 
+ // std::partial_sort rejects most elements with one comparison, so it wins again once the row is long:
+-// measured break-even is ~25K entries for k = 512 (tools/topk_select_check.cpp). Select only below that.
++// measured break-even is ~25K entries for k = 512 (tools/topk_select_check.cpp). Select with nth_element below that; above it,
++// since 2026-09-20, find the k-th largest value with an MSB-first radix select over order-preserving key bits (one pass over the
++// row plus passes over the shrinking candidate set: ~1.1 n operations, no comparisons), which is what the indexer needs at depth
++// (34,178 pools at 128K context, 137K at 512K). The threshold is the same value either way, so the selected set is the same.
+ static constexpr int64_t F18_TOPK_MAX_N = 16384;
+ 
++static inline uint32_t f18_float_key(float v) { // monotone: larger float -> larger key (no NaNs by construction)
++    uint32_t u; memcpy(&u, &v, sizeof(u));
++    return (u & 0x80000000u) ? ~u : (u | 0x80000000u);
++}
++static inline float f18_key_float(uint32_t key) {
++    const uint32_t u = (key & 0x80000000u) ? (key & 0x7fffffffu) : ~key;
++    float v; memcpy(&v, &u, sizeof(v)); return v;
++}
++static float f18_kth_largest_radix(const float * x, int64_t n, int64_t k, uint32_t * key) {
++    for (int64_t i = 0; i < n; ++i) key[i] = f18_float_key(x[i]);
++    int64_t cnt = n, want = k; uint32_t prefix = 0;
++    for (int shift = 24; shift >= 0; shift -= 8) {
++        int64_t hist[256] = {0};
++        for (int64_t i = 0; i < cnt; ++i) ++hist[(key[i] >> shift) & 255u];
++        int64_t seen = 0; int b = 255;
++        for (; b > 0; --b) { if (seen + hist[b] >= want) break; seen += hist[b]; }
++        want -= seen; prefix |= (uint32_t) b << shift;
++        if (shift == 0) break;
++        int64_t w = 0;
++        for (int64_t i = 0; i < cnt; ++i) if (((key[i] >> shift) & 255u) == (uint32_t) b) key[w++] = key[i];
++        cnt = w;
++    }
++    return f18_key_float(prefix);
++}
++
+ static bool f18_top_k_row(const float * x, int64_t n, int64_t k, int32_t * out, float * tmp) {
+     if (k >= n) {
+         for (int64_t i = 0; i < n; ++i) {
+@@ -15,9 +43,6 @@
+         }
+         return k == n;
+     }
+-    if (n > F18_TOPK_MAX_N) {
+-        return false;
+-    }
+ 
+     for (int64_t i = 0; i < n; ++i) {
+         if (x[i] != x[i]) {
+@@ -25,9 +50,15 @@
+         }
+     }
+ 
+-    memcpy(tmp, x, (size_t) n*sizeof(float));
+-    std::nth_element(tmp, tmp + (k - 1), tmp + n, std::greater<float>());
+-    const float thr = tmp[k - 1];
++    float thr;
++    if (n > F18_TOPK_MAX_N) {
++        static_assert(sizeof(uint32_t) == sizeof(float), "tmp doubles as the key buffer");
++        thr = f18_kth_largest_radix(x, n, k, (uint32_t *) tmp);
++    } else {
++        memcpy(tmp, x, (size_t) n*sizeof(float));
++        std::nth_element(tmp, tmp + (k - 1), tmp + n, std::greater<float>());
++        thr = tmp[k - 1];
++    }
+ 
+     int64_t n_ge = 0;
+     for (int64_t i = 0; i < n; ++i) {
+--- /dev/null
++++ b/tools/topk_radix_check.cpp
+@@ -0,0 +1,67 @@
++// topk_radix_check.cpp -- the top-k select path above F18_TOPK_MAX_N (radix select) against std::partial_sort, on rows with ties
++// and -inf entries. The selected SET must be identical whenever f18_top_k_row returns true; when it returns false the row must
++// really have a tie across the cut (or a NaN). Also times both.
++//
++// build: c++ -std=c++17 -O2 -march=native -I<engine>/ggml/src/ggml-cpu topk_radix_check.cpp -o topk_radix_check
++#include <algorithm>
++#include <chrono>
++#include <cmath>
++#include <cstdint>
++#include <cstdio>
++#include <cstring>
++#include <functional>
++#include <numeric>
++#include <random>
++#include <set>
++#include <vector>
++#include "../topk-fast.inc"
++
++static std::vector<int32_t> reference(const std::vector<float> & x, int64_t k) {
++    std::vector<int32_t> idx(x.size()); std::iota(idx.begin(), idx.end(), 0);
++    std::partial_sort(idx.begin(), idx.begin() + k, idx.end(), [&](int32_t a, int32_t b) { return x[a] > x[b]; });
++    idx.resize(k); return idx;
++}
++
++int main() {
++    std::mt19937_64 rng(7);
++    int failures = 0;
++    for (int64_t n : {20000L, 34178L, 137000L}) {
++        for (int mode = 0; mode < 3; ++mode) {
++            const int64_t k = 2051;
++            std::vector<float> x(n);
++            std::normal_distribution<float> nd(0.0f, 1.0f); std::uniform_int_distribution<int> coin(0, 9);
++            for (auto & v : x) {
++                v = nd(rng);
++                if (mode >= 1 && coin(rng) == 0) v = -INFINITY;          // masked pools
++                if (mode == 2 && coin(rng) < 5) v = 0.0f;                // relu zeros: heavy ties
++                if (mode == 2 && coin(rng) == 0) v = 0.25f;              // a tie band near the cut
++            }
++            std::vector<int32_t> out(n); std::vector<float> tmp(n);
++            auto t0 = std::chrono::steady_clock::now();
++            const bool ok = f18_top_k_row(x.data(), n, k, out.data(), tmp.data());
++            const double ms_sel = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
++            t0 = std::chrono::steady_clock::now();
++            const auto ref = reference(x, k);
++            const double ms_ref = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
++            std::set<int32_t> sref(ref.begin(), ref.end());
++            // the k-th largest value and whether it is tied across the cut
++            std::vector<float> sorted(x); std::nth_element(sorted.begin(), sorted.begin() + (k - 1), sorted.end(), std::greater<float>());
++            const float thr = sorted[k - 1];
++            int64_t n_ge = 0; for (float v : x) n_ge += v >= thr;
++            const bool tie = n_ge != k;
++            bool pass;
++            if (ok) {
++                std::set<int32_t> ssel(out.begin(), out.begin() + k);
++                pass = !tie && ssel == sref;
++            } else {
++                pass = tie;
++            }
++            failures += !pass;
++            printf("n %6ld mode %d: select %s (%s) %.3f ms | partial_sort %.3f ms | k-th value %g, tie across cut %s -> %s\n",
++                   (long) n, mode, ok ? "returned set" : "fell back", ok ? "set identical" : "tie present", ms_sel, ms_ref, thr,
++                   tie ? "yes" : "no", pass ? "PASS" : "FAIL");
++        }
++    }
++    printf("%s\n", failures ? "FAILURES" : "all passed");
++    return failures ? 1 : 0;
++}
