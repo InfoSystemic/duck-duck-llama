@@ -11,6 +11,9 @@ Start with the [selected results](../docs/results.md) for measurements with thei
 | [Qwen Flash Next NUMA](qwen38-flash-next-numa.md) | Progress from node-local execution to four CPU-NUMA devices, and failed MTP/placement arms |
 | [GLM Flash NUMA port](glm53-flash-numa-port.md) | Porting the backend into a model-support source line |
 | [GLM Flash decode through Paseo, 09-18 to 09-20](glm53-flash-paseo-decode-20260920.md) | 12.0 to 20.2 tok/s as a Codex agent sees it (19.7 on sampled requests): same-process A/Bs, the cycle budget, two OpenMP teams per core, batch-invariant attention, coupled sampling, and the negative results |
+| [GLM Flash against context depth](glm53-flash-context-depth-20260920.md) | Decode and prefill from 8K to 128K in one append-only session, where the slope comes from, and a corrected trace artifact |
+| [MiMo-V2.6-Pro-RL on four sockets](mimo-v26-pro-cpu-20260923.md) | 1.03 to 26.9 tok/s: tensor parallelism, the DFlash drafter by workload, `p_min`, the cycle model, depth before and after the attention kernel, seven output-identical kernel builds |
+| [Qwen-Image-2.1 on CPU](qwen-image-21-cpu.md) | Image generation on cores the model servers leave idle; cross-socket matmul scaling; what made it faster |
 | [Concurrent throughput](concurrent-throughput.md) | Multi-request serving measurements; distinct from single-conversation decode |
 | [Ten tokens per second](ten-tokens-per-second.md) | A target-driven experiment log and corrections to earlier replay claims |
 
@@ -22,6 +25,8 @@ Start with the [selected results](../docs/results.md) for measurements with thei
 | [GLM tensor-parallel blocker](glm5next-tensor-parallel-blocker.md) | Architecture-specific constraints in an earlier integration |
 | [Full composite speculation failure](glm53-full-composite-spec-failure.md) | A speculative-decoding combination that did not qualify |
 | [CPU flash attention sums V in FP16](cpu-flash-attn-f16-accumulation.md) | About 1% error in the decode path with the default F16 cache, reproduced on stock upstream and measured on real tensors; a minimal fix and its cost |
+| [CPU flash attention re-streams KV per query row and head](cpu-flash-attn-gqa-splitkv.md) | Every speculative verify on a GQA model pays it, in upstream too; a grouped split-KV kernel, 11× at 64K × 8 rows and 4e-2 → 1e-6 error |
+| [Cascade Lake VNNI broadcast penalty](cascade-lake-vnni-broadcast.md) | Embedded-broadcast `vpdpbusd` issues at ~half rate; paired-group kernels, 1.21–1.26× bit-identical |
 | [Kernel efficiency ceiling](kernel-efficiency-ceiling.md) | Component measurements and their limits as a predictor of full-model speed |
 | [Fixed per-token overhead](fixed-per-token-overhead.md) | Investigation of work that does not disappear with smaller tensor traffic |
 
