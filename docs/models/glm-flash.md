@@ -1,6 +1,23 @@
 # GLM-5.3-Flash
 
-**Status (2026-09-20):** the Q4 service delivers 20.2 tok/s to a Codex agent inside Paseo at ~4K tokens of context on the fixed-output fixture, and 19.7 tok/s on requests exactly as Codex sends them (mean of twelve, 19.1–20.2). It was 15.5–16.2 on 09-19 and 12.0 on 09-18. At 13,231 tokens it measures 17.0 tok/s; at ~30K production measured 10.26 tok/s on 09-19 and has not been re-measured.
+**Status (2026-09-21):** production revision h delivers 19.8–20.6 tok/s to a Codex agent inside Paseo on the ~4K-token greedy fixture, and 18.7–19.9 tok/s on requests as Codex sends them. Since 2026-09-21 the service has been stopped to make room for [MiMo-V2.6-Pro](mimo-v26-pro.md); the two cannot share the machine's RAM.
+
+Earlier status points, for comparison:
+
+| Date | Speed |
+| --- | --- |
+| 09-19 | 15.5–16.2 tok/s |
+| 09-18 | 12.0 tok/s |
+
+Speed with depth in one append-only session:
+
+| Context | Speed |
+| --- | --- |
+| 25K | 19.6 tok/s |
+| 67K | 15.5 tok/s |
+| 128K | 12.6 tok/s |
+
+At 4K the cycle is at a hardware limit for this quantisation (see below). The remaining engineering value is at depth.
 
 ## Decode through Paseo, September 18–20
 
@@ -18,6 +35,43 @@ The measurement is an actual Codex turn through the Paseo wrapper, modes switche
 Where the time is: a cycle is now ~127–131 ms (161 on 09-19). The routed experts take 42 ms and the large dense projections 37, and both already stream at the machine's measured DRAM ceiling with every matrix split across the four sockets, so those kernels are finished. What moved was attention, the indexer, the draft loop, host work and scheduling. Draft depth above 2 loses (−4% at depth 3 on the current stack, −22% at depth 4 on 09-18; a verified row costs 24 ms); fusion switches, Q4/Q8 token batching, 16 workers per socket, helper pinning, a multi-slot graph cache and a Q4 draft sidecar gave nothing.
 
 Open: single sampled turns still fall below 18 (three of twelve); ~90 tiny hyper-connection projections per graph cost 2–3 ms of launch overhead; a cached-versus-fresh output discrepancy recorded on 09-19 is unresolved.
+
+## Revisions g–l, September 20 evening: what 24+ tok/s would take
+
+[Records](../../engineering/2026-09-23/README.md#glm-53-flash-september-20-evening) · [depth plan and progress log](../../engineering/2026-09-23/archive/serving/fleet-0920-flash18/DEPTH-CAMPAIGN-PLAN-20260920.md)
+
+Every revision was measured on the same 4K Codex fixture (greedy, seed 42). Revision f read 20.15 tok/s there, with acceptance 0.775 and text hash `ae3c80b549`.
+
+| Revision | Change | Outcome |
+| --- | --- | --- |
+| g | Pooled-indexer fusion made safe against an output placed over its inputs ([patch](../../patches/glm5next-pool-fusion-overlap-proof.patch)) | **Kept.** 19.98 / 20.26 / 20.33 tok/s with the same text hash. Across the 8K→128K curve it is unchanged against f (202 vs 198 ms per cycle at 128K), because a fresh session never trips the rejection. This is a robustness fix for sessions restored from the prompt cache. |
+| h | Lightning-indexer score kernel blocked 16 rows per query pass (2.3× per core); radix top-k above 16,384 entries; both bit-identical ([patch](../../patches/glm5next-indexer-score-blocked.patch)) | **Production.** 20.54 / 20.62 / 20.49 tok/s with the same text hash. The expected gain is at depth (about 19 ms per cycle at 128K); it has not been measured. |
+| i | Router weights stored as F16 | **Rejected.** 19.69–19.83 tok/s. Acceptance fell 0.775 → 0.763 and the text changed: on the full model, an F16 router flips near-tie expert choices, though a 4-layer check had called it bit-identical. |
+| j | Dense Q8_0 weights requantised to Q6_K at load | **Rejected.** 19.69–19.82 tok/s. **Fewer bytes were slower:** these matmuls already run at 71–94 GB/s per socket against a ~95 GB/s wall, and Q6_K costs more to unpack than it saves in bandwidth. The perplexity gate was never needed. |
+| k | Composite drafter: n-gram matches first, MTP otherwise (`n_match` 8) | **Rejected.** 16.1–18.5 tok/s on unseen prompts, with acceptance 0.51–0.66. An n-gram match *replaces* a 77.5%-accurate MTP draft. A repeated prompt reads 25.3–25.5 at acceptance 1.000, but that is the n-gram cache replaying its stored answer. Never quote a warm n-gram number. |
+| l | Same composite at `n_match` 24 | **Rejected.** 17.2–18.9 tok/s, acceptance 0.60–0.69. Rolled back to h. |
+
+The k and l numbers come from unseen prompts, while h's come from the fixture. No h run on those prompts exists, so the comparison is indicative.
+
+A post-rollback check of h read 19.77–19.84 tok/s with acceptance 0.776, but with text hash `b7c6851941` instead of `ae3c80b549`. The recorded request shape was identical. No cause was found; a date-dependent field in the Codex request is one unverified possibility.
+
+A column-split activation quantiser was built and never staged. It rested on a per-socket bandwidth figure that turned out to be an arithmetic error: the traced shapes were already per-socket.
+
+**Where the ceiling is at 4K.** Every matrix already streams at 71–94 GB/s per socket against a measured ~95 wall, so bytes cannot be traded for time in either direction. The exact levers left total about 6%:
+
+- a draft output head with fewer bytes: about 2%. This is output-exact, because [draft quality is free](../case-studies/block-drafter.md#draft-quality-is-free-target-quality-is-not);
+- the 90 tiny hyper-connection matmuls: about 2%;
+- small-operation fusion: about 2%.
+
+That is about 21.8 tok/s. Past that, the verify cycle has to yield more tokens. GLM-5.3-Flash ships one MTP head, and drafting depth 3 on it measured 4% slower. **24+ tok/s single-stream at 4K is a model limit, not an engineering one.**
+
+**Where the value is: depth.** At 41K, the indexer's pool scoring and validation are 15.9% of the verify graph, and they grow linearly with depth. The remaining steps in the depth plan are all exact and all unbuilt:
+
+- epoch-based pool persistence instead of content validation (about −33 ms per cycle at 128K);
+- tensor-parallel indexer scoring;
+- sparse prefill.
+
+Sparse prefill is the largest lever for long sessions. Prefill at 40K spends 21.6 of 35.4 s per micro-batch running the dense attention kernel over every cell behind a −inf mask. Gathering each query's 2,048 selected cells instead is projected to take prefill at 128K from 14.5 to about 60 tok/s. [Depth benchmark](../../benchmarks/glm53-flash-context-depth-20260920.md).
 
 ## Runtime and evidence
 

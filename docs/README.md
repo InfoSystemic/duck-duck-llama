@@ -10,6 +10,7 @@ This guide is the curated entry point to Duck Duck Llama. Each case study connec
 | [Quantization, layout, and correctness](case-studies/quantization-and-layout.md) | Why is a quantization label insufficient? When does repacking help, and how do numerical checks catch an incorrect optimization? |
 | [Speculative decoding and request state](case-studies/speculative-decoding.md) | When does MTP increase useful output? How are acceptance, rollback, cache state, and benchmark fairness checked? |
 | [Native DeepSeek on CPU](case-studies/native-deepseek.md) | What does native FP8/FP4 execution require beyond loading weights? How are lookup, sparse attention, cache limits, and model integration validated? |
+| [Making a block drafter work](case-studies/block-drafter.md) | Why did the model's own drafter start out slower than no speculation? What six defects sat between it and the target, how was each found cheaply, why is `p_min` the right control, and what does a cycle model rule out? |
 
 ## Read by task
 
@@ -18,8 +19,13 @@ This guide is the curated entry point to Duck Duck Llama. Each case study connec
 - **Run or extend the work:** [reproduction](reproducing.md), [tools](../tools/README.md), [profiles](../profiles/README.md), and [contribution guidance](../CONTRIBUTING.md).
 - **Find the original experiment:** [archive index](../engineering/README.md) and `python3 tools/search_archive.py QUERY`.
 - **See what remains:** [roadmap](roadmap.md).
+- **See it on another machine:** [independent verification](independent-verification.md), a two-socket reproduction by an outside tester.
 
 The [previous repository overview](history/legacy-overview-20260912.md) is preserved for historical context. Its chronological runtime updates are superseded by the model guides when discussing current validation status.
+
+## Further reading
+
+- [Independent verification on a two-socket machine](independent-verification.md) — what an outside tester's run confirmed, the bug it found, and how to read its numbers
 - [The case for CPU + multi-channel memory](case-for-cpu-multichannel.md) — capacity economics, the 4.07x NUMA scaling result, and where CPU honestly loses
-- [What is worth taking upstream, and who has to do it](upstream-candidates.md) — five candidates checked against upstream HEAD, one already fixed there, and why submission is a human's job
+- [What is worth taking upstream, and who has to do it](upstream-candidates.md) — every candidate checked against upstream `b23efaa2`, what is already fixed there, and why submission is a human's job
 - [Qwen3.8-Flash-Next: where the ceiling actually is](qwen4exp-ceiling-20260915.md) — the decode-vs-context curve, 35% bandwidth extraction, the indexer finding, and eight refuted claims including our own

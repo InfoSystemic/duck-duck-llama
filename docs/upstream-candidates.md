@@ -1,7 +1,8 @@
 # What is worth taking upstream, and who has to do it
 
 Checked against ggml-org/llama.cpp `b23efaa2ef147f547ee75cbf0c621d61904de80e` (2026-09-20). Every "still open upstream" claim below
-was re-verified in that tree on 2026-09-20 at 17:00; the line numbers are from it.
+was re-verified in that tree on 2026-09-20 at 17:00, and items 3a, 3b and the grouped-attention note on 2026-09-22/23; the line
+numbers are from it. Upstream moves daily: re-check each item before preparing it.
 
 **Nothing here has been submitted, and none of it may be submitted by an agent.** llama.cpp's `AGENTS.md` and `CONTRIBUTING.md` require
 that a human contributor understands every line, writes the description and the commit messages, and answers review personally;
@@ -60,6 +61,43 @@ batch has more than one query, or an F32 `V` path selected by type). A submitter
 the generic `to_float` trait must not be used (7x slower), and numbers from at least one non-x86 platform, which do not exist yet.
 Worth stating in the same breath: the one-query and the multi-query path sum in different orders, so one query differs by 3.4e-4
 between a batch of one and a batch of three ([check](../tools/fa_mqa_invariance_check.cpp)); an F32 accumulator shrinks that gap too.
+
+**Stronger since 2026-09-22: the same decode path also re-streams the KV cache once per query row and Q head.** For batches of
+2-63 query rows, which is every speculative verify, `ggml_compute_forward_flash_attn_ext_f16` runs `one_chunk` per (row, head) over
+the whole KV range. Split-KV applies only to one row and the tiled path only from 64. Under grouped-query attention each K/V row is
+therefore read once per Q head that shares it, times the rows: 128 times per layer for MiMo-V2.6-Pro under 4-way tensor parallelism.
+Upstream `b23efaa2` has the identical dispatch. A grouped split-KV kernel fixes both defects at once: 11x at 64K cells x 8 rows,
+relative error 4e-2 to 1e-6. On the model, decode at 64K went from 1.98 to 6.36 tok/s
+([report](../benchmarks/cpu-flash-attn-gqa-splitkv.md),
+[patch](../engineering/2026-09-23/archive/serving/mimo-v26-pro/patches/cpu-fa-gqa-grouped-splitkv.patch),
+[benchmark tool](../engineering/2026-09-23/archive/serving/mimo-v26-pro/tools/fa-bench.cpp)). File the FP16 issue first, then
+offer the kernel as the larger fix; a submitter must be able to explain the run-time plan from the mask, because the first version
+planned from the KV length and was 2.4x slower on sliding-window layers.
+
+### 3a. `ggml_vec_max_f32` is a scalar loop
+
+GCC does not vectorise a float max reduction without fast-math, so every softmax row maximum is a dependent `vmaxss` chain. Upstream
+`b23efaa2` calls it per row in SOFT_MAX (`ops.cpp:5668`), per KV tile in its tiled flash attention (`ops.cpp:9040`) and in
+cross-entropy (`11720`, `11813`). In the grouped attention kernel above it had grown to 20% of the time. An AVX-512 max made the
+kernel 1.25-1.4x faster with an unchanged output hash
+([patch](../engineering/2026-09-23/archive/serving/mimo-v26-pro/patches/cpu-fa-gqa-vector-max.patch)). Small and generic. The PR
+must state the NaN and signed-zero semantics, because `vmaxps` returns its second operand when either input is NaN, and when both
+are zeros of opposite sign.
+
+### 3b. The Qwen3-Coder XML tool-call handler requires newlines some models never emit
+
+Templates containing `<function=` and `<parameter=` are routed to `common/parsers/qwen3-coder.cpp`. Its parser and lazy grammar
+require a newline after every tag and `\n</parameter>\n` to close a value. MiMo-V2.5/2.6 render, and the model emits, the compact
+form `<tool_call><function=f><parameter=a>value</parameter></function></tool_call>`. The consequences:
+
+- Compact calls parse to no tool calls at all.
+- With `tool_choice=auto`, the grammar pushes the model off-format.
+- Measured at the recommended temperature 1.0: 3 of 20 calls were malformed, two of them looping to `max_tokens`.
+
+Fix: make every structural newline optional, and end a value at either `\n</parameter>` or `</parameter>`, stripping one layout
+newline on each side as the reference parsers do. After it, 0 of 20 were malformed and streamed calls were exact
+([patch](../engineering/2026-09-23/archive/serving/mimo-v26-pro/patches/chat-xml-toolcall-optional-newlines.patch),
+[offline harness](../engineering/2026-09-23/archive/serving/mimo-v26-pro/tools/chat-toolcall-test.cpp)).
 
 ### 4. `GET_ROWS` / `SET_ROWS` on all workers above a row threshold
 
@@ -204,6 +242,24 @@ The scheduler cut a new split when a split reached `GGML_SCHED_MAX_SPLIT_INPUTS`
 worked around here with `-DGGML_SCHED_MAX_SPLIT_INPUTS=64`. At `b23efaa2` the input arrays grow on demand and that cut is gone.
 `qwen4exp` is already excluded from `--split-mode tensor` upstream, so the fork's safety patch for that is moot there.
 
+## Worth an issue: F16 vision projectors overflow on CPU
+
+ggml-cpu's `mul_mat` converts its activations to the weight type's `vec_dot_type`, which is F16 for an F16 weight. Any activation
+above 65,504 becomes infinity before the dot product. Late ViT blocks reach 1e5 (MiMo-V2.6-Pro's last SwiGLU output: 1.077e5), so an
+F16 `mmproj` answers most images with `?` repeated. `ggml_mul_mat_set_prec(GGML_PREC_F32)` does not change this on CPU. The
+workaround is an F32 projector (no slower here); BF16 would keep the range but is emulated without AVX512-BF16.
+
+The report should include:
+
+- the per-node statistics that found it: [vision-embd.cpp](../engineering/2026-09-23/archive/serving/mimo-v26-pro/tools/vision-embd.cpp)
+  with `VE_STATS=1`;
+- the tensor-by-tensor comparison against the vendor's reference module
+  ([notes](../engineering/2026-09-23/archive/serving/mimo-v26-pro/STATE-VISION-20260922.md)).
+
+Also small: `clip.cpp` ignored `--image-min/max-tokens` for the `mimovl` projector. The fix is one line
+([patch](../engineering/2026-09-23/archive/serving/mimo-v26-pro/patches/mimovl-image-token-limits.patch)). Check whether upstream
+carries `mimovl` at all before filing.
+
 ## Not candidates
 
 - Non-temporal stores in the cross-socket all-reduce, the Meta trailing-subgraph fix, small-upload/blocking-dispatch: the fork's
@@ -218,8 +274,9 @@ worked around here with `-DGGML_SCHED_MAX_SPLIT_INPUTS=64`. At `b23efaa2` the in
 
 ## Suggested order, and the checklist for every submission
 
-Order: 1 (unary threading) → 2 (`seq_rm`) → 3 (FA precision, as an issue first) → 4 (`GET_ROWS`) → 5/6 → discussion for 8 and 10 →
-9 once re-done on upstream's `qwen4exp` → 11 after the kernel comparison → help 12 and 13 land as a reviewer.
+Order: 1 (unary threading) → 2 (`seq_rm`) → 3 (FA precision, as an issue first, then the grouped split-KV kernel) → 3a (vector max)
+→ 3b (tool-call newlines) → 4 (`GET_ROWS`) → 5/6 → discussion for 8 and 10 → 9 once re-done on upstream's `qwen4exp` → 11 after the
+kernel comparison → help 12 and 13 land as a reviewer. The F16 projector overflow is an issue, not a patch.
 
 Before each one (from the 09-12 handoff): search open PRs and issues for the same change and comment there instead of duplicating;
 rewrite the commit message and PR description yourself; fill in the AI-usage disclosure; run `test-backend-ops` where a second backend

@@ -67,7 +67,7 @@ profiler once decode has started, and [tools/opdiff.py](../tools/opdiff.py) comp
 |---|---:|---:|---:|
 | `LIGHTNING_INDEXER` pool score: 3 query rows x 32 heads against 34,178 pooled keys per layer | 2.2 ms | 37.5 ms | +35.3 |
 | fused pool kernel (dispatched at the `indexer_pool_members` GET_ROWS node): validates 2 KB of cache per pool against its record, copies the cached result | 1.3 | 34.6 | +33.3 |
-| one layer (the last DSA layer) not fused at 128K: `CONT` x2, `ADD`, `SOFT_MAX` over the whole [4,128,34178] member set | 0 | 51.0 | +51.0 |
+| one layer (the last DSA layer) not fused at 128K: `CONT` x2, `ADD`, `SOFT_MAX` over the whole [4,128,34178] member set — **an artifact of the traced request, see the correction below** | 0 | 51.0 | +51.0 |
 | `TOP_K` over 34,178 pools x 3 rows | 0.3 | 3.1 | +2.8 |
 | mask add, attention, MoE cache effects | | | +9 |
 
@@ -75,3 +75,38 @@ Attention itself grows 1.4 ms. The slope is the indexer's bookkeeping: a scoring
 on 15 cores for 0.84 GFLOP per layer), validation bandwidth for a cache that already holds the answer, and one layer dropping off
 the fused path (the 14-node matcher rejects when the allocator lets the output overlap its inputs). None of it is inherent; the
 plan to remove it is in the engineering notes of the next revision.
+
+**Correction (2026-09-20, 22:37; recorded here 2026-09-24).** The unfused layer is not part of the steady-state slope. The traced
+request had been restored from the server's RAM prompt cache with a different cell layout: 136,712 KV cells for 128,416 tokens,
+at 287 ms per cycle against 198 in the curve above. Different tensor sizes meant a different allocator placement, and the
+placement tripped the fusion matcher's overlap rejection. A session that reaches 128K by appending fuses every layer.
+
+Revision g made the fusion safe against that placement anyway
+([patch](../patches/glm5next-pool-fusion-overlap-proof.patch)). Its own 8K→128K curve, measured in a fresh session, matches
+revision f's within noise:
+
+- 202.3 ms per cycle at 128K, against 198.1;
+- per-depth deltas from −12.6 to +4.2 ms.
+
+([to 41K](../engineering/2026-09-23/archive/serving/fleet-0920-flash18/results/depth-curve-prod-revg-40k.json),
+[to 128K](../engineering/2026-09-23/archive/serving/fleet-0920-flash18/results/depth-curve-prod-revg.json).)
+
+The real 128K slope, about +70 ms per cycle over 8K, breaks down as:
+
+| Component | ms per cycle |
+| --- | ---: |
+| Pool scoring | ~35 |
+| Pool validation | ~33 |
+| Top-k | ~3 |
+
+Revision h's bit-identical score kernel (2.3× per core) is expected to remove about 19 ms of that. It went into production but was
+not re-measured at depth.
+
+Lesson: trace the session that produced the curve, never a restored copy of it.
+
+The remaining plan, all exact, is in the
+[depth campaign notes](../engineering/2026-09-23/archive/serving/fleet-0920-flash18/DEPTH-CAMPAIGN-PLAN-20260920.md):
+
+- per-cell write epochs instead of content validation, about −33 ms at 128K;
+- tensor-parallel scoring;
+- sparse prefill. Today, prefill at 40K spends 21.6 of 35.4 s per micro-batch running dense attention over every cell behind a −inf mask.
