@@ -83,6 +83,10 @@ def main():
     if state['aborted'] or 'timings' not in resp:
         print('no trace:', str(resp)[:300]); return 4
     t = resp['timings']
+    import hashlib
+    text = (resp.get('choices') or [{}])[0].get('message', {}) or {}
+    blob = (text.get('reasoning_content') or '') + '\x1f' + (text.get('content') or '')
+    print(f"text sha {hashlib.sha256(blob.encode()).hexdigest()[:16]} ({len(blob)} chars)")
     print(f"depth {int(t.get('cache_n', 0)) + int(t.get('prompt_n', 0))} (cached {t.get('cache_n')}, prefilled {t.get('prompt_n')}) | "
           f"{t.get('predicted_n')} tokens in {t.get('predicted_ms', 0)/1000:.2f} s = {t.get('predicted_per_second', 0):.2f} tok/s, "
           f"drafts {t.get('draft_n_accepted')}/{t.get('draft_n')}, wall {time.time() - t0:.1f} s, armed {state['armed']} at {state.get('armed_at', -1):.1f} s")
